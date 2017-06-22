@@ -1,0 +1,586 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>awk高级特性 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="UNIX环境下，用shell做一些常见的文本处理工作是很方便高效的事情；虽然目前有很多自带丰富类库的脚本语言可以完成同样的事情，但是对于一些特殊的文本格式处理任务，传统的sed/awk/grep组合还是有很明显的优势：没有复杂的版本问题和类库部署依赖问题，能够快速解决问题。awk作为一门DSL，自身也带有对很多高级特性（相对于shell本身）的支持，灵活应用往往能收到奇效。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="awk高级特性">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/">
+  <meta property="og:url" content="https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/">
+
+
+
+  <meta property="og:description" content="UNIX环境下，用shell做一些常见的文本处理工作是很方便高效的事情；虽然目前有很多自带丰富类库的脚本语言可以完成同样的事情，但是对于一些特殊的文本格式处理任务，传统的sed/awk/grep组合还是有很明显的优势：没有复杂的版本问题和类库部署依赖问题，能够快速解决问题。awk作为一门DSL，自身也带有对很多高级特性（相对于shell本身）的支持，灵活应用往往能收到奇效。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="awk高级特性">
+  <meta name="twitter:description" content="UNIX环境下，用shell做一些常见的文本处理工作是很方便高效的事情；虽然目前有很多自带丰富类库的脚本语言可以完成同样的事情，但是对于一些特殊的文本格式处理任务，传统的sed/awk/grep组合还是有很明显的优势：没有复杂的版本问题和类库部署依赖问题，能够快速解决问题。awk作为一门DSL，自身也带有对很多高级特性（相对于shell本身）的支持，灵活应用往往能收到奇效。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2012-11-26T19:49:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="awk高级特性">
+    <meta itemprop="description" content="UNIX环境下，用shell做一些常见的文本处理工作是很方便高效的事情；虽然目前有很多自带丰富类库的脚本语言可以完成同样的事情，但是对于一些特殊的文本格式处理任务，传统的sed/awk/grep组合还是有很明显的优势：没有复杂的版本问题和类库部署依赖问题，能够快速解决问题。awk作为一门DSL，自身也带有对很多高级特性（相对于shell本身）的支持，灵活应用往往能收到奇效。">
+    <meta itemprop="datePublished" content="November 26, 2012">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">awk高级特性
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>UNIX环境下，用shell做一些常见的文本处理工作是很方便高效的事情；虽然目前有很多自带丰富类库的脚本语言可以完成同样的事情，但是对于一些特殊的文本格式处理任务，传统的sed/awk/grep组合还是有很明显的优势：没有复杂的版本问题和类库部署依赖问题，能够快速解决问题。awk作为一门<strong>DSL</strong>，自身也带有对很多<strong>高级特性</strong>（相对于shell本身）的支持，灵活应用往往能收到奇效。</p>
+
+<!--more-->
+
+<h1 id="array类型">array类型</h1>
+
+<p>awk自身支持类似于C语言数组的数据结构，称之为<strong>array</strong>，但是其下标却不仅仅限于数字，可以是字符串等其它类型；行为上来说更似于一个关联容器，从某个变量关联到另外一个变量：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+    arr['</span>aa<span class="s1">'] = 1
+    arr[4] = 2
+    print arr['</span>aa<span class="s1">']
+}'</span>
+
+</code></pre>
+</div>
+
+<p>基本的array操作：</p>
+
+<ul>
+  <li>遍历元素</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+    arr[1] = "cc"
+    arr[2] = "ddd"
+    arr['</span>ccd<span class="s1">'] = "demo"
+    for (i in arr){
+        print arr[i]
+    }
+}'</span>
+</code></pre>
+</div>
+
+<ul>
+  <li>多维数组 - 多个下表操作内部会被转换为<strong>SUBSEP</strong>连接的字符串为索引的array:</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-awk" data-lang="awk">    #!/usr/bin/awk -f
+BEGIN{
+    for(i = 0; i &lt; 10; i++){
+        for(j = 0; j &lt; 8; j++){
+            grid[i, j] = i * j;
+        }
+    }
+    grid[1,2,7] = 14;
+    grid[4,2,7] = 56;
+
+    if ( (1,2) in grid){
+        printf("grid[1][2]=%d\n", grid[1,2]);
+    }
+
+    for(idx in grid){
+        fmt = "grid[";
+        n = split(idx, indices, SUBSEP);
+        for (sub_idx = 1; sub_idx &lt;= n; sub_idx++){
+            fmt = fmt indices[sub_idx] "]["
+        }
+        printf("%s = %d\n", substr(fmt, 1, length(fmt) - 1), grid[idx])
+    }
+}</code></pre></figure>
+
+<p>需要获取具体下标的时候，可以使用<code class="highlighter-rouge">split</code>函数，传入<strong>SUBSEP</strong>作为分隔符，依次取得每一个下标。用于数据统计的时候，这一技巧相当顺手好用。</p>
+
+<h1 id="字符串操作和正则表达式技巧">字符串操作和正则表达式技巧</h1>
+
+<p>字符串操作和C语言非常类似，可以使用：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">substr</code> 取得子串，和很多脚本语言类似，传入一个源字串，初始下标和长度，例如：</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+    teststr = "this is a test string..."
+    printf("&lt;%s&gt;\n", substr(teststr, 1, length(teststr) - 1));
+    printf("&lt;%s&gt;\n", substr(teststr, 0, length(teststr) - 1));
+}'</span>
+</code></pre>
+</div>
+<p>这里的第二个<code class="highlighter-rouge">printf</code>传入的下标从0开始，那么实际上得到的字串从末尾处被截去了2个字符。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">length</code>可以取得字符串长度信息</li>
+</ul>
+
+<h2 id="正则表达式regexp">正则表达式regexp</h2>
+<p>基本的类<strong>sed</strong>类操作正如其名称所示(部分操作可以省略源字符串，默认等同于和<code class="highlighter-rouge">$0</code>相匹配）</p>
+
+<ul>
+  <li><code class="highlighter-rouge">sub</code> 用于正则替换左数起第一个匹配</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{sub(/[ey] /, "lagggg&gt; ");print}'</span>
+<span class="c">#Thlagggg&gt; lazy dog</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">gsub</code> 用于全局替换,所有满足条件的部分都被替换</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{gsub(/[ey] /, "lagggg&gt; ");print}'</span>
+<span class="gp">Thlagggg&gt; </span>lazlagggg&gt; dog
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">gensub</code> 是一个更通用形式的正则替换操作,它保持源字符串不动，将修改后的串返回</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | gawk <span class="s1">'{new = gensub(/[ey] /, "lagggg&gt; ", "g");print; print new}'</span>
+<span class="c">#The lazy dog</span>
+<span class="c">#Thlagggg&gt; lazlagggg&gt; dog</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><code class="highlighter-rouge">match</code> 可用于模式匹配并返回匹结果的开始下标，并设置<strong>RSTART</strong>为匹配到的下标，<strong>RLENGTH</strong>为匹配字串的长度</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog jump over the brown fox"</span> | awk <span class="s1">'{
+result = match($0, /(dog)(.*)(fox)/)
+print result, RSTART, RLENGTH
+print substr($0, RSTART, RLENGTH)
+&gt; }'</span>
+<span class="c">#10 10 27</span>
+<span class="c">#dog jump over the brown fox</span>
+</code></pre>
+</div>
+
+<h1 id="脚本内嵌和独立awk文件">脚本内嵌和独立awk文件</h1>
+<p>一般可以将不太长的awk脚本处理放入管道操作中，让后用<code class="highlighter-rouge">'</code>来包含实际的awk处理脚本。当awk脚本过长的时候或者为了便于维护，也可以用一个独立的脚本来存放awk脚本内容，但是其shebang部分应该设置为： <code class="highlighter-rouge">#!/usr/bin/awk -f</code>, 这里的 <code class="highlighter-rouge">-f</code>表示后边的内容是awk脚本文件。</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#array" class="page__taxonomy-item" rel="tag">array</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#awk" class="page__taxonomy-item" rel="tag">awk</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#regexp" class="page__taxonomy-item" rel="tag">regexp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/" class="page__taxonomy-item" rel="tag"></a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#unix" class="page__taxonomy-item" rel="tag">unix</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2012-11-26T19:49:00+08:00">November 26, 2012</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=awk高级特性 https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/blog/2012/11/26/awkgao-ji-te-xing/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/blog/2012/08/26/c-plus-plus-xin-te-xing-3-lambdazhi-chi/" class="pagination--pager" title="C++新特性3 - Lambda支持
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/blog/2012/11/27/linuxshang-ru-he-cong-c-plus-plus-cheng-xu-zhong-huo-qu-backtracexin-xi/" class="pagination--pager" title="Linux上如何从C++程序中获取backtrace信息
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>

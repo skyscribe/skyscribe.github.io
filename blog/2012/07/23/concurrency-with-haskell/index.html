@@ -1,0 +1,668 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Concurrency with Haskell - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Concurrency with Haskell">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/">
+  <meta property="og:url" content="https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/">
+
+
+
+  <meta property="og:description" content="随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Concurrency with Haskell">
+  <meta name="twitter:description" content="随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2012-07-23T19:49:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Concurrency with Haskell">
+    <meta itemprop="description" content="随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。">
+    <meta itemprop="datePublished" content="July 23, 2012">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Concurrency with Haskell
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。</p>
+
+<!--more-->
+
+<h2 id="并发concurrency和并行parralelism">并发(concurrency)和并行(parralelism)</h2>
+
+<p>在多核编程中，这是两个经常被误解的概念，两者同样用于<strong>同时</strong>执行一些任务；<strong>并发</strong>强调多个自子任务在同一个时间段内发生，其实际可能是在单个CPU上运行，比如某个任务在等待IO的同时可以暂时让度CPU，另外一个任务先执行操作然后第一个任务的IO完成的时候再切换回来，这样在宏观上看，两个任务是<em>似乎同时</em>进行的；而<strong>并行</strong>一般是强调单个的任务和其它单任务<strong>同时进行</strong>。</p>
+
+<p>并行的程序肯定需要多个物理的CPU，至少从应用程序角度看到的是两个独立运行的CPU（譬如超线程技术或者Sun的CMT）；而并发程序未必需要多个物理核，例如传统语言中常见的事件驱动库或者多线程调度可能在单个物理核上运行。</p>
+
+<h2 id="两种concurrency方式">两种Concurrency方式</h2>
+
+<p>Haskell提供了两种Concurrency模式，一个是传统的Thread/condition/semaphore方式，另外一种为STM方式。</p>
+
+<h3 id="thread-方式">Thread 方式</h3>
+
+<p>Haskell的Thread方式和传统的变成语言或者库有显著的不同；其定义在<code class="highlighter-rouge">Control.Concurrent</code>中提供。由于Thread本身是有副作用的，hanskell通过封装<strong>IO Monad</strong>的方式来提供Thread,即一个thread为一个<strong>IO action</strong>,要使用thread则可以调用<code class="highlighter-rouge">forkIO</code>来执行一些任务。</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">forkIO</span>
+<span class="n">forkIO</span> <span class="o">::</span> <span class="kt">IO</span> <span class="nb">()</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="kt">ThreadId</span> <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
+
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">System</span><span class="o">.</span><span class="kt">Directory</span> 
+<span class="n">ghc</span><span class="o">&gt;</span><span class="n">forkIO</span> <span class="p">(</span><span class="n">writeFile</span> <span class="s">"newFile"</span> <span class="s">"may not be written yet!"</span> <span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">doesFileExist</span> <span class="s">"newFile"</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">bytestring</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mf">2.1</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">unix</span><span class="o">-</span><span class="mf">2.5</span><span class="o">.</span><span class="mf">1.0</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">old</span><span class="o">-</span><span class="n">locale</span><span class="o">-</span><span class="mf">1.0</span><span class="o">.</span><span class="mf">0.4</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">old</span><span class="o">-</span><span class="n">time</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mf">0.0</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">filepath</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mf">0.0</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">Loading</span> <span class="n">package</span> <span class="n">directory</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mf">0.2</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
+<span class="kt">True</span>
+</code></pre>
+</div>
+
+<p>需要注意的是，由于新线程的执行顺序是不确定的，因此上述例子中的程序返回结果可能不同。因为haskell中的变量全部是不可变的，因此在forkIO中传递变量是安全的，这个可以作为传递参数的一种很方便的形式，譬如下边的例子：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Concurrent</span><span class="p">(</span><span class="n">forkIO</span><span class="p">)</span>
+<span class="kr">import</span> <span class="nn">Control.Monad</span><span class="p">(</span><span class="n">forever</span><span class="p">)</span>
+
+<span class="n">acceptConnections</span> <span class="o">::</span> <span class="kt">Config</span> <span class="o">-&gt;</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+<span class="n">acceptConnections</span> <span class="n">config</span> <span class="n">socket</span>
+    <span class="o">=</span> <span class="n">forever</span> <span class="p">(</span> <span class="kr">do</span>  
+            <span class="n">conn</span> <span class="o">&lt;-</span> <span class="n">accept</span> <span class="n">socket</span> <span class="p">;</span>
+            <span class="n">forkIO</span> <span class="p">(</span><span class="n">serviceConn</span> <span class="n">config</span> <span class="n">conn</span><span class="p">)</span> 
+            <span class="p">)</span>
+
+<span class="n">accept</span> <span class="o">::</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="kt">Connection</span>
+<span class="kr">type</span> <span class="kt">Connection</span> <span class="o">=</span> <span class="p">(</span><span class="kt">Handle</span><span class="p">,</span> <span class="kt">SockAddr</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>这里的<code class="highlighter-rouge">serviceConn</code>的两个参数都是从当前线程传递到新创建的线程。</p>
+
+<h3 id="线程通信和基本交互">线程通信和基本交互</h3>
+
+<p>GHC中定义了MVar来方便不同线程之间的通信，并定义有<code class="highlighter-rouge">putMVar</code>和<code class="highlighter-rouge">takeMVar</code>, 同样它们都是<strong>IO action</strong>:</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">MVar</span> 
+<span class="kr">data</span> <span class="kt">MVar</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">MVar</span><span class="o">.</span><span class="kt">MVar</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">MVar</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span> <span class="n">a</span><span class="p">)</span>
+<span class="c1">-- Defined in `GHC.MVar'</span>
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">MVar</span> <span class="n">a</span><span class="p">)</span> <span class="c1">-- Defined in `GHCC.MVar'</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">putMVar</span> 
+<span class="n">putMVar</span> <span class="o">::</span> <span class="kt">MVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span> <span class="c1">-- Defined    in `GHC.MVar'</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">takeMVar</span> 
+<span class="n">takeMVar</span> <span class="o">::</span> <span class="kt">MVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span> <span class="c1">-- Definedd in `GHC.MVar'</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">newEmptyMVar</span> 
+<span class="n">newEmptyMVar</span> <span class="o">::</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">MVar</span> <span class="n">a</span><span class="p">)</span> <span class="c1">--  Defined in `GHC.MVar'</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">newMVar</span> 
+<span class="n">newMVar</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">MVar</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span><span class="kt">MVar</span><span class="o">-</span> <span class="kt">Defined</span> <span class="kr">in</span> <span class="p">`</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">MVar'</span>
+
+</code></pre>
+</div>
+
+<p>这里的<strong>MVar</strong>变量状态可能为空或者满。<code class="highlighter-rouge">takeMVar</code>动作会先检查MVar状态是否为空，为空则阻塞当前的线程知道满为止；<code class="highlighter-rouge">putMVar</code>则是空就写入新的状态量，满则等待挂起当前线程。</p>
+
+<p>两个<strong>new</strong>操作各用于创建一个新的空/满MVar.</p>
+
+<p>和传统的线程库类比，可以发现其实MVar可以实现：</p>
+<ol>
+  <li>从一个线程向另外一个线程发送通知消息</li>
+  <li>对共享数据进行互斥操作，类似于mutex</li>
+</ol>
+
+<p>下边是一个更复杂的例子，用于webserver统计所有的子连接个数 - 控制线程可以做更多有意义的控制，比如在负载满的时候停止创建新的线程等：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">cceptConnections</span> <span class="o">::</span> <span class="kt">Config</span> <span class="o">-&gt;</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+<span class="n">acceptConnections</span> <span class="n">config</span> <span class="n">socket</span>
+<span class="o">=</span> <span class="kr">do</span> <span class="p">{</span>  <span class="n">count</span> <span class="o">&lt;-</span> <span class="n">newEmptyMVar</span> <span class="p">;</span>
+        <span class="n">putMVar</span> <span class="n">count</span> <span class="mi">0</span> <span class="p">;</span>
+        <span class="n">forever</span> <span class="p">(</span><span class="kr">do</span> <span class="p">{</span>   <span class="n">conn</span> <span class="o">&lt;-</span> <span class="n">accept</span> <span class="n">socket</span> <span class="p">;</span>
+                        <span class="n">forkIO</span> <span class="p">(</span><span class="kr">do</span> <span class="p">{</span> <span class="n">inc</span> <span class="n">count</span> <span class="p">;</span>
+                                     <span class="n">serviceConn</span> <span class="n">config</span> <span class="n">conn</span> <span class="p">;</span>
+                                     <span class="n">dec</span> <span class="n">count</span><span class="p">})</span>
+                    <span class="p">})</span> <span class="p">}</span>
+
+<span class="n">inc</span><span class="p">,</span><span class="n">dec</span> <span class="o">::</span> <span class="kt">MVar</span> <span class="kt">Int</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+<span class="n">inc</span> <span class="n">count</span> <span class="o">=</span> <span class="kr">do</span> <span class="p">{</span> <span class="n">v</span> <span class="o">&lt;-</span> <span class="n">takeMVar</span> <span class="n">count</span><span class="p">;</span> <span class="n">putMVar</span> <span class="n">count</span> <span class="p">(</span><span class="n">v</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
+<span class="n">dec</span> <span class="n">count</span> <span class="o">=</span> <span class="kr">do</span> <span class="p">{</span> <span class="n">v</span> <span class="o">&lt;-</span> <span class="n">takeMVar</span> <span class="n">count</span><span class="p">;</span> <span class="n">putMVar</span> <span class="n">count</span> <span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
+</code></pre>
+</div>
+
+<h3 id="channel">Channel</h3>
+
+<p>对于简单的线程通信和交互,MVar就可以满足大部分需求；对于复杂的通信，Haskell还提供了<strong>Channel</strong>支持：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">c</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">Chan</span> 
+<span class="kr">data</span> <span class="kt">Chan</span> <span class="n">a</span>
+<span class="o">=</span> <span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span><span class="o">.</span><span class="kt">Chan</span><span class="o">.</span><span class="kt">Chan</span> <span class="p">(</span><span class="kt">MVar</span>
+                                  <span class="p">(</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span><span class="o">.</span><span class="kt">Chan</span><span class="o">.</span><span class="kt">Stream</span> <span class="n">a</span><span class="p">))</span>
+                             <span class="p">(</span><span class="kt">MVar</span> <span class="p">(</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span><span class="o">.</span><span class="kt">Chan</span><span class="o">.</span><span class="kt">Stream</span> <span class="n">a</span><span class="p">))</span>
+
+<span class="c1">-- Defined in `Control.Concurrent.Chan'</span>
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">Chan</span> <span class="n">a</span><span class="p">)</span> <span class="c1">-- Defineded in `Control.Concurrent.Chan'</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">readChan</span> 
+<span class="n">readChan</span> <span class="o">::</span> <span class="kt">Chan</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">writeChan</span> 
+<span class="n">writeChan</span> <span class="o">::</span> <span class="kt">Chan</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">newChan</span> 
+<span class="n">newChan</span> <span class="o">::</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">Chan</span> <span class="n">a</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>Channel提供了一种单向的线程通信通路，可以实现CSP编程。<code class="highlighter-rouge">readChan</code>在没有数据的时候，将一直阻塞直到有新的数据到Channel中，而<code class="highlighter-rouge">writeChan</code>则永不阻塞，写入一个新的值并且立即返回。这一特性也表明，如果写的速度快于读取的速度，则Channel可以会一直占用更多的资源。</p>
+
+<h2 id="共享状态的并发编程仍然是困难重重">共享状态的并发编程仍然是困难重重</h2>
+
+<p>只要是共享状态信息，那么dead-lock/starvation/race condition这些传统的问题就不可避免。幸运的是，新的STM方式可以在很大程度上缓解这些问题。</p>
+
+<h3 id="stm-方式">STM 方式</h3>
+
+<p>STM是一种相对比较新的并发编程模型，其全称为Software Transaction Memory，其基本思想类似于DB操作中的Transaction Procedure,对于给定内存的操作要么全部完成，要么完全回到操作之前的初始状态。对于某一个给定的内存块，一个线程进入操作这个内存块进行操作的时候，另外一个线程看不到其它进程对这个内存块的操作，如果操作失败，那么会完全回退到进入之前的状态。</p>
+
+<p>STM的定义在<code class="highlighter-rouge">Control.Concurrent.STM</code>中：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">STM</span> <span class="n">a</span>
+  <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Conc</span><span class="o">.</span><span class="kt">Sync</span><span class="o">.</span><span class="kt">STM</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span>
+                         <span class="o">-&gt;</span> <span class="p">(</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span><span class="p">,</span> <span class="n">a</span> <span class="o">#</span><span class="p">))</span>
+               <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
+
+<span class="kr">instance</span> <span class="kt">Monad</span> <span class="kt">STM</span> <span class="c1">-- Definedd in `GHC.Conc.Sync'</span>
+<span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">STM</span> <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
+
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">TVar</span>
+
+<span class="kr">data</span> <span class="kt">TVar</span> <span class="n">a</span>
+  <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Conc</span><span class="o">.</span><span class="kt">Sync</span><span class="o">.</span><span class="kt">TVar</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">TVar</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span> <span class="n">a</span><span class="p">)</span>
+    <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
+
+<span class="kr">instance</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">TVar</span> <span class="n">a</span><span class="p">)</span> <span class="c1">-- Definedned in `GHC.Conc.Sync'</span>
+</code></pre>
+</div>
+
+<p>对应的TVar操作：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">newTVar</span>
+<span class="n">newTVar</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="p">(</span><span class="kt">TVar</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">readTVar</span>
+<span class="n">readTVar</span> <span class="o">::</span> <span class="kt">TVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="n">a</span>
+<span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">writeTVar</span> 
+<span class="n">writeTVar</span> <span class="o">::</span> <span class="kt">TVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
+</code></pre>
+</div>
+
+<p>这里的STM是一个Monad，用于约束所有的操作必须在STM的保护之内，任何操作不能逃离STM之外。任何基于STM的operation可以通过»=, », return等方式组合为新的monad actions，即transaction；整个transaction对于TVar的访问是原子的。</p>
+
+<h3 id="一个具体的例子">一个具体的例子</h3>
+
+<p>下边这个例子来自于<a href="http://en.wikipedia.org/wiki/Concurrent_Haskell">wikipedia</a>:</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">type</span> <span class="kt">Account</span> <span class="o">=</span> <span class="kt">TVar</span> <span class="kt">Integer</span>
+
+<span class="n">transfer</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
+<span class="n">transfer</span> <span class="n">amount</span> <span class="n">from</span> <span class="n">to</span> <span class="o">=</span> <span class="kr">do</span>
+   <span class="n">fromVal</span> <span class="o">&lt;-</span> <span class="n">readTVar</span> <span class="n">from</span>
+   <span class="kr">if</span> <span class="p">(</span><span class="n">fromVal</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+     <span class="kr">then</span> <span class="kr">do</span>
+        <span class="n">debit</span> <span class="n">amount</span> <span class="n">from</span>
+        <span class="n">credit</span> <span class="n">amount</span> <span class="n">to</span>
+     <span class="kr">else</span> <span class="n">retry</span>
+
+<span class="n">credit</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
+<span class="n">credit</span> <span class="n">amount</span> <span class="n">account</span> <span class="o">=</span> <span class="kr">do</span>
+     <span class="n">current</span> <span class="o">&lt;-</span> <span class="n">readTVar</span> <span class="n">account</span>
+     <span class="n">writeTVar</span> <span class="n">account</span> <span class="p">(</span><span class="n">current</span> <span class="o">+</span> <span class="n">amount</span><span class="p">)</span>
+          
+<span class="n">debit</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
+<span class="n">debit</span> <span class="n">amount</span> <span class="n">account</span> <span class="o">=</span> <span class="kr">do</span>
+    <span class="n">current</span> <span class="o">&lt;-</span> <span class="n">readTVar</span> <span class="n">account</span>
+    <span class="n">writeTVar</span> <span class="n">account</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>在<code class="highlighter-rouge">transfer</code>函数中，我们先检查了对应的余额是否重组，如果是则继续完成转账，否则就<code class="highlighter-rouge">retry</code>，retry的实现保证只有对应的变量发生变化时候才重试，从而大大提高了效率。</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">retry</span>
+<span class="n">retry</span><span class="o">::</span><span class="kt">STM</span> <span class="n">a</span>
+</code></pre>
+</div>
+
+<p>这里的每一个操作返回类型都是<strong>STM</strong>,从而保证这些操作都是原子性的。一个特殊的函数<code class="highlighter-rouge">atomically</code>则用于从STM返回一个IO：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">atomically</span> 
+<span class="n">atomically</span> <span class="o">::</span> <span class="kt">STM</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span>
+</code></pre>
+</div>
+
+<p>下边是一个调用上述实现的例子：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Main</span> <span class="kr">where</span>
+ 
+<span class="kr">import</span> <span class="nn">Control.Concurrent</span> <span class="p">(</span><span class="nf">forkIO</span><span class="p">)</span>
+<span class="kr">import</span> <span class="nn">Control.Concurrent.STM</span>
+<span class="kr">import</span> <span class="nn">Control.Monad</span> <span class="p">(</span><span class="nf">forever</span><span class="p">)</span>
+<span class="kr">import</span> <span class="nn">System.Exit</span> <span class="p">(</span><span class="nf">exitSuccess</span><span class="p">)</span>
+ 
+<span class="n">main</span> <span class="o">=</span> <span class="kr">do</span>
+    <span class="n">bob</span> <span class="o">&lt;-</span> <span class="n">newAccount</span> <span class="mi">10000</span>
+    <span class="n">jill</span> <span class="o">&lt;-</span> <span class="n">newAccount</span> <span class="mi">4000</span>
+    <span class="n">repeatIO</span> <span class="mi">2000</span> <span class="o">$</span> <span class="n">forkIO</span> <span class="o">$</span> <span class="n">atomically</span> <span class="o">$</span> <span class="n">transfer</span> <span class="mi">1</span> <span class="n">bob</span> <span class="n">jill</span>
+    <span class="n">forever</span> <span class="o">$</span> <span class="kr">do</span>
+        <span class="n">bobBalance</span> <span class="o">&lt;-</span> <span class="n">atomically</span> <span class="o">$</span> <span class="n">readTVar</span> <span class="n">bob</span>
+        <span class="n">jillBalance</span> <span class="o">&lt;-</span> <span class="n">atomically</span> <span class="o">$</span> <span class="n">readTVar</span> <span class="n">jill</span>
+        <span class="n">putStrLn</span> <span class="p">(</span><span class="s">"Bob's balance: "</span> <span class="o">++</span> <span class="n">show</span> <span class="n">bobBalance</span> <span class="o">++</span> <span class="s">", Jill's balance: "</span> <span class="o">++</span> <span class="n">show</span> <span class="n">jillBalance</span><span class="p">)</span>
+            <span class="kr">if</span> <span class="n">bobBalance</span> <span class="o">==</span> <span class="mi">8000</span>
+                <span class="kr">then</span> <span class="n">exitSuccess</span>
+                <span class="kr">else</span> <span class="n">putStrLn</span> <span class="s">"Trying again."</span>
+                         
+<span class="n">repeatIO</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span>
+<span class="n">repeatIO</span> <span class="mi">1</span> <span class="n">m</span> <span class="o">=</span> <span class="n">m</span>
+<span class="n">repeatIO</span> <span class="n">n</span> <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">&gt;&gt;</span> <span class="n">repeatIO</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="n">m</span>
+
+<span class="n">newAccount</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="kt">Account</span>
+<span class="n">newAccount</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">newTVarIO</span> <span class="n">amount</span>
+
+<span class="c1">--other definitions in above code snippets</span>
+</code></pre>
+</div>
+
+<h2 id="参考资料">参考资料</h2>
+<ol>
+  <li><a href="http://www.haskell.org/haskellwiki/GHC/Concurrency">GHC concurrency</a></li>
+  <li><a href="http://www.haskell.org/haskellwiki/Parallel/Reading">Haskell parallel reading</a></li>
+  <li><a href="http://book.realworldhaskell.org/read/concurrent-and-multicore-programming.html">Real world haskell, ch24</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/Concurrent_Haskell">Concurrent Haskell wiki</a></li>
+</ol>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#concurrency" class="page__taxonomy-item" rel="tag">concurrency</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#haskell" class="page__taxonomy-item" rel="tag">haskell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/#%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0" class="page__taxonomy-item" rel="tag">学习笔记</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2012-07-23T19:49:00+08:00">July 23, 2012</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Concurrency with Haskell https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/blog/2012/07/23/concurrency-with-haskell/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/blog/2012/07/09/vim-he-github/" class="pagination--pager" title="vim 和 Github
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/blog/2012/08/02/parallel-programming-in-haskell/" class="pagination--pager" title="Parallel programming in Haskell
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
