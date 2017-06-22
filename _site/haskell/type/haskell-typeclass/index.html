@@ -1,0 +1,556 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Haskell typeclass - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Haskell 中也有class关键字，但其目的却和 OO 中的类有着巨大的差别。在 OO 世界中，类用来描述一大堆具有共同数据和行为的对象的抽象；而 Haskell 中的 class 则是用于抽象提供同样函数接口的数据类型。每一个 ADT 都可以用instance来生命其满足某个 class 并且给出对应于具体函数的实现，即 class 在 Haskell 中实际用于约束数据类型，因而又被成为 typeclass.">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Haskell typeclass">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/">
+  <meta property="og:url" content="https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/">
+
+
+
+  <meta property="og:description" content="Haskell 中也有class关键字，但其目的却和 OO 中的类有着巨大的差别。在 OO 世界中，类用来描述一大堆具有共同数据和行为的对象的抽象；而 Haskell 中的 class 则是用于抽象提供同样函数接口的数据类型。每一个 ADT 都可以用instance来生命其满足某个 class 并且给出对应于具体函数的实现，即 class 在 Haskell 中实际用于约束数据类型，因而又被成为 typeclass.">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Haskell typeclass">
+  <meta name="twitter:description" content="Haskell 中也有class关键字，但其目的却和 OO 中的类有着巨大的差别。在 OO 世界中，类用来描述一大堆具有共同数据和行为的对象的抽象；而 Haskell 中的 class 则是用于抽象提供同样函数接口的数据类型。每一个 ADT 都可以用instance来生命其满足某个 class 并且给出对应于具体函数的实现，即 class 在 Haskell 中实际用于约束数据类型，因而又被成为 typeclass.">
+  <meta name="twitter:url" content="https://skyscribe.github.io/haskell/type/haskell-typeclass/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2012-03-22T20:15:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/blog/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/blog/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/blog/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Haskell typeclass">
+    <meta itemprop="description" content="Haskell 中也有class关键字，但其目的却和 OO 中的类有着巨大的差别。在 OO 世界中，类用来描述一大堆具有共同数据和行为的对象的抽象；而 Haskell 中的 class 则是用于抽象提供同样函数接口的数据类型。每一个 ADT 都可以用instance来生命其满足某个 class 并且给出对应于具体函数的实现，即 class 在 Haskell 中实际用于约束数据类型，因而又被成为 typeclass.">
+    <meta itemprop="datePublished" content="March 22, 2012">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Haskell typeclass
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>Haskell 中也有class关键字，但其目的却和 OO 中的类有着巨大的差别。在 OO 世界中，类用来描述一大堆具有共同数据和行为的对象的抽象；而 Haskell 中的 class 则是用于抽象提供同样函数接口的数据类型。每一个 ADT 都可以用<code class="highlighter-rouge">instance</code>来生命其满足某个 class 并且给出对应于具体函数的实现，即 class 在 Haskell 中实际用于约束数据类型，因而又被成为 typeclass.</p>
+
+<!--more-->
+
+<h2 id="typeclass-的作用">typeclass 的作用</h2>
+
+<p>由于 Haskell 是一个纯函数式语言，所有的操作都是用函数方式实现的（递归和模式匹配）；同时作为一个强类型语言，所以函数的参数必须绑定于特定的类型，而不同的数据类型之间是不能直接转换的 ( 需要转的也必须通过某些函数来实现 ), 那么对于同样一个类似的函数，可能就需要对不同的类型有不同的实现，因为操作的类型可能不同，这样就会带来很繁琐的代码，例如：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">someOpOnInt</span><span class="o">::</span><span class="kt">Int</span> <span class="o">-&gt;</span> <span class="kt">Int</span>
+<span class="n">someOpOnDouble</span><span class="o">::</span><span class="kt">Double</span><span class="o">-&gt;</span><span class="kt">Int</span>
+<span class="n">someOpOnFractional</span><span class="o">::</span><span class="kt">Fractional</span><span class="o">-&gt;</span> <span class="kt">Int</span>
+</code></pre>
+</div>
+
+<p>由于他们所做的操作本质上相同，但是由于强类型系统的制约，编写者必须给出不同的函数名来对应于不同的类型，后果就是重复的代码乃至糟糕的代码质量。另一个可能的问题则是对于每一个新定义的类型，必须定义一个新的函数。其它的模块想要调用此功能也必须针对不同的类型做不同的处理，导致代码不能重用。</p>
+
+<p>Typeclass则可以很好的解决这个问题：</p>
+<ul>
+  <li>一个 typeclass 来定义所支持的操作，例如
+    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">SomeOp</span> <span class="n">a</span> <span class="kr">where</span>
+  <span class="n">someOp</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Int</span>
+</code></pre>
+    </div>
+  </li>
+  <li>每一个可以支持该操作的类型可以实现对应的操作，如：
+``` haskell
+instance SomeOp Int where
+  – implementition for Int type
+  someOp x = undefined</li>
+</ul>
+
+<p>instance SomeOp Double where
+    – implementation for Double
+    someOp x = undefined</p>
+
+<p>instance SomeOp Fractional where
+    – implementation for Fractional
+    someOp x = undefined</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>
+- typeclass是开放的，这意味着你可以在不同的模块里边实现其它模块中定义的 typeclass   
+``` haskell
+data BrandNewType = BrandNewType String Int
+        deriving (Show, Eq)
+
+instance SomeOp BrandNewType where
+    -- imp for new type
+    someOp x = undefined
+</code></pre>
+</div>
+
+<p>由于 typeclass 实现的是对于 type 的抽象，如果熟悉 C++ 的模板系统和被 C++ 被拖出新标准的 <a href="http://en.wikipedia.org/wiki/Concepts_%28C%2B%2B%29"><strong>concept</strong></a> 概念，那么我们就容易发现 typeclass 和模板系统有很多的相似基因。而 typeclass 能够更优雅的抽象类型接口，则得益于 Haskell 的强类型系统了。想想 C++ 中隐式类型转换给模板实现带来的困扰，Haskell 的 typeclass 是一种更优雅的抽象。</p>
+
+<h2 id="read-和-show">Read 和 Show</h2>
+
+<p>这是两个系统预定义的 typeclass, Show 用于将某个类型转换为 string， 而 Read 则用于从一个字符串表述中构造一个指定类型的数据。二者结合可以完成数据的序列化和反序列化。系统提供的 putStrLn 操作于某个数据类型的时候，如果其类型继承了 Show，那么它的字符串表示就会被打印出来。当然<code class="highlighter-rouge">show</code> 函数也可以用于打印其字符串表述，而 Read 则用构造出一个指定类型的对象，比如：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">Color</span> <span class="o">=</span> <span class="kt">Read</span> <span class="o">|</span> <span class="kt">Green</span> <span class="o">|</span> <span class="kt">Blue</span>
+<span class="kr">instance</span> <span class="kt">Show</span> <span class="kt">Color</span> <span class="kr">where</span>
+    <span class="n">show</span> <span class="kt">Red</span> <span class="o">=</span> <span class="s">"Red"</span>
+    <span class="n">show</span> <span class="kt">Green</span> <span class="o">=</span> <span class="s">"Green"</span>
+    <span class="n">show</span> <span class="kt">Blue</span> <span class="o">=</span> <span class="s">"Blue"</span>
+
+<span class="kr">instance</span> <span class="kt">Read</span> <span class="kt">Color</span> <span class="kr">where</span> 
+    <span class="n">readsPrec</span> <span class="kr">_</span> <span class="n">value</span> <span class="o">=</span>
+        <span class="n">tryParse</span> <span class="p">[(</span><span class="s">"Red"</span><span class="p">,</span> <span class="kt">Red</span><span class="p">),</span> <span class="p">(</span><span class="s">"Green"</span><span class="p">,</span> <span class="kt">Green</span><span class="p">),</span> <span class="p">(</span><span class="s">"Blue"</span><span class="p">,</span> <span class="kt">Blue</span><span class="p">)]</span>
+        <span class="kr">where</span> <span class="n">tryParse</span> <span class="kt">[]</span> <span class="o">=</span> <span class="kt">[]</span>
+              <span class="n">tryParse</span> <span class="p">((</span><span class="n">attempt</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="o">:</span> <span class="n">xs</span><span class="p">)</span> <span class="o">=</span> 
+                <span class="kr">if</span> <span class="p">(</span> <span class="n">take</span> <span class="p">(</span><span class="n">length</span> <span class="n">attempt</span><span class="p">)</span> <span class="n">trimed</span><span class="p">)</span> <span class="o">==</span> <span class="n">attempt</span>
+                <span class="kr">then</span> <span class="p">[(</span><span class="n">result</span><span class="p">,</span> <span class="n">drop</span> <span class="p">(</span><span class="n">length</span> <span class="n">attempt</span><span class="p">)</span> <span class="n">trimed</span><span class="p">)]</span>
+                <span class="kr">else</span> <span class="n">tryParse</span> <span class="n">xs</span>
+              <span class="kr">where</span> <span class="n">trimed</span> <span class="o">=</span> <span class="n">lTrim</span> <span class="n">value</span>
+
+<span class="n">lTrim</span> <span class="p">(</span><span class="sc">' '</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="n">lTrim</span> <span class="n">xs</span>
+<span class="n">lTrim</span> <span class="n">other</span> <span class="o">=</span> <span class="n">other</span>
+
+<span class="c1">-- test in ghci</span>
+<span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="kr">let</span> <span class="n">inst</span> <span class="o">=</span> <span class="p">[</span><span class="kt">Red</span><span class="p">,</span> <span class="kt">Blue</span><span class="p">,</span> <span class="kt">Green</span><span class="p">]</span>
+<span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="n">show</span> <span class="n">inst</span>
+<span class="s">"[Red,Blue,Green]"</span>
+<span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="kr">let</span> <span class="n">inst'</span> <span class="o">=</span> <span class="n">read</span> <span class="p">(</span><span class="n">show</span> <span class="n">inst</span><span class="p">)</span> <span class="o">::</span> <span class="p">[</span><span class="kt">Color</span><span class="p">]</span>
+<span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="n">inst'</span>
+<span class="p">[</span><span class="kt">Red</span><span class="p">,</span><span class="kt">Blue</span><span class="p">,</span><span class="kt">Green</span><span class="p">]</span>
+</code></pre>
+</div>
+
+<p>这里对于 list 类型的处理可以被系统自动推倒出来。</p>
+
+<h2 id="系统预定义的-typeclass">系统预定义的 typeclass</h2>
+
+<p>Haskell 标准规定编译器需要预定义一些基本的 typeclass， 并且对于系统预定义的数据类型，编译器也给出了对应的实现。这些预定义 typeclass 包括：</p>
+<ul>
+  <li>Read - 数据反序列化</li>
+  <li>Show - 数据序列化</li>
+  <li>Ord  - 排序支持，描述顺序关系</li>
+  <li>Enum - 枚举接口</li>
+  <li>Eq   - 相等关系</li>
+</ul>
+
+<p>对于自己定义的 ADT， 这些 typeclass  可以用 deriving 的方式交给Haskell编译器来自动推导，省却了诸多麻烦。限制条件是，我们自己用<code class="highlighter-rouge">data</code>声明的ADT类型必须满足： <strong>其中引用的类型必须也满足需要derive的typeclass</strong>，这些类型可以是手动声明的方式满足typeclass.</p>
+
+<p>如下的例子就是一个例外情况：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">CannotShow</span> <span class="o">=</span> <span class="kt">CannotShow</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
+
+<span class="kr">data</span> <span class="kt">CannotDeriveShow</span> <span class="o">=</span> <span class="kt">CannotDeriveShow</span> <span class="kt">CannotShow</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
+
+<span class="c1">-- this will work</span>
+<span class="kr">data</span> <span class="kt">OK</span> <span class="o">=</span> <span class="kt">OK</span>
+<span class="kr">instance</span> <span class="kt">Show</span> <span class="kt">OK</span> <span class="kr">where</span> <span class="n">show</span> <span class="kr">_</span> <span class="o">=</span> <span class="s">"OK"</span>
+<span class="kr">data</span> <span class="kt">ThisWorks</span> <span class="o">=</span> <span class="kt">ThisWorks</span> <span class="kt">OK</span>
+    <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>这里的第一个例子中，引用的类型没有去指明继承 typeclass 因而会导致编译失败，而第二个类型则可以。</p>
+
+<h2 id="问题---overlapping">问题 - overlapping</h2>
+
+<p>由于 typeclass 是开放的， 不同的模块可能对不同的类型提供不同的 typeclass instance实现，二者就可能出现冲突，例如：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Borked</span> <span class="n">a</span> <span class="kr">where</span> 
+    <span class="n">bork</span><span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">String</span>
+
+<span class="kr">instance</span> <span class="kt">Borked</span> <span class="kt">Int</span> <span class="kr">where</span>
+    <span class="n">bork</span> <span class="o">=</span> <span class="n">show</span>
+
+<span class="kr">instance</span> <span class="kt">Borked</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="n">bork</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="n">bork</span> <span class="n">a</span> <span class="o">++</span> <span class="s">", "</span> <span class="o">++</span> <span class="n">bork</span> <span class="n">b</span>
+
+<span class="kr">instance</span> <span class="p">(</span><span class="kt">Borked</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Borked</span> <span class="n">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kt">Borked</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="n">bork</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="s">"&gt;&gt;"</span> <span class="o">++</span> <span class="n">bork</span> <span class="n">a</span> <span class="o">++</span> <span class="s">", "</span> <span class="o">++</span> <span class="n">bork</span> <span class="n">b</span> <span class="o">++</span> <span class="s">"&lt;&lt;"</span>
+</code></pre>
+</div>
+
+<p>如果我们需要调用<code class="highlighter-rouge">bork (1,2)</code>, 这里 haskell 编译器没法自动判断该选择那一个实现，因为最后两个都同样满足instance条件。GHC 中可以通过扩展 <code class="highlighter-rouge">OverlappingInstance</code> 来解除这一限制，引导编译器选择最具体的类型实现。</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/blog/categories/#haskell" class="page__taxonomy-item" rel="tag">haskell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/blog/categories/#type" class="page__taxonomy-item" rel="tag">type</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2012-03-22T20:15:00+08:00">March 22, 2012</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Haskell typeclass https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/blog/haskell/type/haskell-typeclass/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/blog/haskell/functional/haskell-functional-programming/" class="pagination--pager" title="haskell函数式编程
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/blog/haskell/monad/haskell-monad/" class="pagination--pager" title="Haskell Monad
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/blog/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/blog/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>

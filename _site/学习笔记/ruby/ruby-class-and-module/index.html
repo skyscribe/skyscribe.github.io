@@ -1,0 +1,702 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>ruby学习笔记-4 class&amp;module - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Class和Module是Ruby中的两个重要概念。作为一个纯OO语言，class的概念自然容易理解，即为object的抽象；而module则明显有别于其它语言地提供了mixin方法来解决多继承缺失带来的不便 - 集成多个基类的接口并维持IS-A关系以及LSP替换.">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="ruby学习笔记-4 class&amp;module">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/">
+  <meta property="og:url" content="https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/">
+
+
+
+  <meta property="og:description" content="Class和Module是Ruby中的两个重要概念。作为一个纯OO语言，class的概念自然容易理解，即为object的抽象；而module则明显有别于其它语言地提供了mixin方法来解决多继承缺失带来的不便 - 集成多个基类的接口并维持IS-A关系以及LSP替换.">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="ruby学习笔记-4 class&amp;module">
+  <meta name="twitter:description" content="Class和Module是Ruby中的两个重要概念。作为一个纯OO语言，class的概念自然容易理解，即为object的抽象；而module则明显有别于其它语言地提供了mixin方法来解决多继承缺失带来的不便 - 集成多个基类的接口并维持IS-A关系以及LSP替换.">
+  <meta name="twitter:url" content="https://skyscribe.github.io/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2012-03-06T22:48:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/blog/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/blog/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/blog/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/blog/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="ruby学习笔记-4 class&amp;module">
+    <meta itemprop="description" content="Class和Module是Ruby中的两个重要概念。作为一个纯OO语言，class的概念自然容易理解，即为object的抽象；而module则明显有别于其它语言地提供了mixin方法来解决多继承缺失带来的不便 - 集成多个基类的接口并维持IS-A关系以及LSP替换.">
+    <meta itemprop="datePublished" content="March 06, 2012">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">ruby学习笔记-4 class&amp;module
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>Class和Module是Ruby中的两个重要概念。作为一个纯<strong>OO</strong>语言，class的概念自然容易理解，即为object的抽象；而module则明显有别于其它语言地提供了mixin方法来解决多继承缺失带来的不便 - 集成多个基类的接口并维持<a href="http://en.wikipedia.org/wiki/Is-a">IS-A关系</a>以及<a href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">LSP替换</a>.</p>
+
+<!--more-->
+
+<h2 id="相互关系和一些基本类">相互关系和一些基本类</h2>
+
+<p>ruby中存在一些基础的类（或者是MetaClass)，包括: <code class="highlighter-rouge">[Class, Module, Kernel, Object, BasicObject]</code>, 且看如下测试：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">tests</span> <span class="o">=</span> <span class="p">[</span><span class="no">Class</span><span class="p">,</span> <span class="no">Module</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">Object</span><span class="p">,</span> <span class="no">BasicObject</span><span class="p">]</span>
+
+<span class="nb">puts</span> <span class="s2">"checking class and ancestors for </span><span class="si">#{</span><span class="n">tests</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">tests</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"Ancestors of </span><span class="si">#{</span><span class="n">x</span><span class="si">}</span><span class="s2"> is </span><span class="si">#{</span><span class="n">x</span><span class="p">.</span><span class="nf">ancestors</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="s2">"The class of </span><span class="si">#{</span><span class="n">x</span><span class="si">}</span><span class="s2"> is </span><span class="si">#{</span><span class="n">x</span><span class="p">.</span><span class="nf">class</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+<span class="nb">puts</span> <span class="s2">""</span>
+<span class="k">def</span> <span class="nf">check_is_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">not</span> <span class="n">a</span><span class="p">.</span><span class="nf">is_a?</span> <span class="n">b</span>
+  <span class="nb">puts</span> <span class="s2">"</span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2"> is not a </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="nb">puts</span> <span class="s2">"checking is_a relation for </span><span class="si">#{</span><span class="n">tests</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">tests</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+  <span class="n">tests</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">y</span><span class="o">|</span>
+    <span class="n">check_is_a</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre>
+</div>
+
+<p>输出结果如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>checking class and ancestors for [Class, Module, Kernel, Object, BasicObject]
+Ancestors of Class is [Class, Module, Object, Kernel, BasicObject]
+The class of Class is Class
+Ancestors of Module is [Module, Object, Kernel, BasicObject]
+The class of Module is Class
+Ancestors of Kernel is [Kernel]
+The class of Kernel is Module
+Ancestors of Object is [Object, Kernel, BasicObject]
+The class of Object is Class
+Ancestors of BasicObject is [BasicObject]
+The class of BasicObject is Class
+
+checking is_a relation for [Class, Module, Kernel, Object, BasicObject]
+Kernel is not a Class
+</code></pre>
+</div>
+
+<p>可见，Kernel本身是个Module，但不是一个Class，其它的都互相满足is-a关系。其它任何一个class都是一个module（但是并不意味着可以include class）。</p>
+
+<h2 id="构造测试">构造测试</h2>
+
+<p>Module不能用new来生成一个对象，譬如：</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">module</span> <span class="nn">TestModule</span>
+  <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+    <span class="nb">puts</span> <span class="s2">"value is @value"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">begin</span>
+  <span class="n">obj</span> <span class="o">=</span> <span class="no">TestModule</span><span class="p">.</span><span class="nf">new</span>
+  <span class="n">obj</span><span class="p">.</span><span class="nf">func</span><span class="p">()</span>
+<span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
+  <span class="nb">puts</span> <span class="s2">"Module new got an exception: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">class</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+</code></pre>
+</div>
+<p>这里会抛出<code class="highlighter-rouge">NoMethodError</code>异常。</p>
+
+<h2 id="mixin">MIXIN</h2>
+
+<p>Module的主要作用就是实现MIXIN。通过Module，某个class可以通过<code class="highlighter-rouge">include</code>某个module来包含其所定义的方法。module起的作用类似于抽象基类，所有module定义的方法可以被子class调用或者重写。</p>
+
+<p>下边的这段代码是一个简单的MIXIN例子:</p>
+
+<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BaseClass</span>
+  <span class="k">def</span> <span class="nf">call_func</span><span class="p">()</span>
+    <span class="nb">puts</span> <span class="s2">"base called"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">MixInClass</span> <span class="o">&lt;</span> <span class="no">BaseClass</span>
+  <span class="kp">include</span> <span class="no">TestModule</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="vi">@value</span> <span class="o">=</span> <span class="n">value</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">call_func</span><span class="p">()</span>
+    <span class="k">super</span>
+    <span class="nb">puts</span> <span class="s2">"called in child"</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+    <span class="k">super</span>
+    <span class="nb">puts</span> <span class="s2">"module func called"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="no">MixInClass</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"mixin"</span><span class="p">)</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">func</span><span class="p">()</span>
+<span class="c1"># module method called</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">call_func</span><span class="p">()</span>
+<span class="c1"># virtual method called which will call it's ancestor by super</span>
+</code></pre>
+</div>
+
+<p>上述代码中，<code class="highlighter-rouge">super</code>用于调用<code class="highlighter-rouge">BaseClass</code>或者对应Module中的方法。</p>
+
+<h2 id="方法冲突的解决">方法冲突的解决</h2>
+
+<p>通过MIXIN，一个Class可以通过include来MIXIN多个module的方法。如果有两个module中存在同名的方法，行为又会如何？下边是一个例子：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="k">module</span> <span class="nn">BaseModule1</span>
+    <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called in BaseModule1"</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">func1</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"unique func in module1"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nn">BaseModule2</span>
+    <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called in BaseModule2"</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">func2</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"unique func in module2"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">BaseClass</span>
+    <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called in base class"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="k">class</span> <span class="nc">Child</span> <span class="o">&lt;</span> <span class="no">BaseClass</span>
+    <span class="kp">include</span> <span class="no">BaseModule1</span>
+    <span class="kp">include</span> <span class="no">BaseModule2</span>
+<span class="k">end</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="no">Child</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">func</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">func1</span></code></pre></figure>
+
+<p>运行结果如下：</p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>called <span class="k">in </span>BaseModule2
+unique func <span class="k">in </span>module1
+unique func <span class="k">in </span>module2
+</code></pre>
+</div>
+
+<p>从而可得如下结论:</p>
+
+<ul>
+  <li>同名的方法，优先选择module中的定义</li>
+  <li>如果有module方法名字冲突，ruby选择最近的一个include的module的实现</li>
+  <li>由于不可能集成多个base class，就不可能出现在base class冲突的情况</li>
+</ul>
+
+<h3 id="initialize方法处理">initialize方法处理</h3>
+
+<p>module的initialize方法处理规则有些特殊，如下例：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="k">module</span> <span class="nn">BaseModule</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="vi">@value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called with value = </span><span class="si">#{</span><span class="vi">@value</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Test1</span>
+    <span class="kp">include</span> <span class="no">BaseModule</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">super</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Test2</span>
+    <span class="kp">include</span> <span class="no">BaseModule</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"my value is: </span><span class="si">#{</span><span class="vi">@value</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Test3</span>
+    <span class="kp">include</span> <span class="no">BaseModule</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="vi">@myvalue</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called with myvalue = </span><span class="si">#{</span><span class="vi">@myvalue</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">obj1</span> <span class="o">=</span> <span class="no">Test1</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"test1"</span><span class="p">)</span>
+<span class="n">obj1</span><span class="p">.</span><span class="nf">func</span><span class="p">()</span>
+<span class="n">obj2</span> <span class="o">=</span> <span class="no">Test2</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"test2"</span><span class="p">)</span>
+<span class="n">obj2</span><span class="p">.</span><span class="nf">func</span><span class="p">()</span>
+<span class="n">obj2</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+<span class="n">obj3</span> <span class="o">=</span> <span class="no">Test3</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"test3"</span><span class="p">)</span>
+<span class="n">obj3</span><span class="p">.</span><span class="nf">func</span><span class="p">()</span>
+<span class="n">obj3</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span></code></pre></figure>
+
+<p>运行结果如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>called with value = test1
+called with value = test2
+my value is: test2
+called with value = 
+called with myvalue = test3
+</code></pre>
+</div>
+<p>这里有三种处理情况：</p>
+
+<ul>
+  <li>包含module的class没有定义<code class="highlighter-rouge">initialize</code>函数,module的<code class="highlighter-rouge">initialize</code>函数会被调用</li>
+  <li>class中定义了<code class="highlighter-rouge">initialize</code>,并且其中调用了<code class="highlighter-rouge">super</code>,module的<code class="highlighter-rouge">initialize</code>函数会被调用</li>
+  <li>class虽然定义了<code class="highlighter-rouge">initialize</code>,但是没有调用<code class="highlighter-rouge">super</code>,则module的<code class="highlighter-rouge">initialize</code>不会别调到</li>
+</ul>
+
+<p>这里还有另外一种情况即如果class的BaseClass也定义了initialize,如下述代码：</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="k">module</span> <span class="nn">BaseModule</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="vi">@value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"called with value = </span><span class="si">#{</span><span class="vi">@value</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">BaseClass</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="vi">@baseValue</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">show</span><span class="p">()</span>
+        <span class="nb">puts</span> <span class="s2">"my basevalue=</span><span class="si">#{</span><span class="vi">@baseValue</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Test</span> <span class="o">&lt;</span> <span class="no">BaseClass</span>
+    <span class="kp">include</span> <span class="no">BaseModule</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">super</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="no">Test</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"test1"</span><span class="p">)</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">func</span>
+<span class="n">obj</span><span class="p">.</span><span class="nf">show</span></code></pre></figure>
+
+<p>结果如下:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>called with value = test1
+my basevalue=
+</code></pre>
+</div>
+
+<p>这里，module的<code class="highlighter-rouge">initialize</code>方法有较高的优先级，即<code class="highlighter-rouge">super</code>调用会首先调用module的同名函数。</p>
+
+<h2 id="参考">参考</h2>
+<ul>
+  <li><a href="http://www.cnblogs.com/cnblogsfans/archive/2009/01/27/1381134.html">Class, Module, Object,Kernel的关系</a></li>
+  <li><a href="http://juixe.com/techknow/index.php/2006/06/15/mixins-in-ruby/">Ruby Mixin tutorial</a></li>
+  <li><a href="http://www.51testing.com/?uid-128701-action-viewspace-itemid-153316">Ruby中module和class的区别</a></li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/blog/categories/#ruby" class="page__taxonomy-item" rel="tag">ruby</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/blog/categories/#%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0" class="page__taxonomy-item" rel="tag">学习笔记</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2012-03-06T22:48:00+08:00">March 06, 2012</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=ruby学习笔记-4 class&amp;module https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-class-and-module/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/blog/ruby/haskell/functional/lazy-evaluation-in-ruby-and-haskell/" class="pagination--pager" title="lazy evaluation in Ruby&amp;Haskell
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/blog/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ruby/ruby-more-on-class-and-module/" class="pagination--pager" title="ruby 学习笔记 5 - class&amp;module&amp;methods
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/blog/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/blog/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
