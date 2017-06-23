@@ -1,0 +1,795 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Agile software development - the cooperative game - 笔记 - 4 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Agile software development - the cooperative game - 笔记 - 4">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">
+  <meta property="og:url" content="https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">
+
+
+
+  <meta property="og:description" content="本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Agile software development - the cooperative game - 笔记 - 4">
+  <meta name="twitter:description" content="本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2013-08-24T19:32:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/tags/index.html">All Tags</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/wireshark/index.html">wireshark(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/tools/index.html">tools(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/tips/index.html">tips(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/linux/index.html">linux(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/cmake/index.html">cmake(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/build/index.html">build(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/cpp/index.html">cpp(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/boost/index.html">boost(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/awk/index.html">awk(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/programming/index.html">programming(3)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/gawk/index.html">gawk(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/unix/index.html">UNIX(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/study/index.html">study(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/ruby/index.html">ruby(3)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/hello/index.html">hello(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/octopress/index.html">octopress(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/minutes/index.html">minutes(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/languages/index.html">languages(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/markdown/index.html">markdown(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/yaml/index.html">yaml(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/中文/index.html">中文(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/unicode/index.html">unicode(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/language/index.html">language(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/snmp/index.html">snmp(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/debug/index.html">debug(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Agile software development - the cooperative game - 笔记 - 4">
+    <meta itemprop="description" content="本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。">
+    <meta itemprop="datePublished" content="August 24, 2013">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Agile software development - the cooperative game - 笔记 - 4
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地<strong>定制和应用</strong>这些规则。</p>
+
+<ul>
+  <li><a href="/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html">第一部分</a>。</li>
+  <li><a href="/blog/2013/08/14/agile-software-development-the-cooperative-game-reading-2/index.html">第二部分</a>。</li>
+  <li><a href="/blog/2013/08/18/agile-software-development-the-cooperative-game-reading-3/index.html">第三部分</a>。</li>
+</ul>
+
+<!--more-->
+
+<h2 id="构建发布软件的生态系统">构建发布软件的生态系统</h2>
+
+<p>方法论的目的在于使用所有可行的手段来保证我们可以发布预期的软件，并且这样的方法是可以<strong>确定持续</strong>进行的。方法学本身即使社交行为的创建过程。方法本身是一个关于职位描述，过程，团队中每个人需要遵守的传统的集合。</p>
+
+<p>每一个组织都有自己的方法论，这些方法就是他们怎样做商业的方式。一种方法论可以说是你的组织同意采取的一种传统；这些过程可能在大部分公司并没有很正式的打印出来或者写下来。这种一致同意的传统需要我们不时得<strong>重新审视</strong>，<strong>持续的</strong>构建。</p>
+
+<h2 id="方法论概念">方法论概念</h2>
+
+<p>方法论是关于一些方法的固化和规则定义，其对过程的约束是它不同于方法本身的地方 - 你可以在不同的时候采用不同的方法；然而在一系列开发过程中，方法论代表着一直认可的基本规则和约定。</p>
+
+<p>集合一群聪明人又想获得成功，我们就必须做好协调/合作和协调，离开这些手段，最聪明的人组合的团队也会变得杂乱无章，从而很难取得成功。</p>
+
+<h3 id="结构性术语">结构性术语</h3>
+
+<p>方法学有如下几个结构性要素</p>
+
+<ul>
+  <li>角色：明确的角色分工至关重要，什么样的角色需要什么样的<strong>职责和技能</strong>等</li>
+  <li>技能：角色需要的技能和专长</li>
+  <li>团队：不同的情况之下工作于一起的一种集体角色</li>
+  <li>技术：赖以完成具体工作的技术技能，关于怎样完成某种特定工作的一些知识</li>
+  <li>活动：人们怎样完成某些特定工作的过程，譬如计划，编码，测试等</li>
+  <li>过程：各种各样的活动如何连接在一起</li>
+  <li>工作产品： 可以是中间过程的产出，如CRC卡或者故事卡片等</li>
+  <li>里程碑：一些关键的时间节点，往往是关于整体进度的一个节点</li>
+  <li>标准：关于一些工具/类库/方法的一些传统/约束等</li>
+  <li>质量：关于活动和工作产物的质量属性</li>
+  <li>团队价值：什么样的价值被大家普遍认可</li>
+</ul>
+
+<p>不同的方法论在上述的要素上有很多各不相同之处。</p>
+
+<p>依据上述的结构性要素，常见的方法类可以划分为以下类型：</p>
+
+<ol>
+  <li>Normative方法，强调采用的步骤或者解决方案是完全遵守已有的工作记录。</li>
+  <li>Rational方法，基于工具和方法来构建</li>
+  <li>Participative方法，基于利益相关方和客户参与的方面</li>
+  <li>Heuristic方法，基于已经学习得到的经验，启发式进行</li>
+</ol>
+
+<p>很多情况下，随着人们经验的基积累，方法论可能沿着Heuristics的方法慢慢固化下来，慢慢演进到Normative方法；譬如在计算机编程领域，算法设计方面就达到了标准化的地步；而关于将人们放在开放的办公区还是私有的办公室的方面却没有。</p>
+
+<p>大部分的软件开发货活动还处于<strong>Heuristic方法就足够适用</strong>的阶段。</p>
+
+<h3 id="范围">范围</h3>
+
+<p>一种方法论的范围涵盖了关于它要关注的角色范围和相关的一些活动。早期的面向对象方法论被认为是设计师作为核心的角色，活动主要是讨论技术工具和描述对应标准图形的活动；然而这样的描述<em>不够宽泛</em>的同时，又显得<strong>限制太多</strong>。</p>
+
+<p>方法论的范围可以被概括为如下几个方面：</p>
+
+<ul>
+  <li>生命周期的覆盖，什么时间开始，什么时候结束</li>
+  <li>角色覆盖，什么样的角色参与什么样的活动</li>
+  <li>活动覆盖，什么样的活动在什么样的情况下开展</li>
+</ul>
+
+<p>从这样的角度看，早起的面向对象方法仅仅局限于讨论一个很狭窄的领域，只有设计师参与，仅仅关系到项目设计阶段，从而导致经验丰富的面相对象设计师认为他们不适合参与项目的整个生命周期。从这些因素来考虑，有助于我们更好的理解怎样的方法论在怎样的场景下是更合适的。</p>
+
+<h3 id="概念性要素">概念性要素</h3>
+
+<p>为了更好的设计和定制方法论，我们需得考虑如下一些要素：</p>
+
+<ol>
+  <li>方法论本身的规模大小，有多少标准，活动，质量度量物，技术描述等</li>
+  <li>正规性，多大的精度控制和什么程度的过程控制是需要的，是否需要更严格的控制和错误容忍率</li>
+  <li>方法论的重度，控制元素的个数，流程/活动的数目</li>
+  <li>问题域大小，需要多少问题去解决，<strong>内部复杂性</strong>如何</li>
+  <li>项目本身的大小，<strong>多少个人</strong>需要协调</li>
+  <li>系统重要性，如果发生了错误，造成的损害如何，是仅仅<strong>损失钱财还是造成人命有关的灾难</strong></li>
+  <li>精确度如何，譬如设计的粒度如何，高层设计到什么样的程度为好</li>
+  <li>准确度，怎样更接近真是精确度，如何算好</li>
+  <li>相关性，什么样的讨论是不相关的</li>
+  <li>错误容忍度</li>
+  <li>可见行 - 外部怎么知道某种方法论是否被很好遵循，是否需要审计等</li>
+  <li>扩展性</li>
+  <li>稳定性 - 多大程度上它可能发生变化</li>
+</ol>
+
+<h3 id="发布一种方法论">发布一种方法论</h3>
+
+<p>发布方法论需要发布两种组件，一时可视的<strong>形象化视图</strong>，一是<strong>文本</strong>本身。形象化的视图可能无法显示实践/标准和其它一些对组织很重要的协作方式描述。这些信息很难作出一个形象化的视图来呈现，这时候我们必须用文本来列出来。</p>
+
+<p>发布出来的方法论文本需要描述技术/活动/会议/质量度量/工作角色的指责标准这样的东西。方法论的文本可能变得异常庞大，即使一个很<em>细微</em>的方法论，譬如只有4种角色，每种角色只有4种产出，每个产出只有4个里程碑，最终也会产生出<strong>68=4+16+48</strong>个互锁的子部分需要描述清楚。即使是以轻量级著称的XP方法论，最初只有200页那么多，现在已经达到了1000页才可以描述清楚。</p>
+
+<p>但是很多时候，公司组织并不会将这些东西打印出来，因为</p>
+
+<ol>
+  <li>理解这些比文档本身重要 - Jim Highsmith</li>
+  <li>组织的需求总是在变化的，固定下来的文本很容易过时也没有实用性</li>
+</ol>
+
+<p>组织需要不断的演进既有的方法论，变更不合适的部分，在组织内部的<strong>不同团队之间传递好的习惯和实践</strong>。有很多中方法来减少这些方法论文本的厚度:</p>
+
+<ol>
+  <li>提供工作产出物的范本</li>
+  <li>移除技术操作指南，让人们用更自然的方式协作</li>
+  <li>根据角色来组织方法论文本，某种产出物按照不同的角色给出简单的描述</li>
+  <li>做些关于流程的小实践，通过小的练习实践这些方法，然后再用于具体的工作</li>
+</ol>
+
+<h2 id="方法论设计原则">方法论设计原则</h2>
+
+<h3 id="常见的设计错误">常见的设计错误</h3>
+
+<h3 id="成功的方法论项目">成功的方法论项目</h3>
+
+<h3 id="作者敏感度">作者敏感度</h3>
+
+<h3 id="七大准则">七大准则</h3>
+
+<h2 id="审视xp">审视XP</h2>
+
+<h2 id="究竟为何需要方法论">究竟为何需要方法论</h2>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/agile" class="page__taxonomy-item" rel="tag">agile</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/methodologies" class="page__taxonomy-item" rel="tag">methodologies</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/reading" class="page__taxonomy-item" rel="tag">reading</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/software" class="page__taxonomy-item" rel="tag">software</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2013-08-24T19:32:00+08:00">August 24, 2013</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Agile software development - the cooperative game - 笔记 - 4 https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/blog/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/blog/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/" class="pagination--pager" title="Agile software development - the cooperative game - 笔记 - 3
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/blog/post/2016/04/19/welcome-to-jekyll/" class="pagination--pager" title="Welcome to Jekyll!
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
