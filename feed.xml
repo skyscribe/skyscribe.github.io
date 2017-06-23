@@ -1,28 +1,430 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2017-06-23T10:09:37+08:00</updated><id>https://skyscribe.github.io/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Welcome to Jekyll!</title><link href="https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2017-06-21T13:13:39+08:00</published><updated>2017-06-21T13:13:39+08:00</updated><id>https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2017-06-23T13:18:10+08:00</updated><id>https://skyscribe.github.io/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Kotlin语言之变量约束设计</title><link href="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" rel="alternate" type="text/html" title="Kotlin语言之变量约束设计" /><published>2017-06-05T23:12:00+08:00</published><updated>2017-06-05T23:12:00+08:00</updated><id>https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">&lt;p&gt;可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为&lt;strong&gt;继承/封装/多态等手法针对的都是程序组织上&lt;/strong&gt;的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖&lt;strong&gt;过程式实现跟操作系统打交道&lt;/strong&gt;。&lt;/p&gt;
 
-&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+&lt;h2 id=&quot;函数式编程里的副作用&quot;&gt;函数式编程里的副作用&lt;/h2&gt;
+&lt;p&gt;在函数式编程的世界里，事情会变得很传统的过程式处理不一样，因为这里非常讲究函数本身是否是&lt;strong&gt;有副作用&lt;/strong&gt;的，如果&lt;strong&gt;同样的输入不能保证相同的输出&lt;/strong&gt;，那么则是有副作用的。这里的输出不仅仅表示返回值，还隐含其它形形色色的对环境的影响，包括&lt;/p&gt;
 
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;申请但是没有释放的内存&lt;/li&gt;
+  &lt;li&gt;向操作系统请求占用共享资源如网络套接字&lt;/li&gt;
+  &lt;li&gt;屏幕输出，磁盘占用等&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;为什么要区分副作用&quot;&gt;为什么要区分副作用&lt;/h2&gt;
 
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2016-04-19T00:50:22+08:00</published><updated>2016-04-19T00:50:22+08:00</updated><id>https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll</id><content type="html" xml:base="https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+&lt;p&gt;显然，副作用引入了&lt;strong&gt;额外需要程序员维护&lt;/strong&gt;的状态，而传统的线程库或基本的OS机制将其完全交给了程序员负责。从而导致在多线程编程环境下，复杂的问题随着状态的增加成&lt;strong&gt;指数上升&lt;/strong&gt;。状态意味着有共享资源需要维护，当有并发执行的进程或是线程的时候，为了保证正确的程序语意，则不得不引入锁(昂贵的操作)和竞争，从而制约性能。无锁算法通过CAS+重试机制，可以&lt;strong&gt;部分缓解锁的开销&lt;/strong&gt;，却不能从本质上解决问题。&lt;/p&gt;
 
-&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+&lt;p&gt;无副作用的函数则是天然适合并发的，因为没有共享自然可以并行不悖地执行，问题不是完美解决了吗？然而&lt;strong&gt;现实世界总是不允许绝对完美二字存在&lt;/strong&gt;的，纯粹无副作用的函数几乎一无是处，因为它本质上没什么用，什么也做不了。&lt;/p&gt;
 
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+&lt;p&gt;退而求其次的想法是，能否尽量隔离两者的实现，然后又可以优雅地将二者集成起来完成实际功能？&lt;strong&gt;HASKELL用其优雅的monad抽象&lt;/strong&gt;回答了这个问题。然而对于抽象思维能力不是那么强（或者没有那么好数学基础）的程序员而言，&lt;strong&gt;Monad实在是太阳春白雪&lt;/strong&gt;了而难以接近；想更加接地气一点的程序语言无一不选择和Monad保持距离，即使某些构造和设计的思想就来源于Monad, 譬如随处可见的Optional，基本的map/reduce链式操作等。&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;对于这些没有显示引入monad的非纯函数式语言来说，严格的隔离就显得有些太激进了。取而代之的相对折中一点的&lt;strong&gt;平庸&lt;/strong&gt;策略是语言机制本身提供某些基础机制，剩下的怎么用这些基本机制，一切由程序员自己来定夺。&lt;/p&gt;
 
-&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://github.com/jekyll/jekyll-help&quot;&gt;Jekyll’s dedicated Help repository&lt;/a&gt;.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
+&lt;h2 id=&quot;kotlin的语言层面基本机制&quot;&gt;kotlin的语言层面基本机制&lt;/h2&gt;
+
+&lt;p&gt;kotlin通过关键字 &lt;code class=&quot;highlighter-rouge&quot;&gt;val&lt;/code&gt; 来声明&lt;strong&gt;只读&lt;/strong&gt;的变量，用 &lt;code class=&quot;highlighter-rouge&quot;&gt;var&lt;/code&gt; 来声明可变量。任何函数只要引入对可变量的使用，则其本身就是有明显的副作用的。然而一个变量声明为只读，仅仅表示在其对应的作用域中，不允许修改此变量的值，并&lt;strong&gt;不意味着实际指向的数据对象本身是不可变&lt;/strong&gt;的， 因为在可能有其他的地方使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;var&lt;/code&gt; 的方式来操作此变量，或者有显示的方式将一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;val&lt;/code&gt; 的变量转换回可变的 &lt;code class=&quot;highlighter-rouge&quot;&gt;var&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;考虑下边的例子：&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// field1 是只读的，在本class中不允许修改它
+&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SomeClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;field1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;field2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+       &lt;span class=&quot;c1&quot;&gt;// can only modify field2, but not field1
+&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//calling site
+&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;someTypeInst&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;obj&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;someTypeInst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;112&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// someTypeInst can still be changed by others! Not recommended!
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;虽然&lt;code class=&quot;highlighter-rouge&quot;&gt;someTypeInst&lt;/code&gt;是以只读方式传入&lt;code class=&quot;highlighter-rouge&quot;&gt;obj&lt;/code&gt; 的，然而并不能保证没有其它的线程并发地修改实际的对象，如果发生这种情况，&lt;strong&gt;程序员仍然需要保证数据的一致性和安全&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;只读变量的初始化&quot;&gt;只读变量的初始化&lt;/h3&gt;
+
+&lt;p&gt;显然不可变变量则仅仅能够初始化一次，后续使用中不能再修改了。这样也带来一些限制，譬如在 &lt;code class=&quot;highlighter-rouge&quot;&gt;init block&lt;/code&gt; 里想一次性初始化某些资源然后将其设置为在class内部是只读，则无能为力。一种变通的方式是将其设置为 &lt;code class=&quot;highlighter-rouge&quot;&gt;var&lt;/code&gt; 类，然而这样做我们就损失了只读约束；另外一种做法则需要使用property构造来封装。&lt;/p&gt;
+
+&lt;h2 id=&quot;核心集合类&quot;&gt;核心集合类&lt;/h2&gt;
+&lt;p&gt;kotlin对来自JAVA的集合类库进行了二次封装，清晰地划分了只读集合类和可变集合。&lt;/p&gt;
+
+&lt;h3 id=&quot;接口定义&quot;&gt;接口定义&lt;/h3&gt;
+&lt;p&gt;常用的集合类接口在&lt;code class=&quot;highlighter-rouge&quot;&gt;kotlin,collections&lt;/code&gt; 包中被重新定义 ( 源码中位于 &lt;code class=&quot;highlighter-rouge&quot;&gt;Collections.kt&lt;/code&gt; )&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;kotlin.collections&lt;/span&gt; 
+&lt;span class=&quot;c1&quot;&gt;//...
+// by default not mutable
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Iterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//... }
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// mutable iterable supports removing elements during iterating
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MutableIterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Iterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//...}
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//Only read access to collection
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Iterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//...}
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// Supports read/write operations
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MutableCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableIterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//...}
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;具体的集合类接口则选择从以上接口中&lt;strong&gt;选择对应的&lt;/strong&gt;来扩展实现，因而对同一个类型有两种实现，分别是只读的 (没有前缀) 的和可变类型 (&lt;strong&gt;用 Mutable 做前缀区分&lt;/strong&gt;) 。譬如 &lt;code class=&quot;highlighter-rouge&quot;&gt;List&lt;/code&gt; 类就定义为&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Read only list interface
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//...}
+// Mutable list
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//...}
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;需要注意的是，实际的具体实现类是复用Java中的定义，可参考collection包中的 &lt;code class=&quot;highlighter-rouge&quot;&gt;TypeAliases.kt&lt;/code&gt; 文件&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;kotlin.collections&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;@SinceKotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typealias&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;默认的集合操作以及Streams API返回的大部分是不可变接口对象。&lt;/p&gt;
+
+&lt;h3 id=&quot;集合类扩展工具函数&quot;&gt;集合类扩展/工具函数&lt;/h3&gt;
+&lt;p&gt;除了使用默认的JDK实现来生成具体集合类对象，Kotlin标准库中同时提供了大量的封装函数方便程序员使用，某些来源于对JDK的直接封装，有一些则是直接inline实现。&lt;/p&gt;
+
+&lt;p&gt;譬如返回空list的包装和初始化形形色色的list&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/** Returns an empty read-only list. */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;emptyList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EmptyList&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/** Returns a new read-only list of given elements.  */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;vararg&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;asList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;emptyList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/** Returns an empty read-only list. */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@kotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InlineOnly&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;emptyList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/**
+ * Returns an immutable list containing only the specified object [element].
+ * The returned list is serializable.
+ */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@JvmVersion&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;singletonList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;生成可变List的函数封装大多也是清晰明了 , 并且有很多种类的封装，使得就地生成 List 的工作大大简化；大部分情况仅仅需要&lt;strong&gt;使用已有的函数&lt;/strong&gt;即可，不需要发明新的轮子&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/** Returns an empty new [MutableList]. */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@SinceKotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@kotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InlineOnly&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mutableListOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/** Returns an empty new [ArrayList]. */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@SinceKotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;@kotlin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;internal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InlineOnly&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arrayListOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/** Returns a new [MutableList] with the given elements. */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mutableListOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;vararg&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArrayAsCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isVarargs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;其它集合类  (set/map等) 的实现原理&lt;strong&gt;大概类似&lt;/strong&gt;，可以通过查看对应源码。&lt;/p&gt;
+
+&lt;h3 id=&quot;不可变集合转换为可变集合&quot;&gt;不可变集合转换为可变集合&lt;/h3&gt;
+&lt;p&gt;很多场景下，API返回的都是不可变集合，将其变成一个可变对象再行编辑修改是常见不过的变成任务；kotlin 通过其&lt;strong&gt;自身的扩展机制&lt;/strong&gt;将这些工具函数自动添加到了对应的集合类上&lt;/p&gt;
+
+&lt;p&gt;如果想要将一个只读的 &lt;code class=&quot;highlighter-rouge&quot;&gt;Array&lt;/code&gt; 对象变为一个可变的 &lt;code class=&quot;highlighter-rouge&quot;&gt;MutableList&lt;/code&gt;，那么其实现是通过重新初始化一个新对象实现的：&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Below code is copied from generated standlib as _Arrays.kt
+//  see https://github.com/JetBrains/kotlin/tree/master/libraries/stdlib
+&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;/**
+ * Returns a [MutableList] filled with all elements of this array.
+ */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toMutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;asCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;对于具体的Array类，有不同的实现，如 &lt;code class=&quot;highlighter-rouge&quot;&gt;ByteArray&lt;/code&gt; 的初始化方法则有所不同，直接调用其构造函数，然后注意添加现有的各个元素&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/**
+ * Returns a [MutableList] filled with all elements of this array.
+ */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ByteArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toMutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MutableList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Byte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Byte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;之所以如此，是因为具体这些子类是被映射到具体的 JVM 对象上的。如ByteArray的文档如是说&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;public final class ByteArray defined in kotlin
+An array of bytes. 
+When targeting the JVM, instances of this class are represented as &lt;code class=&quot;highlighter-rouge&quot;&gt;byte[]&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;而对于CharArray，则其映射到&lt;code class=&quot;highlighter-rouge&quot;&gt;char []&lt;/code&gt;类型上去。&lt;/p&gt;
+
+&lt;h2 id=&quot;idea支持&quot;&gt;IDEA支持&lt;/h2&gt;
+&lt;p&gt;作为官方的IDE环境，IDEA对可变量的引用做了显示的&lt;strong&gt;下划线&lt;/strong&gt;提醒，程序员可以一目了然地看到代码中对可变量的使用。&lt;/p&gt;
+
+&lt;p&gt;然而想要更深入的查看整个实现调用链中，哪些引入副作用哪些没有，工具的支持就比较有限了。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。</summary></entry><entry><title type="html">Kotlin语言之函数式编程</title><link href="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" rel="alternate" type="text/html" title="Kotlin语言之函数式编程" /><published>2017-06-04T22:32:00+08:00</published><updated>2017-06-04T22:32:00+08:00</updated><id>https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/">&lt;p&gt;&lt;a href=&quot;https://kotlinlang.org/&quot;&gt;Kotlin语言&lt;/a&gt;是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其&lt;a href=&quot;https://techcrunch.com/2017/05/17/google-makes-kotlin-a-first-class-language-for-writing-android-apps/&quot;&gt;2017年的I/O大会上将其列为Android平台官方支持的语言&lt;/a&gt;而窜上了热点。&lt;/p&gt;
+
+&lt;p&gt;本文尝试从函数式编程的角度管窥Kotlin的特性。&lt;/p&gt;
+
+&lt;h2 id=&quot;jvm上的函数式语言生态&quot;&gt;JVM上的函数式语言生态&lt;/h2&gt;
+&lt;p&gt;作为一门比较年轻的编程语言，要想在既有的数百种语言中脱颖而出，成功吸引开发者的心，对新的&lt;a href=&quot;https://en.wikipedia.org/wiki/Functional_programming&quot;&gt;函数式编程范式&lt;/a&gt;的支持是必然不可少的 - 这一点基本成为语言出品商心照不宣的潜规则了，当然在21实际，不支持面向对象的范式也是说不过去的。&lt;/p&gt;
+
+&lt;p&gt;作为基于JVM平台的语言，和Java的互操作性肯定是一个重要的优势，当然这方面已经有成熟的函数式语言&lt;a href=&quot;https://www.scala-lang.org/&quot;&gt;scala&lt;/a&gt;和更早一点的&lt;a href=&quot;https://clojure.org/about/rationale&quot;&gt;clojure&lt;/a&gt;在前。可能比较遗憾的是，正统的函数式编程风格太难被传统的OO程序员所接受，因此基于传统Lisp的clojure一直曲高和寡，scala在近年来有变得更加流行的趋势，只是目前看来&lt;a href=&quot;https://dzone.com/articles/the-rise-and-fall-of-scala&quot;&gt;仍然没有跨越期望的引爆点&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;有丰富的特性还希望有速度&quot;&gt;有丰富的特性还希望有速度&lt;/h3&gt;
+&lt;p&gt;传统印象中的静态函数式语言的编译速度往往会比较慢，这一点在工程实践上是个很重要的因素。&lt;/p&gt;
+
+&lt;p&gt;Kotlin作为后来者，其开发者认为静态语言的编译速度是个至关重要的，然后Scala的编译速度远不能令人满意。对大型的项目而言，笨拙的编译速度浪费的可是大量的时间和金钱；毕竟天下武功唯快不破，更快的编译时间意味着更快的反馈周期，更多次的迭代开发。Kotlin的目标之一是期望编译速度可以像Java一样快，&lt;a href=&quot;https://medium.com/keepsafe-engineering/kotlin-vs-java-compilation-speed-e6c174b39b5d&quot;&gt;benchmark分析&lt;/a&gt;也表明了二者的速度是差别不大的。&lt;/p&gt;
+
+&lt;h2 id=&quot;基本特性&quot;&gt;基本特性&lt;/h2&gt;
+&lt;p&gt;函数式语言的基本元素就是function，这一点kotlin倒是没有玩太多花头。用&lt;code class=&quot;highlighter-rouge&quot;&gt;fun&lt;/code&gt;关键字来声明函数，函数是第一等公民，可以支持函数作为参数，返回函数等基本特性。&lt;/p&gt;
+
+&lt;h3 id=&quot;不可变类型支持&quot;&gt;不可变类型支持&lt;/h3&gt;
+&lt;p&gt;Kotlin强制要求程序员声明某个特定的变量是否是可变类型。&lt;/p&gt;
+
+&lt;p&gt;如果是可变类型，则需要用&lt;code class=&quot;highlighter-rouge&quot;&gt;var &lt;/code&gt;来声明；那么后续程序中任何地方访问变量都会被IDE给highlight出来，提醒可能的副作用。因为可变类型意味着内部存储着状态，从函数式编程的角度来看，状态会&lt;strong&gt;影响函数的纯度&lt;/strong&gt;，带来副作用和复杂性。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://upload-images.jianshu.io/upload_images/5275528-e33afde1447172d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240&quot; alt=&quot;immutable_hints.png&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;函数声明&quot;&gt;函数声明&lt;/h3&gt;
+&lt;p&gt;基本的函数声明是这样的&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;thisIsAFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;当然这里的类型后置语法和传统的C家族语言有些不同，但是适应起来倒也不是难事儿。&lt;/p&gt;
+
+&lt;h3 id=&quot;类型推导&quot;&gt;类型推导&lt;/h3&gt;
+&lt;p&gt;Kotlin也支持强大的类型推导，从而在很多情况下，可以省略不必言的类型指定，简化代码；譬如函数的返回类型可以被自动推断的时候，其类型声明可以被省略。&lt;/p&gt;
+
+&lt;h3 id=&quot;特殊的返回类型-unit&quot;&gt;特殊的返回类型 &lt;code class=&quot;highlighter-rouge&quot;&gt;Unit&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Unit&lt;/code&gt;是一个特殊的类型，用于指定某个函数返回的值可以被省略，类似于Java8的&lt;code class=&quot;highlighter-rouge&quot;&gt;Void&lt;/code&gt;类型。如果一个函数没有返回值，那么可以指定其返回&lt;code class=&quot;highlighter-rouge&quot;&gt;Unit&lt;/code&gt;或者直接省略其返回&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;someFunc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Unit&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// do something with arg
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// no return needed
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// same as above
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;someFunc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// do something
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;中缀表达式&quot;&gt;中缀表达式&lt;/h3&gt;
+&lt;p&gt;中缀表达式写法更替进人的思维习惯，在定义某些操作符的时候是非常有用的。此用法往往用于扩展已有类型的操作，定义的时候需要满足以下条件&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;属于某个类的成员函数，或者是定义某个类的扩展函数(后边再回头来看)，因为这里我们&lt;strong&gt;必须知道左侧的操作对象&lt;/strong&gt;是谁&lt;/li&gt;
+  &lt;li&gt;必须只有一个函数参数（操作符后边的对象）&lt;/li&gt;
+  &lt;li&gt;用&lt;code class=&quot;highlighter-rouge&quot;&gt;infix&lt;/code&gt;关键字来标记&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;譬如&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;infix&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;/// implementation of shl operation
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// call site
+&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shl&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;命名参数和默认值&quot;&gt;命名参数和默认值&lt;/h3&gt;
+&lt;p&gt;这点和Python很像在多个参数的复杂函数的使用上有很大帮助，能极大提高可读性减少维护成本。调用方可以在调用点指定需要传入的参数的名字；也可以省略掉不需要指定的参数。&lt;/p&gt;
+
+&lt;p&gt;譬如有如下的&lt;code class=&quot;highlighter-rouge&quot;&gt;reformat&lt;/code&gt;函数用于格式化&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;reformat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;normalizeCase&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;upperCaseFirstLetter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;divideByCamelHumps&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;wordSeparator&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'_'&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;调用点可以简单写作&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;reformat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wordSeparator&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// equals to
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reformat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这个功能在传统的C++/Java里边没有提供，但是IDEA提供了只能提示可以弥补Java的不足；而Kotlin则将其内置在语言中了；本身没多少复杂性在里边。&lt;/p&gt;
+
+&lt;h2 id=&quot;高阶函数和语法糖&quot;&gt;高阶函数和语法糖&lt;/h2&gt;
+
+&lt;h3 id=&quot;高阶函数&quot;&gt;高阶函数&lt;/h3&gt;
+&lt;p&gt;函数的参数可以是一个函数，这个在Kotlin的库里已经有大量的例子，譬如基本的&lt;code class=&quot;highlighter-rouge&quot;&gt;Sequence&lt;/code&gt;的filter函数携带一个谓词函数，其针对给定的参数返回一个&lt;code class=&quot;highlighter-rouge&quot;&gt; Boolean&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sequence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;predicate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Boolean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sequence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FilteringSequence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;predicate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;单参数函数的表达式形式&quot;&gt;单参数函数的表达式形式&lt;/h3&gt;
+&lt;p&gt;当函数只有一行实现的时候，可以省略其函数体，直接用&lt;code class=&quot;highlighter-rouge&quot;&gt;=&lt;/code&gt;来书写，就像复制给一个变量一样&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add2Numbers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;lambda和匿名函数&quot;&gt;Lambda和匿名函数&lt;/h3&gt;
+&lt;p&gt;匿名函数用大括号括起来，上面的例子也可以写作&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;add2Numbers2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;函数调用的形式省略&quot;&gt;函数调用的形式省略&lt;/h3&gt;
+&lt;p&gt;当函数仅仅有一个参数的时候，其参数名字默认为&lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt;保留关键字可以不用显示指定。&lt;/p&gt;
+
+&lt;p&gt;当函数的最后一个参数是一个函数的时候，其函数体可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;/code&gt;块的方式来书写，获得更好的可读性。&lt;/p&gt;
+
+&lt;p&gt;譬如如下的例子用于打印指定数目个偶数&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;printEvens&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Long&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;IntStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;limit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forEach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;一个具体一点的例子&quot;&gt;一个具体一点的例子&lt;/h3&gt;
+
+&lt;p&gt;假设要实现如下功能的函数&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;遍历某个目录树&lt;/li&gt;
+  &lt;li&gt;找出所有符合条件的文件夹&lt;/li&gt;
+  &lt;li&gt;取其文件绝对路径&lt;/li&gt;
+  &lt;li&gt;归并为一个字符串列表返回&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;可以通过如下几个函数完成&lt;/p&gt;
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;extractAllDomainDoc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;walkTopDown&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;isDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isDirectory&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isDomainDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;isDomainDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;separator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;separator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;doc&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这里每个函数的含义都是比较清楚易懂的。如果利用上述的省略规则，那么可以更简略的写为&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;extractAllDomainDoc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dirName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;walkTopDown&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;isDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isDirectory&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isDomainDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;isDomainDocDir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;separator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;separator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;doc&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;类型扩展函数&quot;&gt;类型扩展函数&lt;/h2&gt;
+&lt;p&gt;Kotlin 支持对已有的类型添加扩展，值需要在任何想要的地方添加想要的功能，则原有的类型即可像被增强了一样具有新的功能，该机制提供了OO之外新的灵活的扩展方式。&lt;/p&gt;
+
+&lt;p&gt;譬如默认的Kotlin的&lt;code class=&quot;highlighter-rouge&quot;&gt;Iterable&lt;/code&gt;类没有提供并发的&lt;code class=&quot;highlighter-rouge&quot;&gt;foreach&lt;/code&gt;操作，可以通过扩展机制很容易的写出来一个使用&lt;code class=&quot;highlighter-rouge&quot;&gt;ExecutorService&lt;/code&gt;来并发循环的版本&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// parallel for each, see also https://stackoverflow.com/questions/34697828/parallel-operations-on-kotlin-collections
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Iterable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parallelForEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;numThreads&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Runtime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getRuntime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;availableProcessors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExecutorService&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Executors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newFixedThreadPool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;numThreads&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Unit&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// default size is just an inlined version of kotlin.collections.collectionSizeOrDefault
+&lt;/span&gt;    &lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;defaultSize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;*&amp;gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;destination&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;synchronizedList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;defaultSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;submit&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;destination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shutdown&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;awaitTermination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TimeUnit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DAYS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里在函数体中，&lt;code class=&quot;highlighter-rouge&quot;&gt;this&lt;/code&gt;自动会绑定于被扩展的对象。&lt;/p&gt;
+
+&lt;p&gt;如果我们想实现一个自动将一大堆plantuml文件转换为png格式并copy到指定目录，因为默认的plantuml的API是单线程的，我们可以基于上述的parallelForEach实现来并发调度UML的生成过程，对应的代码可以写为&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;markDownFileLists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parallelForEach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;SourceFileReader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;generatedImages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firstOrNull&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;apply&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;copyFileToDirWith&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pngFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;absolutePath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getCopyTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;${System.currentTimeMillis()} - Created png for $it&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。</summary></entry><entry><title type="html">Software Design in Agile Development Context</title><link href="https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context/" rel="alternate" type="text/html" title="Software Design in Agile Development Context" /><published>2016-12-24T19:32:00+08:00</published><updated>2016-12-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context</id><content type="html" xml:base="https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context/">&lt;p&gt;在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;软件设计的刚需被敏捷了吗&quot;&gt;软件设计的刚需被敏捷了吗？&lt;/h2&gt;
+
+&lt;p&gt;工作流程的变更以及开发节奏的加快并不能绕开一个很核心的问题：&lt;strong&gt;写出容易维护方便扩展的代码的复杂程度本质上没有改变&lt;/strong&gt;；软件的维护周期越长，迭代的版本越多，这个基本问题就越突出。要想顺利解决这一问题，只能&lt;strong&gt;依赖于系统具有相对良好的设计&lt;/strong&gt;，使得添加新的功能不会轻易破坏原有的结构，出现问题的时候，不需要大范围地对系统做出变更。&lt;/p&gt;
+
+&lt;p&gt;传统的瀑布式方法希望通过借鉴成熟的建筑行业的做法，采用预先大规模的架构设计，对系统做好明确的分割；继而进行不同层次的设计，直到所有可以预见到的需求都得以满足，然后才开始进行的代码的编写和构建。这种方法生产出来的软件交付工期很长，适应性很差，除了少数特殊行业之外基本已经被市场所淘汰。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://agilemanifesto.org/&quot;&gt;敏捷宣言&lt;/a&gt; 提出了一些基本的原则来指导我们怎样用相对更”&lt;strong&gt;敏捷&lt;/strong&gt;“的方式开发和交付我们的软件；通过多个不同的迭代，增量式的构建和持续交付系统来降低风险。然而软件本身的复杂性导致我们不能将客户的需求一对一的翻译成代码，像搭积木一样构建出来一个可以轻易维护的系统。因为新加入的需求很可能导致原有的代码结构无法适应新的需求；某些为了尽快完成需求而做出的&lt;strong&gt;关键的假设可能必须被打破&lt;/strong&gt;导致添加新的需求会破环大量已有的功能。如何做出恰如其分的软件设计，既能满足现有的短期需求，又能平衡潜在的变更。&lt;/p&gt;
+
+&lt;p&gt;各种不同的敏捷实践方法论对如何管理用户的需求，如何增强不同角色的沟通，如何实施日常的开发和测试活动，如何验证需求保证已经交付的承诺不被变更所破坏，如何规划和平衡资源和进度等复杂问题都给出了丰富的可选实践供项目管理人员裁剪；对于如何做软件设计以及做多少软件设计并没有很详尽的描述。就连基本的是否需要软件设计，以及需要多少软件设计，怎样算作过度设计都语焉不详。&lt;/p&gt;
+
+&lt;h2 id=&quot;真的需要软件设计吗&quot;&gt;真的需要软件设计吗？&lt;/h2&gt;
+
+&lt;p&gt;大部分情况下，对于这个基本的问题我想答案应该是肯定的，除非你是在做一个很小的个人项目。如果需要牵扯到多个人一块合作并且最终的产品需要维护比较长时间，那么起码&lt;strong&gt;某种程度的软件设计&lt;/strong&gt;应该是不可或缺的。毕竟&lt;strong&gt;软件开发活动本身也是围绕着人展开&lt;/strong&gt;的，既然需要多个不同知识背景，不同技能，不同角色的人一起来协作交付功能复杂多变的软件，那么必然需要一些设计保证&lt;strong&gt;参与其中的人有一致的理解&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;敏捷运动的早期一个常见的误解就是，敏捷软件开发不需要软件设计，不需要软件架构，只需要采用极限编程，将人们聚集一个公共空间里，直接动手写代码就行了；复杂的设计文档都是浪费，都是可以避免掉的，代码就是最好的设计文档。这样的过程可能适合于几个能力超强的程序员聚在一起做的临时小项目，放到更广泛的商业环境则难以持续下去。人员的流动，特殊需求的变更，性能问题的修补会使一个一开始看起来极其简单的几个源代码文件组成的小项目演进成&lt;strong&gt;难以维护的“庞然大物”&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;如果系统没有明确的分工和边界，没有相对清晰的职责分工和交互限制，软件的结构很容易陷入“大泥球”结构而不可维护，试想如果代码里的每一个包或者类都有可能和另外其它的任意一个类有交互关系，即使是一个绝对代码行数很小的项目也会变得无法继续添加新的功能。&lt;/p&gt;
+
+&lt;h2 id=&quot;哪些东西应该包含在软件设计中&quot;&gt;哪些东西应该包含在软件设计中？&lt;/h2&gt;
+
+&lt;p&gt;所谓的设计其实可以理解为关于如何组织软件各个部分（特性和行为分割）的一些决策，以及做出相应决策的一些原因。&lt;/p&gt;
+
+&lt;p&gt;敏捷场景下，重构的重要性以及早已经深入人心，因而容易经&lt;strong&gt;由重构来去掉“坏味”的部分就不宜放在设计&lt;/strong&gt;中。因为一般为了重用的目的都会将设计决策写下来供后续使用；如此一来必然产生一些维护成本；而维护设计文档的开销一般比代码要大很多。因此容易通过重构而优化的部分，放在专门的软件设计中显得有些得不偿失了。毕竟敏捷软件开发的基本思路就是&lt;strong&gt;消除浪费&lt;/strong&gt;，使得&lt;strong&gt;投入产出比最大&lt;/strong&gt;化。&lt;/p&gt;
+
+&lt;p&gt;某些跟具体实现技术相关而和核心业务需求关系比较远的决策，大部分也&lt;strong&gt;不适宜包含在软件设计&lt;/strong&gt;中。譬如期望某部分关键数据需要做持久化以保证系统异常重启的时候依然可以恢复。对于业务需求而言，这块数据需要持久化是重要的，但是如何做持久化，又可能是易变的，譬如今天是考虑用文件来做持久化就可以了，将来可能发现不够必须用关系数据库，或者甚至关系数据库可能也不是一个合适的选择，得要用键值对数据库。&lt;strong&gt;识别到可能变化的部分，并将不变的部分抽象出来，放入设计中&lt;/strong&gt;可能就足够了。这样技能照顾到当前的需求，又能满足将来扩展的需要。至于具体是怎样实现的，看代码就足够了。&lt;/p&gt;
+
+&lt;p&gt;需求的&lt;strong&gt;概念抽象化，和软件的静态模型可以作为设计的中心&lt;/strong&gt;之一，必须详细考虑并归档维护。之所以要对需求进行抽象化处理，是因为用户的期望可能是模糊不清的，甚至是“朝令夕改”的。敏捷方法强调持续交付就是为了使用户早期得到反馈，&lt;strong&gt;及时修正他们的需求&lt;/strong&gt;，更好的管理客户的期望，避免开发出不符合客户真正预期的产品，浪费开发资源不说也浪费了客户的投资。软件的静态模型是关于大的软件职责的拆分和交互边界，这一部分不仅是当前进一步开发的基本依据，日后万一需要重构也是很重要的参考，值得花力气仔细讨论达成一致，减少日后维护成本。&lt;/p&gt;
+
+&lt;p&gt;软件的部署和核心模块的交互在有这方面的变更的时候（新加入模块或者服务等）也需要仔细考虑并作为软件设计的关键活动。模块的边界是粗粒度的系统耦合的地方，一些关键的交互流程也适宜详细讨论并放在软件设计文档中。&lt;/p&gt;
+
+&lt;p&gt;系统核心的模块/类以及之间的交互，如果有发生变更，也需要第一时间考虑清楚并放置在设计过程中产生合适的产出，便于沟通和交流。如果模块的粒度足够大（譬如估计有很多的代码），那么哪些部分是对外交互的接口也应该提早考虑清楚，并提取出来以便后续写代码以及代码评审的时候对照，确保设计被正确遵守。&lt;/p&gt;
+
+&lt;h2 id=&quot;什么时候应该停止继续设计&quot;&gt;什么时候应该停止继续设计？&lt;/h2&gt;
+
+&lt;p&gt;敏捷语义下，任何的浪费都是可耻的，代价巨大的设计工作自然也不例外。知道何时还需要仔细讨论搞清楚，何时应该停止变得尤其困难，甚至需要一些接近于艺术化的方法，&lt;strong&gt;需要经过大量的实践经验累积和反思&lt;/strong&gt;才能做到不偏不倚。&lt;/p&gt;
+
+&lt;p&gt;如果发现所讨论的问题可能代码实现很容易就能完成，如果考虑不完备，那么修改代码的代价非常小，那么就可以立即停止了；因为设计的目的是为了更好的写代码，更好的维护既有的代码。因此只有重构代码的代价远远大于预先仔细设计付出的代价是，才应该花费力气去做这些烧脑的工作。发现代码实现已经很容易没什么问题的时候，就放手去写代码或者重构代码吧。这种情况往往发生在我们想去“设计”一些内部实现细节，而这些细节对模块的边界以及待修改模块和核心部分耦合很小的情况。&lt;/p&gt;
+
+&lt;p&gt;如果是在构建一个新的模块，而这个模块和已有的系统有形形色色的复杂联系（耦合），那么如果这个模块和已有的系统的各个部分的交互已经比较清楚，而且其内部实现估计工作量也很小的时候，那么就可以放心将剩下的工作交给聪明的程序员去继续了。将一些&lt;strong&gt;细微的工作也放入设计中，只会使设计文档变得庞大而又难以维护&lt;/strong&gt;。毕竟可工作的代码比完美的文档更重要，虽然后者也很有价值。&lt;/p&gt;
+
+&lt;p&gt;如果对于是否应该继续设计有分歧，可以和其它准备实现的程序员坐在一起讨论（其实任何时候都应该如此，如果团队规模比较小而且时间允许），看将要写代码的程序员是否觉得足够清楚，返工的风险是否足够得小。如果对于一些核心的模块或者类的职责还有不同的认识，或者程序员不知道某些改动是应该新创建一个子包，还是应该在已有的摸个包中修改来实现，那么&lt;strong&gt;很可能有些关键的部分没有设计&lt;/strong&gt;清楚。&lt;/p&gt;
+
+&lt;p&gt;决定何时应该适可而止也和你的程序员团队的&lt;strong&gt;实际水平和能力&lt;/strong&gt;密切相关。一群天才程序员可能需要极少的设计来达成基本的共识就可以产出高质量易维护的代码，而水平平庸的程序员团队则需要更多设计上的预先讨论沟通以达成基本共识，减少返工。&lt;/p&gt;
+
+&lt;h2 id=&quot;工具&quot;&gt;工具&lt;/h2&gt;
+
+&lt;p&gt;软件工程的一个关键要素就是工具。软件设计自然也离不开合适的工具，尤其是软件设计又是对需求进行抽象的结晶；选择合适的工具可以增进协作和沟通，使得设计输出是有实际指导作用的而不仅仅是纯粹的文档工作。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
@@ -655,97 +1057,4 @@ rake deploy
 &lt;ol&gt;
   &lt;li&gt;存放页面的repository必须变为 &lt;strong&gt;username.github.io&lt;/strong&gt;,原来的则是 &lt;strong&gt;username.github.com&lt;/strong&gt;，可以到&lt;strong&gt;settings&lt;/strong&gt;里边，做rename操作。&lt;/li&gt;
   &lt;li&gt;默认显示的页面来自于&lt;strong&gt;master&lt;/strong&gt;,之前则是来自于&lt;strong&gt;gh-pages&lt;/strong&gt; 修改Rakefile即可。&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">GitHub的后台发生了更新，原来的github.com换成了github.io，导致原来的octopress的Rakefile变得不能正常工作。</summary></entry><entry><title type="html">PyQt学习小笔记</title><link href="https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji/" rel="alternate" type="text/html" title="PyQt学习小笔记" /><published>2013-02-24T09:39:00+08:00</published><updated>2013-02-24T09:39:00+08:00</updated><id>https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji/">&lt;p&gt;PyQT是知名跨平台框架QT的python绑定；用它来做些小程序既可以利用QT的跨平台性又能利用python强大的表达能力,从而取得事半功倍的效果。下边是使用它开发一个小程序过程中的学习小笔记。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;ui界面设计&quot;&gt;UI界面设计&lt;/h2&gt;
-
-&lt;h3 id=&quot;qt-designer&quot;&gt;QT Designer&lt;/h3&gt;
-
-&lt;p&gt;使用过VC做过MFC开发的，对&lt;strong&gt;所见即所得(WYSIWYG)&lt;/strong&gt;的工具不会陌生，QT Designer就是类似的一个。其设计就是将代码和UI空间分开，控件布局和对象名称都可以在里边设置，每个空间都有对应的属性表，可以针对很多控件属性做默认定制。最后生成对应的python代码。&lt;/p&gt;
-
-&lt;h3 id=&quot;生成代码&quot;&gt;生成代码&lt;/h3&gt;
-
-&lt;p&gt;生成的代码主要集中于控件显示的部分，事件处理的部分虽然也可以产生，但是仅适用于自定义子类的对象，因为在slot里边没法很方便的为已有的某个UI对象添加新的方法，只能靠子类化的办法来修改类的预定义slot，远不如在代码中自己写来的快捷方便。&lt;/p&gt;
-
-&lt;p&gt;每个界面的设计最终会生成一个&lt;strong&gt;.ui&lt;/strong&gt;后缀的XML文件，使用如下的Makefile规则可以做方便的转换：&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;%.py : %.ui
-    pyuic4 &lt;span class=&quot;nv&quot;&gt;$^&lt;/span&gt; &amp;gt; &lt;span class=&quot;nv&quot;&gt;$@&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h3 id=&quot;尽量少混杂动态控制逻辑到ui设计中&quot;&gt;尽量少混杂动态控制逻辑到UI设计中&lt;/h3&gt;
-
-&lt;p&gt;对于某些需要多步骤协作完成某个特性的控件，在Designer里边修改一部分属性，然后再在代码中完成另一部分是不方便的。譬如设计一个弹出的对话框，如果想设置它为&lt;code class=&quot;highlighter-rouge&quot;&gt;Modal&lt;/code&gt;的，那么最好还是在代码里边，在创建的时候设置要来得方便和清晰的多；否则除了问题，排查起来就比较麻烦。&lt;/p&gt;
-
-&lt;h2 id=&quot;逻辑实现和控制&quot;&gt;逻辑实现和控制&lt;/h2&gt;
-
-&lt;h3 id=&quot;简单控件和逻辑事件&quot;&gt;简单控件和逻辑事件&lt;/h3&gt;
-
-&lt;p&gt;简单的控件使用，有过MFC开发经验的自然容易照搬来做，基本都很像。唯一有些不同的是，在python里边，绑定事件处理的方式灵活了很多，不但可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;QObject&lt;/code&gt;类的&lt;code class=&quot;highlighter-rouge&quot;&gt;connect&lt;/code&gt;方法来做，也可以直接在signal对象上来直接绑，而且绑定的参数可以是任何的&lt;code class=&quot;highlighter-rouge&quot;&gt;callable&lt;/code&gt;，譬如：&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#Option 1&lt;/span&gt;
-&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ui&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;btnAdd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clicked&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_addRecord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#Option 2&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;QtCore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;QObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;btnOk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;QtCore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SIGNAL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_fromUtf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;clicked()&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EditDlg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;对于显示空间，QT支持对它的显示特性做CSS定制，但是在Designer里边必须指定允许扩展stylesheet，然后可以在对于的stylesheet里边设置样式；对应的编辑框里边还提供颜色选择和渐变选择等图形工具。如果需要实现动态的样式变化，则需要在代码逻辑中完成。&lt;/p&gt;
-
-&lt;h3 id=&quot;一些复杂的控件设计&quot;&gt;一些复杂的控件设计&lt;/h3&gt;
-
-&lt;h4 id=&quot;菜单和状态栏&quot;&gt;菜单和状态栏&lt;/h4&gt;
-&lt;p&gt;可以在Designer中选择是否需要菜单栏和状态栏。如果没有设置，那么在生成的代码里边调用&lt;code class=&quot;highlighter-rouge&quot;&gt;menuBar()&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;statusBar()&lt;/code&gt;这样的函数也会创建一个新的，但是对应的显示属性就必须完全自己代码设置了。&lt;/p&gt;
-
-&lt;h4 id=&quot;表格控件和数据操作&quot;&gt;表格控件和数据操作&lt;/h4&gt;
-
-&lt;p&gt;QT的表格控件可以映射到二位数组，其实现建立在它自己的模型/视图框架之上，可参考&lt;code class=&quot;highlighter-rouge&quot;&gt;QAbstractItemView&lt;/code&gt;类的文档。简单说来，是需要提供一个数据模型类,在该数据模型类里边封装底层的实际数据，并且至少实现如下方法：&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rowCount()&lt;/code&gt; 提供表格的行数&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;columnCount()&lt;/code&gt; 提供表格的列数据个数&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;headerData()&lt;/code&gt; 提供表格表头数据显示或者修改&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;以上的方法可以提供一个只读的表控件。如果需要支持可编辑表格(已经显示的数据部分)，则需要以下方法：&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;setData()&lt;/code&gt; 完成数据设置&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flags()&lt;/code&gt; 需要返回一个可编辑的标记&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;如果需要支持记录的增加/删除/修改，则需要：&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;insertRows()&lt;/code&gt; 完成实际数据的增加操作，并在开始的时候调用&lt;code class=&quot;highlighter-rouge&quot;&gt;beginInsertRows()&lt;/code&gt;,操作完毕的时候调用 &lt;code class=&quot;highlighter-rouge&quot;&gt;endInsertRows()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;removeRows()&lt;/code&gt; 完成数据的删除操作,开始操作之前调用&lt;code class=&quot;highlighter-rouge&quot;&gt;beginRemoveRows()&lt;/code&gt;,完毕之后调用&lt;code class=&quot;highlighter-rouge&quot;&gt;endRemoveRows()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;insertColumns()&lt;/code&gt; 完成列数据增加操作,数据操作需包在&lt;code class=&quot;highlighter-rouge&quot;&gt;beginInsertColumns()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;endInsertColumns()&lt;/code&gt;之间&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;removeColumns()&lt;/code&gt; 列删除，操作需要被&lt;code class=&quot;highlighter-rouge&quot;&gt;beginRemoveColumns()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;endRemoveColumns()&lt;/code&gt;之间&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;需要对表格列进行排序，则需要自己实现&lt;code class=&quot;highlighter-rouge&quot;&gt;sort()&lt;/code&gt;函数，根据传入的列编号和排序方法，对实际数据进行排序，并且在排序之前，发送&lt;code class=&quot;highlighter-rouge&quot;&gt;layoutAboutToBeChanged()&lt;/code&gt;通知信号，完成排序之后，发送&lt;code class=&quot;highlighter-rouge&quot;&gt;layoutChanged()&lt;/code&gt;信号。&lt;/p&gt;
-
-&lt;p&gt;当然也可以自己写函数完成修改操作，但是如果牵扯到记录行列的改动，则必须保证对于的&lt;code class=&quot;highlighter-rouge&quot;&gt;begin&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;end&lt;/code&gt;方法被正确调用，否则界面的数据可能无法正确刷新。&lt;/p&gt;
-
-&lt;h4 id=&quot;qmodelindex&quot;&gt;QModelIndex&lt;/h4&gt;
-
-&lt;p&gt;大部分的数据操作都携带一个Index参数，该参数负责定位对应的具体数据，并且精确定位到某一个单元格，可以用切&lt;code class=&quot;highlighter-rouge&quot;&gt;row()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;column()&lt;/code&gt;方法得到其行/列编号。也可以通过给定的行/列号构造一个Index；但是该参数并不能直接定位行数据。在跟踪用户选择的时候，选择的是一整行数据的话，返回的选择列表包含所有的单元格；如果想获取行，则需要对行号做如下变换：&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;rows&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selected&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()]))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;上述的代码利用set的特性将多余的行自动删除，并且再转换回list的时候已经是排序过的。&lt;/p&gt;
-
-&lt;h4 id=&quot;selection-model&quot;&gt;Selection Model&lt;/h4&gt;
-
-&lt;p&gt;如果想跟踪用户的选择并获取通知，则需要绑定对于的selectionModel对象的相关信号。具体的定义可参考&lt;code class=&quot;highlighter-rouge&quot;&gt;QItemSelectionModel&lt;/code&gt;的 singla/slot部分。对应的定位方法仍然是依据单元格。&lt;/p&gt;
-
-&lt;p&gt;如果对于的model数据发生变化(譬如调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;setModel()&lt;/code&gt;)，那么对于的selectionModel会发生变化。&lt;/p&gt;
-
-&lt;h2 id=&quot;如何利用qt的文档&quot;&gt;如何利用QT的文档&lt;/h2&gt;
-
-&lt;p&gt;QT的官方文档都是针对C++的，对于Python绑定并没有提供专门的文档，因此 stackoverflow 上也有很多的提问；总结起来，可以有下边几种办法 :&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;使用QT的官方文档 - 本地装一个，用浏览器打开其页面就是,很方便的展开看类结构和每个类的概要文档&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://qt-project.org/wiki/PySide_Binaries_Linux&quot;&gt;PySide网站&lt;/a&gt;的文档, 提供各个平台的安装包&lt;/li&gt;
-  &lt;li&gt;使用&lt;strong&gt;bpython&lt;/strong&gt;工具，手工导入包，然后可以看每个类方法的文档&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">PyQT是知名跨平台框架QT的python绑定；用它来做些小程序既可以利用QT的跨平台性又能利用python强大的表达能力,从而取得事半功倍的效果。下边是使用它开发一个小程序过程中的学习小笔记。</summary></entry></feed>
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">GitHub的后台发生了更新，原来的github.com换成了github.io，导致原来的octopress的Rakefile变得不能正常工作。</summary></entry></feed>

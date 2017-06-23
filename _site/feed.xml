@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2017-06-23T10:09:37+08:00</updated><id>https://skyscribe.github.io/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Welcome to Jekyll!</title><link href="https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2017-06-21T13:13:39+08:00</published><updated>2017-06-21T13:13:39+08:00</updated><id>https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/21/welcome-to-jekyll/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2016-04-19T00:50:22+08:00</published><updated>2016-04-19T00:50:22+08:00</updated><id>https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll</id><content type="html" xml:base="https://skyscribe.github.io/post/2016/04/19/welcome-to-jekyll/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://github.com/jekyll/jekyll-help&quot;&gt;Jekyll’s dedicated Help repository&lt;/a&gt;.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/14/agile-software-development-the-cooperative-game-reading-2/index.html&quot;&gt;第二部分&lt;/a&gt;。&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/18/agile-software-development-the-cooperative-game-reading-3/index.html&quot;&gt;第三部分&lt;/a&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;构建发布软件的生态系统&quot;&gt;构建发布软件的生态系统&lt;/h2&gt;
+
+&lt;p&gt;方法论的目的在于使用所有可行的手段来保证我们可以发布预期的软件，并且这样的方法是可以&lt;strong&gt;确定持续&lt;/strong&gt;进行的。方法学本身即使社交行为的创建过程。方法本身是一个关于职位描述，过程，团队中每个人需要遵守的传统的集合。&lt;/p&gt;
+
+&lt;p&gt;每一个组织都有自己的方法论，这些方法就是他们怎样做商业的方式。一种方法论可以说是你的组织同意采取的一种传统；这些过程可能在大部分公司并没有很正式的打印出来或者写下来。这种一致同意的传统需要我们不时得&lt;strong&gt;重新审视&lt;/strong&gt;，&lt;strong&gt;持续的&lt;/strong&gt;构建。&lt;/p&gt;
+
+&lt;h2 id=&quot;方法论概念&quot;&gt;方法论概念&lt;/h2&gt;
+
+&lt;p&gt;方法论是关于一些方法的固化和规则定义，其对过程的约束是它不同于方法本身的地方 - 你可以在不同的时候采用不同的方法；然而在一系列开发过程中，方法论代表着一直认可的基本规则和约定。&lt;/p&gt;
+
+&lt;p&gt;集合一群聪明人又想获得成功，我们就必须做好协调/合作和协调，离开这些手段，最聪明的人组合的团队也会变得杂乱无章，从而很难取得成功。&lt;/p&gt;
+
+&lt;h3 id=&quot;结构性术语&quot;&gt;结构性术语&lt;/h3&gt;
+
+&lt;p&gt;方法学有如下几个结构性要素&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;角色：明确的角色分工至关重要，什么样的角色需要什么样的&lt;strong&gt;职责和技能&lt;/strong&gt;等&lt;/li&gt;
+  &lt;li&gt;技能：角色需要的技能和专长&lt;/li&gt;
+  &lt;li&gt;团队：不同的情况之下工作于一起的一种集体角色&lt;/li&gt;
+  &lt;li&gt;技术：赖以完成具体工作的技术技能，关于怎样完成某种特定工作的一些知识&lt;/li&gt;
+  &lt;li&gt;活动：人们怎样完成某些特定工作的过程，譬如计划，编码，测试等&lt;/li&gt;
+  &lt;li&gt;过程：各种各样的活动如何连接在一起&lt;/li&gt;
+  &lt;li&gt;工作产品： 可以是中间过程的产出，如CRC卡或者故事卡片等&lt;/li&gt;
+  &lt;li&gt;里程碑：一些关键的时间节点，往往是关于整体进度的一个节点&lt;/li&gt;
+  &lt;li&gt;标准：关于一些工具/类库/方法的一些传统/约束等&lt;/li&gt;
+  &lt;li&gt;质量：关于活动和工作产物的质量属性&lt;/li&gt;
+  &lt;li&gt;团队价值：什么样的价值被大家普遍认可&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不同的方法论在上述的要素上有很多各不相同之处。&lt;/p&gt;
+
+&lt;p&gt;依据上述的结构性要素，常见的方法类可以划分为以下类型：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Normative方法，强调采用的步骤或者解决方案是完全遵守已有的工作记录。&lt;/li&gt;
+  &lt;li&gt;Rational方法，基于工具和方法来构建&lt;/li&gt;
+  &lt;li&gt;Participative方法，基于利益相关方和客户参与的方面&lt;/li&gt;
+  &lt;li&gt;Heuristic方法，基于已经学习得到的经验，启发式进行&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;很多情况下，随着人们经验的基积累，方法论可能沿着Heuristics的方法慢慢固化下来，慢慢演进到Normative方法；譬如在计算机编程领域，算法设计方面就达到了标准化的地步；而关于将人们放在开放的办公区还是私有的办公室的方面却没有。&lt;/p&gt;
+
+&lt;p&gt;大部分的软件开发货活动还处于&lt;strong&gt;Heuristic方法就足够适用&lt;/strong&gt;的阶段。&lt;/p&gt;
+
+&lt;h3 id=&quot;范围&quot;&gt;范围&lt;/h3&gt;
+
+&lt;p&gt;一种方法论的范围涵盖了关于它要关注的角色范围和相关的一些活动。早期的面向对象方法论被认为是设计师作为核心的角色，活动主要是讨论技术工具和描述对应标准图形的活动；然而这样的描述&lt;em&gt;不够宽泛&lt;/em&gt;的同时，又显得&lt;strong&gt;限制太多&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;方法论的范围可以被概括为如下几个方面：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;生命周期的覆盖，什么时间开始，什么时候结束&lt;/li&gt;
+  &lt;li&gt;角色覆盖，什么样的角色参与什么样的活动&lt;/li&gt;
+  &lt;li&gt;活动覆盖，什么样的活动在什么样的情况下开展&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;从这样的角度看，早起的面向对象方法仅仅局限于讨论一个很狭窄的领域，只有设计师参与，仅仅关系到项目设计阶段，从而导致经验丰富的面相对象设计师认为他们不适合参与项目的整个生命周期。从这些因素来考虑，有助于我们更好的理解怎样的方法论在怎样的场景下是更合适的。&lt;/p&gt;
+
+&lt;h3 id=&quot;概念性要素&quot;&gt;概念性要素&lt;/h3&gt;
+
+&lt;p&gt;为了更好的设计和定制方法论，我们需得考虑如下一些要素：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;方法论本身的规模大小，有多少标准，活动，质量度量物，技术描述等&lt;/li&gt;
+  &lt;li&gt;正规性，多大的精度控制和什么程度的过程控制是需要的，是否需要更严格的控制和错误容忍率&lt;/li&gt;
+  &lt;li&gt;方法论的重度，控制元素的个数，流程/活动的数目&lt;/li&gt;
+  &lt;li&gt;问题域大小，需要多少问题去解决，&lt;strong&gt;内部复杂性&lt;/strong&gt;如何&lt;/li&gt;
+  &lt;li&gt;项目本身的大小，&lt;strong&gt;多少个人&lt;/strong&gt;需要协调&lt;/li&gt;
+  &lt;li&gt;系统重要性，如果发生了错误，造成的损害如何，是仅仅&lt;strong&gt;损失钱财还是造成人命有关的灾难&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;精确度如何，譬如设计的粒度如何，高层设计到什么样的程度为好&lt;/li&gt;
+  &lt;li&gt;准确度，怎样更接近真是精确度，如何算好&lt;/li&gt;
+  &lt;li&gt;相关性，什么样的讨论是不相关的&lt;/li&gt;
+  &lt;li&gt;错误容忍度&lt;/li&gt;
+  &lt;li&gt;可见行 - 外部怎么知道某种方法论是否被很好遵循，是否需要审计等&lt;/li&gt;
+  &lt;li&gt;扩展性&lt;/li&gt;
+  &lt;li&gt;稳定性 - 多大程度上它可能发生变化&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;发布一种方法论&quot;&gt;发布一种方法论&lt;/h3&gt;
+
+&lt;p&gt;发布方法论需要发布两种组件，一时可视的&lt;strong&gt;形象化视图&lt;/strong&gt;，一是&lt;strong&gt;文本&lt;/strong&gt;本身。形象化的视图可能无法显示实践/标准和其它一些对组织很重要的协作方式描述。这些信息很难作出一个形象化的视图来呈现，这时候我们必须用文本来列出来。&lt;/p&gt;
+
+&lt;p&gt;发布出来的方法论文本需要描述技术/活动/会议/质量度量/工作角色的指责标准这样的东西。方法论的文本可能变得异常庞大，即使一个很&lt;em&gt;细微&lt;/em&gt;的方法论，譬如只有4种角色，每种角色只有4种产出，每个产出只有4个里程碑，最终也会产生出&lt;strong&gt;68=4+16+48&lt;/strong&gt;个互锁的子部分需要描述清楚。即使是以轻量级著称的XP方法论，最初只有200页那么多，现在已经达到了1000页才可以描述清楚。&lt;/p&gt;
+
+&lt;p&gt;但是很多时候，公司组织并不会将这些东西打印出来，因为&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;理解这些比文档本身重要 - Jim Highsmith&lt;/li&gt;
+  &lt;li&gt;组织的需求总是在变化的，固定下来的文本很容易过时也没有实用性&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;组织需要不断的演进既有的方法论，变更不合适的部分，在组织内部的&lt;strong&gt;不同团队之间传递好的习惯和实践&lt;/strong&gt;。有很多中方法来减少这些方法论文本的厚度:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;提供工作产出物的范本&lt;/li&gt;
+  &lt;li&gt;移除技术操作指南，让人们用更自然的方式协作&lt;/li&gt;
+  &lt;li&gt;根据角色来组织方法论文本，某种产出物按照不同的角色给出简单的描述&lt;/li&gt;
+  &lt;li&gt;做些关于流程的小实践，通过小的练习实践这些方法，然后再用于具体的工作&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;方法论设计原则&quot;&gt;方法论设计原则&lt;/h2&gt;
+
+&lt;h3 id=&quot;常见的设计错误&quot;&gt;常见的设计错误&lt;/h3&gt;
+
+&lt;h3 id=&quot;成功的方法论项目&quot;&gt;成功的方法论项目&lt;/h3&gt;
+
+&lt;h3 id=&quot;作者敏感度&quot;&gt;作者敏感度&lt;/h3&gt;
+
+&lt;h3 id=&quot;七大准则&quot;&gt;七大准则&lt;/h3&gt;
+
+&lt;h2 id=&quot;审视xp&quot;&gt;审视XP&lt;/h2&gt;
+
+&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 3</title><link href="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 3" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/">&lt;p&gt;本文是第三部分。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/14/agile-software-development-the-cooperative-game-reading-2/index.html&quot;&gt;第二部分&lt;/a&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;信息交换和流动&quot;&gt;信息交换和流动&lt;/h2&gt;
+
+&lt;p&gt;如果我们将软件开发活动看作是协作游戏，那么如果Kim知道一些Pat需要的信息，则项目的进度就取决于：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Pat需要花多少时间了解到Kim知道他想要的信息&lt;/li&gt;
+  &lt;li&gt;Pat和Kim需要耗费多少时间和其它成本来完成对于信息的交流和转移&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;各种情况的开销&quot;&gt;各种情况的开销&lt;/h3&gt;
+
+&lt;p&gt;有六种不同的情况可以考量：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Kim和Pat在同一台计算机前做结对编程，这样的交互成本几乎为零。&lt;/li&gt;
+  &lt;li&gt;Kim和Pat在相邻的位置上；Pat可以通过观察Kim知道他可能在找某些东西而他恰好知道 - 有一些发现问题的成本&lt;/li&gt;
+  &lt;li&gt;Kim和Pat坐在两个背对的位置，只有Kim主动提出问题，否则Pat不可能知道他想要某些信息&lt;/li&gt;
+  &lt;li&gt;Kim和Pat坐在一个有一堵墙隔开的相邻位置，Kim必须站起来，看看Pat是否在位置上，然后才能交互信息&lt;/li&gt;
+  &lt;li&gt;Kim和Pat坐在不同的隔间，甚至不同的楼层，kim必须走过去看看，这时候Pat可能不在位置上！&lt;/li&gt;
+  &lt;li&gt;Kim和Pat在不同的办公区或者不同的地方，他们的沟通和交互就很少能有效和及时&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;如果用需要花费的时间和精力为参考单位（ergo-seconds），那么上述不同情况的开销是递增的。项目成本的上升是和人们需要花费多少时间来理解彼此的想法是&lt;strong&gt;成正比&lt;/strong&gt;的。&lt;/p&gt;
+
+&lt;h3 id=&quot;osmotic-communication&quot;&gt;Osmotic Communication&lt;/h3&gt;
+
+&lt;p&gt;写代码/阅读/学习的同事，我们随时提取周围环境中发生的谈话，利用背景噪音的模式，选取我们关心的内容随时参与讨论，对于不关心的则过滤出去。这种方式的沟通极大的降低了信息流动的成本。办公环境的部署过于分散可能有不提问题造成的潜在时间开销，信息传输的开销和人们无法在谈话中随时给出意见的额外开销。根据此理论，赞助物理分散的分布式团队需要三思而行。然而简单将所有人扔在一起也未必像相像的那样可以很好的解决问题。&lt;/p&gt;
+
+&lt;p&gt;人们在传递什么样的信息？团队个人的习惯偏好如何？不同种类的信息是否会相互干扰？很常见的做法是，将负责实现的程序员安排在大楼的一侧，而将负责需求分析和商业策略领域专家安排在另一侧；因为他们彼此讨论的话题往往形成很强的噪音。然而这种方式也有明显的问题：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;两者之间沟通的成本变高&lt;/li&gt;
+  &lt;li&gt;两个团体可能形成自己小的社区并进而对对方进行指责和抱怨&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Cockburn的偏好是将一个商业专家安排在几个程序员的中间；如果做不到，那么通过其它的方式加强他们之间的沟通和理解，譬如定期的会议，审查等。Feature team的做法是鼓励跨只能的团队，用Feature的方式将各个领域的人聚集在一个团队，减少信息沟通的成本，加快信息的流动。&lt;/p&gt;
+
+&lt;p&gt;个人偏好也是个需要考虑的问题，譬如有的程序员就是喜欢自己安静的空间，不希望有很多的背景噪音干扰。还有些人对哪些人在自己的周围有强烈的偏好 - 如果某个高级的程序员由此选择离开，那么成本之高就变得无法接受。因此调整位置的时候，需要尽量考虑到个人的偏好。&lt;/p&gt;
+
+&lt;h3 id=&quot;信息辐射器&quot;&gt;信息辐射器&lt;/h3&gt;
+
+&lt;p&gt;信息辐射器可以显示任何一个路过的人都可以看到的关于项目的信息；这样他们就不会专门跑过来问某些上面已经有的信息。这样做的好处有两点：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;辐射器上的信息总是随着时间的变化在实时更新&lt;/li&gt;
+  &lt;li&gt;人们花费很少的精力就可以注意到这些信息&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;白板墙可以作为很好的信息辐射器，而公共的Wiki或者Web页面就不是；因为人们不用什么力气就可以随时看到墙上的东西，而web页面需要人们动鼠标打开那个网址。&lt;/p&gt;
+
+&lt;p&gt;人们可以用辐射器显示：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;下个迭代的任务分解情况&lt;/li&gt;
+  &lt;li&gt;每天的任务完成进度情况 - burndown chart等&lt;/li&gt;
+  &lt;li&gt;自动化测试通过情况和通过率&lt;/li&gt;
+  &lt;li&gt;回顾会议的输出&lt;/li&gt;
+  &lt;li&gt;验收测试通过情况&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;热空气理论应用&quot;&gt;热空气理论应用&lt;/h3&gt;
+
+&lt;p&gt;很多公司都意识到在咖啡机旁边放一些白板或者宣传栏的益处。人们可以在停下来聊天的时候注意到这些公开的信息。但是还有一个重要的地方不能漏掉的是，我们要尽量确保这些东西在视线之内，或者可以被清晰的听到。人们在讨论某些东西的时候，可以在身边随手可得的白板上写下自己的设计思路和想法，快速的和对方沟通。&lt;/p&gt;
+
+&lt;p&gt;任何一个项目团队都应该力求&lt;strong&gt;减少发现和传递信息的整体开销&lt;/strong&gt;。这意味着随时发现并加速信息的流动和交换，利用Osmotic Communication的好处，注意潜在的问题和限制，最终减少成员之间信息交换的成本，搬开座位安置不合理造成的障碍。&lt;/p&gt;
+
+&lt;h2 id=&quot;跨越沟通交流的沟壑&quot;&gt;跨越沟通交流的沟壑&lt;/h2&gt;
+
+&lt;p&gt;为了提高沟通的效率，我们需要提高信息的发送方和接受方在可能存在沟通障碍的时候能够尽最大的可能跳过这些障碍的可能性。双方应该能以最快速方便的方式提供反馈，并尽可能地&lt;strong&gt;消除&lt;/strong&gt;可能存在的希望表达的&lt;strong&gt;意识偏差&lt;/strong&gt;。人们在沟通的时候，很可能使用语言之外的其它方式来表述意图(可能是积极的但也可能是消极的负面反馈)，如&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;距离上的疏远或者靠近&lt;/li&gt;
+  &lt;li&gt;空间感觉和反应(视频聊天就在这方面缺失了空间信息)&lt;/li&gt;
+  &lt;li&gt;人身上的体味对方是否习惯或者反感&lt;/li&gt;
+  &lt;li&gt;肢体上的接触&lt;/li&gt;
+  &lt;li&gt;声音语调的变化&lt;/li&gt;
+  &lt;li&gt;肢体语言&lt;/li&gt;
+  &lt;li&gt;提问回答的热情程度&lt;/li&gt;
+  &lt;li&gt;是否有其它方面的干扰&lt;/li&gt;
+  &lt;li&gt;相互之间的信任和愿意从对方学习的情绪&lt;/li&gt;
+  &lt;li&gt;是否使用共享的信息辐射器来共享常见的信息&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;上边这些因素和机制利用得当能够极大的提高沟通的效率。反之，移除其中一些，人们就不得不用&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;电话 - 无法从物理上解除对方&lt;/li&gt;
+  &lt;li&gt;电子邮件 - 没有声音&lt;/li&gt;
+  &lt;li&gt;单向的沟通&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果这些机制都没有被很好的利用，就会出现&lt;em&gt;文档作为沟通的主要方式&lt;/em&gt;。因而好的项目领头人会推荐如下这些实践：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;将所有人丢在一个会议室里边&lt;/li&gt;
+  &lt;li&gt;保持每个团队的短小精干&lt;/li&gt;
+  &lt;li&gt;多用白板表述意图，而不是负责的绘图软件&lt;/li&gt;
+  &lt;li&gt;办公区的白板和咖啡角随处易得&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;当然这些warmmer communication方式仅仅使用于传递想法和真正沟通的时候。传统的cooler communication方式仍然在其它一些场合发挥着重要作用。如果一个高级设计人员在会议中始终占据着发言权和白板，那么系统自组织性的丧失就会很快让沟通变得更加的困难。邮件的允许人们发送之前仔细审视的特点更容易让人们澄清他们真正表述的观点 - 如果这些观点需要慎重的思考的话。&lt;/p&gt;
+
+&lt;h2 id=&quot;团队即社区&quot;&gt;团队即社区&lt;/h2&gt;
+
+&lt;p&gt;一个团队即时一个社区，每时每刻都有很多信息在流动；但是每个团队个体成员可能有不同的兴趣和目标，有自己的专长和侧重。在一个高效的团队中，成员通过&lt;strong&gt;pull&lt;/strong&gt;的方式提取自己感兴趣的信息，反馈给其它成员。人们根据&lt;strong&gt;整个团队的方向&lt;/strong&gt;来协调这些信息的讨论和流动；因此整个团队需要保持一致的方向。&lt;/p&gt;
+
+&lt;h3 id=&quot;小幅度改进&quot;&gt;小幅度改进&lt;/h3&gt;
+
+&lt;p&gt;只需要让每个人改变一个小小的方面 - 这些方面很可能对他个人而言是无足轻重的，最终也可以带来很大的整体效应；因为每个人都向着共同的目标改进一小点，所以每个人对变化的感受都是很细微的，但是因为人们对其它密切相关的同事贡献出他自己的想法，而不是各干各的，最终整个团队的效率会得到巨大的提升。&lt;/p&gt;
+
+&lt;p&gt;为了达到真个团队大方向上的一致，开发人员和项目利益相关人需要讨论和定制每个成员都需要认可的整体决策，这也同时要求很多决定必须是&lt;strong&gt;团队整体的承诺&lt;/strong&gt;而不是经理们的个人意愿。在项目发展的过程中，优先级可能发生巨大的变化或者调整，这个时候，所有人必须被重新集中起来沟通这些变化，确保所有人都知道并且同意这个变化。&lt;/p&gt;
+
+&lt;h3 id=&quot;冲突和纪律&quot;&gt;冲突和纪律&lt;/h3&gt;
+
+&lt;p&gt;团队保持紧密一致不意味着不能有冲突发生。一个团队中几乎没有冲突发生也是不正常的，因为这很可能意味着大家可能更愿意保持沉默不再说出自己的真正想法。&lt;strong&gt;当人们向团队中的其他人掩盖一些信息的时候，潜在的开支就默默地急剧上升&lt;/strong&gt;。人们需要在正常的冲突中讨论出最优的方案使得各方一致满意；这样的结果恰恰是更有利于最终问题的解决。&lt;/p&gt;
+
+&lt;p&gt;良好的社区纪律需要人们用对他人有益（当然间接对自己有益）的方式来共事。它需要成员&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;按时参加会议&lt;/li&gt;
+  &lt;li&gt;回答别人提出的问题，如果知道答案的话&lt;/li&gt;
+  &lt;li&gt;不烦于提出注意到的状况&lt;/li&gt;
+  &lt;li&gt;遵从整体的编码规范/传统&lt;/li&gt;
+  &lt;li&gt;使用一致的代码库&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;这些要求对一些编码规范不满的程序员通过协商的方式定制出共同认可的编程风格 - 虽然个人可能不认可当前的规范，但是通过协商得到&lt;em&gt;稍微看得过去的&lt;/em&gt;规范也比完全没有强。当然，这些纪律需要尽可能在正常的工作时间内实施，而不是通过&lt;strong&gt;加班&lt;/strong&gt;来延长工作时间。&lt;/p&gt;
+
+&lt;h3 id=&quot;团队建设&quot;&gt;团队建设&lt;/h3&gt;
+
+&lt;p&gt;好的团队建设最好的方式是通过一些小小的成功来实施，不管是多小或者多大的成功。混乱的大规模团队建设活动在很多情况下可能仅仅是浪费钱财。真正的团队建设可以通过&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;使团队正在凝聚在一起 - 譬如让物理上分散的团队能尽量经常见面，通过共同的工作取得一些进展，然后不时将这些人放在一些社交活动中。&lt;/li&gt;
+  &lt;li&gt;产生成绩 - 这样可以产生和传递&lt;strong&gt;正能量&lt;/strong&gt;，消除恐惧和不信任感。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;团队文化背景差异和协作&quot;&gt;团队文化背景差异和协作&lt;/h3&gt;
+
+&lt;p&gt;团队的沟通和交互需要更多的采取&lt;strong&gt;协作而非合作&lt;/strong&gt;的形式。协作意味着人们通过频繁的交互和沟通达成一致意见，而合作则意味着通过分工/各自独立工作/集成的方式来达成目标。不同的文化背景可能对这些方面有不同的假设前提，不过敏捷方法论的做法是尽可能得通过协商达成一致。&lt;/p&gt;
+
+&lt;p&gt;具有多个领域特长的专家（譬如精于项目管理和设计倾听的程序员）可以在不同的对象之间充当翻译，以便提高不同的专业人员之间的沟通效率。每一个人都需要更多的联系实践和倾听的技巧：&lt;strong&gt;不管对方的看法多么的疯狂和颠覆，先那样听，然后再决定是否要反对&lt;/strong&gt;，因为那些疯狂的论断可能在另外一个价值体系里边确实司空见惯的常识。&lt;/p&gt;
+
+&lt;h2 id=&quot;视团队为生态系统&quot;&gt;视团队为生态系统&lt;/h2&gt;
+
+&lt;p&gt;一个软件项目的建立同时也创建了一个新的生态系统，这个系统由特质各异/文化背景相左的个体组成。观察这个生同系统的要素，我们可以得到&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;办公室的墙壁成为隔离的壁垒，公共的空间提供交互场所&lt;/li&gt;
+  &lt;li&gt;特性各异的个体好比不同的物种&lt;/li&gt;
+  &lt;li&gt;每一个具有不同特性的个体的工作方式极大得影响着整个生态系统&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;每一个项目团队都是独一无二的，原则上并没有太具体的原则和实践可以误差别地施加于你的团队。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;只有团队中的人才可以决定什么样的方式在那个特定的环境中工作的更好 - 调整环境来服务你的团队&lt;/li&gt;
+  &lt;li&gt;如果团队中一些人有很好的方法学知识，他就能很好的回顾和反思他观察的并逐步改进 - 发现每个人的长处，找到一个最好的方式以便发挥各自的优势&lt;/li&gt;
+  &lt;li&gt;视每个团队的方法实践为一种&lt;strong&gt;新的建设&lt;/strong&gt;，没有一种现有的办法可以不经修改完全适用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;关键的团队自身需要通过不断的反思来自适应，逐步改进工作的方法，并逐渐找到更优的方式。&lt;/p&gt;
+
+&lt;h2 id=&quot;ken-auer的程序员办公室&quot;&gt;Ken Auer的程序员办公室&lt;/h2&gt;
+
+&lt;p&gt;这是一种典型的值得参考的办公环境：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;一个大的用于编程的房间，中间是结对编码区域，四个长桌子围成长方形，人环座四周，长的一侧的桌子允许两对人工作，短的一侧允许一对，这样可以容纳最多12个人结对&lt;/li&gt;
+  &lt;li&gt;编程办公室的四周靠墙壁的地方放置用于私人空间的编程工作 - 人们可以再这里创建私有的空间来做一些不受打扰的思考工作&lt;/li&gt;
+  &lt;li&gt;编程办公室的南边是接待室和销售人员办公室，设备和浴室也在这一块儿空间；接待室在中间相隔，实现动静分离&lt;/li&gt;
+  &lt;li&gt;编程办公室的西边是厨房和与之相隔的更远一点的会议室&lt;/li&gt;
+  &lt;li&gt;西南是图书馆和客户办公室，图书馆在中间做一个动静分隔的作用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - part2</title><link href="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - part2" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">&lt;p&gt;本文是第二部分(&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;)。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;作为个体的人&quot;&gt;作为个体的人&lt;/h2&gt;
+
+&lt;p&gt;人们常常选择性的忽略了软件开发和实际过程是由一个一个的&lt;strong&gt;个体的人&lt;/strong&gt;来完成的；然而人都有弱点，容易犯错，有固定的失败模式/成功模式，以及通用的行为模式：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;人们的行为通常是难以预测的&lt;/li&gt;
+  &lt;li&gt;人性本身有些固有的失败模式&lt;/li&gt;
+  &lt;li&gt;总有一些方式比另外一些方式更容易让人们共同工作，即使对同样一群人&lt;/li&gt;
+  &lt;li&gt;有很多模式引起失败，那么什么样的方式才能达成成功?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;人的行为模式&quot;&gt;人的行为模式&lt;/h3&gt;
+
+&lt;p&gt;人的行为总是非线性的并且比一般的物理实体复杂的多；给予双倍的奖励，或者双倍的惩罚，甚至于双倍的时间，都不能确定的提高一个人的思考速度/思考质量/编程设计输出。一个每周工作40个小时的人可能在下周工作60个小时就可以得到双倍的进展，但是接下来一周再工作60个小时，可能不仅不能维持之前双倍的效率，可能反而不及最初正常的效率，因为人们会产生疲惫。&lt;/p&gt;
+
+&lt;p&gt;人的行为会突然发生偶然的变化，某某可能突然对测试工作发生兴趣；一个偶然的小事儿可能导致一个高级工程师的离开等；某个工程师可能在一种情况下显得特别容易沟通而换了一种环境则会变得难以沟通。人们协作的方式也可能有巨大的差异，不同的文化背景可能青睐于不同的沟通方式；直接或者保守在不同的文化氛围中显得完全不同。真因为这些不可避免的差异，所以才有各种各样的技术方法被发明出来，然后，&lt;strong&gt;没有一种方法是绝对有效&lt;/strong&gt;的。这个结论是明显的，然后人们往往容易忽略之，而盲目的鼓吹某种方法是&lt;strong&gt;正确&lt;/strong&gt;的方式并且期望所有人按照这种方式来工作。&lt;/p&gt;
+
+&lt;p&gt;人的行为在很多方面表现出巨大的不同，并不意味着一些通用的方法就没有意义；还是有些东西在很大的范围内行之有效的。基于此，我们就可以在承认人与人之间巨大差异的基础上来建立大家认可的方法，但是并不能由此期望人们的具体行为会趋同或者可以严格预测。&lt;/p&gt;
+
+&lt;p&gt;有效的过程方法的意义在于：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;允许人们更容易地表述他们的想法&lt;/li&gt;
+  &lt;li&gt;可以完成一个人无法独立完成的工作&lt;/li&gt;
+  &lt;li&gt;将复杂而又繁琐的工作自动化&lt;/li&gt;
+  &lt;li&gt;使得人们的相互沟通更容易&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;失败模式&quot;&gt;失败模式&lt;/h3&gt;
+
+&lt;p&gt;有如下五种比较普遍的失败模式：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;人们总是会犯错&lt;/strong&gt; - 简单但又常常被人们忽略；敏捷和迭代开发的巨大进步意义就在于承认人总是会出错，但是通过一连串小的错误来及早暴露风险；持续不断的解决问题而不是固守详细周密的计划 - 没有错误的计划似乎只存在于真空之中&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;倾向于保守谨慎&lt;/strong&gt; 在最终结果一致的情况下，同样的问题通过不同的方式呈现出来，人们的反应却有可能大不相同。当我没可能获得比较高的潜在收益的时候，人们总是倾向于去冒险，然后在可能失去某些东西的时候，人们则会倾向于选择更保守的方式。一个有很多瀑布模式成功经验的manager（其实这些成功的经验有多大程度上算作成功就很难考量）在一个初级的工程师提出尝试迭代开发的模式的时候可能持激烈的反对态度；他可能更愿意采用传统的策略，能产生“确定“的输出而不是”可能产生更大收益“但是又”看起来奇怪“的方式&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;习惯的不一致性&lt;/strong&gt; 如果人们总能保持一致，那么就不会有减肥/锻炼的问题。问题是&lt;strong&gt;我们从来不缺少方法实践，缺少的恰恰是实践这些方法&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;倾向于发明新的东西而不是研究已有的方案&lt;/strong&gt; 大概跟人们接受的教育有关 - 鼓励原创的论文/独立完成的作业等等；而不是团队工作。很多时候人们需要更好的重用已有的成果而不是自己从头发明一切&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;自律和适当容忍的妥协&lt;/strong&gt;  强调高度的自律往往是一厢情愿，然后过度的妥协又容易导致越来越多的混乱。项目经理可能对严格要求团队遵循某个方法实践所带来的副作用感到惊讶。譬如XP实践强调结对编程和Coach，然后很多Team在实践的过程中却将重构的工作丢下不理，等待更高级的工程师去做&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;某些方式总是比其它的更好&quot;&gt;某些方式总是比其它的更好&lt;/h3&gt;
+
+&lt;p&gt;尽管人与人之间的差异是巨大的，然而总有一些方法是更有效的。人们倾向于做的更好，如果他们&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;从具体的例子开始&lt;/li&gt;
+  &lt;li&gt;从容易处理的东西开始着手&lt;/li&gt;
+  &lt;li&gt;从已有的东西入手寻找替代/优化的方式&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;还有一些方法也更容易让人们取得积极的进展：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;通过观察和学习的同时做工作&lt;/li&gt;
+  &lt;li&gt;支持精力集中的思考并同时支持积极的沟通 - 设置安静时间和公共沟通区域来加强沟通&lt;/li&gt;
+  &lt;li&gt;根据人们的长处进行任务分配&lt;/li&gt;
+  &lt;li&gt;选择最好的人才&lt;/li&gt;
+  &lt;li&gt;激励方式的选择 - 开发人员的工作激情/成就感/贡献荣誉感觉&lt;/li&gt;
+  &lt;li&gt;清晰有效的反馈 - 越及时效果越好&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;寻找成功模式&quot;&gt;寻找成功模式&lt;/h3&gt;
+
+&lt;p&gt;作者长期面试成功项目团队的经验中，如下的申明频繁的出现： &lt;strong&gt;一小部分人在关键的时间介入，作出了一切需要做的工作&lt;/strong&gt;。看起来是很随意的描述，然而更仔细的审视发现，如下的一些成功因素慢慢浮现出来:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;擅长于四处观望式的扫视 - 设计文档未必需要每一个细节都和实现保持一致，只要大致结构的一致即可。做维护工作的开发者就可以通过快速的浏览找到需要的部分，剩下的就是具体怎么做了，细节的准确意义并没有想的那么大了。文档只需要&lt;strong&gt;保持足够的精确&lt;/strong&gt;即可，能完成主要的工作，使得人们不用费很大功夫就可以找到对应的细节即可。Tech Lead仅仅需要大致看一下问题大概在什么地方并知道其它工程师去做即可，而不是处理每一个细节&lt;/li&gt;
+  &lt;li&gt;人们持续不断的学习 - 敏捷过程提出的持续改进就是这么一个思想，回顾当前迭代中那些值得改进的，持续的需西和发现不足，人们就能不断的进步。&lt;/li&gt;
+  &lt;li&gt;可以改变的韧性 - 通过团队的集体氛围来慢慢提高个体的韧性，使之适应并改变 - 当然并不是每个个人都可适应这个过程，然后他就会离开&lt;/li&gt;
+  &lt;li&gt;主动承担和贡献&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;融合这些成功的因素&quot;&gt;融合这些成功的因素&lt;/h4&gt;
+
+&lt;p&gt;是否有融合这些成功因素的方法存在？&lt;strong&gt;自组织团队&lt;/strong&gt;的想法给出了一种思路，但是实现的过程自然是充满崎岖的。需要培养这样的氛围，每个人都需要能够第一时间发现系统中的错误，不管这个人的职位和角色是什么；&lt;strong&gt;他将错误传递到能够正确纠正错误的人的成本&lt;/strong&gt;往往决定了&lt;strong&gt;整个项目的成本&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;平衡各种策略&quot;&gt;平衡各种策略&lt;/h2&gt;
+
+&lt;p&gt;很多时候看起来很好的策略并不意味着在大部分情况都是好的 - 譬如让一个Team的成员坐在一起。&lt;a href=&quot;http://pmdoi.org&quot;&gt;PMDOI&lt;/a&gt;认为，我们可以通过具体情况具体分析的策略/工具和方法来真正提高效率和可靠性。一个真正好的策略需要平衡各种足够好的基本策略，将其打包调整其中的某些不合时宜的做法。想想人们常说的，坐在一起的团队和面对面的沟通总是能达到最好的效果；但是为了达到&lt;strong&gt;真正高效的沟通&lt;/strong&gt;(因为这才是&lt;strong&gt;最高优先级的事情&lt;/strong&gt;),我们还需考虑到：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;人们有时候需要安静的思考和集中注意力的工作&lt;/li&gt;
+  &lt;li&gt;有时候需要进行一些安静的对话来交换一些深思熟虑的意见&lt;/li&gt;
+  &lt;li&gt;有时候需要放松的心态学习一些新的语言/工具等&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Osmotic Communication要求人们做的足够的近以便周围人的谈话都很容易被听清楚，这样有什么问题就可以马上作出反应；信息传递的成本几乎为零。这样一些复杂的问题可能会被周围的专家以最快的速度解决。然后Cone of Silence策略则提出了一种相反的做法：一个或者多个团队成员坐得距离其它人远远的从而可以排除沟通干扰。但是这种策略也有典型的适用场合，譬如Tech Leader本来应该用于安排解决艰难负责的问题，然而由于周围的人不断得分散其注意力，导致复杂的问题没有被解决，进度不断被延误，进而导致情况更加恶化。Cockburn认为，相互沟通的两个人的距离超过一辆公交车的长度时，沟通的效果就会急剧下降。&lt;/p&gt;
+
+&lt;p&gt;策略的平衡意味着，安排座位的时候需要考虑某些负面的影响 - 有些时候需要将人们适度分隔开来而不是聚越来越多的人在一个大的空间。当周围的噪音和干扰越来越大的时候，人们容易觉得压抑和头疼，很多重要的工作都无法正常的完成。每一种策略都有一定的限制；明智的决策什么时候&lt;strong&gt;Osmotic Communication&lt;/strong&gt;是有效的，什么时候它因为人太多而失去意义是个重要的事情。&lt;/p&gt;
+
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry><entry><title type="html">Agile software development - The cooperative game - 笔记 - part1</title><link href="https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/" rel="alternate" type="text/html" title="Agile software development - The cooperative game - 笔记 - part1" /><published>2013-08-11T09:52:00+08:00</published><updated>2013-08-11T09:52:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/">&lt;p&gt;这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;脉络&quot;&gt;脉络&lt;/h2&gt;
+
+&lt;p&gt;这本书讲述的部分很多已经超越了软件开发本身，并且也并没有特别偏颇的只讲述Agile一种方法，而是从多个角度综合衡量多种方法论的优缺点和使用场景。总体而言，这又是一本务实的书，而不是简单的对agile方法进行鼓吹和传教。&lt;/p&gt;
+
+&lt;p&gt;全书的结构可以看作三个部分（虽然作者认为是2个部分）:&lt;/p&gt;
+
+&lt;h3 id=&quot;理论&quot;&gt;理论&lt;/h3&gt;
+
+&lt;p&gt;前边一半的篇幅用于介绍各色理论 - 沟通的基础和协作，个人的影响，交互通信的方式和特点，团队以及方法学。讨厌理论的人可能会跳过这一大部分，然后我个人的看法是，这恰恰是作者最精华的所在。理论的探讨也不是简单的罗列和论证，而是引用其它人的研究成果，并结合了作者自己做管理咨询工作的经验和分析总结。每一个章节，都分为一大一小两个部分：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;前者详细的分析和论证主题，并根据实践经验加以总结和分析&lt;/li&gt;
+  &lt;li&gt;第二部分大多冠以&lt;strong&gt;evolution&lt;/strong&gt;的后缀，在前者部分基础上加以升华或者扩展。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;实践和方法学&quot;&gt;实践和方法学&lt;/h3&gt;
+
+&lt;p&gt;第二个部分主要侧重于实践，即各种各样的方法学和实践方式，主要侧重怎样做的问题和思考这些方法学可以给个人带来怎么样的启发。描述了集中方法论：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;XP&lt;/li&gt;
+  &lt;li&gt;Light and agile&lt;/li&gt;
+  &lt;li&gt;Self adapting&lt;/li&gt;
+  &lt;li&gt;Crystal family&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这些方法和常见的Scrum/XP/Clean Room方法论有些不同；其实现有的方法分支都以这些公共的理论为基础，互相学习/发展和渗透。&lt;/p&gt;
+
+&lt;h3 id=&quot;附录&quot;&gt;附录&lt;/h3&gt;
+
+&lt;p&gt;一般书籍的附录不会太长，仅仅添加一些和主旨无太大关系的说明或者索引。这本书则不属于这一类；初一看会发现书籍的附录占据了四分之一的篇幅，并且分成留个章节，只有最后一个章节是关于索引和书籍引用的常规内容。其它的部分，也遵从了前边两个大块的结构，对正文没有详细说的部分做了更深入的扩展，或引用大篇幅已经脱销的书籍文字，或者直接给出一些偏一轮的paper的大部分乃至全文来辅助全书的主线。个人感觉这部分其实可以作为一个独立的部分。&lt;/p&gt;
+
+&lt;p&gt;有趣的是，敏捷宣言的部分和敏捷联盟的成立背景也在这里做了详细的介绍 - 由此我才明白为何外界对敏捷有那么深刻的误解：这只是一个松散的联盟，参与发起的先驱们其实有着很不同的观点和方法论。这个过程的产出才是大家常见到的敏捷宣言，过程本身又呼应了作者的观点 - 这是一个关于&lt;strong&gt;协作&lt;/strong&gt;的游戏。&lt;/p&gt;
+
+&lt;h2 id=&quot;理论-1&quot;&gt;理论&lt;/h2&gt;
+
+&lt;h3 id=&quot;沟通和倾听的三个境界&quot;&gt;沟通和倾听的三个境界&lt;/h3&gt;
+
+&lt;p&gt;作者认为沟通是极其苦难的事情，甚至有些时候是那一达到的，所以才有各种各样的方法论来减少协作的难度。这个过程是有不同的阶段的，作者引用了Shua-Ha-Ri的学习理论来阐述这三个阶段：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Shu 是基础部分，需要维持基本的原则和方法，学习成熟的方法和实践，确保这些实践不被破坏；这个是基础阶段，需要有mentor或者coach指明一条正确的道路，引导大家走下去，不要偏离到错误的路上去。&lt;/li&gt;
+  &lt;li&gt;Ha 是脱离第一个阶段，适度偏离死板的教条，获得一定的自由去深入的反思和理解其中不合乎实际情况的部分。这个部分的前提是，一些基础的原则和实践被真正吸收和消化，否则就容易随意的否定和偏移，这是一个提高的阶段&lt;/li&gt;
+  &lt;li&gt;Ri 是最高的升华阶段，这个水平之上要求能超越已有的所有舒服，用实践者的方法从实际情况出发，找到最适合的方式。这一阶段任何书籍和方法仅仅是参考，需要的是原创的思想和过程&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;理想的沟通在很多时候甚至是不可能的事情，尤其是如下的情况：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;人们很容易误会口头表达的意思&lt;/li&gt;
+  &lt;li&gt;有歧义的术语或者名词常常产生误解&lt;/li&gt;
+  &lt;li&gt;喋喋不休的人可能给出的指令是让人不想仔细听下去或者真正听进去&lt;/li&gt;
+  &lt;li&gt;领域知识的差异导致信息准确性的降低&lt;/li&gt;
+  &lt;li&gt;不同的知识背景导致某些预设的关于常识的背景可能根本就不存在&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;具体到实际工作中来，就会有&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;设计文档阐述的意图很难准确和无偏差&lt;/li&gt;
+  &lt;li&gt;经验丰富的开发者很可能用简洁的语言描述设计想法&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;有鉴于此，我们可以在沟通的过程中，尽量创造&lt;strong&gt;共同的经验和背景知识&lt;/strong&gt;作为讨论的前提，并在作出具体的Action之前多确认不必要的误解。而这一切都需要更好的协作和交互。&lt;/p&gt;
+
+&lt;h3 id=&quot;软件和创造沟通游戏&quot;&gt;软件和创造/沟通游戏&lt;/h3&gt;
+
+&lt;p&gt;游戏可以按照是否有目标和是否终止分为如下三个类型：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;有限结束的，没有目标导向的，如弹钢琴，跳舞等&lt;/li&gt;
+  &lt;li&gt;有限的，但是有确定的目标，譬如网球比赛，软件开发&lt;/li&gt;
+  &lt;li&gt;无限永远不终止的，如职业生涯管理，商业组织生存&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;自然这里关于有限无限的定义，是基于一个一个具体的活动而言的，譬如职业生涯的发展，相对于一次的工作更替来说是无限继续下去的，但是对于人的生命而言又是相对有限的，当然这个是不同的范围界定了。&lt;/p&gt;
+
+&lt;p&gt;Cockburn认为最容易和软件开发活动做对比的莫过于攀岩运动，因为他们有如下的共同之处：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;注重协作和目标导向：攀岩需要登顶，还需要分工合作，软件开发也同样有清晰的商业目标（开源软件不在此列），并且强调分工协作（个人项目自然不算）&lt;/li&gt;
+  &lt;li&gt;负载均衡和分工：根据不同的需要和负载来协作分配资源和重心&lt;/li&gt;
+  &lt;li&gt;团队：需要用团队的方式来完成&lt;/li&gt;
+  &lt;li&gt;智力水平的要求：有些人永远不能完成攀岩，有些人永远没有智力和能力做软件开发工作&lt;/li&gt;
+  &lt;li&gt;技巧密集型：需要经验和技巧的积累才能更好的完成目标&lt;/li&gt;
+  &lt;li&gt;培训：各种知识和技巧需要事前的培训才可&lt;/li&gt;
+  &lt;li&gt;工具：需要用工具来提高效率，并且工具扮演了一个重要的角色&lt;/li&gt;
+  &lt;li&gt;资源受限：没有无限制的资源供分配，必须协调和均衡&lt;/li&gt;
+  &lt;li&gt;计划：必须事先指定某种粒度的计划，进行资源的分配&lt;/li&gt;
+  &lt;li&gt;不确定性/挑战：总有无法预料的情况发生，天气可能突变，突然而来的技术问题等&lt;/li&gt;
+  &lt;li&gt;乐趣：过程本身是有趣的，编程过程本身是有趣味的（至少很多程序员是因此从事这个职业）&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;尽管有很多关于软件开发和传统工程学科的比较，然而Cockburn并不认为这样的比较是恰当的，因为工程师仅仅按照设计好的计划来操作就是，后期如果除了小问题，要么推倒重来，要么小修小补；然后几十年的软件工程时间却表明，仿照这种方式来操作带来了效率的问题和维护性的噩梦。软件开发的计划很难做到和变化的环境想符，而维护的成本也高昂到甚至直接取消项目。&lt;/p&gt;
+
+&lt;p&gt;作为软件开发工程师，他们需要的是达到目标，理解问题然后找到一种方法解决面临的问题，并用合适的工具和语言实现该解决方案，并解决可能的变更和维护需要。从这个角度出发，软件开发活动是：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;资源有限的&lt;/li&gt;
+  &lt;li&gt;协作性的&lt;/li&gt;
+  &lt;li&gt;注重创造和沟通的&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;同时，软件开发活动同时要求在沟通的过程中，将发布可用的软件作为首要的目标的同时，积累一些经验可用用到下一个软件中去。软件开发团队在没有满足第一个目标之前必须优先尽可能保证当前的软件可以发布；然后做到第一个之后，对于第二个目标，必须同时考虑到资源的限制性，做到尽可能好就够 - 奢求文档永远和代码同步就是一个没有意义的目标。&lt;strong&gt;足够好&lt;/strong&gt;就是了。交互和协作才是最重要的，因为文档总为是死的，沟通则是总在变化的。&lt;/p&gt;
+
+&lt;h4 id=&quot;重构软件开发过程&quot;&gt;重构软件开发过程&lt;/h4&gt;
+
+&lt;p&gt;软件开发过程是一个通过协商来达到协作的过程，该过程通过个人的技术尝试和由各个贡献者组成的团队的协作达成专业技术上的决策。从这个意义上来说，注重交互和协作的软件开发过程和传统意义上的软件工程有很大的区别。ECN（Engineering Collaboration via Negotiation)就是通过群体的协作达成的技术决策来完成软件开发的活动。这一活动强调，最好的流程是通过共同构建的过程达成，在这个过程中，每个人都动态的参与并影响最终的决策。因为人的想法和观点总是在动态的变化，因此这一过程必然要求协作和协商的过程也是动态进行和持续不断的。&lt;/p&gt;
+
+&lt;p&gt;同时这一过程也意味着工程上的协商决策(collaborative deal-making)和共同创新(collective innovation)。协作的结果是所有参与各方的互相竞争的偏好所达成的一整的意见。这个过程必然强调双赢的产出和新的创新，这些创新都不可能由单枪匹马的冒险所达到，而是通过协商而后的一致意见转化得来。&lt;/p&gt;
+
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。</summary></entry><entry><title type="html">The productive Programmer - 笔记</title><link href="https://skyscribe.github.io/post/2013/08/06/the-productive-programmer/" rel="alternate" type="text/html" title="The productive Programmer - 笔记" /><published>2013-08-06T20:24:00+08:00</published><updated>2013-08-06T20:24:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/06/the-productive-programmer</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/06/the-productive-programmer/">&lt;p&gt;这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;不要敏捷只要消除浪费&quot;&gt;不要敏捷，只要消除浪费&lt;/h2&gt;
+
+&lt;p&gt;这句话摘自译者的序言中，简单明了的概括了这本书主要解决的问题 - 消除开发中的浪费行为，提高生产效率。作为一个程序员，你需要从什么地方来提高自己的生产率，消除浪费，并不是每个人都仔细想过这个问题；所以优秀的程序员才可以比平庸的程序员效率差异极大。当然提高效率的想法很简单，但是真正去做到实处，却是很难的，因为这需要不放过&lt;strong&gt;没有细微的地方&lt;/strong&gt;，发现浪费和降低生产率的做法，然后设法一点一滴提高。关注于每一个细节，对细节进行持续优化，通过对细节的改善来最终提高生产效率，这是个人工作方法上的敏捷，最终会取得个人工作效率上的持续提升。&lt;/p&gt;
+
+&lt;p&gt;这本书对我而言最右价值的部分是关于Windows上的效率提升建议，讲述了很多实用的工具和方法。至于Linux上的，那些关于命令行和脚本的章节，早就受惠已久了所以自然没感觉到大的思路更新。&lt;/p&gt;
+
+&lt;h2 id=&quot;启动面板和加载器&quot;&gt;启动面板和加载器&lt;/h2&gt;
+
+&lt;p&gt;Linux的Unity是这方面很好的例子，让你可以脱离鼠标仅仅通过几个快捷键转瞬之间打开常用的引用，定制什么的也比较简单。Windows就没这么好用了，或者说大部分人都没有仔细去查阅如何来用键盘来实现类似的高效率。作者推荐了如下一些方式:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;开始菜单之中创建一个启动面板，将常用的程序放进去，重命名快捷方式，使得每个程序的首字母一样，然后通过&lt;strong&gt;Windows+x&lt;/strong&gt;来启动，这里的字符就是重命名之后的程序名字的首字母&lt;/li&gt;
+  &lt;li&gt;Windows的Power tools工具集，包括Tweak UI，可以用图形方式修改注册表&lt;/li&gt;
+  &lt;li&gt;快速启动栏的程序，可以通过&lt;strong&gt;Windows+1&lt;/strong&gt;的方式启动程序，不过最多可以启动10个&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;地址栏加速&quot;&gt;地址栏加速&lt;/h3&gt;
+
+&lt;p&gt;地址栏可以在当前路径的后边，输入一部份然后利用&lt;strong&gt;Tab&lt;/strong&gt;来补全剩余的；这个在当前目录里边有很多文件的时候尤其有用，可以减少很多鼠标点击和肉眼扫描。&lt;/p&gt;
+
+&lt;h3 id=&quot;命令行提示符&quot;&gt;命令行提示符&lt;/h3&gt;
+
+&lt;p&gt;可以在当前目录打开命令行，只需要安装&lt;strong&gt;Command Prompt Explorer Bar&lt;/strong&gt;这个开源工具，就可以用&lt;strong&gt;Ctrl-M&lt;/strong&gt;打开一个附着于资源管理器底部的命令提示符。当上边的资源管理器目录发生变化之后，底下的命令提示符目录也随之发生变化。&lt;/p&gt;
+
+&lt;p&gt;Windows PowerToys的系列工具之一可以再右键菜单上加入“当前目录打开命令提示符”的子菜单，这样就可以简单的在当前目录打开一个命令窗口。&lt;/p&gt;
+
+&lt;h3 id=&quot;键盘宏工具&quot;&gt;键盘宏工具&lt;/h3&gt;
+
+&lt;p&gt;用宏来录制常用的键盘操作组合是个很好的做法，可以看看Windows流行的&lt;strong&gt;AutoHotKey&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;专注&quot;&gt;专注&lt;/h2&gt;
+
+&lt;p&gt;下边的策略可以有效的排除干扰，专注于当前的工作：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;隔离策略，关闭不必要的提醒/邮件/手机等&lt;/li&gt;
+  &lt;li&gt;关闭操作系统的气泡提示&lt;/li&gt;
+  &lt;li&gt;为团队规定一段安静时间，除非特殊情况，任何人不要干扰&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;windows的有根视图&quot;&gt;Windows的有根视图&lt;/h3&gt;
+
+&lt;p&gt;就是一种以某个子目录为文件结构根目录的做法；从中可以看到这个子目录的内容，但是不需要关心其它目录的内容。可以用如下的方式打开有根视图:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;explorer /e,/root,c:&lt;span class=&quot;se&quot;&gt;\w&lt;/span&gt;ork&lt;span class=&quot;se&quot;&gt;\c&lt;/span&gt;it
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这种方式只在打开的资源浏览器里边有效。另外一种办法是，在WIN7中为常用的目录创建Library。&lt;/p&gt;
+
+&lt;h3 id=&quot;使用虚拟桌面切分窗口&quot;&gt;使用虚拟桌面切分窗口&lt;/h3&gt;
+
+&lt;p&gt;可以使用Windows PowerToys里边的Virtual Desktop Manager打开多个桌面。每个桌面会有自己的快速启动栏，热键；并且可以同时打开所有桌面。这个是从Unix那边借鉴过来的特性，也没太多可说。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。</summary></entry><entry><title type="html">Pragmatic Programmer再读</title><link href="https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du/" rel="alternate" type="text/html" title="Pragmatic Programmer再读" /><published>2013-08-05T21:18:00+08:00</published><updated>2013-08-05T21:18:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du/">&lt;p&gt;这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;再读机缘&quot;&gt;再读机缘&lt;/h2&gt;
+
+&lt;p&gt;初次接触到这本大作是在2008年初；当时刚刚开阔自己封闭的眼界，读到很多人的推荐都将此书列为必读的经典，于是兴冲冲的去图书馆借了过来读。草草读完心中大为触动，什么是优秀的程序员，为什么顶尖的程序员和初级程序员的生产效率相差数倍乃至更多，这本书给出了深刻的答案；虽然没有具体的技术，但是一个条目一个条目的建议和提示，辅以思考分析，当时便暗下决心要照着其中的条例去做，做到自己的极致。加上当时另外一本奇书 «Unix 编程艺术» 也进入了我的视野，使我彻底陷入了Unix的程序世界；两本书中的相似的哲学观点深刻的整塑着我的编程价值观。&lt;/p&gt;
+
+&lt;p&gt;一晃然又是五年过去了；当时的菜鸟已经慢慢成长为一个老油条；这期间总是努力迫使自己向着其中的条目去努力和进步；但是感觉上却没有太多新的东西让自己觉得太震撼了,至少是具体到编程技术上的，也许是我自己已经将这本书的原则实践的很不错了？&lt;/p&gt;
+
+&lt;p&gt;刚好前几天又到图书馆借书，没有找到满意的图书，却于不经意见看到了 «编程原本»和这本书，于是便背了回来，权当一次重新检视自己的标杆吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;感悟&quot;&gt;感悟&lt;/h2&gt;
+
+&lt;p&gt;重新翻了一遍，当初的震撼感几乎消失殆尽了，因为书里边讲述的很多信条已经在我的大脑中成为编程习惯的一部分了，只是某些方面还没有尽力将其发挥的更远 - 也许这就是开始基础不高的时候进步总是很容易的，一旦达到一定的高度再想更进一步就难上加难了。&lt;/p&gt;
+
+&lt;p&gt;这里再挑几点最深的感悟：&lt;/p&gt;
+
+&lt;h3 id=&quot;dry-原则&quot;&gt;DRY 原则&lt;/h3&gt;
+
+&lt;p&gt;这个原则是如此的深入人心，以至于很多设计模式和讲述重构的书都会反反复复的阐释，并且提出各自的实践。不重复自己，意味着如果某些事情中有很多重复，并且是人工维护的，就很容易出错并慢慢变得越来越难以维护。久而久之代码就会慢慢失去活力，腐败并产生Smelly,可以说这一原则是其它所有重要的原则的基础。尽量避免重复，就自然的避免拷贝/粘帖，逼迫自己用无重复的方式去改进实现，优雅的设计自然就慢慢演变出来。没有一个优秀的设计是充满重复的。如果有，那么也是计算机来重复执行，譬如写一个生成器一样的东西。&lt;/p&gt;
+
+&lt;h3 id=&quot;自动化手工操作&quot;&gt;自动化手工操作&lt;/h3&gt;
+
+&lt;p&gt;这个其实是更深层次的DRY应用 - 如果发现总是重复的跑一些命令或者操作一些步骤，那么就尽量的将其自动化。自己写脚本也好，寻找更有些的工具也好，一旦将其自动化，这些繁琐的东西就不会再浪费你太多的精力，这样你就可以花更少的时间来做更多的工作；将浪费的时间用来做重要的事情，自然效率大大增加。寻找自动化工具的努力什么时候都不会太浪费。手工的操作速度再快，绝大部分情况也赶不上计算机那么准确和快速。&lt;/p&gt;
+
+&lt;h3 id=&quot;命令行工具&quot;&gt;命令行工具&lt;/h3&gt;
+
+&lt;p&gt;Bash的威力是巨大的，当然只有比较深度的Linux用户才能理解的更透彻。各种丰富的小工具和基于管道的组合可以产生巨大的威力，即使面临更先进的python/ruby这些新潮语言的挑战，很多时候原始的grep/awk/sed组合也有超强的优势 - 尤其当效率是个重要因素的时候。根源嘛，这些程序可是用纯C写的，而且诞生于资源紧张的年代，每一片代码都经过经心的调整以保证最佳效率。我们现在已经不这么写应用程序了，但是这些已有的强大的小工具，用好还是可以令人效率急速飙升的。&lt;/p&gt;
+
+&lt;h3 id=&quot;学习多种编程语言&quot;&gt;学习多种编程语言&lt;/h3&gt;
+
+&lt;p&gt;编程语言是程序员思考的工具，遗憾的是每种编程语言都有很多的边界。这些边界也在潜意识中阻碍了程序员的视野，使得很多时候难以发现最合适的方案和最优雅的做法。打破这一障碍的方法就是经常学习新的编程语言，尤其是思路不同的程序语言，对你的世界观影响更大。每个优秀的程序员，个人认为至少应该掌握几种编程范式的语言中的一种：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;过程式&lt;/li&gt;
+  &lt;li&gt;面向对象&lt;/li&gt;
+  &lt;li&gt;声明式&lt;/li&gt;
+  &lt;li&gt;函数式&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;当然更新的语言往往集成了更多的语言特性；而且在运用前边的原则的时候，有时候为了拿到顺手的工具就不可避免要学习新的编程语言。有实际需求驱动的语言学习往往能取得更好的效果，比如之前我为了做个效率更高的日志分析统计工具，专门花了一段时间学习gawk的手册，写了几百行代码之后，这些经验就在我的脑子中累计屏在日后发挥了很多的作用。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。</summary></entry><entry><title type="html">Github pages upgrade</title><link href="https://skyscribe.github.io/post/2013/08/04/github-pages-upgrade/" rel="alternate" type="text/html" title="Github pages upgrade" /><published>2013-08-04T23:07:00+08:00</published><updated>2013-08-04T23:07:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/04/github-pages-upgrade</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/04/github-pages-upgrade/">&lt;p&gt;GitHub的后台发生了更新，原来的&lt;strong&gt;github.com&lt;/strong&gt;换成了&lt;strong&gt;github.io&lt;/strong&gt;，导致原来的&lt;strong&gt;octopress&lt;/strong&gt;的Rakefile变得不能正常工作。
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;octopress升级的问题&quot;&gt;Octopress升级的问题&lt;/h2&gt;
+
+&lt;p&gt;只需要按照常规的步骤，用git更新其upstream即可。问题在于更新之后，scss可能不工作了，导致打开后看到的主页显示不正常。&lt;/p&gt;
+
+&lt;p&gt;Google之，解决方法如下：&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;rake update_style
+rake clean
+rake generate
+rake deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;github升级&quot;&gt;Github升级&lt;/h2&gt;
+
+&lt;p&gt;有两个比较大的变化，文档并不是那么容易看清楚：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;存放页面的repository必须变为 &lt;strong&gt;username.github.io&lt;/strong&gt;,原来的则是 &lt;strong&gt;username.github.com&lt;/strong&gt;，可以到&lt;strong&gt;settings&lt;/strong&gt;里边，做rename操作。&lt;/li&gt;
+  &lt;li&gt;默认显示的页面来自于&lt;strong&gt;master&lt;/strong&gt;,之前则是来自于&lt;strong&gt;gh-pages&lt;/strong&gt; 修改Rakefile即可。&lt;/li&gt;
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">GitHub的后台发生了更新，原来的github.com换成了github.io，导致原来的octopress的Rakefile变得不能正常工作。</summary></entry><entry><title type="html">PyQt学习小笔记</title><link href="https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji/" rel="alternate" type="text/html" title="PyQt学习小笔记" /><published>2013-02-24T09:39:00+08:00</published><updated>2013-02-24T09:39:00+08:00</updated><id>https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/02/24/pyqtxue-xi-xiao-bi-ji/">&lt;p&gt;PyQT是知名跨平台框架QT的python绑定；用它来做些小程序既可以利用QT的跨平台性又能利用python强大的表达能力,从而取得事半功倍的效果。下边是使用它开发一个小程序过程中的学习小笔记。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;ui界面设计&quot;&gt;UI界面设计&lt;/h2&gt;
+
+&lt;h3 id=&quot;qt-designer&quot;&gt;QT Designer&lt;/h3&gt;
+
+&lt;p&gt;使用过VC做过MFC开发的，对&lt;strong&gt;所见即所得(WYSIWYG)&lt;/strong&gt;的工具不会陌生，QT Designer就是类似的一个。其设计就是将代码和UI空间分开，控件布局和对象名称都可以在里边设置，每个空间都有对应的属性表，可以针对很多控件属性做默认定制。最后生成对应的python代码。&lt;/p&gt;
+
+&lt;h3 id=&quot;生成代码&quot;&gt;生成代码&lt;/h3&gt;
+
+&lt;p&gt;生成的代码主要集中于控件显示的部分，事件处理的部分虽然也可以产生，但是仅适用于自定义子类的对象，因为在slot里边没法很方便的为已有的某个UI对象添加新的方法，只能靠子类化的办法来修改类的预定义slot，远不如在代码中自己写来的快捷方便。&lt;/p&gt;
+
+&lt;p&gt;每个界面的设计最终会生成一个&lt;strong&gt;.ui&lt;/strong&gt;后缀的XML文件，使用如下的Makefile规则可以做方便的转换：&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;%.py : %.ui
+    pyuic4 &lt;span class=&quot;nv&quot;&gt;$^&lt;/span&gt; &amp;gt; &lt;span class=&quot;nv&quot;&gt;$@&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;尽量少混杂动态控制逻辑到ui设计中&quot;&gt;尽量少混杂动态控制逻辑到UI设计中&lt;/h3&gt;
+
+&lt;p&gt;对于某些需要多步骤协作完成某个特性的控件，在Designer里边修改一部分属性，然后再在代码中完成另一部分是不方便的。譬如设计一个弹出的对话框，如果想设置它为&lt;code class=&quot;highlighter-rouge&quot;&gt;Modal&lt;/code&gt;的，那么最好还是在代码里边，在创建的时候设置要来得方便和清晰的多；否则除了问题，排查起来就比较麻烦。&lt;/p&gt;
+
+&lt;h2 id=&quot;逻辑实现和控制&quot;&gt;逻辑实现和控制&lt;/h2&gt;
+
+&lt;h3 id=&quot;简单控件和逻辑事件&quot;&gt;简单控件和逻辑事件&lt;/h3&gt;
+
+&lt;p&gt;简单的控件使用，有过MFC开发经验的自然容易照搬来做，基本都很像。唯一有些不同的是，在python里边，绑定事件处理的方式灵活了很多，不但可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;QObject&lt;/code&gt;类的&lt;code class=&quot;highlighter-rouge&quot;&gt;connect&lt;/code&gt;方法来做，也可以直接在signal对象上来直接绑，而且绑定的参数可以是任何的&lt;code class=&quot;highlighter-rouge&quot;&gt;callable&lt;/code&gt;，譬如：&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#Option 1&lt;/span&gt;
+&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ui&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;btnAdd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clicked&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_addRecord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#Option 2&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;QtCore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;QObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;btnOk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;QtCore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SIGNAL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_fromUtf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;clicked()&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EditDlg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;对于显示空间，QT支持对它的显示特性做CSS定制，但是在Designer里边必须指定允许扩展stylesheet，然后可以在对于的stylesheet里边设置样式；对应的编辑框里边还提供颜色选择和渐变选择等图形工具。如果需要实现动态的样式变化，则需要在代码逻辑中完成。&lt;/p&gt;
+
+&lt;h3 id=&quot;一些复杂的控件设计&quot;&gt;一些复杂的控件设计&lt;/h3&gt;
+
+&lt;h4 id=&quot;菜单和状态栏&quot;&gt;菜单和状态栏&lt;/h4&gt;
+&lt;p&gt;可以在Designer中选择是否需要菜单栏和状态栏。如果没有设置，那么在生成的代码里边调用&lt;code class=&quot;highlighter-rouge&quot;&gt;menuBar()&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;statusBar()&lt;/code&gt;这样的函数也会创建一个新的，但是对应的显示属性就必须完全自己代码设置了。&lt;/p&gt;
+
+&lt;h4 id=&quot;表格控件和数据操作&quot;&gt;表格控件和数据操作&lt;/h4&gt;
+
+&lt;p&gt;QT的表格控件可以映射到二位数组，其实现建立在它自己的模型/视图框架之上，可参考&lt;code class=&quot;highlighter-rouge&quot;&gt;QAbstractItemView&lt;/code&gt;类的文档。简单说来，是需要提供一个数据模型类,在该数据模型类里边封装底层的实际数据，并且至少实现如下方法：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rowCount()&lt;/code&gt; 提供表格的行数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;columnCount()&lt;/code&gt; 提供表格的列数据个数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;headerData()&lt;/code&gt; 提供表格表头数据显示或者修改&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;以上的方法可以提供一个只读的表控件。如果需要支持可编辑表格(已经显示的数据部分)，则需要以下方法：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;setData()&lt;/code&gt; 完成数据设置&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flags()&lt;/code&gt; 需要返回一个可编辑的标记&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;如果需要支持记录的增加/删除/修改，则需要：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;insertRows()&lt;/code&gt; 完成实际数据的增加操作，并在开始的时候调用&lt;code class=&quot;highlighter-rouge&quot;&gt;beginInsertRows()&lt;/code&gt;,操作完毕的时候调用 &lt;code class=&quot;highlighter-rouge&quot;&gt;endInsertRows()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;removeRows()&lt;/code&gt; 完成数据的删除操作,开始操作之前调用&lt;code class=&quot;highlighter-rouge&quot;&gt;beginRemoveRows()&lt;/code&gt;,完毕之后调用&lt;code class=&quot;highlighter-rouge&quot;&gt;endRemoveRows()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;insertColumns()&lt;/code&gt; 完成列数据增加操作,数据操作需包在&lt;code class=&quot;highlighter-rouge&quot;&gt;beginInsertColumns()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;endInsertColumns()&lt;/code&gt;之间&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;removeColumns()&lt;/code&gt; 列删除，操作需要被&lt;code class=&quot;highlighter-rouge&quot;&gt;beginRemoveColumns()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;endRemoveColumns()&lt;/code&gt;之间&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;需要对表格列进行排序，则需要自己实现&lt;code class=&quot;highlighter-rouge&quot;&gt;sort()&lt;/code&gt;函数，根据传入的列编号和排序方法，对实际数据进行排序，并且在排序之前，发送&lt;code class=&quot;highlighter-rouge&quot;&gt;layoutAboutToBeChanged()&lt;/code&gt;通知信号，完成排序之后，发送&lt;code class=&quot;highlighter-rouge&quot;&gt;layoutChanged()&lt;/code&gt;信号。&lt;/p&gt;
+
+&lt;p&gt;当然也可以自己写函数完成修改操作，但是如果牵扯到记录行列的改动，则必须保证对于的&lt;code class=&quot;highlighter-rouge&quot;&gt;begin&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;end&lt;/code&gt;方法被正确调用，否则界面的数据可能无法正确刷新。&lt;/p&gt;
+
+&lt;h4 id=&quot;qmodelindex&quot;&gt;QModelIndex&lt;/h4&gt;
+
+&lt;p&gt;大部分的数据操作都携带一个Index参数，该参数负责定位对应的具体数据，并且精确定位到某一个单元格，可以用切&lt;code class=&quot;highlighter-rouge&quot;&gt;row()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;column()&lt;/code&gt;方法得到其行/列编号。也可以通过给定的行/列号构造一个Index；但是该参数并不能直接定位行数据。在跟踪用户选择的时候，选择的是一整行数据的话，返回的选择列表包含所有的单元格；如果想获取行，则需要对行号做如下变换：&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;rows&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;selected&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;上述的代码利用set的特性将多余的行自动删除，并且再转换回list的时候已经是排序过的。&lt;/p&gt;
+
+&lt;h4 id=&quot;selection-model&quot;&gt;Selection Model&lt;/h4&gt;
+
+&lt;p&gt;如果想跟踪用户的选择并获取通知，则需要绑定对于的selectionModel对象的相关信号。具体的定义可参考&lt;code class=&quot;highlighter-rouge&quot;&gt;QItemSelectionModel&lt;/code&gt;的 singla/slot部分。对应的定位方法仍然是依据单元格。&lt;/p&gt;
+
+&lt;p&gt;如果对于的model数据发生变化(譬如调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;setModel()&lt;/code&gt;)，那么对于的selectionModel会发生变化。&lt;/p&gt;
+
+&lt;h2 id=&quot;如何利用qt的文档&quot;&gt;如何利用QT的文档&lt;/h2&gt;
+
+&lt;p&gt;QT的官方文档都是针对C++的，对于Python绑定并没有提供专门的文档，因此 stackoverflow 上也有很多的提问；总结起来，可以有下边几种办法 :&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用QT的官方文档 - 本地装一个，用浏览器打开其页面就是,很方便的展开看类结构和每个类的概要文档&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://qt-project.org/wiki/PySide_Binaries_Linux&quot;&gt;PySide网站&lt;/a&gt;的文档, 提供各个平台的安装包&lt;/li&gt;
+  &lt;li&gt;使用&lt;strong&gt;bpython&lt;/strong&gt;工具，手工导入包，然后可以看每个类方法的文档&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">PyQT是知名跨平台框架QT的python绑定；用它来做些小程序既可以利用QT的跨平台性又能利用python强大的表达能力,从而取得事半功倍的效果。下边是使用它开发一个小程序过程中的学习小笔记。</summary></entry></feed>
