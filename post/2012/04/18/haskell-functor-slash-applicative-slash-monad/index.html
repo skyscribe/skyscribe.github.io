@@ -1,0 +1,979 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Haskell Functor/Applicative Functor - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Haskell中存在三种层次的函数过程抽象，依据约束的多少分别有 Functor， Applicative 和 Monad。Functor是一种最基本的调用提升，通过fmap可以将传入参数函数作用于所wrapper的type；而Applicative和Monad则定义了更多的运算符和原子函数等。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Haskell Functor/Applicative Functor">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/">
+
+
+
+  <meta property="og:description" content="Haskell中存在三种层次的函数过程抽象，依据约束的多少分别有 Functor， Applicative 和 Monad。Functor是一种最基本的调用提升，通过fmap可以将传入参数函数作用于所wrapper的type；而Applicative和Monad则定义了更多的运算符和原子函数等。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Haskell Functor/Applicative Functor">
+  <meta name="twitter:description" content="Haskell中存在三种层次的函数过程抽象，依据约束的多少分别有 Functor， Applicative 和 Monad。Functor是一种最基本的调用提升，通过fmap可以将传入参数函数作用于所wrapper的type；而Applicative和Monad则定义了更多的运算符和原子函数等。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2012-04-18T20:19:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        An curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/tags/index.html">All Tags</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/wireshark/index.html">wireshark(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/tools/index.html">tools(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/tips/index.html">tips(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/linux/index.html">linux(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/cmake/index.html">cmake(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/build/index.html">build(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/cpp/index.html">cpp(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/boost/index.html">boost(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/awk/index.html">awk(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/programming/index.html">programming(3)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/gawk/index.html">gawk(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/unix/index.html">UNIX(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/study/index.html">study(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/ruby/index.html">ruby(3)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/hello/index.html">hello(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/octopress/index.html">octopress(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/minutes/index.html">minutes(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/languages/index.html">languages(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/markdown/index.html">markdown(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/yaml/index.html">yaml(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/中文/index.html">中文(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/unicode/index.html">unicode(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/language/index.html">language(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/snmp/index.html">snmp(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/tags/debug/index.html">debug(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Haskell Functor/Applicative Functor">
+    <meta itemprop="description" content="Haskell中存在三种层次的函数过程抽象，依据约束的多少分别有 Functor， Applicative 和 Monad。Functor是一种最基本的调用提升，通过fmap可以将传入参数函数作用于所wrapper的type；而Applicative和Monad则定义了更多的运算符和原子函数等。">
+    <meta itemprop="datePublished" content="April 18, 2012">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Haskell Functor/Applicative Functor
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  9 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>Haskell中存在三种层次的函数过程抽象，依据约束的多少分别有 Functor， Applicative 和 Monad。Functor是一种最基本的调用提升，通过<code class="highlighter-rouge">fmap</code>可以将传入参数函数作用于所wrapper的type；而Applicative和Monad则定义了更多的运算符和原子函数等。</p>
+
+<!--more-->
+
+<h2 id="functor">Functor</h2>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">fmap</span> <span class="o">::</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+</code></pre>
+</div>
+
+<p>Functor定义为一个Typecalss，其定义了一个fmap函数，对于对应的Type instance，a/b为构造函数参数变量，fmap将type变量中的a通过参数函数映射为变量b，并进而生成一个新的ADT变量。</p>
+
+<p>假设 <code class="highlighter-rouge">g :: ( a -&gt; b)</code>,那么 <code class="highlighter-rouge">fmap g (f a) = f (g a) = f b</code>。</p>
+
+<p>GHC自带的很多基本<strong>ADT</strong>满足Functor的要求，即他们自身是Functor的实例，包括Maybe, list([]), IO Monad, Either等。</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">fmap</span> <span class="o">::</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+<span class="n">fmap</span> <span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="kt">Just</span> <span class="mi">1</span><span class="p">)</span> 
+<span class="c1">-- Just 2, type = Maybe, constructor = Just</span>
+<span class="n">fmap</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="c1">-- [2,4,6,8], type = []</span>
+<span class="n">fmap</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="kt">Left</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1">-- Left 4, type = Either, constructor = Left</span>
+<span class="n">fmap</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="kt">Right</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1">-- Right 4, type = Either, constructor = Right </span>
+<span class="n">fmap</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1">-- (1,4), type = ((,) a)</span>
+</code></pre>
+</div>
+
+<h3 id="functor-定律">Functor 定律</h3>
+
+<p>fmap需要满足以下约束条件：</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>fmap id = id
+fmap (f . g)  = fmap f . fmap g 
+</code></pre>
+</div>
+
+<p>不满足以上定律的ADT，如果声明了满足Functor，用fmap方式操作的时候可能产生错误的行为。</p>
+
+<h3 id="fmap-的局限性">fmap 的局限性</h3>
+
+<p>在Haskell中，所有的函数都可以视为只带一个参数，其余的参数可以通过 <strong>currying</strong> 来视为以第一个参数为参数，返回以其它剩余参数为参数的一个函数，即 <code class="highlighter-rouge">a -&gt; b -&gt; c</code> 也可看作一个以 <code class="highlighter-rouge">a</code> 为参数返回一个 ` b -&gt; c `的函数的函数。考虑如下的例子：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="kr">let</span> <span class="n">a</span> <span class="o">=</span> <span class="n">fmap</span> <span class="p">(</span><span class="o">^</span><span class="p">)</span> <span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">a</span>
+<span class="n">a</span> <span class="o">::</span> <span class="p">[</span><span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span><span class="p">]</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="n">fmap</span> <span class="p">(</span><span class="nf">\</span><span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="mi">2</span><span class="p">)</span> <span class="n">a</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">36</span><span class="p">,</span><span class="mi">49</span><span class="p">,</span><span class="mi">64</span><span class="p">,</span><span class="mi">81</span><span class="p">,</span><span class="mi">100</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>因为传入fmap的函数参数为: <code class="highlighter-rouge">(^) :: (Num a, Integral b) =&gt; a -&gt; b -&gt; a</code>, 数据类型为 <code class="highlighter-rouge">list</code>, 于是，fmap的结果则是一个list类型，其中的元素参数为一个函数。对于这个list再次调用<strong>fmap</strong>, 那么对应的函数就是一个基于函数的函数 (<strong>lambda</strong>描述为 <code class="highlighter-rouge">\f -&gt; f 2</code>), 结果就是将对应的lambda 函数作用于list中的每一个函数，生成最终的list 数据。这里的2次fmap调用得到的结果始终是一个list, 只不过每次的list具体数据类型有所不同。</p>
+
+<p>如果想将<code class="highlighter-rouge">fmap</code>作用于一个不同类型的ADT数据 (Context)，那么编译器机会报错：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="n">fmap</span> <span class="kt">Just</span> <span class="p">(</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span> <span class="kt">Just</span> <span class="mi">5</span>
+
+<span class="o">&lt;</span><span class="n">interactive</span><span class="o">&gt;:</span><span class="mi">1</span><span class="o">:</span><span class="mi">6</span><span class="o">:</span>
+    <span class="kt">Couldn't</span> <span class="n">match</span> <span class="n">expected</span> <span class="kr">type</span> <span class="p">`</span><span class="n">t1</span> <span class="o">-&gt;</span> <span class="n">t0'</span> <span class="n">with</span> <span class="n">actual</span> <span class="kr">type</span> <span class="p">`</span><span class="kt">Maybe</span> <span class="n">a0'</span>
+    <span class="kt">Expected</span> <span class="kr">type</span><span class="o">:</span> <span class="n">a0</span> <span class="o">-&gt;</span> <span class="n">t1</span> <span class="o">-&gt;</span> <span class="n">t0</span>
+      <span class="kt">Actual</span> <span class="kr">type</span><span class="o">:</span> <span class="n">a0</span> <span class="o">-&gt;</span> <span class="kt">Maybe</span> <span class="n">a0</span>
+    <span class="kt">In</span> <span class="n">the</span> <span class="n">first</span> <span class="n">argument</span> <span class="kr">of</span> <span class="p">`</span><span class="n">fmap'</span><span class="p">,</span> <span class="n">namely</span> <span class="p">`</span><span class="kt">Just'</span>
+    <span class="kt">In</span> <span class="n">the</span> <span class="n">expression</span><span class="o">:</span> <span class="n">fmap</span> <span class="kt">Just</span> <span class="p">(</span><span class="o">^</span> <span class="mi">2</span><span class="p">)</span> <span class="kt">Just</span> <span class="mi">5</span>
+</code></pre>
+</div>
+<p>而Applicativeze则可以很好的解决这个难题。</p>
+
+<h2 id="applicative">Applicative</h2>
+
+<p>Applicative定义于<code class="highlighter-rouge">Control.Applicative</code>模块中，其自身定义于Functor之上（即对应的ADT首先应该满足Functor要求）,并且定义了更多的操作函数：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="kr">where</span>
+    <span class="n">pure</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span>
+    <span class="p">(</span><span class="o">&lt;*&gt;</span><span class="p">)</span> <span class="o">::</span> <span class="n">f</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+    <span class="p">(</span><span class="o">*&gt;</span><span class="p">)</span> <span class="o">::</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+    <span class="p">(</span><span class="o">&lt;*</span><span class="p">)</span> <span class="o">::</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span>
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">pure</code>比较简单，将ADT的构造函数变量a直接作用于Functor本身的构造函数<code class="highlighter-rouge">f</code>，返回具体的ADT变量<code class="highlighter-rouge">f a</code>.</p>
+
+<p><code class="highlighter-rouge">&lt;*&gt;</code>函数就是具体的applicative函数，其类型可以做如下简化：假设<code class="highlighter-rouge">g :: (a -&gt; b)</code>, 则 <code class="highlighter-rouge">f g &lt;*&gt; (f a) = f ( g a) = f b</code>。<code class="highlighter-rouge">&lt;*</code>和 <code class="highlighter-rouge">*&gt;</code>则不需要对应的函数作用，仅仅返回左边或者右边的ADT变量。下边是一些具体的例子：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span> 
+<span class="c1">-- Just 6 : Just (2 * 3)</span>
+<span class="n">pure</span> <span class="p">(</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span>
+<span class="c1">-- Just 6, equals to previous example</span>
+<span class="n">pure</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">3</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">5</span>
+<span class="c1">-- Just 7</span>
+</code></pre>
+</div>
+
+<p>上述最后一个例子中，Haskell的currying特性得以应用，对于带有多个参数的函数，可以认为它只带一个参数，其它的可以根据一次传入的参数类型来替换，即:</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="o">:</span><span class="kr">type</span> <span class="n">pure</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span>
+<span class="c1">-- (Applicative f, Num a) =&gt; f (a-&gt; a -&gt; a)</span>
+<span class="o">:</span><span class="kr">type</span> <span class="p">(</span><span class="n">pure</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">&lt;*&gt;</span><span class="p">)</span>
+<span class="c1">-- (Applicative f, Num a) =&gt; f a -&gt;  f (a -&gt; a)</span>
+<span class="o">:</span><span class="kr">type</span> <span class="p">(</span><span class="n">pure</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">3</span><span class="p">)</span>
+<span class="c1">-- (Applicative f, Num a) =&gt; Maybe (a -&gt; a)</span>
+<span class="o">:</span><span class="kr">type</span> <span class="p">(</span><span class="n">pure</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">3</span> <span class="o">&lt;*&gt;</span><span class="p">)</span>
+<span class="c1">-- (Applicative f, Num a) =&gt; Maybe b -&gt; Maybe b</span>
+</code></pre>
+</div>
+
+<p>对于对个参数的情况，Applicative可以通过<code class="highlighter-rouge">&lt;*&gt;</code>来依次传入对应的参数，并应用于对应的变换函数，最后将得到的结果用Functor的构造生成新的ADT变量。从上边的例子其实可以得出，<code class="highlighter-rouge">pure f &lt;*&gt; x = fmap f x</code>;因此Applicative定义了<code class="highlighter-rouge">&lt;$&gt;</code>来简化书写，即最后一个例子等价于</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">&lt;$&gt;</span> <span class="kt">Just</span> <span class="mi">3</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">4</span>
+</code></pre>
+</div>
+
+<h3 id="-和--及-const"><code class="highlighter-rouge">&lt;*</code> 和 <code class="highlighter-rouge">*&gt;</code> 及 const</h3>
+
+<p><code class="highlighter-rouge">&lt;*</code>和<code class="highlighter-rouge">*&gt;</code>的类型表明它忽略函数的右侧或者左侧参数数值，但是对应的容器类型(f)没有发生变化。比如如下的例子：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;:</span><span class="n">info</span> <span class="o">&lt;*</span>
+<span class="kr">class</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="kr">where</span>
+  <span class="o">...</span>
+    <span class="p">(</span><span class="o">&lt;*</span><span class="p">)</span> <span class="o">::</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span>
+        <span class="c1">-- Defined in Control.Applicative</span>
+<span class="kr">infixl</span> <span class="mi">4</span> <span class="o">&lt;*</span>
+
+<span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="mi">2</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">1</span>
+<span class="kt">Just</span> <span class="mi">2</span>
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="n">t</span> <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="p">)</span>
+<span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="p">)</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">a</span> <span class="o">=&gt;</span> <span class="kt">Maybe</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="kt">Maybe</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="n">t</span> <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">2</span><span class="p">)</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">a</span> <span class="o">=&gt;</span> <span class="kt">Maybe</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="n">t</span> <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">2</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">2</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">1</span><span class="p">)</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">b</span> <span class="o">=&gt;</span> <span class="kt">Maybe</span> <span class="n">b</span>
+<span class="n">gci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*</span> <span class="kt">Just</span> <span class="mi">2</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">1</span>
+<span class="kt">Just</span> <span class="mi">3</span>
+</code></pre>
+</div>
+
+<p>可见<code class="highlighter-rouge">&lt;*</code> 是忽略函数右侧的其它参数，返回左侧。<code class="highlighter-rouge">*&gt;</code>则和其相反：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">*&gt;</span> <span class="kt">Just</span> <span class="mi">1</span>
+<span class="kt">Just</span> <span class="mi">1</span>
+</code></pre>
+</div>
+
+<p>Haskell有如下的<code class="highlighter-rouge">const</code>函数，因此 <code class="highlighter-rouge">&lt;*</code> <code class="highlighter-rouge">*&gt;</code>可以有 <code class="highlighter-rouge">&lt;*&gt;</code> 和<code class="highlighter-rouge">const</code>来实现:</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">const</span> 
+<span class="n">const</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">a</span>    <span class="c1">-- Defined in GHC.Base</span>
+<span class="n">f</span> <span class="o">*&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">flip</span> <span class="n">const</span> <span class="o">&lt;$&gt;</span> <span class="n">f</span> <span class="o">&lt;*&gt;</span> <span class="n">g</span>
+<span class="n">f</span> <span class="o">&lt;*</span> <span class="n">g</span> <span class="o">=</span> <span class="n">const</span> <span class="o">&lt;$&gt;</span> <span class="n">f</span> <span class="o">&lt;*&gt;</span> <span class="n">g</span>
+</code></pre>
+</div>
+
+<h3 id="list-applicative">list applicative</h3>
+
+<p>list类型本身是Applicative的一个instance, 但它的实现和Maybe有些不同，主要在于<code class="highlighter-rouge">&lt;*&gt;</code>的实现上可以有多种方式。考虑下边的例子：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="p">[(</span><span class="o">*</span><span class="mi">2</span><span class="p">)]</span> <span class="o">&lt;*&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="p">[</span><span class="n">length</span><span class="p">]</span> <span class="o">&lt;*&gt;</span> <span class="p">[</span><span class="s">"ss"</span><span class="p">,</span> <span class="s">"tt"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>这里的容器类型（构造函数）是<code class="highlighter-rouge">[]</code>本身，所以其中的映射函数 <code class="highlighter-rouge">a-&gt;b</code> 必须放置在 <code class="highlighter-rouge">[]</code>中，对应的<strong>applicative</strong>参数分别是<code class="highlighter-rouge">Int</code>和<code class="highlighter-rouge">[Char]</code>。考虑如下更复杂一点的情形：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="p">[(</span><span class="o">^</span><span class="mi">2</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">]</span>  <span class="o">&lt;*&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">9.0</span><span class="p">,</span><span class="mf">16.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.4142135623730951</span><span class="p">,</span><span class="mf">1.7320508075688772</span><span class="p">,</span><span class="mf">2.0</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>这里的<code class="highlighter-rouge">&lt;*&gt;</code>操作结果为对于左边的每一个函数，依次作用于右边的每一个元素，并且返回结果的list。自然左边参数的函数类型必须是相同的;根据以上行为可见，list 的 Applicative定义其实为：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Applicative</span> <span class="kt">[]</span> <span class="kr">where</span>
+    <span class="n">pure</span> <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span>
+    <span class="n">gs</span> <span class="o">&lt;*&gt;</span> <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="n">x</span> <span class="o">|</span> <span class="n">g</span> <span class="o">&lt;-</span> <span class="n">gs</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;-</span> <span class="n">xs</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>其<code class="highlighter-rouge">&lt;*&gt;</code>函数是通过<strong>list comprehension</strong>来完成的。</p>
+
+<p>另外一种实现是分别取左右（相对于操作符 <code class="highlighter-rouge">&lt;*&gt;</code> 函数的中缀表达式写法）的对应函数和参数，将所得的运算结果放置于结果list中；即ZipWith:</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">ZipList</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">ZipList</span> <span class="p">{</span><span class="n">getZipList</span> <span class="o">::</span> <span class="p">[</span><span class="n">a</span><span class="p">])</span>
+
+<span class="kr">instance</span> <span class="kt">Applicative</span> <span class="kt">ZipList</span> <span class="kr">where</span>
+    <span class="n">pure</span> <span class="n">x</span> <span class="o">=</span> <span class="kt">ZipList</span> <span class="p">(</span><span class="n">repeat</span> <span class="n">x</span><span class="p">)</span>
+    <span class="kt">ZipList</span> <span class="n">fs</span> <span class="o">&lt;*&gt;</span> <span class="kt">ZipList</span> <span class="n">xs</span> <span class="o">=</span> <span class="kt">ZipList</span> <span class="p">(</span><span class="n">zipWith</span> <span class="p">(</span><span class="nf">\</span><span class="n">f</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">x</span><span class="p">)</span> <span class="n">fs</span> <span class="n">xs</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>下边是一个ZipList的例子：</p>
+
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="n">getZipList</span> <span class="o">$</span> <span class="kt">ZipList</span> <span class="p">[(</span><span class="o">^</span><span class="mi">2</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">,</span> <span class="p">(</span><span class="o">+</span><span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span> <span class="o">&lt;*&gt;</span> <span class="kt">ZipList</span> <span class="p">[</span><span class="mi">2</span><span class="o">..</span><span class="mi">10</span><span class="p">]</span> 
+<span class="p">[</span><span class="mf">4.0</span><span class="p">,</span><span class="mf">1.7320508075688772</span><span class="p">,</span><span class="mf">14.0</span><span class="p">,</span><span class="mf">2.5</span><span class="p">]</span>
+</code></pre>
+</div>
+<p>这里，操作的结果是依次应用于左边的每一个函数于右边的每一个List元素，生成结果的<code class="highlighter-rouge">ZipList</code>.</p>
+
+<h3 id="-操作符">&lt;$&gt; 操作符</h3>
+
+<p>为了简化代码并且提高可读性，Applicative定义了<code class="highlighter-rouge">&lt;$&gt;</code>操作符，类似于基本的<code class="highlighter-rouge">($)</code>函数，且有：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">fmap</span> <span class="n">f</span> <span class="n">a</span>
+<span class="n">pure</span> <span class="n">f</span> <span class="o">&lt;*&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">fmap</span> <span class="n">f</span> <span class="n">x</span> <span class="o">=</span> <span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="n">x</span>
+
+<span class="c1">-- we can further write</span>
+<span class="n">g</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">c</span><span class="p">)</span>
+<span class="n">f</span> <span class="n">g</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">c</span> <span class="o">=</span> <span class="n">pure</span> <span class="n">g</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">c</span> <span class="o">=</span> <span class="n">g</span> <span class="o">&lt;$&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">&lt;$&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">&lt;*&gt;</span> <span class="n">f</span> <span class="n">c</span>
+
+<span class="c1">--example</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="kr">let</span> <span class="n">f</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">d</span>
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">f</span>
+<span class="n">f</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">a</span> <span class="o">=&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="kt">Just</span> <span class="mi">1</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">3</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">4</span>
+<span class="kt">Just</span> <span class="mi">40</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="n">f</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>
+<span class="kt">Just</span> <span class="mi">40</span>
+</code></pre>
+</div>
+<p>上述的编程风格又被成为 <strong>Applicative Style</strong> .</p>
+
+<h3 id="applicative-定律">Applicative 定律</h3>
+
+<p>Applicate的实例类型必须满足如下定律：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">pure</span> <span class="n">id</span> <span class="o">&lt;*&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="n">v</span>                               <span class="c1">--Identity</span>
+<span class="n">pure</span> <span class="p">(</span><span class="o">.</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="n">u</span> <span class="o">&lt;*&gt;</span> <span class="n">v</span> <span class="o">&lt;*&gt;</span> <span class="n">w</span> <span class="o">=</span> <span class="n">u</span> <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="n">v</span> <span class="o">&lt;*&gt;</span> <span class="n">w</span><span class="p">)</span>    <span class="c1">--Composition</span>
+<span class="n">pure</span> <span class="n">f</span> <span class="o">&lt;*&gt;</span> <span class="n">pure</span> <span class="n">x</span> <span class="o">=</span> <span class="n">pure</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span>                  <span class="c1">--Homomorphism</span>
+<span class="n">u</span> <span class="o">&lt;*&gt;</span> <span class="n">pure</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pure</span> <span class="p">(</span><span class="o">$</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="n">u</span>                 <span class="c1">--Interchange</span>
+</code></pre>
+</div>
+<p>对于Maybe类型，可以做如下验证：</p>
+<ul>
+  <li>Identity
+    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="n">pure</span> <span class="n">id</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">1</span>
+<span class="kt">Just</span> <span class="mi">1</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="mi">1</span>
+<span class="kt">Just</span> <span class="mi">1</span>
+</code></pre>
+    </div>
+  </li>
+  <li>composition
+    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="p">(</span><span class="o">.</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="mi">2</span>
+<span class="mi">10</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="n">pure</span> <span class="p">(</span><span class="o">.</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span>
+<span class="kt">Just</span> <span class="mi">10</span>
+<span class="n">ci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span><span class="p">)</span>
+<span class="kt">Just</span> <span class="mi">10</span>
+</code></pre>
+    </div>
+  </li>
+  <li>Homomorphism
+    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="mi">2</span>
+<span class="kt">Just</span> <span class="mi">4</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">((</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span>
+<span class="kt">Just</span> <span class="mi">4</span>
+</code></pre>
+    </div>
+  </li>
+  <li>Interchange
+    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;</span><span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="n">pure</span> <span class="mi">2</span>
+<span class="kt">Just</span> <span class="mi">4</span>
+<span class="n">ghci</span><span class="o">&gt;</span><span class="n">pure</span> <span class="p">(</span><span class="o">$</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;*&gt;</span> <span class="kt">Just</span> <span class="p">(</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+<span class="kt">Just</span> <span class="mi">4</span>
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<h3 id="io-monad-and-applicative">IO Monad and Applicative</h3>
+
+<p>所有的Monad都满足Applicative的要求；其实Monad对结构化的要求比Applicative的要高。对于IO Monad，以下是其实现：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Applicative</span> <span class="kt">IO</span> <span class="kr">where</span>
+    <span class="n">pure</span> <span class="o">=</span> <span class="n">return</span>
+    <span class="n">a</span> <span class="o">&lt;*&gt;</span> <span class="n">b</span> <span class="o">=</span> <span class="kr">do</span>
+        <span class="n">f</span> <span class="o">&lt;-</span> <span class="n">a</span>
+        <span class="n">x</span> <span class="o">&lt;-</span> <span class="n">b</span>
+        <span class="n">return</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>对于如下的do风格程序：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">greeting</span> <span class="o">=</span> <span class="kr">do</span>
+    <span class="n">firstName</span> <span class="o">&lt;-</span> <span class="n">getLine</span>
+    <span class="kt">LastName</span> <span class="o">&lt;-</span> <span class="n">getLine</span>
+    <span class="n">putStrLn</span> <span class="o">$</span> <span class="s">"hello"</span> <span class="o">++</span> <span class="n">firstName</span> <span class="o">++</span> <span class="n">lastName</span>
+</code></pre>
+</div>
+<p>可以用Applicative风格更优雅地写作：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">greeting</span> <span class="o">=</span> <span class="kr">do</span>
+    <span class="n">name</span> <span class="o">&lt;-</span> <span class="p">(</span><span class="o">++</span><span class="p">)</span> <span class="p">(</span><span class="o">$</span><span class="p">)</span> <span class="n">getLine</span> <span class="o">&lt;*&gt;</span> <span class="n">getLine</span>
+    <span class="n">putStrLn</span> <span class="o">$</span> <span class="s">"hello"</span> <span class="o">++</span> <span class="n">name</span>
+</code></pre>
+</div>
+
+<p>可以看到，如果将上边的IO类型换做其它的Monad也是照样成立的。可见所有的Monad类其实也满足Applicative，但是由于Monad类型的出现早于Applicative，因此Haskell自带的定义中没有指明上述的约束关系。</p>
+
+<h3 id="applicative-辅助函数">Applicative 辅助函数</h3>
+
+<p>Aplicative定义了如下一些辅助函数用于简化代码书写：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">liftA</span> <span class="o">::</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+<span class="n">liftA</span> <span class="n">f</span> <span class="n">a</span> <span class="o">=</span> <span class="n">pure</span> <span class="n">f</span> <span class="o">&lt;*&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="n">a</span>
+
+<span class="n">liftA2</span> <span class="o">::</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">c</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">c</span>
+<span class="n">liftA2</span> <span class="n">f</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="n">a</span> <span class="o">&lt;*&gt;</span> <span class="n">b</span>
+
+<span class="n">liftA3</span> <span class="o">::</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">c</span> <span class="o">-&gt;</span> <span class="n">d</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">c</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">d</span>
+<span class="n">liftA3</span> <span class="n">f</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span> <span class="o">=</span> <span class="n">f</span> <span class="o">&lt;$&gt;</span> <span class="n">a</span> <span class="o">&lt;*&gt;</span> <span class="n">b</span> <span class="o">&lt;*&gt;</span> <span class="n">c</span>
+</code></pre>
+</div>
+
+<h2 id="functorapplicative-functormonad">Functor/Applicative Functor/Monad</h2>
+
+<p>在Monad中，Haskell定义了<code class="highlighter-rouge">ap</code>函数, 如果参照<code class="highlighter-rouge">&lt;*&gt;</code>的定义：</p>
+<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghci</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">ap</span>
+<span class="n">ap</span> <span class="o">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span>
+    <span class="c1">-- Defined in Control.Monad</span>
+
+<span class="n">ghci</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="p">(</span><span class="o">&lt;*&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="o">&lt;*&gt;</span><span class="p">)</span> <span class="o">::</span> <span class="kt">Applicative</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="n">f</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
+</code></pre>
+</div>
+<p>可以看出，如果将m替换为f，那么二者的定义是一致的。其实Monad是一种比Applicative更强的约束,同样地，<code class="highlighter-rouge">liftM</code>, <code class="highlighter-rouge">liftM2</code>….和fmap/&lt;*&gt;也很相似。二者的关系和相关的提议可参考<a href="http://www.haskell.org/haskellwiki/Functor-Applicative-Monad_Proposal">这里</a>。</p>
+
+<h2 id="参考资料">参考资料</h2>
+<ol>
+  <li><a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">learnyouahaskell on functors and applicative functors</a></li>
+  <li><a href="http://wiki.ifs.hsr.ch/SemProgAnTr/files/ApplicativeFunctorsInHaskell.pdf">Applicative Functors in Haskell</a></li>
+  <li><a href="http://db.inf.uni-tuebingen.de/files/weijers/AFP1112/lecture7.pdf">Functors and Applicative Functors</a></li>
+  <li><a href="http://www.haskell.org/haskellwiki/Functor-Applicative-Monad_Proposal">Functor-Applicative-Monad Proposal</a></li>
+</ol>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/functional" class="page__taxonomy-item" rel="tag">functional</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/haskell" class="page__taxonomy-item" rel="tag">haskell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/monad" class="page__taxonomy-item" rel="tag">monad</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2012-04-18T20:19:00+08:00">April 18, 2012</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Haskell Functor/Applicative Functor https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2012/04/18/haskell-functor-slash-applicative-slash-monad/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/post/2012/04/15/haskell-functor-and-monad/" class="pagination--pager" title="Haskell Functor &amp; Monad
+">Previous</a>
+    
+    
+      <a href="https://skyscribe.github.io/post/2012/04/24/type-slash-data-slash-newtype-in-haskell/" class="pagination--pager" title="Type/data/newtype in Haskell
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
