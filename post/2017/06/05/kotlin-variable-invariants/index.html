@@ -36,8 +36,8 @@
 <meta property="og:title" content="Kotlin语言之变量约束设计">
 
 
-  <link rel="canonical" href="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
-  <meta property="og:url" content="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
+  <link rel="canonical" href="http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/">
+  <meta property="og:url" content="http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/">
 
 
 
@@ -48,7 +48,7 @@
   <meta name="twitter:site" content="@skyscribe">
   <meta name="twitter:title" content="Kotlin语言之变量约束设计">
   <meta name="twitter:description" content="可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。">
-  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
+  <meta name="twitter:url" content="http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/">
 
   
     <meta name="twitter:card" content="summary">
@@ -83,7 +83,7 @@
 <!-- end SEO -->
 
 
-<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+<link href="http://10.140.20.80:4000/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
 
 <!-- http://t.co/dKP3o1e -->
 <meta name="HandheldFriendly" content="True">
@@ -95,7 +95,7 @@
 </script>
 
 <!-- For all browsers -->
-<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+<link rel="stylesheet" href="http://10.140.20.80:4000/assets/css/main.css">
 
 <!--[if lte IE 9]>
   <style>
@@ -129,20 +129,20 @@
   <div class="masthead__inner-wrap">
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
-        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <a class="site-title" href="http://10.140.20.80:4000/">驭风万里无垠</a>
         <ul class="visible-links">
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+            <li class="masthead__menu-item"><a href="http://10.140.20.80:4000/year-archive/index.html">Posts</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+            <li class="masthead__menu-item"><a href="http://10.140.20.80:4000/tags/index.html">Tags</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+            <li class="masthead__menu-item"><a href="http://10.140.20.80:4000/categories/index.html">Categories</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+            <li class="masthead__menu-item"><a href="http://10.140.20.80:4000/about/">About</a></li>
           
         </ul>
         <button><div class="navicon"></div></button>
@@ -163,6 +163,12 @@
 
 <div itemscope itemtype="http://schema.org/Person">
 
+  
+    <div class="author__avatar">
+      
+        <img src="http://10.140.20.80:4000/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
   
 
   <div class="author__content">
@@ -197,7 +203,23 @@
       
 
       
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
 
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
       
 
       
@@ -209,11 +231,19 @@
       
 
       
-
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
       
 
       
-
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
       
 
       
@@ -661,15 +691,15 @@ When targeting the JVM, instances of this class are represented as <code class="
     
       
       
-      <a href="https://skyscribe.github.io/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+      <a href="http://10.140.20.80:4000/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/tags/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
+      <a href="http://10.140.20.80:4000/tags/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+      <a href="http://10.140.20.80:4000/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
     
     </span>
   </p>
@@ -690,11 +720,11 @@ When targeting the JVM, instances of this class are represented as <code class="
     
       
       
-      <a href="https://skyscribe.github.io/categories/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
+      <a href="http://10.140.20.80:4000/categories/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+      <a href="http://10.140.20.80:4000/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
     
     </span>
   </p>
@@ -710,20 +740,20 @@ When targeting the JVM, instances of this class are represented as <code class="
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Kotlin语言之变量约束设计 https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Kotlin语言之变量约束设计 http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+  <a href="https://plus.google.com/share?url=http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
       
   <nav class="pagination">
     
-      <a href="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" class="pagination--pager" title="Kotlin语言之函数式编程
+      <a href="http://10.140.20.80:4000/post/2017/06/04/kotlin-language-functional-programming/" class="pagination--pager" title="Kotlin语言之函数式编程
 ">Previous</a>
     
     
@@ -765,8 +795,10 @@ When targeting the JVM, instances of this class are represented as <code class="
     
     
     
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
     
-    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+    <li><a href="http://10.140.20.80:4000/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
   </ul>
 </div>
 
@@ -774,7 +806,7 @@ When targeting the JVM, instances of this class are represented as <code class="
       </footer>
     </div>
 
-    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+    <script src="http://10.140.20.80:4000/assets/js/main.min.js"></script>
 
 
 
