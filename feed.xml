@@ -1,4 +1,143 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://10.140.20.80:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://10.140.20.80:4000/" rel="alternate" type="text/html" /><updated>2017-06-23T16:45:36+08:00</updated><id>http://10.140.20.80:4000/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Kotlin语言之变量约束设计</title><link href="http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/" rel="alternate" type="text/html" title="Kotlin语言之变量约束设计" /><published>2017-06-05T23:12:00+08:00</published><updated>2017-06-05T23:12:00+08:00</updated><id>http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants</id><content type="html" xml:base="http://10.140.20.80:4000/post/2017/06/05/kotlin-variable-invariants/">&lt;p&gt;可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为&lt;strong&gt;继承/封装/多态等手法针对的都是程序组织上&lt;/strong&gt;的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖&lt;strong&gt;过程式实现跟操作系统打交道&lt;/strong&gt;。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2017-06-24T23:16:21+08:00</updated><id>https://skyscribe.github.io/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Migrate blog to Jekyll</title><link href="https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/" rel="alternate" type="text/html" title="Migrate blog to Jekyll" /><published>2017-06-24T00:00:00+08:00</published><updated>2017-06-24T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/">&lt;p&gt;之前本blog的内容是基于强大的&lt;a href=&quot;http://octopress.org/&quot;&gt;octopress&lt;/a&gt;生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的&lt;a href=&quot;http://octopress.org/2015/01/15/octopress-3.0-is-coming/&quot;&gt;新版本预告&lt;/a&gt;后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。&lt;/p&gt;
+
+&lt;p&gt;很明显，&lt;strong&gt;octopress项目要死了&lt;/strong&gt;，这在开源软件社区是常有的事儿；但是活人不能被尿憋死，本来用octopress的目的也是因为 Jekyll 太抽象了想顺带找个近路学习学习前端知识；这些没有了借口，还是升吧。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;上新版本jekyll安装主题&quot;&gt;上新版本Jekyll，安装主题&lt;/h2&gt;
+
+&lt;p&gt;最开始用octopress的时候，Jekyll还是 0.6 版本；这么多年过去，Github 团队官方已经发布了 3.0 版本了，功能支持的已经比较完善了。本身Jekyll是基于 gem 的，模块化做的非常好了，不像原来的 octorpess 直接fork一个代码就在里边改来改去，还要创建多个branch 防止无法升级的问题。按照 &lt;a href=&quot;https://jekyllrb.com/docs/installation/&quot;&gt;官方文档&lt;/a&gt; 的步骤按部就班即可。&lt;/p&gt;
+
+&lt;p&gt;Jekyll支持&lt;strong&gt;丰富的插件&lt;/strong&gt;，生成好对应的site之后，修改配置文件就可以用 &lt;code class=&quot;highlighter-rouge&quot;&gt;bundle update&lt;/code&gt; 来安装。但是默认的Jekyll主题太过于原始，所以找个适合自己口味的主题是首要的。因为本blog是托管在github上的，gith-hub pages &lt;a href=&quot;https://pages.github.com/themes/&quot;&gt;支持的主题&lt;/a&gt; 却&lt;strong&gt;比较有限&lt;/strong&gt;, 而且要没没有提供预览，要么提供的预览不适合个人口味。&lt;/p&gt;
+
+&lt;p&gt;回头看Ocotpress发现其实现方式完全是自己生成页面的，不用Github自己的build系统；这里可以很容易的依法炮制，自己将所有的东西编译好，将生成的site内容给传上去即可。个人还是比较喜欢原来的 Octorpress提供的默认主题，简洁明快；所以最终选择的是 &lt;a href=&quot;https://mademistakes.com/work/minimal-mistakes-jekyll-theme/&quot;&gt;Minimal Mistakes&lt;/a&gt; ；浏览选择过程中，对 &lt;a href=&quot;http://phlow.github.io/feeling-responsive/&quot;&gt;Feeling Responsive&lt;/a&gt;主题也非常入眼，只是看起来文档比较复杂，可以留待以后尝试折腾下。&lt;/p&gt;
+
+&lt;p&gt;Minimal Mistake主题支持比较多的设定，因为打算自己生成页面，所以采用类似fork的思路，安装&lt;strong&gt;自己想要的插件&lt;/strong&gt;（可以突破&lt;a href=&quot;https://pages.github.com/versions/&quot;&gt;Github-Pages的限制&lt;/a&gt;)，最后build成页面给push上去即可。&lt;/p&gt;
+
+&lt;h2 id=&quot;自动同步&quot;&gt;自动同步&lt;/h2&gt;
+
+&lt;p&gt;由于是自己手工编译生成静态内容，所以很希望有类似于Octopress的Rakefile，遗憾的是&lt;strong&gt;copy下来的Rakefile&lt;/strong&gt;不能正确执行。Google上search了一圈发现没有现成的方案，而且Github-pages的个人站点仅仅&lt;strong&gt;支持push到master分支&lt;/strong&gt;, 而&lt;del&gt;早期的时候是push到gh-pages&lt;/del&gt;分支的；这个细微的更新貌似很多google页面都没有提及；不过好在也不是很难发现，仅仅需要在自己site的设置页面查看build的分支就可以看到只能接受master分支了。&lt;/p&gt;
+
+&lt;p&gt;自动化的工作最终写了个简单的shell脚本来完成, 基本的步骤是沿用 Octopress2 的步骤，设置2个入口&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;一个用于初始化一个deploy目录，和github的站点内容保持同步，初始化git和remote等等。&lt;/li&gt;
+  &lt;li&gt;另外一个用于每次更新内容，调用 &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll build&lt;/code&gt; 完成编译后，将生成的内容全部copy到deploy目录下，然后再同步到github的repository&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;deployDir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/_deploy
+&lt;span class=&quot;nv&quot;&gt;siteDir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/_site
+&lt;span class=&quot;nv&quot;&gt;siteUrl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;https://github.com/skyscribe/skyscribe.github.io.git
+
+&lt;span class=&quot;k&quot;&gt;function &lt;/span&gt;setup&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    rm -fr &lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;
+    mkdir -p &lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    git init
+    &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;dummy content&quot;&lt;/span&gt; &amp;gt; index.html
+    git add .
+    git commit -m &lt;span class=&quot;s2&quot;&gt;&quot;dummy script init&quot;&lt;/span&gt;
+    git branch -m master
+    git remote add origin &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$siteUrl&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Setup complete for &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;function &lt;/span&gt;deploy&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll build
+    &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    cp -r &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$siteDir&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$deployDir&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&quot;&lt;/span&gt;
+    git pull origin master
+    git add -A
+    &lt;span class=&quot;nv&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;date &lt;span class=&quot;s2&quot;&gt;&quot;+%Y-%m-%d_%H:%M:%S&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;
+    git commit -m &lt;span class=&quot;s2&quot;&gt;&quot;site updated at &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$now&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    git push origin master --force
+    &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;deploy completed&quot;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in
+  &lt;/span&gt;setup&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	    setup
+        &lt;span class=&quot;p&quot;&gt;;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        deploy
+        &lt;span class=&quot;p&quot;&gt;;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;esac&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;数据搬运&quot;&gt;数据搬运&lt;/h2&gt;
+
+&lt;p&gt;相对来说数据搬运不是很困难就是比较繁琐，原来很多Octopress支持的插件，在这里都得自己检验是否不工作或者是否有合适的插件可以替代。期间的过程就是不断的&lt;strong&gt;测试驱动&lt;/strong&gt;搬运，发现编译出错后，打开&lt;code class=&quot;highlighter-rouge&quot;&gt;--trace&lt;/code&gt;开关，看问题出在什么地方然后一一修改之。最麻烦的一个问题是 gist 插件貌似产生了不兼容，原来的 &lt;code class=&quot;highlighter-rouge&quot;&gt;include_file&lt;/code&gt; 插件也没法再用，只好将文件内容copy过来，用Liquid的 &lt;code class=&quot;highlighter-rouge&quot;&gt;highlight&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;include&lt;/code&gt; 标签，套用如下的模板&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;highlight&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;include&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;code/include.html&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;endhighlight&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;插件和定制&quot;&gt;插件和定制&lt;/h2&gt;
+
+&lt;p&gt;没有了github的插件束缚，就可以装自己想要的插件了&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;jekyll-compose 可以用&lt;strong&gt;命令行来生成新的post&lt;/strong&gt;，类似于之前的octopress的命令行&lt;/li&gt;
+  &lt;li&gt;jekyll-archives 可以用来生成归档页面，方便使用&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;默认的blog页面用的是post layout，但是默认没有定义，简单起见，自己在 &lt;code class=&quot;highlighter-rouge&quot;&gt;_layout&lt;/code&gt; 下边加一个就行，从默认的single.html拷贝过来修改一下即可。&lt;/p&gt;
+
+&lt;h3 id=&quot;tag-cloud&quot;&gt;Tag cloud&lt;/h3&gt;
+&lt;p&gt;Octopress的tagcloud插件，找了一圈也没找到好的，仿照别人家的，写了个简单的 tagcloud.html&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;assign&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;all_tags&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;site.tags&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;h&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;a&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;{{absolute_url}}/categories/index.html&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;Categories&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;/h&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;div&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;tagCloud&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;site.categories&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;assign&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;category_name&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;assign&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;cat_count&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;tag&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;last&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;assign&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;cat_avg&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;cat_count&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;div:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;all_tags&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;li&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;span&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;tag&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+      &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;a&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;{{absolute_url}}/categories/{{ category_name | downcase}}/index.html&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;category_name&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}(&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;cat_count&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;})&amp;lt;/a&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;endfor&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;稍微定制下需要显示的地方，将上述html给include进去即可。&lt;/p&gt;
+
+&lt;h3 id=&quot;布局调整&quot;&gt;布局调整&lt;/h3&gt;
+&lt;p&gt;页面在高分辨率的屏幕下感觉空白太多，进入 &lt;code class=&quot;highlighter-rouge&quot;&gt;_sass/minimal-mistakes&lt;/code&gt; 修改即可，代码相对比较清楚&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;_variables.scss&lt;/code&gt; 包含一些全局变量的定义，譬如字体大小，缩进，padding等&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;_sidebar.scss&lt;/code&gt; 包含对边栏的样式定义&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;_masthead.scss&lt;/code&gt; 指定主头部元素的样式定义&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;_page.scss&lt;/code&gt; 包含页面主要内容部分的样式定义&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;大概对着浏览器窗口调整即可，无需赘述。&lt;/p&gt;
+
+&lt;h2 id=&quot;未尽事宜&quot;&gt;未尽事宜&lt;/h2&gt;
+&lt;p&gt;还有一些其它的问题暂时没找到解决方案，暂时不折腾了，先列在这里。&lt;/p&gt;
+
+&lt;h4 id=&quot;无法删除的老页面&quot;&gt;无法删除的老页面&lt;/h4&gt;
+&lt;p&gt;之前的blog采用的是octopress的URL设置，当在新的主题里，将permalink依法炮制的时候，发现更新的页面没有被github正确重新加载，依然显示的是老的页面。无奈之下，只好修改一下permalink的前缀部分，强制生成不一样的页面。问题是老的页面依然可以访问。&lt;/p&gt;
+
+&lt;h4 id=&quot;页面布局&quot;&gt;页面布局&lt;/h4&gt;
+&lt;p&gt;默认的布局中有很多&lt;em&gt;额外的padding&lt;/em&gt;没法去掉，尤其是PC的分辨率比较高的时候，页面右侧的边框显得特别大；用Chrome的Inspect工具打开可以看到右侧的padding有16%之多，然而修改附带的css并不能生效。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考链接&quot;&gt;参考链接&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;http://rafabene.com/2015/10/11/how-migrated-blog-jekyll-github/&quot;&gt;How I migrated my blog to Jekyll/Github&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hblok.net/blog/posts/2016/10/23/jekyll-include-partial-snippets-of-code/&quot;&gt;Include partial snippets of code&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/phaer/1020852&quot;&gt;Raw tag plugin to prevent liquid from parsing given text&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="blog" /><summary type="html">之前本blog的内容是基于强大的octopress生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的新版本预告后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。</summary></entry><entry><title type="html">Kotlin语言之变量约束设计</title><link href="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" rel="alternate" type="text/html" title="Kotlin语言之变量约束设计" /><published>2017-06-05T23:12:00+08:00</published><updated>2017-06-05T23:12:00+08:00</updated><id>https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">&lt;p&gt;可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为&lt;strong&gt;继承/封装/多态等手法针对的都是程序组织上&lt;/strong&gt;的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖&lt;strong&gt;过程式实现跟操作系统打交道&lt;/strong&gt;。&lt;/p&gt;
 
 &lt;h2 id=&quot;函数式编程里的副作用&quot;&gt;函数式编程里的副作用&lt;/h2&gt;
 &lt;p&gt;在函数式编程的世界里，事情会变得很传统的过程式处理不一样，因为这里非常讲究函数本身是否是&lt;strong&gt;有副作用&lt;/strong&gt;的，如果&lt;strong&gt;同样的输入不能保证相同的输出&lt;/strong&gt;，那么则是有副作用的。这里的输出不仅仅表示返回值，还隐含其它形形色色的对环境的影响，包括&lt;/p&gt;
@@ -166,7 +305,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;h2 id=&quot;idea支持&quot;&gt;IDEA支持&lt;/h2&gt;
 &lt;p&gt;作为官方的IDE环境，IDEA对可变量的引用做了显示的&lt;strong&gt;下划线&lt;/strong&gt;提醒，程序员可以一目了然地看到代码中对可变量的使用。&lt;/p&gt;
 
-&lt;p&gt;然而想要更深入的查看整个实现调用链中，哪些引入副作用哪些没有，工具的支持就比较有限了。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。</summary></entry><entry><title type="html">Kotlin语言之函数式编程</title><link href="http://10.140.20.80:4000/post/2017/06/04/kotlin-language-functional-programming/" rel="alternate" type="text/html" title="Kotlin语言之函数式编程" /><published>2017-06-04T22:32:00+08:00</published><updated>2017-06-04T22:32:00+08:00</updated><id>http://10.140.20.80:4000/post/2017/06/04/kotlin-language-functional-programming</id><content type="html" xml:base="http://10.140.20.80:4000/post/2017/06/04/kotlin-language-functional-programming/">&lt;p&gt;&lt;a href=&quot;https://kotlinlang.org/&quot;&gt;Kotlin语言&lt;/a&gt;是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其&lt;a href=&quot;https://techcrunch.com/2017/05/17/google-makes-kotlin-a-first-class-language-for-writing-android-apps/&quot;&gt;2017年的I/O大会上将其列为Android平台官方支持的语言&lt;/a&gt;而窜上了热点。&lt;/p&gt;
+&lt;p&gt;然而想要更深入的查看整个实现调用链中，哪些引入副作用哪些没有，工具的支持就比较有限了。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。</summary></entry><entry><title type="html">Kotlin语言之函数式编程</title><link href="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" rel="alternate" type="text/html" title="Kotlin语言之函数式编程" /><published>2017-06-04T22:32:00+08:00</published><updated>2017-06-04T22:32:00+08:00</updated><id>https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/">&lt;p&gt;&lt;a href=&quot;https://kotlinlang.org/&quot;&gt;Kotlin语言&lt;/a&gt;是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其&lt;a href=&quot;https://techcrunch.com/2017/05/17/google-makes-kotlin-a-first-class-language-for-writing-android-apps/&quot;&gt;2017年的I/O大会上将其列为Android平台官方支持的语言&lt;/a&gt;而窜上了热点。&lt;/p&gt;
 
 &lt;p&gt;本文尝试从函数式编程的角度管窥Kotlin的特性。&lt;/p&gt;
 
@@ -372,7 +511,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
     &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。</summary></entry><entry><title type="html">Software Design in Agile Development Context</title><link href="http://10.140.20.80:4000/post/2016/12/24/software-design-in-agile-development-context/" rel="alternate" type="text/html" title="Software Design in Agile Development Context" /><published>2016-12-24T19:32:00+08:00</published><updated>2016-12-24T19:32:00+08:00</updated><id>http://10.140.20.80:4000/post/2016/12/24/software-design-in-agile-development-context</id><content type="html" xml:base="http://10.140.20.80:4000/post/2016/12/24/software-design-in-agile-development-context/">&lt;p&gt;在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。&lt;/p&gt;
+&lt;/div&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kotlin" /><category term="programming" /><category term="fp" /><summary type="html">Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。</summary></entry><entry><title type="html">Software Design in Agile Development Context</title><link href="https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context/" rel="alternate" type="text/html" title="Software Design in Agile Development Context" /><published>2016-12-24T19:32:00+08:00</published><updated>2016-12-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context</id><content type="html" xml:base="https://skyscribe.github.io/post/2016/12/24/software-design-in-agile-development-context/">&lt;p&gt;在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -424,7 +563,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;软件工程的一个关键要素就是工具。软件设计自然也离不开合适的工具，尤其是软件设计又是对需求进行抽象的结晶；选择合适的工具可以增进协作和沟通，使得设计输出是有实际指导作用的而不仅仅是纯粹的文档工作。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://10.140.20.80:4000/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
@@ -547,7 +686,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;h2 id=&quot;审视xp&quot;&gt;审视XP&lt;/h2&gt;
 
-&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 3</title><link href="http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 3" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/">&lt;p&gt;本文是第三部分。&lt;/p&gt;
+&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 3</title><link href="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 3" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/">&lt;p&gt;本文是第三部分。&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
@@ -731,7 +870,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;西南是图书馆和客户办公室，图书馆在中间做一个动静分隔的作用&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - part2</title><link href="http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - part2" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">&lt;p&gt;本文是第二部分(&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;)。&lt;/p&gt;
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - part2</title><link href="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - part2" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">&lt;p&gt;本文是第二部分(&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;)。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -825,7 +964,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;策略的平衡意味着，安排座位的时候需要考虑某些负面的影响 - 有些时候需要将人们适度分隔开来而不是聚越来越多的人在一个大的空间。当周围的噪音和干扰越来越大的时候，人们容易觉得压抑和头疼，很多重要的工作都无法正常的完成。每一种策略都有一定的限制；明智的决策什么时候&lt;strong&gt;Osmotic Communication&lt;/strong&gt;是有效的，什么时候它因为人太多而失去意义是个重要的事情。&lt;/p&gt;
 
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry><entry><title type="html">Agile software development - The cooperative game - 笔记 - part1</title><link href="http://10.140.20.80:4000/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/" rel="alternate" type="text/html" title="Agile software development - The cooperative game - 笔记 - part1" /><published>2013-08-11T09:52:00+08:00</published><updated>2013-08-11T09:52:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/">&lt;p&gt;这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。&lt;/p&gt;
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry><entry><title type="html">Agile software development - The cooperative game - 笔记 - part1</title><link href="https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/" rel="alternate" type="text/html" title="Agile software development - The cooperative game - 笔记 - part1" /><published>2013-08-11T09:52:00+08:00</published><updated>2013-08-11T09:52:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/">&lt;p&gt;这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -939,7 +1078,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;同时这一过程也意味着工程上的协商决策(collaborative deal-making)和共同创新(collective innovation)。协作的结果是所有参与各方的互相竞争的偏好所达成的一整的意见。这个过程必然强调双赢的产出和新的创新，这些创新都不可能由单枪匹马的冒险所达到，而是通过协商而后的一致意见转化得来。&lt;/p&gt;
 
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。</summary></entry><entry><title type="html">The productive Programmer - 笔记</title><link href="http://10.140.20.80:4000/post/2013/08/06/the-productive-programmer/" rel="alternate" type="text/html" title="The productive Programmer - 笔记" /><published>2013-08-06T20:24:00+08:00</published><updated>2013-08-06T20:24:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/06/the-productive-programmer</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/06/the-productive-programmer/">&lt;p&gt;这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。&lt;/p&gt;
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。</summary></entry><entry><title type="html">The productive Programmer - 笔记</title><link href="https://skyscribe.github.io/post/2013/08/06/the-productive-programmer/" rel="alternate" type="text/html" title="The productive Programmer - 笔记" /><published>2013-08-06T20:24:00+08:00</published><updated>2013-08-06T20:24:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/06/the-productive-programmer</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/06/the-productive-programmer/">&lt;p&gt;这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -994,7 +1133,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;h3 id=&quot;使用虚拟桌面切分窗口&quot;&gt;使用虚拟桌面切分窗口&lt;/h3&gt;
 
-&lt;p&gt;可以使用Windows PowerToys里边的Virtual Desktop Manager打开多个桌面。每个桌面会有自己的快速启动栏，热键；并且可以同时打开所有桌面。这个是从Unix那边借鉴过来的特性，也没太多可说。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。</summary></entry><entry><title type="html">Pragmatic Programmer再读</title><link href="http://10.140.20.80:4000/post/2013/08/05/pragmatic-programmerzai-du/" rel="alternate" type="text/html" title="Pragmatic Programmer再读" /><published>2013-08-05T21:18:00+08:00</published><updated>2013-08-05T21:18:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/05/pragmatic-programmerzai-du</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/05/pragmatic-programmerzai-du/">&lt;p&gt;这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。&lt;/p&gt;
+&lt;p&gt;可以使用Windows PowerToys里边的Virtual Desktop Manager打开多个桌面。每个桌面会有自己的快速启动栏，热键；并且可以同时打开所有桌面。这个是从Unix那边借鉴过来的特性，也没太多可说。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本关于程序员生产效率的书，作者来自于Thought Works - 很多人一听到这个公司的名字就会在头脑中联系到敏捷/布道师这样的角色，并且可能在心里暗暗的寻思，又是一个光说不练的家伙在传播他们的理论了。但是仔细读来，才会发现这本书其实和敏捷并没有太大关联，讲述的也是一些实实在在的建议和实践。</summary></entry><entry><title type="html">Pragmatic Programmer再读</title><link href="https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du/" rel="alternate" type="text/html" title="Pragmatic Programmer再读" /><published>2013-08-05T21:18:00+08:00</published><updated>2013-08-05T21:18:00+08:00</updated><id>https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du</id><content type="html" xml:base="https://skyscribe.github.io/post/2013/08/05/pragmatic-programmerzai-du/">&lt;p&gt;这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1035,26 +1174,4 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;函数式&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;当然更新的语言往往集成了更多的语言特性；而且在运用前边的原则的时候，有时候为了拿到顺手的工具就不可避免要学习新的编程语言。有实际需求驱动的语言学习往往能取得更好的效果，比如之前我为了做个效率更高的日志分析统计工具，专门花了一段时间学习gawk的手册，写了几百行代码之后，这些经验就在我的脑子中累计屏在日后发挥了很多的作用。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。</summary></entry><entry><title type="html">Github pages upgrade</title><link href="http://10.140.20.80:4000/post/2013/08/04/github-pages-upgrade/" rel="alternate" type="text/html" title="Github pages upgrade" /><published>2013-08-04T23:07:00+08:00</published><updated>2013-08-04T23:07:00+08:00</updated><id>http://10.140.20.80:4000/post/2013/08/04/github-pages-upgrade</id><content type="html" xml:base="http://10.140.20.80:4000/post/2013/08/04/github-pages-upgrade/">&lt;p&gt;GitHub的后台发生了更新，原来的&lt;strong&gt;github.com&lt;/strong&gt;换成了&lt;strong&gt;github.io&lt;/strong&gt;，导致原来的&lt;strong&gt;octopress&lt;/strong&gt;的Rakefile变得不能正常工作。
-&lt;!--more--&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;octopress升级的问题&quot;&gt;Octopress升级的问题&lt;/h2&gt;
-
-&lt;p&gt;只需要按照常规的步骤，用git更新其upstream即可。问题在于更新之后，scss可能不工作了，导致打开后看到的主页显示不正常。&lt;/p&gt;
-
-&lt;p&gt;Google之，解决方法如下：&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;rake update_style
-rake clean
-rake generate
-rake deploy
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h2 id=&quot;github升级&quot;&gt;Github升级&lt;/h2&gt;
-
-&lt;p&gt;有两个比较大的变化，文档并不是那么容易看清楚：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;存放页面的repository必须变为 &lt;strong&gt;username.github.io&lt;/strong&gt;,原来的则是 &lt;strong&gt;username.github.com&lt;/strong&gt;，可以到&lt;strong&gt;settings&lt;/strong&gt;里边，做rename操作。&lt;/li&gt;
-  &lt;li&gt;默认显示的页面来自于&lt;strong&gt;master&lt;/strong&gt;,之前则是来自于&lt;strong&gt;gh-pages&lt;/strong&gt; 修改Rakefile即可。&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">GitHub的后台发生了更新，原来的github.com换成了github.io，导致原来的octopress的Rakefile变得不能正常工作。</summary></entry></feed>
+&lt;p&gt;当然更新的语言往往集成了更多的语言特性；而且在运用前边的原则的时候，有时候为了拿到顺手的工具就不可避免要学习新的编程语言。有实际需求驱动的语言学习往往能取得更好的效果，比如之前我为了做个效率更高的日志分析统计工具，专门花了一段时间学习gawk的手册，写了几百行代码之后，这些经验就在我的脑子中累计屏在日后发挥了很多的作用。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这是一本讲述程序员开发哲学和思想的书，虽然出版了十余年仍然没有太多过时的东西，因为讲述的内容是一些永远不会过时的东西（至少从计算机程序设计职业化-即所谓的软件工程开启的时间算便是如此）。</summary></entry></feed>

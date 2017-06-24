@@ -1,0 +1,802 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Migrate blog to Jekyll - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="之前本blog的内容是基于强大的octopress生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的新版本预告后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Migrate blog to Jekyll">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/">
+
+
+
+  <meta property="og:description" content="之前本blog的内容是基于强大的octopress生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的新版本预告后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Migrate blog to Jekyll">
+  <meta name="twitter:description" content="之前本blog的内容是基于强大的octopress生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的新版本预告后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-06-24T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(20)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/security/index.html">security(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/python/index.html">python(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(18)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/ruby/index.html">ruby(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/kotlin/index.html">kotlin(2)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Migrate blog to Jekyll">
+    <meta itemprop="description" content="之前本blog的内容是基于强大的octopress生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的新版本预告后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。">
+    <meta itemprop="datePublished" content="June 24, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Migrate blog to Jekyll
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>之前本blog的内容是基于强大的<a href="http://octopress.org/">octopress</a>生成为静态站点，然后将生成的内容静态拷贝到 github-pages 上去的。当octopress的作者宣布重构后的<a href="http://octopress.org/2015/01/15/octopress-3.0-is-coming/">新版本预告</a>后便急冲冲上去升级了本站内容，可惜很多插件都不工作了。眼见2年多过去了，貌似正式的3.0版本还没有被宣布，官方页面的帮助依然停留在2.0版本时代。</p>
+
+<p>很明显，<strong>octopress项目要死了</strong>，这在开源软件社区是常有的事儿；但是活人不能被尿憋死，本来用octopress的目的也是因为 Jekyll 太抽象了想顺带找个近路学习学习前端知识；这些没有了借口，还是升吧。</p>
+
+<!--more-->
+
+<h2 id="上新版本jekyll安装主题">上新版本Jekyll，安装主题</h2>
+
+<p>最开始用octopress的时候，Jekyll还是 0.6 版本；这么多年过去，Github 团队官方已经发布了 3.0 版本了，功能支持的已经比较完善了。本身Jekyll是基于 gem 的，模块化做的非常好了，不像原来的 octorpess 直接fork一个代码就在里边改来改去，还要创建多个branch 防止无法升级的问题。按照 <a href="https://jekyllrb.com/docs/installation/">官方文档</a> 的步骤按部就班即可。</p>
+
+<p>Jekyll支持<strong>丰富的插件</strong>，生成好对应的site之后，修改配置文件就可以用 <code class="highlighter-rouge">bundle update</code> 来安装。但是默认的Jekyll主题太过于原始，所以找个适合自己口味的主题是首要的。因为本blog是托管在github上的，gith-hub pages <a href="https://pages.github.com/themes/">支持的主题</a> 却<strong>比较有限</strong>, 而且要没没有提供预览，要么提供的预览不适合个人口味。</p>
+
+<p>回头看Ocotpress发现其实现方式完全是自己生成页面的，不用Github自己的build系统；这里可以很容易的依法炮制，自己将所有的东西编译好，将生成的site内容给传上去即可。个人还是比较喜欢原来的 Octorpress提供的默认主题，简洁明快；所以最终选择的是 <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/">Minimal Mistakes</a> ；浏览选择过程中，对 <a href="http://phlow.github.io/feeling-responsive/">Feeling Responsive</a>主题也非常入眼，只是看起来文档比较复杂，可以留待以后尝试折腾下。</p>
+
+<p>Minimal Mistake主题支持比较多的设定，因为打算自己生成页面，所以采用类似fork的思路，安装<strong>自己想要的插件</strong>（可以突破<a href="https://pages.github.com/versions/">Github-Pages的限制</a>)，最后build成页面给push上去即可。</p>
+
+<h2 id="自动同步">自动同步</h2>
+
+<p>由于是自己手工编译生成静态内容，所以很希望有类似于Octopress的Rakefile，遗憾的是<strong>copy下来的Rakefile</strong>不能正确执行。Google上search了一圈发现没有现成的方案，而且Github-pages的个人站点仅仅<strong>支持push到master分支</strong>, 而<del>早期的时候是push到gh-pages</del>分支的；这个细微的更新貌似很多google页面都没有提及；不过好在也不是很难发现，仅仅需要在自己site的设置页面查看build的分支就可以看到只能接受master分支了。</p>
+
+<p>自动化的工作最终写了个简单的shell脚本来完成, 基本的步骤是沿用 Octopress2 的步骤，设置2个入口</p>
+<ol>
+  <li>一个用于初始化一个deploy目录，和github的站点内容保持同步，初始化git和remote等等。</li>
+  <li>另外一个用于每次更新内容，调用 <code class="highlighter-rouge">jekyll build</code> 完成编译后，将生成的内容全部copy到deploy目录下，然后再同步到github的repository</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="nv">deployDir</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/_deploy
+<span class="nv">siteDir</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/_site
+<span class="nv">siteUrl</span><span class="o">=</span>https://github.com/skyscribe/skyscribe.github.io.git
+
+<span class="k">function </span>setup<span class="o">()</span> <span class="o">{</span>
+    rm -fr <span class="nv">$deployDir</span>
+    mkdir -p <span class="nv">$deployDir</span>
+    <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">"</span>
+    git init
+    <span class="nb">echo</span> <span class="s2">"dummy content"</span> &gt; index.html
+    git add .
+    git commit -m <span class="s2">"dummy script init"</span>
+    git branch -m master
+    git remote add origin <span class="s2">"</span><span class="nv">$siteUrl</span><span class="s2">"</span>
+    <span class="nb">echo</span> <span class="s2">"Setup complete for </span><span class="nv">$deployDir</span><span class="s2">"</span>
+<span class="o">}</span>
+
+<span class="k">function </span>deploy<span class="o">()</span> <span class="o">{</span>
+    bundle <span class="nb">exec </span>jekyll build
+    <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">"</span>
+    cp -r <span class="s2">"</span><span class="nv">$siteDir</span><span class="s2">"</span>/<span class="k">*</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">/"</span>
+    git pull origin master
+    git add -A
+    <span class="nv">now</span><span class="o">=</span><span class="k">$(</span>date <span class="s2">"+%Y-%m-%d_%H:%M:%S"</span><span class="k">)</span>
+    git commit -m <span class="s2">"site updated at </span><span class="nv">$now</span><span class="s2">"</span>
+    git push origin master --force
+    <span class="nb">echo</span> <span class="s2">"deploy completed"</span>
+<span class="o">}</span>
+
+<span class="k">case</span> <span class="nv">$1</span> <span class="k">in
+  </span>setup<span class="p">)</span>
+	    setup
+        <span class="p">;;</span>
+
+    <span class="k">*</span> <span class="p">)</span>
+        deploy
+        <span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre>
+</div>
+
+<h2 id="数据搬运">数据搬运</h2>
+
+<p>相对来说数据搬运不是很困难就是比较繁琐，原来很多Octopress支持的插件，在这里都得自己检验是否不工作或者是否有合适的插件可以替代。期间的过程就是不断的<strong>测试驱动</strong>搬运，发现编译出错后，打开<code class="highlighter-rouge">--trace</code>开关，看问题出在什么地方然后一一修改之。最麻烦的一个问题是 gist 插件貌似产生了不兼容，原来的 <code class="highlighter-rouge">include_file</code> 插件也没法再用，只好将文件内容copy过来，用Liquid的 <code class="highlighter-rouge">highlight</code> 和 <code class="highlighter-rouge">include</code> 标签，套用如下的模板</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">highlight</span><span class="w"> </span><span class="err">html</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">include</span><span class="w"> </span><span class="err">code/include.html</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endhighlight</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h2 id="插件和定制">插件和定制</h2>
+
+<p>没有了github的插件束缚，就可以装自己想要的插件了</p>
+<ol>
+  <li>jekyll-compose 可以用<strong>命令行来生成新的post</strong>，类似于之前的octopress的命令行</li>
+  <li>jekyll-archives 可以用来生成归档页面，方便使用</li>
+</ol>
+
+<p>默认的blog页面用的是post layout，但是默认没有定义，简单起见，自己在 <code class="highlighter-rouge">_layout</code> 下边加一个就行，从默认的single.html拷贝过来修改一下即可。</p>
+
+<h3 id="tag-cloud">Tag cloud</h3>
+<p>Octopress的tagcloud插件，找了一圈也没找到好的，仿照别人家的，写了个简单的 tagcloud.html</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">all_tags</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">site.tags</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">size</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span><span class="err">&lt;h</span><span class="mi">3</span><span class="err">&gt;</span><span class="w">
+  </span><span class="err">&lt;a</span><span class="w"> </span><span class="err">href=</span><span class="s2">"{{absolute_url}}/categories/index.html"</span><span class="err">&gt;Categories&lt;/a&gt;</span><span class="w">
+</span><span class="err">&lt;/h</span><span class="mi">3</span><span class="err">&gt;</span><span class="w">
+</span><span class="err">&lt;div</span><span class="w"> </span><span class="err">class=</span><span class="s2">"tagCloud"</span><span class="err">&gt;</span><span class="w">
+  </span><span class="err">&lt;ul&gt;</span><span class="w">
+  </span><span class="p">{</span><span class="err">%for</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">site.categories</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">category_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">first</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">last</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">size</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">cat_avg</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">div:</span><span class="w"> </span><span class="err">all_tags</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="err">&lt;li&gt;</span><span class="w">
+  </span><span class="err">&lt;span</span><span class="w"> </span><span class="err">class=</span><span class="s2">"tag"</span><span class="err">&gt;</span><span class="w">
+      </span><span class="err">&lt;a</span><span class="w"> </span><span class="err">href=</span><span class="s2">"{{absolute_url}}/categories/{{ category_name | downcase}}/index.html"</span><span class="err">&gt;</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">category_name</span><span class="w"> </span><span class="p">}</span><span class="err">}(</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="p">}</span><span class="err">})&lt;/a&gt;</span><span class="w">
+  </span><span class="err">&lt;/span&gt;</span><span class="w">
+  </span><span class="err">&lt;/li&gt;</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="err">&lt;/ul&gt;</span><span class="w">
+</span><span class="err">&lt;/div&gt;</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>稍微定制下需要显示的地方，将上述html给include进去即可。</p>
+
+<h3 id="布局调整">布局调整</h3>
+<p>页面在高分辨率的屏幕下感觉空白太多，进入 <code class="highlighter-rouge">_sass/minimal-mistakes</code> 修改即可，代码相对比较清楚</p>
+<ul>
+  <li><code class="highlighter-rouge">_variables.scss</code> 包含一些全局变量的定义，譬如字体大小，缩进，padding等</li>
+  <li><code class="highlighter-rouge">_sidebar.scss</code> 包含对边栏的样式定义</li>
+  <li><code class="highlighter-rouge">_masthead.scss</code> 指定主头部元素的样式定义</li>
+  <li><code class="highlighter-rouge">_page.scss</code> 包含页面主要内容部分的样式定义</li>
+</ul>
+
+<p>大概对着浏览器窗口调整即可，无需赘述。</p>
+
+<h2 id="未尽事宜">未尽事宜</h2>
+<p>还有一些其它的问题暂时没找到解决方案，暂时不折腾了，先列在这里。</p>
+
+<h4 id="无法删除的老页面">无法删除的老页面</h4>
+<p>之前的blog采用的是octopress的URL设置，当在新的主题里，将permalink依法炮制的时候，发现更新的页面没有被github正确重新加载，依然显示的是老的页面。无奈之下，只好修改一下permalink的前缀部分，强制生成不一样的页面。问题是老的页面依然可以访问。</p>
+
+<h4 id="页面布局">页面布局</h4>
+<p>默认的布局中有很多<em>额外的padding</em>没法去掉，尤其是PC的分辨率比较高的时候，页面右侧的边框显得特别大；用Chrome的Inspect工具打开可以看到右侧的padding有16%之多，然而修改附带的css并不能生效。</p>
+
+<h2 id="参考链接">参考链接</h2>
+<ol>
+  <li><a href="http://rafabene.com/2015/10/11/how-migrated-blog-jekyll-github/">How I migrated my blog to Jekyll/Github</a></li>
+  <li><a href="https://hblok.net/blog/posts/2016/10/23/jekyll-include-partial-snippets-of-code/">Include partial snippets of code</a></li>
+  <li><a href="https://gist.github.com/phaer/1020852">Raw tag plugin to prevent liquid from parsing given text</a></li>
+</ol>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/blog" class="page__taxonomy-item" rel="tag">blog</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/blog" class="page__taxonomy-item" rel="tag">blog</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-06-24T00:00:00+08:00">June 24, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Migrate blog to Jekyll https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/06/24/migrate-blog-to-jekyll/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="pagination--pager" title="Kotlin语言之变量约束设计
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
