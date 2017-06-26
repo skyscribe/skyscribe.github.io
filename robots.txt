@@ -1,1 +1,1 @@
-Sitemap: http://www.skyscribe.me/sitemap.xml
+Sitemap: http://blog.skyscribe.me/sitemap.xml
