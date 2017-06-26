@@ -36,8 +36,8 @@
 <meta property="og:title" content="Concurrency with Haskell">
 
 
-  <link rel="canonical" href="https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/">
-  <meta property="og:url" content="https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/">
+  <link rel="canonical" href="http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/">
 
 
 
@@ -48,7 +48,7 @@
   <meta name="twitter:site" content="@skyscribe">
   <meta name="twitter:title" content="Concurrency with Haskell">
   <meta name="twitter:description" content="随着基于CPU频率的摩尔定律的失效，现代的计算机体系都采用多核的方式提高处理能力，传统的编程思维和模式在多核时代则遭遇越来越多的问题；而函数式编程则在很大程度上提供了完全不同但是更为优雅的思路。作为纯函数式编程语言，Haskell的并发编程则和传统的过程式语言有着明显的不同。">
-  <meta name="twitter:url" content="https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/">
 
   
     <meta name="twitter:card" content="summary">
@@ -83,7 +83,7 @@
 <!-- end SEO -->
 
 
-<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+<link href="http://www.skyscribe.me/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
 
 <!-- http://t.co/dKP3o1e -->
 <meta name="HandheldFriendly" content="True">
@@ -95,7 +95,7 @@
 </script>
 
 <!-- For all browsers -->
-<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+<link rel="stylesheet" href="http://www.skyscribe.me/assets/css/main.css">
 
 <!--[if lte IE 9]>
   <style>
@@ -129,20 +129,20 @@
   <div class="masthead__inner-wrap">
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
-        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <a class="site-title" href="http://www.skyscribe.me/">驭风万里无垠</a>
         <ul class="visible-links">
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">Posts</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">Posts</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">Tags</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">Tags</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">Categories</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">Categories</a></li>
           
             
-            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">About</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">About</a></li>
           
         </ul>
         <button><div class="navicon"></div></button>
@@ -166,7 +166,7 @@
   
     <div class="author__avatar">
       
-        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+        <img src="http://www.skyscribe.me/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
       
     </div>
   
@@ -766,23 +766,23 @@
     
       
       
-      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+      <a href="http://www.skyscribe.me/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/categories/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+      <a href="http://www.skyscribe.me/categories/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/categories/haskell" class="page__taxonomy-item" rel="tag">haskell</a><span class="sep">, </span>
+      <a href="http://www.skyscribe.me/categories/haskell" class="page__taxonomy-item" rel="tag">haskell</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/categories/notes" class="page__taxonomy-item" rel="tag">notes</a><span class="sep">, </span>
+      <a href="http://www.skyscribe.me/categories/notes" class="page__taxonomy-item" rel="tag">notes</a><span class="sep">, </span>
     
       
       
-      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+      <a href="http://www.skyscribe.me/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
     
     </span>
   </p>
@@ -798,24 +798,24 @@
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Concurrency with Haskell https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Concurrency with Haskell http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2012/07/23/concurrency-with-haskell/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2012/07/23/concurrency-with-haskell/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
       
   <nav class="pagination">
     
-      <a href="https://skyscribe.github.io/post/2012/07/09/vim-he-github/" class="pagination--pager" title="vim 和 Github
+      <a href="http://www.skyscribe.me/post/2012/07/09/vim-he-github/" class="pagination--pager" title="vim 和 Github
 ">Previous</a>
     
     
-      <a href="https://skyscribe.github.io/post/2012/08/02/parallel-programming-in-haskell/" class="pagination--pager" title="Parallel programming in Haskell
+      <a href="http://www.skyscribe.me/post/2012/08/02/parallel-programming-in-haskell/" class="pagination--pager" title="Parallel programming in Haskell
 ">Next</a>
     
   </nav>
@@ -857,7 +857,7 @@
       <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
     
     
-    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    <li><a href="http://www.skyscribe.me/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
   </ul>
 </div>
 
@@ -865,7 +865,7 @@
       </footer>
     </div>
 
-    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+    <script src="http://www.skyscribe.me/assets/js/main.min.js"></script>
 
 
 
