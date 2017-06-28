@@ -1,0 +1,757 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Excessive null checks in Java Defensive Programming? - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="最近在参与某开发小组的团体代码审查会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Excessive null checks in Java Defensive Programming?">
+
+
+  <link rel="canonical" href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">
+
+
+
+  <meta property="og:description" content="最近在参与某开发小组的团体代码审查会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Excessive null checks in Java Defensive Programming?">
+  <meta name="twitter:description" content="最近在参与某开发小组的团体代码审查会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-06-27T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="http://www.skyscribe.me/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://www.skyscribe.me/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="http://www.skyscribe.me/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">Posts</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">Tags</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">Categories</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">About</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="http://www.skyscribe.me/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(20)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/security/index.html">security(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/python/index.html">python(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(18)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/ruby/index.html">ruby(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(22)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/kotlin/index.html">kotlin(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/java/index.html">java(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Excessive null checks in Java Defensive Programming?">
+    <meta itemprop="description" content="最近在参与某开发小组的团体代码审查会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。">
+    <meta itemprop="datePublished" content="June 27, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Excessive null checks in Java Defensive Programming?
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>最近在参与某开发小组的<a href="https://atendesigngroup.com/blog/group-code-reviews">团体代码审查</a>会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。</p>
+
+<!--more-->
+
+<p>按照最偷懒的做法 (毕竟<a href="http://threevirtues.com/">懒惰是伟大程序员的美德</a>之一)，可以对使用的对象不做检查，那么万一该指针为空，则运行期抛出的空指针异常<strong>默认行为就会将程序给crash掉</strong>，你的用户会很不高兴，你公司的客户会不高兴乃至投诉你的研发老板，你的老板会更加不高兴甚至于愤怒以至于半夜将你叫起来加班解决问题；试想当你拖着睡眼惺忪的躯壳爬到办公室查看日志，迷迷糊糊一看，原来是有个地方的对象引用是null指针，没有做判断导致JVM退出了。那么最自然的方案是添加个判断了，原来的代码可能是</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">()</span>
+</code></pre>
+</div>
+<p>现在被改成了</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">someObj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">()</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>后边可能出现了新的问题，那么你可能依法炮制，继续加上更多的分支判断。这时候可能有个聪明的程序员跳出来说，我们不是有<a href="https://en.wikipedia.org/wiki/Defensive_programming">防御性编程</a>大法吗，可以来的更彻底一些，<strong>干脆对所有的传入对象做空指针检查</strong>不就可以了吗？粗看起来很有道理，然而仔细想一下就会发现这里有很大的隐患。上述的检查其实对每一次对象的调用其复杂度就会增加1，如果一个类里引用了很多对象，每次都要去做判断很快使代码变得难以维护，尤其是考虑到一些稍微复杂一些的方法可能有多个出口的情况，条件判断的增多会直接导致内部状态变得难以分析。</p>
+
+<p>显然对所有的对象引用做空指针检查不是一个明智的主意。那么是否有什么方法可以减少这些检查或者有其它的提高可读性的变通之道吗？</p>
+
+<h2 id="到底哪些情况需要判断空指针">到底哪些情况需要判断空指针</h2>
+
+<p>为了探讨这个问题，我们可以详细列举一些可能需要判断的情况逐一分析一番就能做到心中有数了。因为Java语言中一切皆是对象(当然基本类型不算)，所有对象都由某个class给构造出来，所以我们<strong>仅仅需要讨论class中涉及到的对象</strong>即可。</p>
+
+<h3 id="成员对象-field">成员对象 (field)</h3>
+
+<h4 id="在构造中被初始化过的成员对象">在构造中被初始化过的成员对象</h4>
+
+<h4 id="没有在构造中初始化的成员对象">没有在构造中初始化的成员对象</h4>
+
+<h3 id="静态成员对象-field">静态成员对象 (Field)</h3>
+
+<h3 id="方法传入参数">方法传入参数</h3>
+
+<h4 id="公有方法public-中的参数">公有方法public 中的参数</h4>
+
+<h4 id="私有方法中的参数">私有方法中的参数</h4>
+
+<h3 id="外部对象">外部对象</h3>
+
+<p>所谓的外部对象是这些在某个方法实现中被引用到，却并没有被类如方法传入参数，也没有被放在成员对象列表中的对象。当然如果出现这种情况，往往是全局对象的引用（要么是静态全局对象，要么是单例对象）。然而不管哪种情况下，你的class已经悄无声息地引入了<strong>隐式依赖</strong>，而隐式依赖在大部分情况下引入的问题比解决的问题要多。</p>
+
+<p>对于这类对象，如果用现代的依赖注入方案来解决，很自然它们就和普通的成员对象没什么区别了。关键的问题是需要考虑好，是否真的必须引入这类隐式依赖就可以了，绝大部分情况下，<strong>显示依赖比隐式依赖要好</strong>。当然去掉了隐式依赖后，一个额外的好处是你的测试将变得更加容易了，因为不需要特殊的mock或是Stub来设置上下文了；只需要构造被测试对象的时候安插好构造参数即可。</p>
+
+<h2 id="变通之道">变通之道</h2>
+<p>啰嗦这么多，看起来很多地方可能还是不可避免需要去做空指针检查。是否有办法做个变通，既保证逻辑正确，也能确保代码维护性不被破坏？其实回头仔细想一下，之所以有空指针异常这回事儿，根本上还不是因为<strong>Java用异常机制来非正常情况的</strong>处理吗，从这个角度出发，其实我们还有这些选择</p>
+
+<ol>
+  <li>用返回值而不用异常 - 然而我们是在讨论Java，虽然依然可以用返回值对象，或者类似C或者golang的error code的方式，但是如果你以这种方式写代码，其实<strong>可维护性的负担反而加重</strong>了,顶多是少了一些花括号而已</li>
+  <li>使用新的变成范式，没错我们还有functional programming可以选择，因为Java8已经给我们送来了这个大礼 - Optional</li>
+</ol>
+
+<h3 id="optional">Optional</h3>
+
+<h3 id="隐藏在optional中的模式">隐藏在Optional中的模式</h3>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/java" class="page__taxonomy-item" rel="tag">java</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/patterns" class="page__taxonomy-item" rel="tag">patterns</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/java" class="page__taxonomy-item" rel="tag">java</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-06-27T00:00:00+08:00">June 27, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Excessive null checks in Java Defensive Programming? http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="http://www.skyscribe.me/post/2017/06/24/migrate-blog-to-jekyll/" class="pagination--pager" title="Migrate blog to Jekyll
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="http://www.skyscribe.me/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+      </footer>
+    </div>
+
+    <script src="http://www.skyscribe.me/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>

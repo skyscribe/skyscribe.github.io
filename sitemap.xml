@@ -237,6 +237,10 @@
 <lastmod>2017-06-24T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/</loc>
+<lastmod>2017-06-27T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/about/</loc>
 </url>
 <url>
@@ -342,6 +346,12 @@
 <loc>http://www.skyscribe.me/tags/fp/</loc>
 </url>
 <url>
+<loc>http://www.skyscribe.me/tags/java/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/patterns/</loc>
+</url>
+<url>
 <loc>http://www.skyscribe.me/categories/cpp/</loc>
 </url>
 <url>
@@ -400,6 +410,9 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/categories/kotlin/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/categories/java/</loc>
 </url>
 <url>
 <loc>http://www.skyscribe.me/page2/</loc>
