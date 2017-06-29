@@ -221,6 +221,10 @@
 <lastmod>2013-08-24T19:32:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/</loc>
+<lastmod>2016-03-03T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/post/2016/12/24/software-design-in-agile-development-context/</loc>
 <lastmod>2016-12-24T19:32:00+08:00</lastmod>
 </url>
@@ -409,6 +413,9 @@
 <loc>http://www.skyscribe.me/categories/engineering/</loc>
 </url>
 <url>
+<loc>http://www.skyscribe.me/categories/cmake/</loc>
+</url>
+<url>
 <loc>http://www.skyscribe.me/categories/kotlin/</loc>
 </url>
 <url>
@@ -446,5 +453,8 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/page12/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/page13/</loc>
 </url>
 </urlset>
