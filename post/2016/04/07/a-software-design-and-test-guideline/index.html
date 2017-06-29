@@ -1,0 +1,875 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>A software design and test guideline for C++ project - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="A software design and test guideline for C++ project">
+
+
+  <link rel="canonical" href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">
+
+
+
+  <meta property="og:description" content="To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="A software design and test guideline for C++ project">
+  <meta name="twitter:description" content="To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2016-04-07T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="http://www.skyscribe.me/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://www.skyscribe.me/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="http://www.skyscribe.me/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="http://www.skyscribe.me/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/security/index.html">security(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/python/index.html">python(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(18)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/ruby/index.html">ruby(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(22)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/kotlin/index.html">kotlin(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/java/index.html">java(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="A software design and test guideline for C++ project">
+    <meta itemprop="description" content="To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.">
+    <meta itemprop="datePublished" content="April 07, 2016">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">A software design and test guideline for C++ project
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  11 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>To make large scale C++ software project in good shape is not an easy job, especially when you have <strong>a pretty big development team that may form multiple sub-teams</strong>. One of the key actions is to have <strong>common understanding on software design and testing strategies, rules and guidelines</strong>, which are far more important than simply coding guidelines.</p>
+
+<p>This article is my personal understanding and suggestion on such a critical (yet controversial) topic.</p>
+
+<!--more-->
+
+<h1 id="designtest-strategy">Design/Test Strategy</h1>
+<p>Here’s the general rules regarding design and testing strategy.</p>
+
+<h2 id="testing-strategy">Testing Strategy</h2>
+
+<ul>
+  <li>Software testing strategy would be <strong>UT + SCT</strong> during development.</li>
+  <li>Obsolete MT(module test) cases in all domains in the long run, consider adding SCT to cover specific scenarios while counting whole binary as SUT</li>
+  <li>Consider UT and SCT as different level of tests, so <strong>SCT coverage wouldn’t replace UT coverage</strong>, vice versa</li>
+  <li>Remove legacy MT case when it’s considered to be too heavy to maintain</li>
+  <li><strong>DONOT</strong> test <del>against internal implementation of an entity</del> (either a class or binary), test its interface (public methods or exposed component interfaces) intensively</li>
+  <li>Design complicated scenarios into different layers, so unit tests can be written <strong>separately in different levels</strong></li>
+  <li>Avoid writing tests that treats different layers of implementations as SUT, write testing against lowest layer directly as possible</li>
+</ul>
+
+<h2 id="class-design-for-testability">Class Design For Testability</h2>
+<ul>
+  <li>Program your class to interface than implementation</li>
+  <li>Keep class as <strong>small with single responsibility</strong> as possible</li>
+  <li>Design your class so it can easily be tested, with small interface, clear responsibility and explicit collaboration with other classes</li>
+  <li>Also take SCT testability into account in design</li>
+  <li>Wrap utility functions within nested namespaces, and test them individually. DONOT place them in a class with static qualifier.</li>
+  <li>DONOT add code to a legacy big smelly class, consider <strong>extract the changes into smaller classes</strong> and use <strong>dependency injection</strong> to make changes testable</li>
+</ul>
+
+<h1 id="technical-detailed-guidelines">Technical Detailed Guidelines</h1>
+<p>A few detailed guidelines are listed here for reference.</p>
+
+<h2 id="class-design">Class Design</h2>
+<p>Class is the basic element of object oriented software, the majority of the unit tests shall be taken a single class as SUT. Here lists some general guidelines:</p>
+
+<ul>
+  <li>A class should not provide too many public interfaces, generally 3~7 public methods shall be preferred</li>
+  <li>A class should not leak its internal states to external users by public interfaces</li>
+  <li>A class should initialize its collaborators through <strong>dependency injection</strong> than directly construct by instance</li>
+  <li>A class should not work on different abstract levels</li>
+  <li>High level classes (working towards the center of business logic interaction) should not work directly with low level details - design lower level classes to finish the low level work</li>
+  <li>A class should not collaborate with too many external classes, no specific number is suggested here, while working with <strong>tens of external classes would be definitely problematic</strong> in most cases</li>
+</ul>
+
+<h3 id="boundary-class-design">Boundary Class Design</h3>
+<p>A boundary class is designed to be the interface to external entities (module or higher level entities), the design should apply below guidelines</p>
+<ul>
+  <li>It should be an abstract class with visible interfaces, main intention is the <strong>separation of concerns</strong></li>
+  <li>It should never reveal internal design details</li>
+  <li>It should not bring unnecessary dependencies (like introducing template meta-programming elements)</li>
+  <li>It should not handle processing details rather act as the bridge to other entities</li>
+</ul>
+
+<p>Above guidelines also holds for general class design, while special care shall be taken when you’re designing a boundary class, since violation of them might turn overall software architecture into <em>a big ball of mud</em>.</p>
+<blockquote>
+  <p>A Big Ball of Mud is a haphazardly structured, sprawling, sloppy, duct-tape-and-baling-wire, spaghetti-code jungle. <strong>These systems show unmistakable signs of unregulated growth, and repeated, expedient repair</strong>. Information is shared promiscuously among distant elements of the system, often to the point where <strong>nearly all the important information becomes global or duplicated</strong>. The overall structure of the system may never have been well defined. If it was, it may have eroded beyond recognition. Programmers with a shred of architectural sensibility shun these quagmires. Only those who are unconcerned about architecture, and, perhaps, are comfortable with the inertia of the day-to-day chore of patching the holes in these failing dikes, are content to work on such systems.</p>
+</blockquote>
+
+<blockquote>
+  <p>— Brian Foote and Joseph Yoder, Big Ball of Mud. Fourth Conference on Patterns ? Languages of Programs (PLoP ‘97/EuroPLoP ‘97) Monticello, Illinois, September 1997</p>
+</blockquote>
+
+<p>Also be careful not to introduce too many boundary classes.</p>
+
+<h3 id="application-logic-class-design">Application-logic Class Design</h3>
+<p>Application logic specific classes are those who are created to fulfill certain specific business logic. It shall comply with below guidelines</p>
+<ul>
+  <li>It should be kept as low in coupling and high in cohesion</li>
+  <li>It should have single responsibility, have <strong>good balance between SOLID principles</strong>, and not violate the law of Demeter
+    <blockquote>
+      <p>Each unit should have only limited knowledge about other units : only units “closely” related to the current unit.</p>
+
+      <p>Each unit should only talk to its friends; don’t talk to strangers.</p>
+
+      <p>Only talk to your immediate friends.</p>
+    </blockquote>
+  </li>
+  <li>It should never work on different abstraction levels, like a <strong>manager/controller class handles low level platform APIs should be discouraged</strong></li>
+  <li>It should not contain too many data members, which is typically sever violation of single responsibility</li>
+  <li>They may further by abstracted into different levels, if this is the case, keep <strong>dependency inversion principle</strong> followed such that abstractions (higher level classes) shall not depend on implementation details (lower level classes)
+    <blockquote>
+      <p>A. High-level modules should not depend on low-level modules. Both should depend on abstractions.</p>
+
+      <p>B. Abstractions should not depend on details. Details should depend on abstractions.</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="tmp-usage">TMP Usage</h3>
+<p>Template-meta-programming are widely adopted by modern programmers, unfortunately it’s quite often misused/overused. When it’s overtaken, compiling dependence might be a serious problem, and compiler diagnostics messages might kill your time. It’s not a problem of generics itself, but rather a limitation of compilers and c++ language.Here’s some general ideas</p>
+<ul>
+  <li>DONOT bring TMP to public interfaces unless you’re designing low level utilities</li>
+  <li>Balance OOD and TMP, hide TMP into implementation details would be a good idea</li>
+  <li>DONOT reinvent the wheels, make good use of standard libraries</li>
+</ul>
+
+<h2 id="unit-test-design">Unit Test Design</h2>
+<p>This chapter would <strong>not</strong> cover basic howtos about unit testing, although some important guidelines are listed. Walk through <a href="cpri_handler_unit_test_guide.md">unit test guide</a> for that purpose.</p>
+
+<h3 id="general-rules">General Rules</h3>
+<p>Below general rules shall be applied always as possible</p>
+<ul>
+  <li>Each non-trivial classes shall be tested</li>
+  <li>DONOT test against factory method or classes since they’re designed to bring up other objects - it’s still valuable to test against complicated startup procedures</li>
+  <li>Keep <strong>test design and class design as synchronized</strong> - whenever class design is changed, test design shall be refined accordingly</li>
+</ul>
+
+<h3 id="test-case-intention-and-focus">Test Case Intention And Focus</h3>
+<ul>
+  <li>A test case/suite shall <strong>test against a sinle class in most of the time</strong>, testing against multiple classes without abstraction generally makes tests fragile and hard to maintain; be careful when you want to bring multiple classes into SUT</li>
+  <li>A test case shall <strong>test against the public (exposed) interface</strong> only, and consider the SUT (specific class) as black box as possible</li>
+  <li>A test case shall focus on the behavior (business intention) of its SUT than internal implementation, which are more subject to change</li>
+  <li>Different test cases shall be added to <strong>cover both normal scenarios and exceptional scenarios based on intention</strong></li>
+  <li>A test case shall be as specific as possible, and shall have <strong>clear expectation and strict validation</strong></li>
+  <li>DONOT try to cover more than one scenario in one test case, feel free to add more cases for exceptional scenarios</li>
+</ul>
+
+<h3 id="testing-interaction-with-mocksstubs">Testing Interaction With Mocks/Stubs</h3>
+
+<ul>
+  <li>Be careful on heavy mocks, and <strong>add strong checks on matchers and set desired actions</strong> if you want to validate the output (interaction) in customized mocks</li>
+  <li>Prefer grouping mocks in different test suites than organizing them in common functions, the latter is harder to maintain</li>
+  <li>Combine stubs with mocks wisely</li>
+  <li>DONOT create threads before careful reasoning - introducing threads to unit tests makes test cases hared to maintain and track</li>
+  <li>DONOT introduce real timers to test cases - advance a mocked timer to simulate the timeout behavior makes tests more stable and predictable</li>
+  <li><strong>Never sleep nor wait</strong> in test cases</li>
+  <li>Make unit tests run fast as possible - generally one unit test shall not take over <strong>300 milliseconds</strong> to finish</li>
+</ul>
+
+<h3 id="test-cases-groupingsuites">Test Cases Grouping/Suites</h3>
+<ul>
+  <li><strong>Generalize common operations and reuse them</strong> as test fixtures that can be shared by multiple test cases</li>
+  <li>Prefer split big/complicated tests into smaller ones and group them according to logical abstractions - big tests typically indicates design smelly in SUT</li>
+  <li>DONOT create very large fixtures, consider ways to re-organize setups/fixtures by abstraction</li>
+  <li>Keep one test group (based on a common fixture typically) in one or more source files, <strong>DONOT</strong> place irreverent tests in one source file</li>
+</ul>
+
+<h1 id="references">References</h1>
+<ul>
+  <li><a href="http://agilemodeling.com/artifacts/crcModel.htm">Class Responsibility Collaboration(CRC) models: An Agile Introduction</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Class-responsibility-collaboration_card">Wikipedia:CRC Cards</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Dependency_inversion_principle">Dependency Inversion Principle</a></li>
+  <li><a href="http://www.laputan.org/mud/">Big Ball of Mud</a></li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/guideline" class="page__taxonomy-item" rel="tag">guideline</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/strategy" class="page__taxonomy-item" rel="tag">strategy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/test" class="page__taxonomy-item" rel="tag">test</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2016-04-07T00:00:00+08:00">April 07, 2016</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=A software design and test guideline for C++ project http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/" class="pagination--pager" title="Faster build optimization for large CMake based project
+">Previous</a>
+    
+    
+      <a href="http://www.skyscribe.me/post/2016/12/24/software-design-in-agile-development-context/" class="pagination--pager" title="Software Design in Agile Development Context
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="http://www.skyscribe.me/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="http://www.skyscribe.me/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>

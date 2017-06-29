@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-06-29T22:06:07+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-06-29T22:32:48+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -771,7 +771,152 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;软件工程的一个关键要素就是工具。软件设计自然也离不开合适的工具，尤其是软件设计又是对需求进行抽象的结晶；选择合适的工具可以增进协作和沟通，使得设计输出是有实际指导作用的而不仅仅是纯粹的文档工作。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">Faster build optimization for large CMake based project</title><link href="http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/" rel="alternate" type="text/html" title="Faster build optimization for large CMake based project" /><published>2016-03-03T00:00:00+08:00</published><updated>2016-03-03T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/">&lt;p&gt;Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency.
+&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">A software design and test guideline for C++ project</title><link href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" rel="alternate" type="text/html" title="A software design and test guideline for C++ project" /><published>2016-04-07T00:00:00+08:00</published><updated>2016-04-07T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">&lt;p&gt;To make large scale C++ software project in good shape is not an easy job, especially when you have &lt;strong&gt;a pretty big development team that may form multiple sub-teams&lt;/strong&gt;. One of the key actions is to have &lt;strong&gt;common understanding on software design and testing strategies, rules and guidelines&lt;/strong&gt;, which are far more important than simply coding guidelines.&lt;/p&gt;
+
+&lt;p&gt;This article is my personal understanding and suggestion on such a critical (yet controversial) topic.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h1 id=&quot;designtest-strategy&quot;&gt;Design/Test Strategy&lt;/h1&gt;
+&lt;p&gt;Here’s the general rules regarding design and testing strategy.&lt;/p&gt;
+
+&lt;h2 id=&quot;testing-strategy&quot;&gt;Testing Strategy&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Software testing strategy would be &lt;strong&gt;UT + SCT&lt;/strong&gt; during development.&lt;/li&gt;
+  &lt;li&gt;Obsolete MT(module test) cases in all domains in the long run, consider adding SCT to cover specific scenarios while counting whole binary as SUT&lt;/li&gt;
+  &lt;li&gt;Consider UT and SCT as different level of tests, so &lt;strong&gt;SCT coverage wouldn’t replace UT coverage&lt;/strong&gt;, vice versa&lt;/li&gt;
+  &lt;li&gt;Remove legacy MT case when it’s considered to be too heavy to maintain&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;DONOT&lt;/strong&gt; test &lt;del&gt;against internal implementation of an entity&lt;/del&gt; (either a class or binary), test its interface (public methods or exposed component interfaces) intensively&lt;/li&gt;
+  &lt;li&gt;Design complicated scenarios into different layers, so unit tests can be written &lt;strong&gt;separately in different levels&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;Avoid writing tests that treats different layers of implementations as SUT, write testing against lowest layer directly as possible&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;class-design-for-testability&quot;&gt;Class Design For Testability&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Program your class to interface than implementation&lt;/li&gt;
+  &lt;li&gt;Keep class as &lt;strong&gt;small with single responsibility&lt;/strong&gt; as possible&lt;/li&gt;
+  &lt;li&gt;Design your class so it can easily be tested, with small interface, clear responsibility and explicit collaboration with other classes&lt;/li&gt;
+  &lt;li&gt;Also take SCT testability into account in design&lt;/li&gt;
+  &lt;li&gt;Wrap utility functions within nested namespaces, and test them individually. DONOT place them in a class with static qualifier.&lt;/li&gt;
+  &lt;li&gt;DONOT add code to a legacy big smelly class, consider &lt;strong&gt;extract the changes into smaller classes&lt;/strong&gt; and use &lt;strong&gt;dependency injection&lt;/strong&gt; to make changes testable&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;technical-detailed-guidelines&quot;&gt;Technical Detailed Guidelines&lt;/h1&gt;
+&lt;p&gt;A few detailed guidelines are listed here for reference.&lt;/p&gt;
+
+&lt;h2 id=&quot;class-design&quot;&gt;Class Design&lt;/h2&gt;
+&lt;p&gt;Class is the basic element of object oriented software, the majority of the unit tests shall be taken a single class as SUT. Here lists some general guidelines:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A class should not provide too many public interfaces, generally 3~7 public methods shall be preferred&lt;/li&gt;
+  &lt;li&gt;A class should not leak its internal states to external users by public interfaces&lt;/li&gt;
+  &lt;li&gt;A class should initialize its collaborators through &lt;strong&gt;dependency injection&lt;/strong&gt; than directly construct by instance&lt;/li&gt;
+  &lt;li&gt;A class should not work on different abstract levels&lt;/li&gt;
+  &lt;li&gt;High level classes (working towards the center of business logic interaction) should not work directly with low level details - design lower level classes to finish the low level work&lt;/li&gt;
+  &lt;li&gt;A class should not collaborate with too many external classes, no specific number is suggested here, while working with &lt;strong&gt;tens of external classes would be definitely problematic&lt;/strong&gt; in most cases&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;boundary-class-design&quot;&gt;Boundary Class Design&lt;/h3&gt;
+&lt;p&gt;A boundary class is designed to be the interface to external entities (module or higher level entities), the design should apply below guidelines&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;It should be an abstract class with visible interfaces, main intention is the &lt;strong&gt;separation of concerns&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;It should never reveal internal design details&lt;/li&gt;
+  &lt;li&gt;It should not bring unnecessary dependencies (like introducing template meta-programming elements)&lt;/li&gt;
+  &lt;li&gt;It should not handle processing details rather act as the bridge to other entities&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Above guidelines also holds for general class design, while special care shall be taken when you’re designing a boundary class, since violation of them might turn overall software architecture into &lt;em&gt;a big ball of mud&lt;/em&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;A Big Ball of Mud is a haphazardly structured, sprawling, sloppy, duct-tape-and-baling-wire, spaghetti-code jungle. &lt;strong&gt;These systems show unmistakable signs of unregulated growth, and repeated, expedient repair&lt;/strong&gt;. Information is shared promiscuously among distant elements of the system, often to the point where &lt;strong&gt;nearly all the important information becomes global or duplicated&lt;/strong&gt;. The overall structure of the system may never have been well defined. If it was, it may have eroded beyond recognition. Programmers with a shred of architectural sensibility shun these quagmires. Only those who are unconcerned about architecture, and, perhaps, are comfortable with the inertia of the day-to-day chore of patching the holes in these failing dikes, are content to work on such systems.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;— Brian Foote and Joseph Yoder, Big Ball of Mud. Fourth Conference on Patterns ? Languages of Programs (PLoP ‘97/EuroPLoP ‘97) Monticello, Illinois, September 1997&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Also be careful not to introduce too many boundary classes.&lt;/p&gt;
+
+&lt;h3 id=&quot;application-logic-class-design&quot;&gt;Application-logic Class Design&lt;/h3&gt;
+&lt;p&gt;Application logic specific classes are those who are created to fulfill certain specific business logic. It shall comply with below guidelines&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;It should be kept as low in coupling and high in cohesion&lt;/li&gt;
+  &lt;li&gt;It should have single responsibility, have &lt;strong&gt;good balance between SOLID principles&lt;/strong&gt;, and not violate the law of Demeter
+    &lt;blockquote&gt;
+      &lt;p&gt;Each unit should have only limited knowledge about other units : only units “closely” related to the current unit.&lt;/p&gt;
+
+      &lt;p&gt;Each unit should only talk to its friends; don’t talk to strangers.&lt;/p&gt;
+
+      &lt;p&gt;Only talk to your immediate friends.&lt;/p&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+  &lt;li&gt;It should never work on different abstraction levels, like a &lt;strong&gt;manager/controller class handles low level platform APIs should be discouraged&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;It should not contain too many data members, which is typically sever violation of single responsibility&lt;/li&gt;
+  &lt;li&gt;They may further by abstracted into different levels, if this is the case, keep &lt;strong&gt;dependency inversion principle&lt;/strong&gt; followed such that abstractions (higher level classes) shall not depend on implementation details (lower level classes)
+    &lt;blockquote&gt;
+      &lt;p&gt;A. High-level modules should not depend on low-level modules. Both should depend on abstractions.&lt;/p&gt;
+
+      &lt;p&gt;B. Abstractions should not depend on details. Details should depend on abstractions.&lt;/p&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;tmp-usage&quot;&gt;TMP Usage&lt;/h3&gt;
+&lt;p&gt;Template-meta-programming are widely adopted by modern programmers, unfortunately it’s quite often misused/overused. When it’s overtaken, compiling dependence might be a serious problem, and compiler diagnostics messages might kill your time. It’s not a problem of generics itself, but rather a limitation of compilers and c++ language.Here’s some general ideas&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;DONOT bring TMP to public interfaces unless you’re designing low level utilities&lt;/li&gt;
+  &lt;li&gt;Balance OOD and TMP, hide TMP into implementation details would be a good idea&lt;/li&gt;
+  &lt;li&gt;DONOT reinvent the wheels, make good use of standard libraries&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;unit-test-design&quot;&gt;Unit Test Design&lt;/h2&gt;
+&lt;p&gt;This chapter would &lt;strong&gt;not&lt;/strong&gt; cover basic howtos about unit testing, although some important guidelines are listed. Walk through &lt;a href=&quot;cpri_handler_unit_test_guide.md&quot;&gt;unit test guide&lt;/a&gt; for that purpose.&lt;/p&gt;
+
+&lt;h3 id=&quot;general-rules&quot;&gt;General Rules&lt;/h3&gt;
+&lt;p&gt;Below general rules shall be applied always as possible&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Each non-trivial classes shall be tested&lt;/li&gt;
+  &lt;li&gt;DONOT test against factory method or classes since they’re designed to bring up other objects - it’s still valuable to test against complicated startup procedures&lt;/li&gt;
+  &lt;li&gt;Keep &lt;strong&gt;test design and class design as synchronized&lt;/strong&gt; - whenever class design is changed, test design shall be refined accordingly&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;test-case-intention-and-focus&quot;&gt;Test Case Intention And Focus&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;A test case/suite shall &lt;strong&gt;test against a sinle class in most of the time&lt;/strong&gt;, testing against multiple classes without abstraction generally makes tests fragile and hard to maintain; be careful when you want to bring multiple classes into SUT&lt;/li&gt;
+  &lt;li&gt;A test case shall &lt;strong&gt;test against the public (exposed) interface&lt;/strong&gt; only, and consider the SUT (specific class) as black box as possible&lt;/li&gt;
+  &lt;li&gt;A test case shall focus on the behavior (business intention) of its SUT than internal implementation, which are more subject to change&lt;/li&gt;
+  &lt;li&gt;Different test cases shall be added to &lt;strong&gt;cover both normal scenarios and exceptional scenarios based on intention&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;A test case shall be as specific as possible, and shall have &lt;strong&gt;clear expectation and strict validation&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;DONOT try to cover more than one scenario in one test case, feel free to add more cases for exceptional scenarios&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;testing-interaction-with-mocksstubs&quot;&gt;Testing Interaction With Mocks/Stubs&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Be careful on heavy mocks, and &lt;strong&gt;add strong checks on matchers and set desired actions&lt;/strong&gt; if you want to validate the output (interaction) in customized mocks&lt;/li&gt;
+  &lt;li&gt;Prefer grouping mocks in different test suites than organizing them in common functions, the latter is harder to maintain&lt;/li&gt;
+  &lt;li&gt;Combine stubs with mocks wisely&lt;/li&gt;
+  &lt;li&gt;DONOT create threads before careful reasoning - introducing threads to unit tests makes test cases hared to maintain and track&lt;/li&gt;
+  &lt;li&gt;DONOT introduce real timers to test cases - advance a mocked timer to simulate the timeout behavior makes tests more stable and predictable&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Never sleep nor wait&lt;/strong&gt; in test cases&lt;/li&gt;
+  &lt;li&gt;Make unit tests run fast as possible - generally one unit test shall not take over &lt;strong&gt;300 milliseconds&lt;/strong&gt; to finish&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;test-cases-groupingsuites&quot;&gt;Test Cases Grouping/Suites&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Generalize common operations and reuse them&lt;/strong&gt; as test fixtures that can be shared by multiple test cases&lt;/li&gt;
+  &lt;li&gt;Prefer split big/complicated tests into smaller ones and group them according to logical abstractions - big tests typically indicates design smelly in SUT&lt;/li&gt;
+  &lt;li&gt;DONOT create very large fixtures, consider ways to re-organize setups/fixtures by abstraction&lt;/li&gt;
+  &lt;li&gt;Keep one test group (based on a common fixture typically) in one or more source files, &lt;strong&gt;DONOT&lt;/strong&gt; place irreverent tests in one source file&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://agilemodeling.com/artifacts/crcModel.htm&quot;&gt;Class Responsibility Collaboration(CRC) models: An Agile Introduction&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Class-responsibility-collaboration_card&quot;&gt;Wikipedia:CRC Cards&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Dependency_inversion_principle&quot;&gt;Dependency Inversion Principle&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.laputan.org/mud/&quot;&gt;Big Ball of Mud&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="test" /><category term="strategy" /><category term="guideline" /><summary type="html">To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.</summary></entry><entry><title type="html">Faster build optimization for large CMake based project</title><link href="http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/" rel="alternate" type="text/html" title="Faster build optimization for large CMake based project" /><published>2016-03-03T00:00:00+08:00</published><updated>2016-03-03T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/">&lt;p&gt;Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency.
 &lt;!--more--&gt;&lt;/p&gt;
 &lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
 &lt;p&gt;In daily development work, engineers are frequently frustrated by the slow build system&lt;/p&gt;
@@ -792,11 +937,12 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;Take the power of Gerrit and link CI jobs with every patch set on Gerrit&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Above ideas are awesome from CI side, unfortunately daily TDD cycle is quite different with CI. For majority of the time, developers just want to change a small sub-set of the source code, and they hardly need to rebuild the whole system. Every piece of efforts were invested on CI even makes programmers think their only rescue is to ask CI to do the build/testing. When they make some changes, they just create a patch and throw it to Gerrit, do something else for a while and get back to check if Jenkins jobs are done with positive (or negative) feedbacks. Things do work well with their own downside:&lt;/p&gt;
+&lt;p&gt;Above ideas are awesome from CI side, unfortunately daily TDD cycle is quite different with CI. For &lt;strong&gt;majority of the time, developers just want to change a small sub-set of the source code&lt;/strong&gt;, and they hardly need to rebuild the whole system. Every piece of efforts were invested on CI even makes programmers think their only rescue is to ask CI to do the build/testing. When they make some changes, they just &lt;del&gt;create a patch and throw it to Gerrit&lt;/del&gt;, do something else for a while and get back to check if Jenkins jobs are done with positive (or negative) feedbacks. Things do work well with their own downside:&lt;/p&gt;
+
 &lt;ul&gt;
   &lt;li&gt;&lt;strong&gt;Jenkins/CI becomes more busy&lt;/strong&gt; due to more and more engineers push their local changes (not verified locally) to CI&lt;/li&gt;
-  &lt;li&gt;There is less room to improve from CI side unless more budget can be assigned (allocate more cloud instances)&lt;/li&gt;
-  &lt;li&gt;Programmers are still quite distracted due to task switch (waiting for building/testing results)&lt;/li&gt;
+  &lt;li&gt;There is &lt;strong&gt;less and less room to improve from CI&lt;/strong&gt; side unless more budget can be assigned (allocate more cloud instances)&lt;/li&gt;
+  &lt;li&gt;Programmers are still quite distracted due to &lt;strong&gt;task switches&lt;/strong&gt;(waiting for building/testing results), everybody knows it’s bad, and lots of them get depressed and think nothing can change&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;untouched-dark-side&quot;&gt;Untouched dark side&lt;/h3&gt;
@@ -1313,118 +1459,4 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;策略的平衡意味着，安排座位的时候需要考虑某些负面的影响 - 有些时候需要将人们适度分隔开来而不是聚越来越多的人在一个大的空间。当周围的噪音和干扰越来越大的时候，人们容易觉得压抑和头疼，很多重要的工作都无法正常的完成。每一种策略都有一定的限制；明智的决策什么时候&lt;strong&gt;Osmotic Communication&lt;/strong&gt;是有效的，什么时候它因为人太多而失去意义是个重要的事情。&lt;/p&gt;
 
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry><entry><title type="html">Agile software development - The cooperative game - 笔记 - part1</title><link href="http://www.skyscribe.me/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/" rel="alternate" type="text/html" title="Agile software development - The cooperative game - 笔记 - part1" /><published>2013-08-11T09:52:00+08:00</published><updated>2013-08-11T09:52:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/">&lt;p&gt;这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;脉络&quot;&gt;脉络&lt;/h2&gt;
-
-&lt;p&gt;这本书讲述的部分很多已经超越了软件开发本身，并且也并没有特别偏颇的只讲述Agile一种方法，而是从多个角度综合衡量多种方法论的优缺点和使用场景。总体而言，这又是一本务实的书，而不是简单的对agile方法进行鼓吹和传教。&lt;/p&gt;
-
-&lt;p&gt;全书的结构可以看作三个部分（虽然作者认为是2个部分）:&lt;/p&gt;
-
-&lt;h3 id=&quot;理论&quot;&gt;理论&lt;/h3&gt;
-
-&lt;p&gt;前边一半的篇幅用于介绍各色理论 - 沟通的基础和协作，个人的影响，交互通信的方式和特点，团队以及方法学。讨厌理论的人可能会跳过这一大部分，然后我个人的看法是，这恰恰是作者最精华的所在。理论的探讨也不是简单的罗列和论证，而是引用其它人的研究成果，并结合了作者自己做管理咨询工作的经验和分析总结。每一个章节，都分为一大一小两个部分：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;前者详细的分析和论证主题，并根据实践经验加以总结和分析&lt;/li&gt;
-  &lt;li&gt;第二部分大多冠以&lt;strong&gt;evolution&lt;/strong&gt;的后缀，在前者部分基础上加以升华或者扩展。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;实践和方法学&quot;&gt;实践和方法学&lt;/h3&gt;
-
-&lt;p&gt;第二个部分主要侧重于实践，即各种各样的方法学和实践方式，主要侧重怎样做的问题和思考这些方法学可以给个人带来怎么样的启发。描述了集中方法论：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;XP&lt;/li&gt;
-  &lt;li&gt;Light and agile&lt;/li&gt;
-  &lt;li&gt;Self adapting&lt;/li&gt;
-  &lt;li&gt;Crystal family&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这些方法和常见的Scrum/XP/Clean Room方法论有些不同；其实现有的方法分支都以这些公共的理论为基础，互相学习/发展和渗透。&lt;/p&gt;
-
-&lt;h3 id=&quot;附录&quot;&gt;附录&lt;/h3&gt;
-
-&lt;p&gt;一般书籍的附录不会太长，仅仅添加一些和主旨无太大关系的说明或者索引。这本书则不属于这一类；初一看会发现书籍的附录占据了四分之一的篇幅，并且分成留个章节，只有最后一个章节是关于索引和书籍引用的常规内容。其它的部分，也遵从了前边两个大块的结构，对正文没有详细说的部分做了更深入的扩展，或引用大篇幅已经脱销的书籍文字，或者直接给出一些偏一轮的paper的大部分乃至全文来辅助全书的主线。个人感觉这部分其实可以作为一个独立的部分。&lt;/p&gt;
-
-&lt;p&gt;有趣的是，敏捷宣言的部分和敏捷联盟的成立背景也在这里做了详细的介绍 - 由此我才明白为何外界对敏捷有那么深刻的误解：这只是一个松散的联盟，参与发起的先驱们其实有着很不同的观点和方法论。这个过程的产出才是大家常见到的敏捷宣言，过程本身又呼应了作者的观点 - 这是一个关于&lt;strong&gt;协作&lt;/strong&gt;的游戏。&lt;/p&gt;
-
-&lt;h2 id=&quot;理论-1&quot;&gt;理论&lt;/h2&gt;
-
-&lt;h3 id=&quot;沟通和倾听的三个境界&quot;&gt;沟通和倾听的三个境界&lt;/h3&gt;
-
-&lt;p&gt;作者认为沟通是极其苦难的事情，甚至有些时候是那一达到的，所以才有各种各样的方法论来减少协作的难度。这个过程是有不同的阶段的，作者引用了Shua-Ha-Ri的学习理论来阐述这三个阶段：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Shu 是基础部分，需要维持基本的原则和方法，学习成熟的方法和实践，确保这些实践不被破坏；这个是基础阶段，需要有mentor或者coach指明一条正确的道路，引导大家走下去，不要偏离到错误的路上去。&lt;/li&gt;
-  &lt;li&gt;Ha 是脱离第一个阶段，适度偏离死板的教条，获得一定的自由去深入的反思和理解其中不合乎实际情况的部分。这个部分的前提是，一些基础的原则和实践被真正吸收和消化，否则就容易随意的否定和偏移，这是一个提高的阶段&lt;/li&gt;
-  &lt;li&gt;Ri 是最高的升华阶段，这个水平之上要求能超越已有的所有舒服，用实践者的方法从实际情况出发，找到最适合的方式。这一阶段任何书籍和方法仅仅是参考，需要的是原创的思想和过程&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;理想的沟通在很多时候甚至是不可能的事情，尤其是如下的情况：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;人们很容易误会口头表达的意思&lt;/li&gt;
-  &lt;li&gt;有歧义的术语或者名词常常产生误解&lt;/li&gt;
-  &lt;li&gt;喋喋不休的人可能给出的指令是让人不想仔细听下去或者真正听进去&lt;/li&gt;
-  &lt;li&gt;领域知识的差异导致信息准确性的降低&lt;/li&gt;
-  &lt;li&gt;不同的知识背景导致某些预设的关于常识的背景可能根本就不存在&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;具体到实际工作中来，就会有&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;设计文档阐述的意图很难准确和无偏差&lt;/li&gt;
-  &lt;li&gt;经验丰富的开发者很可能用简洁的语言描述设计想法&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;有鉴于此，我们可以在沟通的过程中，尽量创造&lt;strong&gt;共同的经验和背景知识&lt;/strong&gt;作为讨论的前提，并在作出具体的Action之前多确认不必要的误解。而这一切都需要更好的协作和交互。&lt;/p&gt;
-
-&lt;h3 id=&quot;软件和创造沟通游戏&quot;&gt;软件和创造/沟通游戏&lt;/h3&gt;
-
-&lt;p&gt;游戏可以按照是否有目标和是否终止分为如下三个类型：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;有限结束的，没有目标导向的，如弹钢琴，跳舞等&lt;/li&gt;
-  &lt;li&gt;有限的，但是有确定的目标，譬如网球比赛，软件开发&lt;/li&gt;
-  &lt;li&gt;无限永远不终止的，如职业生涯管理，商业组织生存&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;自然这里关于有限无限的定义，是基于一个一个具体的活动而言的，譬如职业生涯的发展，相对于一次的工作更替来说是无限继续下去的，但是对于人的生命而言又是相对有限的，当然这个是不同的范围界定了。&lt;/p&gt;
-
-&lt;p&gt;Cockburn认为最容易和软件开发活动做对比的莫过于攀岩运动，因为他们有如下的共同之处：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;注重协作和目标导向：攀岩需要登顶，还需要分工合作，软件开发也同样有清晰的商业目标（开源软件不在此列），并且强调分工协作（个人项目自然不算）&lt;/li&gt;
-  &lt;li&gt;负载均衡和分工：根据不同的需要和负载来协作分配资源和重心&lt;/li&gt;
-  &lt;li&gt;团队：需要用团队的方式来完成&lt;/li&gt;
-  &lt;li&gt;智力水平的要求：有些人永远不能完成攀岩，有些人永远没有智力和能力做软件开发工作&lt;/li&gt;
-  &lt;li&gt;技巧密集型：需要经验和技巧的积累才能更好的完成目标&lt;/li&gt;
-  &lt;li&gt;培训：各种知识和技巧需要事前的培训才可&lt;/li&gt;
-  &lt;li&gt;工具：需要用工具来提高效率，并且工具扮演了一个重要的角色&lt;/li&gt;
-  &lt;li&gt;资源受限：没有无限制的资源供分配，必须协调和均衡&lt;/li&gt;
-  &lt;li&gt;计划：必须事先指定某种粒度的计划，进行资源的分配&lt;/li&gt;
-  &lt;li&gt;不确定性/挑战：总有无法预料的情况发生，天气可能突变，突然而来的技术问题等&lt;/li&gt;
-  &lt;li&gt;乐趣：过程本身是有趣的，编程过程本身是有趣味的（至少很多程序员是因此从事这个职业）&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;尽管有很多关于软件开发和传统工程学科的比较，然而Cockburn并不认为这样的比较是恰当的，因为工程师仅仅按照设计好的计划来操作就是，后期如果除了小问题，要么推倒重来，要么小修小补；然后几十年的软件工程时间却表明，仿照这种方式来操作带来了效率的问题和维护性的噩梦。软件开发的计划很难做到和变化的环境想符，而维护的成本也高昂到甚至直接取消项目。&lt;/p&gt;
-
-&lt;p&gt;作为软件开发工程师，他们需要的是达到目标，理解问题然后找到一种方法解决面临的问题，并用合适的工具和语言实现该解决方案，并解决可能的变更和维护需要。从这个角度出发，软件开发活动是：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;资源有限的&lt;/li&gt;
-  &lt;li&gt;协作性的&lt;/li&gt;
-  &lt;li&gt;注重创造和沟通的&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;同时，软件开发活动同时要求在沟通的过程中，将发布可用的软件作为首要的目标的同时，积累一些经验可用用到下一个软件中去。软件开发团队在没有满足第一个目标之前必须优先尽可能保证当前的软件可以发布；然后做到第一个之后，对于第二个目标，必须同时考虑到资源的限制性，做到尽可能好就够 - 奢求文档永远和代码同步就是一个没有意义的目标。&lt;strong&gt;足够好&lt;/strong&gt;就是了。交互和协作才是最重要的，因为文档总为是死的，沟通则是总在变化的。&lt;/p&gt;
-
-&lt;h4 id=&quot;重构软件开发过程&quot;&gt;重构软件开发过程&lt;/h4&gt;
-
-&lt;p&gt;软件开发过程是一个通过协商来达到协作的过程，该过程通过个人的技术尝试和由各个贡献者组成的团队的协作达成专业技术上的决策。从这个意义上来说，注重交互和协作的软件开发过程和传统意义上的软件工程有很大的区别。ECN（Engineering Collaboration via Negotiation)就是通过群体的协作达成的技术决策来完成软件开发的活动。这一活动强调，最好的流程是通过共同构建的过程达成，在这个过程中，每个人都动态的参与并影响最终的决策。因为人的想法和观点总是在动态的变化，因此这一过程必然要求协作和协商的过程也是动态进行和持续不断的。&lt;/p&gt;
-
-&lt;p&gt;同时这一过程也意味着工程上的协商决策(collaborative deal-making)和共同创新(collective innovation)。协作的结果是所有参与各方的互相竞争的偏好所达成的一整的意见。这个过程必然强调双赢的产出和新的创新，这些创新都不可能由单枪匹马的冒险所达到，而是通过协商而后的一致意见转化得来。&lt;/p&gt;
-
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">这本书的中文译名是一个平淡无奇的«敏捷软件开发»，这个名字是如此的平庸以至于放在书架上不会有几个人注意到它真正的价值，除非你仔细的阅读了书面封底的作者介绍和英文原版所获得的荣耀 - 17届Jolt大奖获奖作品；而Cockburn大师本身又属于一个人能连续两次获得Jolt的技术作家之一；但是能够在连续两年中获得两次Jolt大奖的，估计又少之又少了。</summary></entry></feed>
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry></feed>

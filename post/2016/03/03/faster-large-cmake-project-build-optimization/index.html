@@ -133,16 +133,37 @@
         <ul class="visible-links">
           
             
-            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">Posts</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/programming/index.html">编程相关</a></li>
           
             
-            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">Tags</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/notes/index.html">个人笔记</a></li>
           
             
-            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">Categories</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/tools/index.html">工具相关</a></li>
           
             
-            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">About</a></li>
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">关于...</a></li>
           
         </ul>
         <button><div class="navicon"></div></button>
@@ -445,7 +466,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/design/index.html">design(4)</a>
+      <a href="/categories/design/index.html">design(5)</a>
   </span>
   </li>
   
@@ -454,16 +475,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/engineering/index.html">engineering(6)</a>
-  </span>
-  </li>
-  
-  
-  
-  
-  <li>
-  <span class="tag">
-      <a href="/categories/cmake/index.html">cmake(1)</a>
+      <a href="/categories/engineering/index.html">engineering(7)</a>
   </span>
   </li>
   
@@ -540,11 +552,12 @@
   <li>Take the power of Gerrit and link CI jobs with every patch set on Gerrit</li>
 </ul>
 
-<p>Above ideas are awesome from CI side, unfortunately daily TDD cycle is quite different with CI. For majority of the time, developers just want to change a small sub-set of the source code, and they hardly need to rebuild the whole system. Every piece of efforts were invested on CI even makes programmers think their only rescue is to ask CI to do the build/testing. When they make some changes, they just create a patch and throw it to Gerrit, do something else for a while and get back to check if Jenkins jobs are done with positive (or negative) feedbacks. Things do work well with their own downside:</p>
+<p>Above ideas are awesome from CI side, unfortunately daily TDD cycle is quite different with CI. For <strong>majority of the time, developers just want to change a small sub-set of the source code</strong>, and they hardly need to rebuild the whole system. Every piece of efforts were invested on CI even makes programmers think their only rescue is to ask CI to do the build/testing. When they make some changes, they just <del>create a patch and throw it to Gerrit</del>, do something else for a while and get back to check if Jenkins jobs are done with positive (or negative) feedbacks. Things do work well with their own downside:</p>
+
 <ul>
   <li><strong>Jenkins/CI becomes more busy</strong> due to more and more engineers push their local changes (not verified locally) to CI</li>
-  <li>There is less room to improve from CI side unless more budget can be assigned (allocate more cloud instances)</li>
-  <li>Programmers are still quite distracted due to task switch (waiting for building/testing results)</li>
+  <li>There is <strong>less and less room to improve from CI</strong> side unless more budget can be assigned (allocate more cloud instances)</li>
+  <li>Programmers are still quite distracted due to <strong>task switches</strong>(waiting for building/testing results), everybody knows it’s bad, and lots of them get depressed and think nothing can change</li>
 </ul>
 
 <h3 id="untouched-dark-side">Untouched dark side</h3>
@@ -723,10 +736,6 @@
     
       
       
-      <a href="http://www.skyscribe.me/categories/cmake" class="page__taxonomy-item" rel="tag">cmake</a><span class="sep">, </span>
-    
-      
-      
       <a href="http://www.skyscribe.me/categories/tools" class="page__taxonomy-item" rel="tag">tools</a>
     
     </span>
@@ -760,7 +769,7 @@
 ">Previous</a>
     
     
-      <a href="http://www.skyscribe.me/post/2016/12/24/software-design-in-agile-development-context/" class="pagination--pager" title="Software Design in Agile Development Context
+      <a href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" class="pagination--pager" title="A software design and test guideline for C++ project
 ">Next</a>
     
   </nav>

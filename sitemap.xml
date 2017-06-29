@@ -225,6 +225,10 @@
 <lastmod>2016-03-03T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/</loc>
+<lastmod>2016-04-07T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/post/2016/12/24/software-design-in-agile-development-context/</loc>
 <lastmod>2016-12-24T19:32:00+08:00</lastmod>
 </url>
@@ -338,6 +342,15 @@
 <loc>http://www.skyscribe.me/tags/design/</loc>
 </url>
 <url>
+<loc>http://www.skyscribe.me/tags/test/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/strategy/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/guideline/</loc>
+</url>
+<url>
 <loc>http://www.skyscribe.me/tags/agile/</loc>
 </url>
 <url>
@@ -411,9 +424,6 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/categories/engineering/</loc>
-</url>
-<url>
-<loc>http://www.skyscribe.me/categories/cmake/</loc>
 </url>
 <url>
 <loc>http://www.skyscribe.me/categories/kotlin/</loc>
