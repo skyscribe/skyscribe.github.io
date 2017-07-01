@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-06-30T22:42:32+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-01T18:06:13+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -771,7 +771,90 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;软件工程的一个关键要素就是工具。软件设计自然也离不开合适的工具，尤其是软件设计又是对需求进行抽象的结晶；选择合适的工具可以增进协作和沟通，使得设计输出是有实际指导作用的而不仅仅是纯粹的文档工作。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">A software design and test guideline for C++ project</title><link href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" rel="alternate" type="text/html" title="A software design and test guideline for C++ project" /><published>2016-04-07T00:00:00+08:00</published><updated>2016-04-07T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">&lt;p&gt;To make large scale C++ software project in good shape is not an easy job, especially when you have &lt;strong&gt;a pretty big development team that may form multiple sub-teams&lt;/strong&gt;. One of the key actions is to have &lt;strong&gt;common understanding on software design and testing strategies, rules and guidelines&lt;/strong&gt;, which are far more important than simply coding guidelines.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;假设教练和新手（初出茅庐的新队员）正在观看同一场比赛，教练所能察觉到的内容远远超过新手。这并非是因为教练火眼金睛，而是因为他掌握了某种无形的武器。通过一整套&lt;strong&gt;思维抽象&lt;/strong&gt;，教练能够投过现象看到本质，把对原始现象的感知转换为对目前局势简明扼要的理解。例如，教练看到传球的一瞬间，就会联想到某种战术的成功。尽管教练与新手观看了同一场比赛，但是教练可以更好的理解比赛。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Gegore Fairbanks博士在其《恰如其分的软件架构》一书的概述中反复采纳了上述的隐喻来阐释&lt;strong&gt;抽象思维和精炼模型&lt;/strong&gt;的重要性；因为这是软件架构最为根本的部分，是复杂软件系统最为本质和核心的部分。计算机科学经过几十年的发展，形成了一些非常基本的解决问题的思路，包括分治，抽象和知识积累；合格的架构师则需要审时度势，深入的理解所要解决的具体问题领域的最本质的问题，适时的选择合理的抽象，对系统做&lt;strong&gt;合理的划分从而能有效的分而治之又不引入过多的边界耦合&lt;/strong&gt;问题，同时还要巧妙地将领域知识映射到具体的软件实现上来。&lt;/p&gt;
+
+&lt;h2 id=&quot;知识的重要性不应被低估&quot;&gt;知识的重要性不应被低估&lt;/h2&gt;
+&lt;p&gt;这里知识的重要性往往容易被忽略，尤其是容易被&lt;strong&gt;一些断章取义的&lt;/strong&gt;对爱因斯坦关于&lt;a href=&quot;http://quoteinvestigator.com/2013/01/01/einstein-imagination/&quot;&gt;想象力比知识更重要&lt;/a&gt;的主张的引用所蒙蔽；因为软件工程问题比较不同于前沿物理理论的探索，实际软件工程需要解决很多关于人的协作的问题，而不仅仅是纯粹探索具体的软件技术本身。现实的工程实践中，有太多的软件工程师将聪明才智花费在编程语言细节的追求和优化上，却对&lt;strong&gt;大的软件系统的职责分割和协作交互方式投入关注太少&lt;/strong&gt;，从这个角度上来说，掌握再多的具体变成语言的细节可能对整体的帮助也不会帮助太多，因为&lt;strong&gt;大部分编程语言在一些细节问题的处理上其实是大同小异&lt;/strong&gt;，而对于粗粒度的业务逻辑的抽象处理能力上，编程语言的支持其实又相当有限。设计模式试图从纯技术的角度来提炼一些公用的范式，然而终究和具体需要解决的领域问题关系甚远 - 我们需要的更多是关于&lt;strong&gt;如何思考整个系统的分割和协同解决整体问题的知识&lt;/strong&gt;，譬如同样是用于解决一个关于日志文件的存储问题，可以有一些不同的解决思路&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;采用本地的日志文件&lt;/li&gt;
+  &lt;li&gt;采用中央数据库的方法来存储&lt;/li&gt;
+  &lt;li&gt;采用分布式文件系统加索引来支持快速检索的技术&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于软件架构师而言，不了解这些具体技术及其背后的优缺点和应用场景，自然无法对真实需要解决的领域问题选择合适的解决方法。这里&lt;strong&gt;了解相关的知识是解决问题的重要前提&lt;/strong&gt;条件，如果不具备相关的知识而是仅仅选择一个理论上可能可以解决当前问题的方案，然后寄希望于之后发现问题再行逐步解决不是一种负责任的做法。所谓脱离了具体知识的想象力，只能是纸上谈兵光说不练假把式，将架构师应该负的责任都推给了救火队长。&lt;/p&gt;
+
+&lt;p&gt;起码从知识积累的角度来说，软件架构的选择和维护不是一个容易的工作，需要大量的现有知识和对业务场景的仔细分析，才能从众多可能的解决方法中&lt;strong&gt;找到一个最适合具体场景&lt;/strong&gt;的解决方案出来，将其转化为合理的软件概念和抽象，最终生成可以运行的代码。&lt;/p&gt;
+
+&lt;h2 id=&quot;为什么需要风险驱动的架构&quot;&gt;为什么需要风险驱动的架构&lt;/h2&gt;
+&lt;p&gt;按照上述的思路，软件架构是一个&lt;strong&gt;成本相当高&lt;/strong&gt;又相当费时的工作，架构师需要对所处理的领域问题做深入的探讨、分析和分解，根据已有的解决方案做合理的评估，选出最合适的匹配才能力保最终实现出来的软件系统满足目标客户的需求，为客户创造价值的同时自己的组织也从中获取收益。可惜在敏捷开发思想日益深入人心的今天，绝大部分组织没有可能有这么多的时间让架构师做太完备的分析而不产出一行代码，你晚发布一个月，可能你的竞争对手就已经占领了更多的市场，取得更多客户的订单。&lt;/p&gt;
+
+&lt;p&gt;最理想的情况是，你的项目可能刚好是一个有很多成功先例的项目，那么仅需要&lt;strong&gt;重用那些历经考验的架构&lt;/strong&gt;做合适的适配即可投入使用；如果你面临的是一个相对很新的领域而没有现成的架构方式可以参考，你就需要特别小心谨慎的分析思考了。更可能的情况是，一个系统中有一些领域是相对成熟的有现成的方案，而另外一些子领域则可能是问题重重，需要比较大的投入去分析和考量。风险驱动的方式采用&lt;strong&gt;和项目优先级对齐&lt;/strong&gt;的架构设计方式，通过对项目优先级的分析识别出相对合理的风险优先级，再基于这些风险优先级来决定做多少架构的工作，以及需要选择什么样的技术来解决高风险的问题。&lt;/p&gt;
+
+&lt;h2 id=&quot;如何决定架构的重要性&quot;&gt;如何决定架构的重要性&lt;/h2&gt;
+&lt;p&gt;具体的就是如何判断对于某些具体的问题架构是至关重要的，而那些情况下不是。譬如开发一个现实商品细节的手机呈现页面，架构就是是无关紧要的，只需要开发者有足够的软件知识和清晰的界面布局约束，就可以以较低的风险完成编码测试并交付给客户；相反当你开发一个实现自动驾驶汽车的刹车子系统的软件模块的时候，则需要时刻关注整个自动驾驶系统的架构，因为一个微小的错误判断可能轻则导致车辆失控撞上马路旁边路灯，重则撞上前方静止等待红灯的车辆，引发严重的事故。&lt;/p&gt;
+
+&lt;p&gt;对于&lt;strong&gt;大规模或者复杂度高&lt;/strong&gt;的（有很多相关开发/测试等人员牵涉其中）系统，我们&lt;strong&gt;需要格外重视其软件架构&lt;/strong&gt;，具体而言&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;如果可能的解决方案空间很少，或者很难设计出满足要求的解决方案的系统，软件架构的风险也非常高，譬如设计一个对吞吐量、可靠性、实时性都有相当要求的系统，需要仔细的权衡那些具体的技术可以采用，可能会有哪些现在的风险&lt;/li&gt;
+  &lt;li&gt;生死攸关的系统或者&lt;strong&gt;失败风险极高&lt;/strong&gt;的系统，譬如你在开发一个网络中间设备控制器软件，改软件下游有相当多的终端设备相连，任何时候改控制器软件发生故障或者性能下降，下游的设备都会受到波及从而招致客户的抱怨；这种情况下架构的决策以及权衡也变得相当重要&lt;/li&gt;
+  &lt;li&gt;对&lt;strong&gt;质量有相当高要求&lt;/strong&gt;的系统，譬如高可用性约束的系统，对系统发生故障导致不可用的时间和故障修复时间有明确的高可靠性要求，那么具体设计中就需要考虑使用那些高可用技术既保证系统的一致性得以满足又能够有适当的备份机制提供热切换，始终尽量保持服务处于不中断状态&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;如何做风险驱动模型&quot;&gt;如何做：风险驱动模型&lt;/h2&gt;
+
+&lt;p&gt;既然风险驱动架构的目的是&lt;strong&gt;期望用最小的架构技术去降低最紧迫的风险&lt;/strong&gt;以达到事半功倍的效果。随之而来的就是具体采用怎样的步骤来达到目标,概括起来可以用如下的步骤&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;识别系统的风险，对这些风险排定优先级；这些在专门的风险管理知识中有专门的介绍，包括定性分析方法和定量分析法等，比较正规的办法是使用风险矩阵，包括美国的军方标准MIL-STD-882D，当然大部分软件组织在设计计算机系统的时候不会这么正规。&lt;/li&gt;
+  &lt;li&gt;选择运用一组技术，这些技术必须是可以用来合理的降低风险而不是增加系统的风险，同时能完成功能需求&lt;/li&gt;
+  &lt;li&gt;评估风险减低的程度&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;风险驱动模型的核心在于始终将风险放在极为显著的位置，充分将风险暴露出来，考虑其带来的影响并采用合理的技术解决之。很多情况下，特性驱动的开发模型过于关注对基本功能的完成情况而选择对系统重要的非功能风险置之不理，直&lt;strong&gt;到系统功能完成差不多了才来审视这些质量属性和约束，往往这个时候已经到了项目的维护期而为时已晚&lt;/strong&gt;，早期对这些风险的缺乏重视导致项目的维护难以为继而失败甚至推倒重来。&lt;/p&gt;
+
+&lt;p&gt;有可能出现的一个问题是，不同的开发人员对风险的评估和认识和你的不同，这个时候可能就需要仔细的评审和和基于事实的一些评估；甚至要做一些简单的原型验证工作。&lt;strong&gt;这些工作都是恰当而必要的，因为你始终工作在方法优先级较高的风险&lt;/strong&gt;上。&lt;/p&gt;
+
+&lt;h3 id=&quot;选用什么样的技术&quot;&gt;选用什么样的技术&lt;/h3&gt;
+
+&lt;p&gt;在这个语境下，技术是个很宽泛的字眼，往往关注的是一些独立于具体领域问题的技术，如设计模式或架构模式来分解系统，对领域进行建模采用&lt;a href=&quot;https://en.wikipedia.org/wiki/Domain-driven_design&quot;&gt;领域驱动设计&lt;/a&gt;,做原型测试等等。任何特定的技术都只是擅长于解决某些类型的风险，但并不一定适合于解决其它风险，譬如吞吐量分析和原型测试有利于降低性能风险，但并不能解决系统可靠性的风险。有些风险可能有多种技术手段可以解决，而有些特定的风险则必须结合多种技术才能解决，因此不能一概而论或寄期望于有一个“万能手册”&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;如果你面临 &lt;X&gt; 风险，请使用&lt;Y&gt; 技术降低它。&lt;/Y&gt;&lt;/X&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;有意义的是这种根据风险来选择技术的思路，它可以帮助我们提高工作的效率,&lt;strong&gt;避免在一些低效的技术上浪费时间或者资源&lt;/strong&gt;，但同时又不忽略那些真正关乎项目成败的风险。&lt;/p&gt;
+
+&lt;p&gt;具体实践上我们也不能根除项目的所有风险，因为消除风险的成本是巨大的，所以必须结合项目的优先级，权衡工程风险和非工程风险，合理采用技术手段和非技术（项目管理）手段，综合考虑技术因素和非技术因素最终确保项目的成功。&lt;/p&gt;
+
+&lt;h2 id=&quot;何时停止&quot;&gt;何时停止？&lt;/h2&gt;
+&lt;p&gt;合理把握设计和架构的度是个复杂的问题，因为时间成本是此消彼长的关系；用在设计和分析的时间太多了，能分配在构建和测试上的时间就会相应减少。因此我们需要一些中庸之道，采用&lt;strong&gt;恰如其分&lt;/strong&gt;的软件设计，即不做过多又不能忽视可能是实际项目实施陷入困境的风险。因而一个简单的模型指导原则是&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;为架构所付出的努力应该与相应失败的风险相称&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;譬如如果性能风险微不足道，就没必要在性能测试或者分析优化数据结构上浪费太多的时间。然而当性能变的直观重要的时候，就必须从一开始尽量想清楚目标环境的各种性能约束条件，选择合适的算法和数据结构，仔细权衡各种网络和IO开销，及早开始做性能测试甚至可以在开始阶段多做原型验证，确保设计没有大的缺陷。&lt;/p&gt;
+
+&lt;h2 id=&quot;架构和设计的演进&quot;&gt;架构和设计的演进&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://randomarchitecture.files.wordpress.com/2013/07/bduf-vs-emergent-design1.png?w=441&amp;amp;h=179&quot; alt=&quot;BDUF_vs_emergent_design&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;正如马丁·福勒在其&lt;a href=&quot;https://martinfowler.com/articles/designDead.html&quot;&gt;演进式架构&lt;/a&gt;中所说，系统的设计会随着具体的实现的增长而增长；过往的软件工程历史表明，演进式设计一直充满了争议，局部而又不协调的设计决策会带来一系列的混乱，从而制造出一个大杂烩系统，导致系统的可维护性下降，进一步阻碍系统的进一步演进。甚至于一不小心还会陷入&lt;a href=&quot;http://www.laputan.org/mud/&quot;&gt;大泥球架构&lt;/a&gt;的泥潭。&lt;/p&gt;
+
+&lt;p&gt;当然随着敏捷开发方式的日渐流行和各项重构技术的发展，演进式架构以及渐渐克服了上述这些缺点从而再度焕发生机，奥妙就在于各种更为敏捷的工程实践，包括重构、测试驱动开发、持续集成等越来越深入人心。&lt;/p&gt;
+
+&lt;p&gt;传统的方法上来说，也有预先计划式设计这种从建筑行业借鉴来的方式（架构师这个名称也是从建筑行业来的），要求实现做好周密的设计然后再开工写代码做测试；只是时至今日一见很少有人主张采用预先大量设计(&lt;a href=&quot;https://en.wikipedia.org/wiki/Big_Design_Up_Front&quot;&gt;Big Design Up Front&lt;/a&gt;)。&lt;/p&gt;
+
+&lt;p&gt;介于两者之间的是预先小量的设计，采用这种方式可能是更好的一种这种，譬如在一开始阶段，通过对系统风险的分析对最大的风险采用预先设计的方式防范最首要的风险，然后随着项目的逐步推进，采用演进式设计来逐步完善整个系统的整体设计图景；当然这里最重要的前提是，&lt;strong&gt;确保重构、持续集成、测试驱动开发等关键的敏捷开发实践能够落到实处&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;T.B.D&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="engineering" /><category term="software architecture" /><category term="agile" /><summary type="html">随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了客户对交付时间和质量的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以借助各种成熟的基础设施和成熟完善的开发工具在很短的时间内完成复杂的功能。然而软件架构和抽象洞察能力这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。</summary></entry><entry><title type="html">A software design and test guideline for C++ project</title><link href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" rel="alternate" type="text/html" title="A software design and test guideline for C++ project" /><published>2016-04-07T00:00:00+08:00</published><updated>2016-04-07T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">&lt;p&gt;To make large scale C++ software project in good shape is not an easy job, especially when you have &lt;strong&gt;a pretty big development team that may form multiple sub-teams&lt;/strong&gt;. One of the key actions is to have &lt;strong&gt;common understanding on software design and testing strategies, rules and guidelines&lt;/strong&gt;, which are far more important than simply coding guidelines.&lt;/p&gt;
 
 &lt;p&gt;This article is my personal understanding and suggestion on such a critical (yet controversial) topic.&lt;/p&gt;
 
@@ -1365,98 +1448,4 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;西南是图书馆和客户办公室，图书馆在中间做一个动静分隔的作用&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - part2</title><link href="http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - part2" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">&lt;p&gt;本文是第二部分(&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;)。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;作为个体的人&quot;&gt;作为个体的人&lt;/h2&gt;
-
-&lt;p&gt;人们常常选择性的忽略了软件开发和实际过程是由一个一个的&lt;strong&gt;个体的人&lt;/strong&gt;来完成的；然而人都有弱点，容易犯错，有固定的失败模式/成功模式，以及通用的行为模式：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;人们的行为通常是难以预测的&lt;/li&gt;
-  &lt;li&gt;人性本身有些固有的失败模式&lt;/li&gt;
-  &lt;li&gt;总有一些方式比另外一些方式更容易让人们共同工作，即使对同样一群人&lt;/li&gt;
-  &lt;li&gt;有很多模式引起失败，那么什么样的方式才能达成成功?&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;人的行为模式&quot;&gt;人的行为模式&lt;/h3&gt;
-
-&lt;p&gt;人的行为总是非线性的并且比一般的物理实体复杂的多；给予双倍的奖励，或者双倍的惩罚，甚至于双倍的时间，都不能确定的提高一个人的思考速度/思考质量/编程设计输出。一个每周工作40个小时的人可能在下周工作60个小时就可以得到双倍的进展，但是接下来一周再工作60个小时，可能不仅不能维持之前双倍的效率，可能反而不及最初正常的效率，因为人们会产生疲惫。&lt;/p&gt;
-
-&lt;p&gt;人的行为会突然发生偶然的变化，某某可能突然对测试工作发生兴趣；一个偶然的小事儿可能导致一个高级工程师的离开等；某个工程师可能在一种情况下显得特别容易沟通而换了一种环境则会变得难以沟通。人们协作的方式也可能有巨大的差异，不同的文化背景可能青睐于不同的沟通方式；直接或者保守在不同的文化氛围中显得完全不同。真因为这些不可避免的差异，所以才有各种各样的技术方法被发明出来，然后，&lt;strong&gt;没有一种方法是绝对有效&lt;/strong&gt;的。这个结论是明显的，然后人们往往容易忽略之，而盲目的鼓吹某种方法是&lt;strong&gt;正确&lt;/strong&gt;的方式并且期望所有人按照这种方式来工作。&lt;/p&gt;
-
-&lt;p&gt;人的行为在很多方面表现出巨大的不同，并不意味着一些通用的方法就没有意义；还是有些东西在很大的范围内行之有效的。基于此，我们就可以在承认人与人之间巨大差异的基础上来建立大家认可的方法，但是并不能由此期望人们的具体行为会趋同或者可以严格预测。&lt;/p&gt;
-
-&lt;p&gt;有效的过程方法的意义在于：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;允许人们更容易地表述他们的想法&lt;/li&gt;
-  &lt;li&gt;可以完成一个人无法独立完成的工作&lt;/li&gt;
-  &lt;li&gt;将复杂而又繁琐的工作自动化&lt;/li&gt;
-  &lt;li&gt;使得人们的相互沟通更容易&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;失败模式&quot;&gt;失败模式&lt;/h3&gt;
-
-&lt;p&gt;有如下五种比较普遍的失败模式：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;&lt;strong&gt;人们总是会犯错&lt;/strong&gt; - 简单但又常常被人们忽略；敏捷和迭代开发的巨大进步意义就在于承认人总是会出错，但是通过一连串小的错误来及早暴露风险；持续不断的解决问题而不是固守详细周密的计划 - 没有错误的计划似乎只存在于真空之中&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;倾向于保守谨慎&lt;/strong&gt; 在最终结果一致的情况下，同样的问题通过不同的方式呈现出来，人们的反应却有可能大不相同。当我没可能获得比较高的潜在收益的时候，人们总是倾向于去冒险，然后在可能失去某些东西的时候，人们则会倾向于选择更保守的方式。一个有很多瀑布模式成功经验的manager（其实这些成功的经验有多大程度上算作成功就很难考量）在一个初级的工程师提出尝试迭代开发的模式的时候可能持激烈的反对态度；他可能更愿意采用传统的策略，能产生“确定“的输出而不是”可能产生更大收益“但是又”看起来奇怪“的方式&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;习惯的不一致性&lt;/strong&gt; 如果人们总能保持一致，那么就不会有减肥/锻炼的问题。问题是&lt;strong&gt;我们从来不缺少方法实践，缺少的恰恰是实践这些方法&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;倾向于发明新的东西而不是研究已有的方案&lt;/strong&gt; 大概跟人们接受的教育有关 - 鼓励原创的论文/独立完成的作业等等；而不是团队工作。很多时候人们需要更好的重用已有的成果而不是自己从头发明一切&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;自律和适当容忍的妥协&lt;/strong&gt;  强调高度的自律往往是一厢情愿，然后过度的妥协又容易导致越来越多的混乱。项目经理可能对严格要求团队遵循某个方法实践所带来的副作用感到惊讶。譬如XP实践强调结对编程和Coach，然后很多Team在实践的过程中却将重构的工作丢下不理，等待更高级的工程师去做&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;某些方式总是比其它的更好&quot;&gt;某些方式总是比其它的更好&lt;/h3&gt;
-
-&lt;p&gt;尽管人与人之间的差异是巨大的，然而总有一些方法是更有效的。人们倾向于做的更好，如果他们&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;从具体的例子开始&lt;/li&gt;
-  &lt;li&gt;从容易处理的东西开始着手&lt;/li&gt;
-  &lt;li&gt;从已有的东西入手寻找替代/优化的方式&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;还有一些方法也更容易让人们取得积极的进展：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;通过观察和学习的同时做工作&lt;/li&gt;
-  &lt;li&gt;支持精力集中的思考并同时支持积极的沟通 - 设置安静时间和公共沟通区域来加强沟通&lt;/li&gt;
-  &lt;li&gt;根据人们的长处进行任务分配&lt;/li&gt;
-  &lt;li&gt;选择最好的人才&lt;/li&gt;
-  &lt;li&gt;激励方式的选择 - 开发人员的工作激情/成就感/贡献荣誉感觉&lt;/li&gt;
-  &lt;li&gt;清晰有效的反馈 - 越及时效果越好&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;寻找成功模式&quot;&gt;寻找成功模式&lt;/h3&gt;
-
-&lt;p&gt;作者长期面试成功项目团队的经验中，如下的申明频繁的出现： &lt;strong&gt;一小部分人在关键的时间介入，作出了一切需要做的工作&lt;/strong&gt;。看起来是很随意的描述，然而更仔细的审视发现，如下的一些成功因素慢慢浮现出来:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;擅长于四处观望式的扫视 - 设计文档未必需要每一个细节都和实现保持一致，只要大致结构的一致即可。做维护工作的开发者就可以通过快速的浏览找到需要的部分，剩下的就是具体怎么做了，细节的准确意义并没有想的那么大了。文档只需要&lt;strong&gt;保持足够的精确&lt;/strong&gt;即可，能完成主要的工作，使得人们不用费很大功夫就可以找到对应的细节即可。Tech Lead仅仅需要大致看一下问题大概在什么地方并知道其它工程师去做即可，而不是处理每一个细节&lt;/li&gt;
-  &lt;li&gt;人们持续不断的学习 - 敏捷过程提出的持续改进就是这么一个思想，回顾当前迭代中那些值得改进的，持续的需西和发现不足，人们就能不断的进步。&lt;/li&gt;
-  &lt;li&gt;可以改变的韧性 - 通过团队的集体氛围来慢慢提高个体的韧性，使之适应并改变 - 当然并不是每个个人都可适应这个过程，然后他就会离开&lt;/li&gt;
-  &lt;li&gt;主动承担和贡献&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h4 id=&quot;融合这些成功的因素&quot;&gt;融合这些成功的因素&lt;/h4&gt;
-
-&lt;p&gt;是否有融合这些成功因素的方法存在？&lt;strong&gt;自组织团队&lt;/strong&gt;的想法给出了一种思路，但是实现的过程自然是充满崎岖的。需要培养这样的氛围，每个人都需要能够第一时间发现系统中的错误，不管这个人的职位和角色是什么；&lt;strong&gt;他将错误传递到能够正确纠正错误的人的成本&lt;/strong&gt;往往决定了&lt;strong&gt;整个项目的成本&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h2 id=&quot;平衡各种策略&quot;&gt;平衡各种策略&lt;/h2&gt;
-
-&lt;p&gt;很多时候看起来很好的策略并不意味着在大部分情况都是好的 - 譬如让一个Team的成员坐在一起。&lt;a href=&quot;http://pmdoi.org&quot;&gt;PMDOI&lt;/a&gt;认为，我们可以通过具体情况具体分析的策略/工具和方法来真正提高效率和可靠性。一个真正好的策略需要平衡各种足够好的基本策略，将其打包调整其中的某些不合时宜的做法。想想人们常说的，坐在一起的团队和面对面的沟通总是能达到最好的效果；但是为了达到&lt;strong&gt;真正高效的沟通&lt;/strong&gt;(因为这才是&lt;strong&gt;最高优先级的事情&lt;/strong&gt;),我们还需考虑到：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;人们有时候需要安静的思考和集中注意力的工作&lt;/li&gt;
-  &lt;li&gt;有时候需要进行一些安静的对话来交换一些深思熟虑的意见&lt;/li&gt;
-  &lt;li&gt;有时候需要放松的心态学习一些新的语言/工具等&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Osmotic Communication要求人们做的足够的近以便周围人的谈话都很容易被听清楚，这样有什么问题就可以马上作出反应；信息传递的成本几乎为零。这样一些复杂的问题可能会被周围的专家以最快的速度解决。然后Cone of Silence策略则提出了一种相反的做法：一个或者多个团队成员坐得距离其它人远远的从而可以排除沟通干扰。但是这种策略也有典型的适用场合，譬如Tech Leader本来应该用于安排解决艰难负责的问题，然而由于周围的人不断得分散其注意力，导致复杂的问题没有被解决，进度不断被延误，进而导致情况更加恶化。Cockburn认为，相互沟通的两个人的距离超过一辆公交车的长度时，沟通的效果就会急剧下降。&lt;/p&gt;
-
-&lt;p&gt;策略的平衡意味着，安排座位的时候需要考虑某些负面的影响 - 有些时候需要将人们适度分隔开来而不是聚越来越多的人在一个大的空间。当周围的噪音和干扰越来越大的时候，人们容易觉得压抑和头疼，很多重要的工作都无法正常的完成。每一种策略都有一定的限制；明智的决策什么时候&lt;strong&gt;Osmotic Communication&lt;/strong&gt;是有效的，什么时候它因为人太多而失去意义是个重要的事情。&lt;/p&gt;
-
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第二部分(第一部分)。</summary></entry></feed>
+&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry></feed>
