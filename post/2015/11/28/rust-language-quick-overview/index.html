@@ -1,0 +1,841 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Rust编程语言初探 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Rust编程语言初探">
+
+
+  <link rel="canonical" href="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">
+
+
+
+  <meta property="og:description" content="静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Rust编程语言初探">
+  <meta name="twitter:description" content="静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2015-11-28T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="http://www.skyscribe.me/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://www.skyscribe.me/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="http://www.skyscribe.me/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="http://www.skyscribe.me/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/security/index.html">security(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/python/index.html">python(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(29)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/kotlin/index.html">kotlin(2)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/java/index.html">java(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Rust编程语言初探">
+    <meta itemprop="description" content="静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。">
+    <meta itemprop="datePublished" content="November 28, 2015">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Rust编程语言初探
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p><strong>静态、强类型而又不带垃圾收集</strong>的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路<strong>已经不太适合新时代的编程需求</strong>，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的<a href="https://www.rust-lang.org/en-US/">Rustlang</a>(以下简称<code class="highlighter-rouge">Rust</code>)被创造出来，其新版本的发布不时引起<a href="https://news.ycombinator.com/item?id=9551937">HackNews</a>等极客圈的关注。</p>
+
+<p>本文试图通过其官方文档对该语言（以及其相关的生态系统）做简单的研习。</p>
+
+<!--more-->
+
+<h2 id="核心语言特性设计目标">核心语言特性设计目标</h2>
+<p>按照其官方描述，Rust需要满足其以下几个核心目标</p>
+<ol>
+  <li>应用于系统设计场景</li>
+  <li>开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，开源社区的影响力不容忽视</li>
+  <li>安全而又高效 - 在现代的软件工程环境中，安全是不可或缺的，而面向系统编程场景的语言必然少不了对<strong>性能的极致要求</strong></li>
+  <li>充分利用现代<strong>多核和并发处理</strong>技术的能力 - 这也是传统的C/C++语言的软肋所在；同时也是Google的Golang的设计目标之一</li>
+  <li>容易学习的语法 - 减少类似于段错误或隐式的多线程编程等相对底层的细节应该尽量被隐藏</li>
+</ol>
+
+<p>根据以上目标可以相对容易的理解一些核心的语言设计策略背后的决策依据。</p>
+
+<h2 id="基本语法特性">基本语法特性</h2>
+
+<h3 id="类型自动推断和后者类型声明">类型自动推断和后者类型声明</h3>
+
+<h3 id="错误检查机制">错误检查机制</h3>
+
+<h2 id="内存访问模型和并发">内存访问模型和并发</h2>
+
+<h3 id="对象的唯一ownership">对象的唯一Ownership</h3>
+
+<h3 id="智能指针">智能指针</h3>
+
+<h3 id="更简洁的并发支持">更简洁的并发支持</h3>
+
+<h2 id="模块系统">模块系统</h2>
+
+<h2 id="编程范式和高级特性">编程范式和高级特性</h2>
+
+<h3 id="面向对象编程">面向对象编程</h3>
+
+<h3 id="函数式编程">函数式编程</h3>
+
+<h3 id="traits">Traits</h3>
+
+<h2 id="软件工程支持---工具和方法">软件工程支持 - 工具和方法</h2>
+
+<h3 id="在线文档和可执行的文档"><a href="https://doc.rust-lang.org/book/second-edition/">在线文档</a>和可执行的文档</h3>
+
+<h3 id="creates">Creates</h3>
+
+<h3 id="cargo系统">Cargo系统</h3>
+
+<h3 id="测试">测试</h3>
+
+<h2 id="总结">总结</h2>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>你可能也对下列文章感兴趣</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">Excessive null checks in Java Defensive Programming? <span class="label label-default">programming</span>  <span class="label label-default">design</span> </a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/24/migrate-blog-to-jekyll/">Migrate blog to Jekyll</a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/05/kotlin-variable-invariants/">Kotlin语言之变量约束设计 <span class="label label-default">programming</span> </a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/04/kotlin-language-functional-programming/">Kotlin语言之函数式编程 <span class="label label-default">programming</span> </a>
+    </li>
+    
+    
+    
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/concurrency" class="page__taxonomy-item" rel="tag">concurrency</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/rustlang" class="page__taxonomy-item" rel="tag">rustlang</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/notes" class="page__taxonomy-item" rel="tag">notes</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2015-11-28T00:00:00+08:00">November 28, 2015</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Rust编程语言初探 http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="http://www.skyscribe.me/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="http://www.skyscribe.me/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>

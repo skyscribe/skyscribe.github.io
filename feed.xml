@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-01T18:22:15+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-02T22:53:36+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1141,7 +1141,59 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;Take use of better file system to boost compiling speed, like using memory mapped file system - a lot of GCC’s runtime are spent on IO&lt;/li&gt;
   &lt;li&gt;Saving previous workspace (or tagged workspace) and not cleaning everything&lt;/li&gt;
   &lt;li&gt;Using distcc/ninja for better C++ building performance&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry><entry><title type="html">Rust编程语言初探</title><link href="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" rel="alternate" type="text/html" title="Rust编程语言初探" /><published>2015-11-28T00:00:00+08:00</published><updated>2015-11-28T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">&lt;p&gt;&lt;strong&gt;静态、强类型而又不带垃圾收集&lt;/strong&gt;的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路&lt;strong&gt;已经不太适合新时代的编程需求&lt;/strong&gt;，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的&lt;a href=&quot;https://www.rust-lang.org/en-US/&quot;&gt;Rustlang&lt;/a&gt;(以下简称&lt;code class=&quot;highlighter-rouge&quot;&gt;Rust&lt;/code&gt;)被创造出来，其新版本的发布不时引起&lt;a href=&quot;https://news.ycombinator.com/item?id=9551937&quot;&gt;HackNews&lt;/a&gt;等极客圈的关注。&lt;/p&gt;
+
+&lt;p&gt;本文试图通过其官方文档对该语言（以及其相关的生态系统）做简单的研习。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;核心语言特性设计目标&quot;&gt;核心语言特性设计目标&lt;/h2&gt;
+&lt;p&gt;按照其官方描述，Rust需要满足其以下几个核心目标&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;应用于系统设计场景&lt;/li&gt;
+  &lt;li&gt;开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，开源社区的影响力不容忽视&lt;/li&gt;
+  &lt;li&gt;安全而又高效 - 在现代的软件工程环境中，安全是不可或缺的，而面向系统编程场景的语言必然少不了对&lt;strong&gt;性能的极致要求&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;充分利用现代&lt;strong&gt;多核和并发处理&lt;/strong&gt;技术的能力 - 这也是传统的C/C++语言的软肋所在；同时也是Google的Golang的设计目标之一&lt;/li&gt;
+  &lt;li&gt;容易学习的语法 - 减少类似于段错误或隐式的多线程编程等相对底层的细节应该尽量被隐藏&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;根据以上目标可以相对容易的理解一些核心的语言设计策略背后的决策依据。&lt;/p&gt;
+
+&lt;h2 id=&quot;基本语法特性&quot;&gt;基本语法特性&lt;/h2&gt;
+
+&lt;h3 id=&quot;类型自动推断和后者类型声明&quot;&gt;类型自动推断和后者类型声明&lt;/h3&gt;
+
+&lt;h3 id=&quot;错误检查机制&quot;&gt;错误检查机制&lt;/h3&gt;
+
+&lt;h2 id=&quot;内存访问模型和并发&quot;&gt;内存访问模型和并发&lt;/h2&gt;
+
+&lt;h3 id=&quot;对象的唯一ownership&quot;&gt;对象的唯一Ownership&lt;/h3&gt;
+
+&lt;h3 id=&quot;智能指针&quot;&gt;智能指针&lt;/h3&gt;
+
+&lt;h3 id=&quot;更简洁的并发支持&quot;&gt;更简洁的并发支持&lt;/h3&gt;
+
+&lt;h2 id=&quot;模块系统&quot;&gt;模块系统&lt;/h2&gt;
+
+&lt;h2 id=&quot;编程范式和高级特性&quot;&gt;编程范式和高级特性&lt;/h2&gt;
+
+&lt;h3 id=&quot;面向对象编程&quot;&gt;面向对象编程&lt;/h3&gt;
+
+&lt;h3 id=&quot;函数式编程&quot;&gt;函数式编程&lt;/h3&gt;
+
+&lt;h3 id=&quot;traits&quot;&gt;Traits&lt;/h3&gt;
+
+&lt;h2 id=&quot;软件工程支持---工具和方法&quot;&gt;软件工程支持 - 工具和方法&lt;/h2&gt;
+
+&lt;h3 id=&quot;在线文档和可执行的文档&quot;&gt;&lt;a href=&quot;https://doc.rust-lang.org/book/second-edition/&quot;&gt;在线文档&lt;/a&gt;和可执行的文档&lt;/h3&gt;
+
+&lt;h3 id=&quot;creates&quot;&gt;Creates&lt;/h3&gt;
+
+&lt;h3 id=&quot;cargo系统&quot;&gt;Cargo系统&lt;/h3&gt;
+
+&lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
@@ -1264,188 +1316,4 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;h2 id=&quot;审视xp&quot;&gt;审视XP&lt;/h2&gt;
 
-&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 3</title><link href="http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 3" /><published>2013-08-14T20:32:00+08:00</published><updated>2013-08-14T20:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/">&lt;p&gt;本文是第三部分。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/14/agile-software-development-the-cooperative-game-reading-2/index.html&quot;&gt;第二部分&lt;/a&gt;。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;信息交换和流动&quot;&gt;信息交换和流动&lt;/h2&gt;
-
-&lt;p&gt;如果我们将软件开发活动看作是协作游戏，那么如果Kim知道一些Pat需要的信息，则项目的进度就取决于：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Pat需要花多少时间了解到Kim知道他想要的信息&lt;/li&gt;
-  &lt;li&gt;Pat和Kim需要耗费多少时间和其它成本来完成对于信息的交流和转移&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;各种情况的开销&quot;&gt;各种情况的开销&lt;/h3&gt;
-
-&lt;p&gt;有六种不同的情况可以考量：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Kim和Pat在同一台计算机前做结对编程，这样的交互成本几乎为零。&lt;/li&gt;
-  &lt;li&gt;Kim和Pat在相邻的位置上；Pat可以通过观察Kim知道他可能在找某些东西而他恰好知道 - 有一些发现问题的成本&lt;/li&gt;
-  &lt;li&gt;Kim和Pat坐在两个背对的位置，只有Kim主动提出问题，否则Pat不可能知道他想要某些信息&lt;/li&gt;
-  &lt;li&gt;Kim和Pat坐在一个有一堵墙隔开的相邻位置，Kim必须站起来，看看Pat是否在位置上，然后才能交互信息&lt;/li&gt;
-  &lt;li&gt;Kim和Pat坐在不同的隔间，甚至不同的楼层，kim必须走过去看看，这时候Pat可能不在位置上！&lt;/li&gt;
-  &lt;li&gt;Kim和Pat在不同的办公区或者不同的地方，他们的沟通和交互就很少能有效和及时&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;如果用需要花费的时间和精力为参考单位（ergo-seconds），那么上述不同情况的开销是递增的。项目成本的上升是和人们需要花费多少时间来理解彼此的想法是&lt;strong&gt;成正比&lt;/strong&gt;的。&lt;/p&gt;
-
-&lt;h3 id=&quot;osmotic-communication&quot;&gt;Osmotic Communication&lt;/h3&gt;
-
-&lt;p&gt;写代码/阅读/学习的同事，我们随时提取周围环境中发生的谈话，利用背景噪音的模式，选取我们关心的内容随时参与讨论，对于不关心的则过滤出去。这种方式的沟通极大的降低了信息流动的成本。办公环境的部署过于分散可能有不提问题造成的潜在时间开销，信息传输的开销和人们无法在谈话中随时给出意见的额外开销。根据此理论，赞助物理分散的分布式团队需要三思而行。然而简单将所有人扔在一起也未必像相像的那样可以很好的解决问题。&lt;/p&gt;
-
-&lt;p&gt;人们在传递什么样的信息？团队个人的习惯偏好如何？不同种类的信息是否会相互干扰？很常见的做法是，将负责实现的程序员安排在大楼的一侧，而将负责需求分析和商业策略领域专家安排在另一侧；因为他们彼此讨论的话题往往形成很强的噪音。然而这种方式也有明显的问题：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;两者之间沟通的成本变高&lt;/li&gt;
-  &lt;li&gt;两个团体可能形成自己小的社区并进而对对方进行指责和抱怨&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Cockburn的偏好是将一个商业专家安排在几个程序员的中间；如果做不到，那么通过其它的方式加强他们之间的沟通和理解，譬如定期的会议，审查等。Feature team的做法是鼓励跨只能的团队，用Feature的方式将各个领域的人聚集在一个团队，减少信息沟通的成本，加快信息的流动。&lt;/p&gt;
-
-&lt;p&gt;个人偏好也是个需要考虑的问题，譬如有的程序员就是喜欢自己安静的空间，不希望有很多的背景噪音干扰。还有些人对哪些人在自己的周围有强烈的偏好 - 如果某个高级的程序员由此选择离开，那么成本之高就变得无法接受。因此调整位置的时候，需要尽量考虑到个人的偏好。&lt;/p&gt;
-
-&lt;h3 id=&quot;信息辐射器&quot;&gt;信息辐射器&lt;/h3&gt;
-
-&lt;p&gt;信息辐射器可以显示任何一个路过的人都可以看到的关于项目的信息；这样他们就不会专门跑过来问某些上面已经有的信息。这样做的好处有两点：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;辐射器上的信息总是随着时间的变化在实时更新&lt;/li&gt;
-  &lt;li&gt;人们花费很少的精力就可以注意到这些信息&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;白板墙可以作为很好的信息辐射器，而公共的Wiki或者Web页面就不是；因为人们不用什么力气就可以随时看到墙上的东西，而web页面需要人们动鼠标打开那个网址。&lt;/p&gt;
-
-&lt;p&gt;人们可以用辐射器显示：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;下个迭代的任务分解情况&lt;/li&gt;
-  &lt;li&gt;每天的任务完成进度情况 - burndown chart等&lt;/li&gt;
-  &lt;li&gt;自动化测试通过情况和通过率&lt;/li&gt;
-  &lt;li&gt;回顾会议的输出&lt;/li&gt;
-  &lt;li&gt;验收测试通过情况&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;热空气理论应用&quot;&gt;热空气理论应用&lt;/h3&gt;
-
-&lt;p&gt;很多公司都意识到在咖啡机旁边放一些白板或者宣传栏的益处。人们可以在停下来聊天的时候注意到这些公开的信息。但是还有一个重要的地方不能漏掉的是，我们要尽量确保这些东西在视线之内，或者可以被清晰的听到。人们在讨论某些东西的时候，可以在身边随手可得的白板上写下自己的设计思路和想法，快速的和对方沟通。&lt;/p&gt;
-
-&lt;p&gt;任何一个项目团队都应该力求&lt;strong&gt;减少发现和传递信息的整体开销&lt;/strong&gt;。这意味着随时发现并加速信息的流动和交换，利用Osmotic Communication的好处，注意潜在的问题和限制，最终减少成员之间信息交换的成本，搬开座位安置不合理造成的障碍。&lt;/p&gt;
-
-&lt;h2 id=&quot;跨越沟通交流的沟壑&quot;&gt;跨越沟通交流的沟壑&lt;/h2&gt;
-
-&lt;p&gt;为了提高沟通的效率，我们需要提高信息的发送方和接受方在可能存在沟通障碍的时候能够尽最大的可能跳过这些障碍的可能性。双方应该能以最快速方便的方式提供反馈，并尽可能地&lt;strong&gt;消除&lt;/strong&gt;可能存在的希望表达的&lt;strong&gt;意识偏差&lt;/strong&gt;。人们在沟通的时候，很可能使用语言之外的其它方式来表述意图(可能是积极的但也可能是消极的负面反馈)，如&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;距离上的疏远或者靠近&lt;/li&gt;
-  &lt;li&gt;空间感觉和反应(视频聊天就在这方面缺失了空间信息)&lt;/li&gt;
-  &lt;li&gt;人身上的体味对方是否习惯或者反感&lt;/li&gt;
-  &lt;li&gt;肢体上的接触&lt;/li&gt;
-  &lt;li&gt;声音语调的变化&lt;/li&gt;
-  &lt;li&gt;肢体语言&lt;/li&gt;
-  &lt;li&gt;提问回答的热情程度&lt;/li&gt;
-  &lt;li&gt;是否有其它方面的干扰&lt;/li&gt;
-  &lt;li&gt;相互之间的信任和愿意从对方学习的情绪&lt;/li&gt;
-  &lt;li&gt;是否使用共享的信息辐射器来共享常见的信息&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;上边这些因素和机制利用得当能够极大的提高沟通的效率。反之，移除其中一些，人们就不得不用&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;电话 - 无法从物理上解除对方&lt;/li&gt;
-  &lt;li&gt;电子邮件 - 没有声音&lt;/li&gt;
-  &lt;li&gt;单向的沟通&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;如果这些机制都没有被很好的利用，就会出现&lt;em&gt;文档作为沟通的主要方式&lt;/em&gt;。因而好的项目领头人会推荐如下这些实践：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;将所有人丢在一个会议室里边&lt;/li&gt;
-  &lt;li&gt;保持每个团队的短小精干&lt;/li&gt;
-  &lt;li&gt;多用白板表述意图，而不是负责的绘图软件&lt;/li&gt;
-  &lt;li&gt;办公区的白板和咖啡角随处易得&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;当然这些warmmer communication方式仅仅使用于传递想法和真正沟通的时候。传统的cooler communication方式仍然在其它一些场合发挥着重要作用。如果一个高级设计人员在会议中始终占据着发言权和白板，那么系统自组织性的丧失就会很快让沟通变得更加的困难。邮件的允许人们发送之前仔细审视的特点更容易让人们澄清他们真正表述的观点 - 如果这些观点需要慎重的思考的话。&lt;/p&gt;
-
-&lt;h2 id=&quot;团队即社区&quot;&gt;团队即社区&lt;/h2&gt;
-
-&lt;p&gt;一个团队即时一个社区，每时每刻都有很多信息在流动；但是每个团队个体成员可能有不同的兴趣和目标，有自己的专长和侧重。在一个高效的团队中，成员通过&lt;strong&gt;pull&lt;/strong&gt;的方式提取自己感兴趣的信息，反馈给其它成员。人们根据&lt;strong&gt;整个团队的方向&lt;/strong&gt;来协调这些信息的讨论和流动；因此整个团队需要保持一致的方向。&lt;/p&gt;
-
-&lt;h3 id=&quot;小幅度改进&quot;&gt;小幅度改进&lt;/h3&gt;
-
-&lt;p&gt;只需要让每个人改变一个小小的方面 - 这些方面很可能对他个人而言是无足轻重的，最终也可以带来很大的整体效应；因为每个人都向着共同的目标改进一小点，所以每个人对变化的感受都是很细微的，但是因为人们对其它密切相关的同事贡献出他自己的想法，而不是各干各的，最终整个团队的效率会得到巨大的提升。&lt;/p&gt;
-
-&lt;p&gt;为了达到真个团队大方向上的一致，开发人员和项目利益相关人需要讨论和定制每个成员都需要认可的整体决策，这也同时要求很多决定必须是&lt;strong&gt;团队整体的承诺&lt;/strong&gt;而不是经理们的个人意愿。在项目发展的过程中，优先级可能发生巨大的变化或者调整，这个时候，所有人必须被重新集中起来沟通这些变化，确保所有人都知道并且同意这个变化。&lt;/p&gt;
-
-&lt;h3 id=&quot;冲突和纪律&quot;&gt;冲突和纪律&lt;/h3&gt;
-
-&lt;p&gt;团队保持紧密一致不意味着不能有冲突发生。一个团队中几乎没有冲突发生也是不正常的，因为这很可能意味着大家可能更愿意保持沉默不再说出自己的真正想法。&lt;strong&gt;当人们向团队中的其他人掩盖一些信息的时候，潜在的开支就默默地急剧上升&lt;/strong&gt;。人们需要在正常的冲突中讨论出最优的方案使得各方一致满意；这样的结果恰恰是更有利于最终问题的解决。&lt;/p&gt;
-
-&lt;p&gt;良好的社区纪律需要人们用对他人有益（当然间接对自己有益）的方式来共事。它需要成员&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;按时参加会议&lt;/li&gt;
-  &lt;li&gt;回答别人提出的问题，如果知道答案的话&lt;/li&gt;
-  &lt;li&gt;不烦于提出注意到的状况&lt;/li&gt;
-  &lt;li&gt;遵从整体的编码规范/传统&lt;/li&gt;
-  &lt;li&gt;使用一致的代码库&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;这些要求对一些编码规范不满的程序员通过协商的方式定制出共同认可的编程风格 - 虽然个人可能不认可当前的规范，但是通过协商得到&lt;em&gt;稍微看得过去的&lt;/em&gt;规范也比完全没有强。当然，这些纪律需要尽可能在正常的工作时间内实施，而不是通过&lt;strong&gt;加班&lt;/strong&gt;来延长工作时间。&lt;/p&gt;
-
-&lt;h3 id=&quot;团队建设&quot;&gt;团队建设&lt;/h3&gt;
-
-&lt;p&gt;好的团队建设最好的方式是通过一些小小的成功来实施，不管是多小或者多大的成功。混乱的大规模团队建设活动在很多情况下可能仅仅是浪费钱财。真正的团队建设可以通过&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;使团队正在凝聚在一起 - 譬如让物理上分散的团队能尽量经常见面，通过共同的工作取得一些进展，然后不时将这些人放在一些社交活动中。&lt;/li&gt;
-  &lt;li&gt;产生成绩 - 这样可以产生和传递&lt;strong&gt;正能量&lt;/strong&gt;，消除恐惧和不信任感。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;团队文化背景差异和协作&quot;&gt;团队文化背景差异和协作&lt;/h3&gt;
-
-&lt;p&gt;团队的沟通和交互需要更多的采取&lt;strong&gt;协作而非合作&lt;/strong&gt;的形式。协作意味着人们通过频繁的交互和沟通达成一致意见，而合作则意味着通过分工/各自独立工作/集成的方式来达成目标。不同的文化背景可能对这些方面有不同的假设前提，不过敏捷方法论的做法是尽可能得通过协商达成一致。&lt;/p&gt;
-
-&lt;p&gt;具有多个领域特长的专家（譬如精于项目管理和设计倾听的程序员）可以在不同的对象之间充当翻译，以便提高不同的专业人员之间的沟通效率。每一个人都需要更多的联系实践和倾听的技巧：&lt;strong&gt;不管对方的看法多么的疯狂和颠覆，先那样听，然后再决定是否要反对&lt;/strong&gt;，因为那些疯狂的论断可能在另外一个价值体系里边确实司空见惯的常识。&lt;/p&gt;
-
-&lt;h2 id=&quot;视团队为生态系统&quot;&gt;视团队为生态系统&lt;/h2&gt;
-
-&lt;p&gt;一个软件项目的建立同时也创建了一个新的生态系统，这个系统由特质各异/文化背景相左的个体组成。观察这个生同系统的要素，我们可以得到&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;办公室的墙壁成为隔离的壁垒，公共的空间提供交互场所&lt;/li&gt;
-  &lt;li&gt;特性各异的个体好比不同的物种&lt;/li&gt;
-  &lt;li&gt;每一个具有不同特性的个体的工作方式极大得影响着整个生态系统&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;每一个项目团队都是独一无二的，原则上并没有太具体的原则和实践可以误差别地施加于你的团队。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;只有团队中的人才可以决定什么样的方式在那个特定的环境中工作的更好 - 调整环境来服务你的团队&lt;/li&gt;
-  &lt;li&gt;如果团队中一些人有很好的方法学知识，他就能很好的回顾和反思他观察的并逐步改进 - 发现每个人的长处，找到一个最好的方式以便发挥各自的优势&lt;/li&gt;
-  &lt;li&gt;视每个团队的方法实践为一种&lt;strong&gt;新的建设&lt;/strong&gt;，没有一种现有的办法可以不经修改完全适用&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;关键的团队自身需要通过不断的反思来自适应，逐步改进工作的方法，并逐渐找到更优的方式。&lt;/p&gt;
-
-&lt;h2 id=&quot;ken-auer的程序员办公室&quot;&gt;Ken Auer的程序员办公室&lt;/h2&gt;
-
-&lt;p&gt;这是一种典型的值得参考的办公环境：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;一个大的用于编程的房间，中间是结对编码区域，四个长桌子围成长方形，人环座四周，长的一侧的桌子允许两对人工作，短的一侧允许一对，这样可以容纳最多12个人结对&lt;/li&gt;
-  &lt;li&gt;编程办公室的四周靠墙壁的地方放置用于私人空间的编程工作 - 人们可以再这里创建私有的空间来做一些不受打扰的思考工作&lt;/li&gt;
-  &lt;li&gt;编程办公室的南边是接待室和销售人员办公室，设备和浴室也在这一块儿空间；接待室在中间相隔，实现动静分离&lt;/li&gt;
-  &lt;li&gt;编程办公室的西边是厨房和与之相隔的更远一点的会议室&lt;/li&gt;
-  &lt;li&gt;西南是图书馆和客户办公室，图书馆在中间做一个动静分隔的作用&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;待续。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第三部分。</summary></entry></feed>
+&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry></feed>
