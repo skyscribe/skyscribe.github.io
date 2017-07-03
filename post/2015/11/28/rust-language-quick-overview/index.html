@@ -488,7 +488,7 @@
 
 
 
-  9 minute read
+  11 minute read
 
 </p>
           
@@ -563,9 +563,9 @@
 <p>比较新一点的语言都支持一些复杂一点的基本组合类型。</p>
 
 <p><code class="highlighter-rouge">tuple</code>和其它语言的比较类似，用括号语法来声明，如<code class="highlighter-rouge">let tup = (1, 2.2, "something")</code>声明一个含有三个不同类型的元素的元组；<code class="highlighter-rouge">let (a, b, c) = tup</code> 则将元组中的元素逐一取出，和Python的用法比较类似。
-除了这种提取方式，元组元素也可以用点语法来访问，如<code class="highlighter-rouge">tup.1</code>则取出第二个元素<code class="highlighter-rouge">2.2</code>；比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
+除了这种提取方式，元组元素<strong>也可以用点语法</strong>来访问元素，如<code class="highlighter-rouge">tup.1</code>则取出第二个元素<code class="highlighter-rouge">2.2</code>；比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
 
-<p>数组则用于表示具有相同类型的元素的集合，如<code class="highlighter-rouge">let arr = [1, 2, 3, 4, 5]</code>,如果类型不一致则会有编译错误报出。
+<p>数组则用于表示<strong>具有相同类型的元素的集合</strong>，如<code class="highlighter-rouge">let arr = [1, 2, 3, 4, 5]</code>,如果类型不一致则会有编译错误报出。
 和C/C++这中的类似，数组元素一般是分配在栈上的，其大小在编译器应该是预先确定的；如果需要可变长的容器，则需要<code class="highlighter-rouge">Vector</code>类型。
 数组越界的检查默认也包含在语言中了，如果访问越界的下标，默认程序就会崩溃；当然Rust的错误处理机制也有些特殊，容后探讨。</p>
 
@@ -580,7 +580,7 @@
     <p><code class="highlighter-rouge">String</code> 是<strong>作为一个库提供</strong>的而不是基本的语言机制；其实现和C++的比较类似，内部也使用一个<code class="highlighter-rouge">Vec&lt;u8&gt;</code>来存储数据的，因此考虑到国际化的原因，其操作可能比其它语言中的要复杂一些；幸运的是，这些细节以及被标准库所封装。</p>
   </li>
   <li>
-    <p><code class="highlighter-rouge">Hashmap</code> 用于表述逻辑上的哈希关联容器；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点</p>
+    <p><code class="highlighter-rouge">Hashmap</code> 用于表述逻辑上的<strong>哈希关联容器</strong>；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点</p>
   </li>
 </ul>
 
@@ -615,8 +615,57 @@
 比C中的宏好一点的是，Rust提供了对宏进行调试的方式，可以在其编译器的命令行中加入<code class="highlighter-rouge">--pretty expand</code>选项来查看展开的代码。</p>
 
 <h3 id="错误检查机制">错误检查机制</h3>
+<p>现实生活中的软件总是有各种各样的错误<strong>需要被正确处理但没有被及早处理</strong>就泄漏到了客户现场。
+Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译器错误的方式提示程序员。</p>
+
+<p>和Java的关于错误分类的思路类似，Rust也<strong>区分可恢复的错误和不可恢复的错误</strong>，并提供了相应的语言机制上的支持。
+可恢复的错误一般是一些环境的错误，譬如文件找不到或者网络连接失败等情况，实现上可以用重试等策略来尝试自动恢复。
+不可恢复的错误往往意味着编程错误或低级bug，这种情况下最好的思路是直接让程序崩溃，并修复代码。</p>
+
+<p>和Java不同的是，Rust里<strong>没有异常</strong>支持！对于可恢复异常，Rust使用<code class="highlighter-rouge">Result&lt;T, E&gt;</code>类型来封装处理结果，而不可恢复异常则提供<code class="highlighter-rouge">panic!</code>宏来终止程序继续执行。</p>
+
+<h4 id="不可恢复异常的支持">不可恢复异常的支持</h4>
+<p>遇到不可恢复异常的时候，<code class="highlighter-rouge">panic!</code>宏会打印错误消息（程序员指定），<strong>展开线程栈帧，打印出实际出错的源代码位置</strong>。
+如果需要打印<code class="highlighter-rouge">backtrace</code>信息，则可以在程序运行前设置环境变量<code class="highlighter-rouge">RUST_BACKTRACE</code>。如果忘记设置的话，默认的打印输出会给出温馨的提示。</p>
+
+<p>如果不希望展开栈帧而直接暴力终止程序，可以在Cargo.toml中指定</p>
+<div class="language-ini highlighter-rouge"><pre class="highlight"><code><span class="nn">[profile.release]</span>
+<span class="py">panic</span><span class="p">=</span><span class="s">'abort'</span>
+</code></pre>
+</div>
+
+<h4 id="可恢复异常">可恢复异常</h4>
+<p>可恢复异常用一个泛型类<code class="highlighter-rouge">Result</code>来传递结果，其定义是</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
+    <span class="nf">Err</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>可以使用枚举类型的模式匹配（见后述) 来优雅的解决，譬如这个操作文件的例子</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="n">File</span><span class="p">;</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">);</span>
+
+    <span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="k">match</span> <span class="n">f</span> <span class="p">{</span>
+        <span class="nf">Ok</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="n">file</span><span class="p">,</span>
+        <span class="nf">Err</span><span class="p">(</span><span class="n">error</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+            <span class="nd">panic!</span><span class="p">(</span><span class="s">"There was a problem opening the file: {:?}"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="p">},</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Rust支持一种<strong>更简洁的方法</strong>来简化上述的样板代码<code class="highlighter-rouge">let f = File::open("hello.txt").unwrap()</code>则返回正常情况下的返回值，如果有异常则直接调用<code class="highlighter-rouge">panic!</code>来终止程序。</p>
+
+<p><strong>TBD</strong></p>
 
 <h2 id="内存访问模型和并发">内存访问模型和并发</h2>
+<p>为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。</p>
 
 <h3 id="对象的唯一ownership">对象的唯一Ownership</h3>
 

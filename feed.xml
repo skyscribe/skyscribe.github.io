@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-03T22:13:49+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-03T22:40:09+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1208,9 +1208,9 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;p&gt;比较新一点的语言都支持一些复杂一点的基本组合类型。&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;和其它语言的比较类似，用括号语法来声明，如&lt;code class=&quot;highlighter-rouge&quot;&gt;let tup = (1, 2.2, &quot;something&quot;)&lt;/code&gt;声明一个含有三个不同类型的元素的元组；&lt;code class=&quot;highlighter-rouge&quot;&gt;let (a, b, c) = tup&lt;/code&gt; 则将元组中的元素逐一取出，和Python的用法比较类似。
-除了这种提取方式，元组元素也可以用点语法来访问，如&lt;code class=&quot;highlighter-rouge&quot;&gt;tup.1&lt;/code&gt;则取出第二个元素&lt;code class=&quot;highlighter-rouge&quot;&gt;2.2&lt;/code&gt;；比&lt;a href=&quot;http://en.cppreference.com/w/cpp/utility/tuple/get&quot;&gt;C++11的模板元语法&lt;/a&gt;简单多了。&lt;/p&gt;
+除了这种提取方式，元组元素&lt;strong&gt;也可以用点语法&lt;/strong&gt;来访问元素，如&lt;code class=&quot;highlighter-rouge&quot;&gt;tup.1&lt;/code&gt;则取出第二个元素&lt;code class=&quot;highlighter-rouge&quot;&gt;2.2&lt;/code&gt;；比&lt;a href=&quot;http://en.cppreference.com/w/cpp/utility/tuple/get&quot;&gt;C++11的模板元语法&lt;/a&gt;简单多了。&lt;/p&gt;
 
-&lt;p&gt;数组则用于表示具有相同类型的元素的集合，如&lt;code class=&quot;highlighter-rouge&quot;&gt;let arr = [1, 2, 3, 4, 5]&lt;/code&gt;,如果类型不一致则会有编译错误报出。
+&lt;p&gt;数组则用于表示&lt;strong&gt;具有相同类型的元素的集合&lt;/strong&gt;，如&lt;code class=&quot;highlighter-rouge&quot;&gt;let arr = [1, 2, 3, 4, 5]&lt;/code&gt;,如果类型不一致则会有编译错误报出。
 和C/C++这中的类似，数组元素一般是分配在栈上的，其大小在编译器应该是预先确定的；如果需要可变长的容器，则需要&lt;code class=&quot;highlighter-rouge&quot;&gt;Vector&lt;/code&gt;类型。
 数组越界的检查默认也包含在语言中了，如果访问越界的下标，默认程序就会崩溃；当然Rust的错误处理机制也有些特殊，容后探讨。&lt;/p&gt;
 
@@ -1225,7 +1225,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
     &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; 是&lt;strong&gt;作为一个库提供&lt;/strong&gt;的而不是基本的语言机制；其实现和C++的比较类似，内部也使用一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&amp;lt;u8&amp;gt;&lt;/code&gt;来存储数据的，因此考虑到国际化的原因，其操作可能比其它语言中的要复杂一些；幸运的是，这些细节以及被标准库所封装。&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Hashmap&lt;/code&gt; 用于表述逻辑上的哈希关联容器；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点&lt;/p&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Hashmap&lt;/code&gt; 用于表述逻辑上的&lt;strong&gt;哈希关联容器&lt;/strong&gt;；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
 
@@ -1260,8 +1260,57 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 比C中的宏好一点的是，Rust提供了对宏进行调试的方式，可以在其编译器的命令行中加入&lt;code class=&quot;highlighter-rouge&quot;&gt;--pretty expand&lt;/code&gt;选项来查看展开的代码。&lt;/p&gt;
 
 &lt;h3 id=&quot;错误检查机制&quot;&gt;错误检查机制&lt;/h3&gt;
+&lt;p&gt;现实生活中的软件总是有各种各样的错误&lt;strong&gt;需要被正确处理但没有被及早处理&lt;/strong&gt;就泄漏到了客户现场。
+Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译器错误的方式提示程序员。&lt;/p&gt;
+
+&lt;p&gt;和Java的关于错误分类的思路类似，Rust也&lt;strong&gt;区分可恢复的错误和不可恢复的错误&lt;/strong&gt;，并提供了相应的语言机制上的支持。
+可恢复的错误一般是一些环境的错误，譬如文件找不到或者网络连接失败等情况，实现上可以用重试等策略来尝试自动恢复。
+不可恢复的错误往往意味着编程错误或低级bug，这种情况下最好的思路是直接让程序崩溃，并修复代码。&lt;/p&gt;
+
+&lt;p&gt;和Java不同的是，Rust里&lt;strong&gt;没有异常&lt;/strong&gt;支持！对于可恢复异常，Rust使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Result&amp;lt;T, E&amp;gt;&lt;/code&gt;类型来封装处理结果，而不可恢复异常则提供&lt;code class=&quot;highlighter-rouge&quot;&gt;panic!&lt;/code&gt;宏来终止程序继续执行。&lt;/p&gt;
+
+&lt;h4 id=&quot;不可恢复异常的支持&quot;&gt;不可恢复异常的支持&lt;/h4&gt;
+&lt;p&gt;遇到不可恢复异常的时候，&lt;code class=&quot;highlighter-rouge&quot;&gt;panic!&lt;/code&gt;宏会打印错误消息（程序员指定），&lt;strong&gt;展开线程栈帧，打印出实际出错的源代码位置&lt;/strong&gt;。
+如果需要打印&lt;code class=&quot;highlighter-rouge&quot;&gt;backtrace&lt;/code&gt;信息，则可以在程序运行前设置环境变量&lt;code class=&quot;highlighter-rouge&quot;&gt;RUST_BACKTRACE&lt;/code&gt;。如果忘记设置的话，默认的打印输出会给出温馨的提示。&lt;/p&gt;
+
+&lt;p&gt;如果不希望展开栈帧而直接暴力终止程序，可以在Cargo.toml中指定&lt;/p&gt;
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[profile.release]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;panic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'abort'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;可恢复异常&quot;&gt;可恢复异常&lt;/h4&gt;
+&lt;p&gt;可恢复异常用一个泛型类&lt;code class=&quot;highlighter-rouge&quot;&gt;Result&lt;/code&gt;来传递结果，其定义是&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Ok&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;Err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;可以使用枚举类型的模式匹配（见后述) 来优雅的解决，譬如这个操作文件的例子&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello.txt&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;Ok&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;Err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nd&quot;&gt;panic!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;There was a problem opening the file: {:?}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Rust支持一种&lt;strong&gt;更简洁的方法&lt;/strong&gt;来简化上述的样板代码&lt;code class=&quot;highlighter-rouge&quot;&gt;let f = File::open(&quot;hello.txt&quot;).unwrap()&lt;/code&gt;则返回正常情况下的返回值，如果有异常则直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;panic!&lt;/code&gt;来终止程序。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;内存访问模型和并发&quot;&gt;内存访问模型和并发&lt;/h2&gt;
+&lt;p&gt;为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。&lt;/p&gt;
 
 &lt;h3 id=&quot;对象的唯一ownership&quot;&gt;对象的唯一Ownership&lt;/h3&gt;
 
