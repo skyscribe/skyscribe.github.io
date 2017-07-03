@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-03T21:37:20+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-03T22:13:49+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1162,7 +1162,10 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;h2 id=&quot;基本语法特性&quot;&gt;基本语法特性&lt;/h2&gt;
 &lt;p&gt;作为一门面向系统编程的&lt;strong&gt;偏底层&lt;/strong&gt;的程序语言，其基本语法和传统的C/C++/Java系列语言共享了很多共同之处，这里仅需要看看其不同之处。&lt;/p&gt;
 
-&lt;h3 id=&quot;类型声明和自动推断&quot;&gt;类型声明和自动推断&lt;/h3&gt;
+&lt;h3 id=&quot;类型系统&quot;&gt;类型系统&lt;/h3&gt;
+&lt;p&gt;静态语言的基本元素之一是变量和类型；不同的语言会选择不同的类型定义和内置的开箱可用的基本类型；这些类型及内置类的设计往往反映了编程语言设计者的决策策略和权衡要素。&lt;/p&gt;
+
+&lt;h4 id=&quot;类型声明和自动推断&quot;&gt;类型声明和自动推断&lt;/h4&gt;
 
 &lt;p&gt;毕竟要面对的是偏严肃的&lt;strong&gt;系统编程&lt;/strong&gt;领域，选择静态类型可以在编译阶段&lt;strong&gt;尽可能早地发现更多的&lt;/strong&gt;程序错误是题中之义；同时作为一门比较现代的编程语言，每次让程序员自己输入每个变量的类型这类臃肿的做法也被废弃，&lt;strong&gt;自动类型推断&lt;/strong&gt;必不可少 - 当编译器可以”聪明地”推导出合适的类型的时候，变量类型指定可以忽略。&lt;/p&gt;
 
@@ -1177,7 +1180,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;这种机制从某种程度上来说，反而会使代码变得不太容易理解，如果程序员习惯了C/C++的编程方式的话；同时&lt;strong&gt;也会给IDE等工具的解析&lt;/strong&gt;带来一些挑战；当然这个是仁者见仁智者见智的事情。&lt;/p&gt;
 
-&lt;h3 id=&quot;类型可变性约束&quot;&gt;类型可变性约束&lt;/h3&gt;
+&lt;h4 id=&quot;类型可变性约束&quot;&gt;类型可变性约束&lt;/h4&gt;
 
 &lt;p&gt;Rust要求所有定义的变量必须指定是否是&lt;strong&gt;可变&lt;/strong&gt;的；并且作为变量的基本特征强制程序员做合理的选择。
 可变的变量用类似&lt;code class=&quot;highlighter-rouge&quot;&gt;let mut varName:Type = value&lt;/code&gt;的语法来定义，顾名思义可以在&lt;strong&gt;声明之后被重新赋值&lt;/strong&gt;修改；
@@ -1187,6 +1190,44 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 对于常量类型我们必须使用类型注解，不能声明可变的常量类型（不允许混合&lt;code class=&quot;highlighter-rouge&quot;&gt;const&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;mut&lt;/code&gt;),而且常量类型只能被赋值为一个常量表达式，
 不能用函数调用的结果或者是其他一些运行时计算出来的值来初始化。
 综合来看，Rust的常量类型和C++11中新引入的&lt;a href=&quot;http://en.cppreference.com/w/cpp/language/constexpr&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr&lt;/code&gt;&lt;/a&gt;行为比较接近。&lt;/p&gt;
+
+&lt;h4 id=&quot;内置类型&quot;&gt;内置类型&lt;/h4&gt;
+
+&lt;p&gt;内置类型一般用于提供大部分程序员都要用到的基本数据结构。除了一些其他语言都常见的基本类型(Rust称之为标量类型)，Rust也提供了一些相对比较复杂的类型。&lt;/p&gt;
+
+&lt;p&gt;基本标量类型包含以下这些基本的类型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;整型类型，包括定长的8/16/32/64位的有符号和无符号类型（如&lt;code class=&quot;highlighter-rouge&quot;&gt;u16&lt;/code&gt;是无符号16位整型，&lt;code class=&quot;highlighter-rouge&quot;&gt;i32&lt;/code&gt;是有符号32位类型），
+还支持平台相关的有符号/无符号类型，分别用&lt;code class=&quot;highlighter-rouge&quot;&gt;isize&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;usize&lt;/code&gt;表示&lt;/li&gt;
+  &lt;li&gt;浮点类型，支持单精度(&lt;code class=&quot;highlighter-rouge&quot;&gt;f32&lt;/code&gt;)和双精度(&lt;code class=&quot;highlighter-rouge&quot;&gt;f64&lt;/code&gt;)类型，这些在数值计算的时候比较关键&lt;/li&gt;
+  &lt;li&gt;布尔类型，和C++中的比较类似，有&lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt;两种可能的取值，当然没有C/C++中的那些隐式转换的麻烦&lt;/li&gt;
+  &lt;li&gt;字符类型，支持Unicode&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;复合类型&quot;&gt;复合类型`&lt;/h4&gt;
+&lt;p&gt;比较新一点的语言都支持一些复杂一点的基本组合类型。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;和其它语言的比较类似，用括号语法来声明，如&lt;code class=&quot;highlighter-rouge&quot;&gt;let tup = (1, 2.2, &quot;something&quot;)&lt;/code&gt;声明一个含有三个不同类型的元素的元组；&lt;code class=&quot;highlighter-rouge&quot;&gt;let (a, b, c) = tup&lt;/code&gt; 则将元组中的元素逐一取出，和Python的用法比较类似。
+除了这种提取方式，元组元素也可以用点语法来访问，如&lt;code class=&quot;highlighter-rouge&quot;&gt;tup.1&lt;/code&gt;则取出第二个元素&lt;code class=&quot;highlighter-rouge&quot;&gt;2.2&lt;/code&gt;；比&lt;a href=&quot;http://en.cppreference.com/w/cpp/utility/tuple/get&quot;&gt;C++11的模板元语法&lt;/a&gt;简单多了。&lt;/p&gt;
+
+&lt;p&gt;数组则用于表示具有相同类型的元素的集合，如&lt;code class=&quot;highlighter-rouge&quot;&gt;let arr = [1, 2, 3, 4, 5]&lt;/code&gt;,如果类型不一致则会有编译错误报出。
+和C/C++这中的类似，数组元素一般是分配在栈上的，其大小在编译器应该是预先确定的；如果需要可变长的容器，则需要&lt;code class=&quot;highlighter-rouge&quot;&gt;Vector&lt;/code&gt;类型。
+数组越界的检查默认也包含在语言中了，如果访问越界的下标，默认程序就会崩溃；当然Rust的错误处理机制也有些特殊，容后探讨。&lt;/p&gt;
+
+&lt;h4 id=&quot;容器类型&quot;&gt;容器类型&lt;/h4&gt;
+&lt;p&gt;Rust支持以下基本的容器类型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Vector&lt;/code&gt; 该类型用于存储逻辑上的列表类型，其正式名字是&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&lt;/code&gt;,用&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec::new()&lt;/code&gt;创建空的向量，因为其是用泛型实现的，我们必须指定类型注解；
+即是用 &lt;code class=&quot;highlighter-rouge&quot;&gt;let v: Vec&amp;lt;i32&amp;gt; = Vec::new()&lt;/code&gt; 来生成一个新的向量&lt;code class=&quot;highlighter-rouge&quot;&gt;v&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; 是&lt;strong&gt;作为一个库提供&lt;/strong&gt;的而不是基本的语言机制；其实现和C++的比较类似，内部也使用一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&amp;lt;u8&amp;gt;&lt;/code&gt;来存储数据的，因此考虑到国际化的原因，其操作可能比其它语言中的要复杂一些；幸运的是，这些细节以及被标准库所封装。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Hashmap&lt;/code&gt; 用于表述逻辑上的哈希关联容器；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;函数&quot;&gt;函数&lt;/h3&gt;
 
@@ -1198,7 +1239,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;函数的实现体本质上是一个&lt;code class=&quot;highlighter-rouge&quot;&gt;block&lt;/code&gt;，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它还支持Ruby风格的自动返回最后一个表达式的写法，
+&lt;p&gt;函数的实现体本质上是一个&lt;code class=&quot;highlighter-rouge&quot;&gt;block&lt;/code&gt;，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它&lt;strong&gt;还支持Ruby风格的自动返回最后一个表达式&lt;/strong&gt;的写法，
 仅仅需要最后一个表达式省略分号即可；比如这个简单的函数&lt;/p&gt;
 
 &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;five&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -1206,6 +1247,17 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+&lt;p&gt;懒惰是伟大程序员的优良品质哈。&lt;/p&gt;
+
+&lt;h4 id=&quot;函数和宏&quot;&gt;函数和宏&lt;/h4&gt;
+
+&lt;p&gt;Rust本身支持语法层面的宏，并且其标准库提供了很多各种各样的宏，譬如最常用的打印函数其实就是一个宏；所有的宏使用&lt;code class=&quot;highlighter-rouge&quot;&gt;!&lt;/code&gt;后缀来区分。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;println!(&quot;The value of x is {}, y is {}&quot;, x, y)&lt;/code&gt;用于打印出x和y的值；其语法形式非常像一些常见的Java库所支持的格式，可以用大括号来打印对象。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://doc.rust-lang.org/book/first-edition/macros.html&quot;&gt;宏是在编译的早期阶段&lt;/a&gt;被展开的，和C中的宏原理类似，虽然Rust的语法看起来更简洁一些；但是依然有很多新的语法构造，简单来说可以认为Rust的宏是用&lt;code class=&quot;highlighter-rouge&quot;&gt;macro_rules&lt;/code&gt;和模式匹配来实现的。&lt;/p&gt;
+
+&lt;p&gt;从可维护的角度来说，应该做好折中因为宏代码往往意味着&lt;strong&gt;更难理解和调试&lt;/strong&gt;。很多时候，需要将宏作为最后一种不得已而为之的措施。
+比C中的宏好一点的是，Rust提供了对宏进行调试的方式，可以在其编译器的命令行中加入&lt;code class=&quot;highlighter-rouge&quot;&gt;--pretty expand&lt;/code&gt;选项来查看展开的代码。&lt;/p&gt;
 
 &lt;h3 id=&quot;错误检查机制&quot;&gt;错误检查机制&lt;/h3&gt;
 
@@ -1224,6 +1276,8 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;h3 id=&quot;面向对象编程&quot;&gt;面向对象编程&lt;/h3&gt;
 
 &lt;h3 id=&quot;函数式编程&quot;&gt;函数式编程&lt;/h3&gt;
+
+&lt;h4 id=&quot;option类型&quot;&gt;Option类型&lt;/h4&gt;
 
 &lt;h3 id=&quot;traits&quot;&gt;Traits&lt;/h3&gt;
 

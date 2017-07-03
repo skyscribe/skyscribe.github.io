@@ -488,7 +488,7 @@
 
 
 
-  5 minute read
+  9 minute read
 
 </p>
           
@@ -517,7 +517,10 @@
 <h2 id="基本语法特性">基本语法特性</h2>
 <p>作为一门面向系统编程的<strong>偏底层</strong>的程序语言，其基本语法和传统的C/C++/Java系列语言共享了很多共同之处，这里仅需要看看其不同之处。</p>
 
-<h3 id="类型声明和自动推断">类型声明和自动推断</h3>
+<h3 id="类型系统">类型系统</h3>
+<p>静态语言的基本元素之一是变量和类型；不同的语言会选择不同的类型定义和内置的开箱可用的基本类型；这些类型及内置类的设计往往反映了编程语言设计者的决策策略和权衡要素。</p>
+
+<h4 id="类型声明和自动推断">类型声明和自动推断</h4>
 
 <p>毕竟要面对的是偏严肃的<strong>系统编程</strong>领域，选择静态类型可以在编译阶段<strong>尽可能早地发现更多的</strong>程序错误是题中之义；同时作为一门比较现代的编程语言，每次让程序员自己输入每个变量的类型这类臃肿的做法也被废弃，<strong>自动类型推断</strong>必不可少 - 当编译器可以”聪明地”推导出合适的类型的时候，变量类型指定可以忽略。</p>
 
@@ -532,7 +535,7 @@
 
 <p>这种机制从某种程度上来说，反而会使代码变得不太容易理解，如果程序员习惯了C/C++的编程方式的话；同时<strong>也会给IDE等工具的解析</strong>带来一些挑战；当然这个是仁者见仁智者见智的事情。</p>
 
-<h3 id="类型可变性约束">类型可变性约束</h3>
+<h4 id="类型可变性约束">类型可变性约束</h4>
 
 <p>Rust要求所有定义的变量必须指定是否是<strong>可变</strong>的；并且作为变量的基本特征强制程序员做合理的选择。
 可变的变量用类似<code class="highlighter-rouge">let mut varName:Type = value</code>的语法来定义，顾名思义可以在<strong>声明之后被重新赋值</strong>修改；
@@ -542,6 +545,44 @@
 对于常量类型我们必须使用类型注解，不能声明可变的常量类型（不允许混合<code class="highlighter-rouge">const</code>和<code class="highlighter-rouge">mut</code>),而且常量类型只能被赋值为一个常量表达式，
 不能用函数调用的结果或者是其他一些运行时计算出来的值来初始化。
 综合来看，Rust的常量类型和C++11中新引入的<a href="http://en.cppreference.com/w/cpp/language/constexpr"><code class="highlighter-rouge">constexpr</code></a>行为比较接近。</p>
+
+<h4 id="内置类型">内置类型</h4>
+
+<p>内置类型一般用于提供大部分程序员都要用到的基本数据结构。除了一些其他语言都常见的基本类型(Rust称之为标量类型)，Rust也提供了一些相对比较复杂的类型。</p>
+
+<p>基本标量类型包含以下这些基本的类型</p>
+<ul>
+  <li>整型类型，包括定长的8/16/32/64位的有符号和无符号类型（如<code class="highlighter-rouge">u16</code>是无符号16位整型，<code class="highlighter-rouge">i32</code>是有符号32位类型），
+还支持平台相关的有符号/无符号类型，分别用<code class="highlighter-rouge">isize</code>和<code class="highlighter-rouge">usize</code>表示</li>
+  <li>浮点类型，支持单精度(<code class="highlighter-rouge">f32</code>)和双精度(<code class="highlighter-rouge">f64</code>)类型，这些在数值计算的时候比较关键</li>
+  <li>布尔类型，和C++中的比较类似，有<code class="highlighter-rouge">true</code>和<code class="highlighter-rouge">false</code>两种可能的取值，当然没有C/C++中的那些隐式转换的麻烦</li>
+  <li>字符类型，支持Unicode</li>
+</ul>
+
+<h4 id="复合类型">复合类型`</h4>
+<p>比较新一点的语言都支持一些复杂一点的基本组合类型。</p>
+
+<p><code class="highlighter-rouge">tuple</code>和其它语言的比较类似，用括号语法来声明，如<code class="highlighter-rouge">let tup = (1, 2.2, "something")</code>声明一个含有三个不同类型的元素的元组；<code class="highlighter-rouge">let (a, b, c) = tup</code> 则将元组中的元素逐一取出，和Python的用法比较类似。
+除了这种提取方式，元组元素也可以用点语法来访问，如<code class="highlighter-rouge">tup.1</code>则取出第二个元素<code class="highlighter-rouge">2.2</code>；比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
+
+<p>数组则用于表示具有相同类型的元素的集合，如<code class="highlighter-rouge">let arr = [1, 2, 3, 4, 5]</code>,如果类型不一致则会有编译错误报出。
+和C/C++这中的类似，数组元素一般是分配在栈上的，其大小在编译器应该是预先确定的；如果需要可变长的容器，则需要<code class="highlighter-rouge">Vector</code>类型。
+数组越界的检查默认也包含在语言中了，如果访问越界的下标，默认程序就会崩溃；当然Rust的错误处理机制也有些特殊，容后探讨。</p>
+
+<h4 id="容器类型">容器类型</h4>
+<p>Rust支持以下基本的容器类型</p>
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">Vector</code> 该类型用于存储逻辑上的列表类型，其正式名字是<code class="highlighter-rouge">Vec</code>,用<code class="highlighter-rouge">Vec::new()</code>创建空的向量，因为其是用泛型实现的，我们必须指定类型注解；
+即是用 <code class="highlighter-rouge">let v: Vec&lt;i32&gt; = Vec::new()</code> 来生成一个新的向量<code class="highlighter-rouge">v</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">String</code> 是<strong>作为一个库提供</strong>的而不是基本的语言机制；其实现和C++的比较类似，内部也使用一个<code class="highlighter-rouge">Vec&lt;u8&gt;</code>来存储数据的，因此考虑到国际化的原因，其操作可能比其它语言中的要复杂一些；幸运的是，这些细节以及被标准库所封装。</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">Hashmap</code> 用于表述逻辑上的哈希关联容器；其提供的API和C++/Java的比较类似，功能上比C++的复杂一些但比Java的更精简一点</p>
+  </li>
+</ul>
 
 <h3 id="函数">函数</h3>
 
@@ -553,7 +594,7 @@
 </code></pre>
 </div>
 
-<p>函数的实现体本质上是一个<code class="highlighter-rouge">block</code>，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它还支持Ruby风格的自动返回最后一个表达式的写法，
+<p>函数的实现体本质上是一个<code class="highlighter-rouge">block</code>，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它<strong>还支持Ruby风格的自动返回最后一个表达式</strong>的写法，
 仅仅需要最后一个表达式省略分号即可；比如这个简单的函数</p>
 
 <div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">five</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
@@ -561,6 +602,17 @@
 <span class="p">}</span>
 </code></pre>
 </div>
+<p>懒惰是伟大程序员的优良品质哈。</p>
+
+<h4 id="函数和宏">函数和宏</h4>
+
+<p>Rust本身支持语法层面的宏，并且其标准库提供了很多各种各样的宏，譬如最常用的打印函数其实就是一个宏；所有的宏使用<code class="highlighter-rouge">!</code>后缀来区分。
+<code class="highlighter-rouge">println!("The value of x is {}, y is {}", x, y)</code>用于打印出x和y的值；其语法形式非常像一些常见的Java库所支持的格式，可以用大括号来打印对象。</p>
+
+<p><a href="https://doc.rust-lang.org/book/first-edition/macros.html">宏是在编译的早期阶段</a>被展开的，和C中的宏原理类似，虽然Rust的语法看起来更简洁一些；但是依然有很多新的语法构造，简单来说可以认为Rust的宏是用<code class="highlighter-rouge">macro_rules</code>和模式匹配来实现的。</p>
+
+<p>从可维护的角度来说，应该做好折中因为宏代码往往意味着<strong>更难理解和调试</strong>。很多时候，需要将宏作为最后一种不得已而为之的措施。
+比C中的宏好一点的是，Rust提供了对宏进行调试的方式，可以在其编译器的命令行中加入<code class="highlighter-rouge">--pretty expand</code>选项来查看展开的代码。</p>
 
 <h3 id="错误检查机制">错误检查机制</h3>
 
@@ -579,6 +631,8 @@
 <h3 id="面向对象编程">面向对象编程</h3>
 
 <h3 id="函数式编程">函数式编程</h3>
+
+<h4 id="option类型">Option类型</h4>
 
 <h3 id="traits">Traits</h3>
 
