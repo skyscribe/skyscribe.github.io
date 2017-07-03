@@ -488,7 +488,7 @@
 
 
 
-  1 minute read
+  5 minute read
 
 </p>
           
@@ -515,8 +515,52 @@
 <p>根据以上目标可以相对容易的理解一些核心的语言设计策略背后的决策依据。</p>
 
 <h2 id="基本语法特性">基本语法特性</h2>
+<p>作为一门面向系统编程的<strong>偏底层</strong>的程序语言，其基本语法和传统的C/C++/Java系列语言共享了很多共同之处，这里仅需要看看其不同之处。</p>
 
-<h3 id="类型自动推断和后者类型声明">类型自动推断和后者类型声明</h3>
+<h3 id="类型声明和自动推断">类型声明和自动推断</h3>
+
+<p>毕竟要面对的是偏严肃的<strong>系统编程</strong>领域，选择静态类型可以在编译阶段<strong>尽可能早地发现更多的</strong>程序错误是题中之义；同时作为一门比较现代的编程语言，每次让程序员自己输入每个变量的类型这类臃肿的做法也被废弃，<strong>自动类型推断</strong>必不可少 - 当编译器可以”聪明地”推导出合适的类型的时候，变量类型指定可以忽略。</p>
+
+<p>譬如需要声明一个某种类型的变量，Rust用<code class="highlighter-rouge">let x: someType = &lt;some value&gt;</code>来表示；当然对于编译器可以推导出来类型的情况下，类型是可以省略的这样可以少写一些啰嗦的代码，<code class="highlighter-rouge">let x = 2</code>就会定义一个整数类型的变量<code class="highlighter-rouge">x</code>;比较新的编程语言基本都是这么做的，没有什么新意。</p>
+
+<p>作为一门<strong>强类型的语言</strong>，任何变量或者表达式必须有唯一的类型，否则编译的时候就会报错。当然Rust支持一种特殊的变量隐藏机制(Shadow),即同一个名字的变量可以重新使用，并设置为一个完全不同的类型；这个时候<strong>原来的变量就不能被访问</strong>了。如</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">var</span> <span class="o">=</span> <span class="s">"something"</span><span class="p">;</span> <span class="c">//string literal</span>
+<span class="k">let</span> <span class="n">var</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c">//changed to int</span>
+</code></pre>
+</div>
+
+<p>这种机制从某种程度上来说，反而会使代码变得不太容易理解，如果程序员习惯了C/C++的编程方式的话；同时<strong>也会给IDE等工具的解析</strong>带来一些挑战；当然这个是仁者见仁智者见智的事情。</p>
+
+<h3 id="类型可变性约束">类型可变性约束</h3>
+
+<p>Rust要求所有定义的变量必须指定是否是<strong>可变</strong>的；并且作为变量的基本特征强制程序员做合理的选择。
+可变的变量用类似<code class="highlighter-rouge">let mut varName:Type = value</code>的语法来定义，顾名思义可以在<strong>声明之后被重新赋值</strong>修改；
+而不可变的变量少了一个<code class="highlighter-rouge">mut</code>关键字，其定义的变量在初始化一次后续就不能再修改了。</p>
+
+<p>Rust里边同时支持常量类型，用<code class="highlighter-rouge">const</code>来声明，像是从C++里借鉴来的。它和可变类型<code class="highlighter-rouge">mutable</code>有一些细微的不同:
+对于常量类型我们必须使用类型注解，不能声明可变的常量类型（不允许混合<code class="highlighter-rouge">const</code>和<code class="highlighter-rouge">mut</code>),而且常量类型只能被赋值为一个常量表达式，
+不能用函数调用的结果或者是其他一些运行时计算出来的值来初始化。
+综合来看，Rust的常量类型和C++11中新引入的<a href="http://en.cppreference.com/w/cpp/language/constexpr"><code class="highlighter-rouge">constexpr</code></a>行为比较接近。</p>
+
+<h3 id="函数">函数</h3>
+
+<p>作为基本编程要素的函数在Rust中的定义没有什么特别特殊的地方，除了其类型声明是后置风格之外，其返回类型（如果不能被自动推断）用<code class="highlighter-rouge">-&gt;</code>来声明，比如</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="c">//一个返回int类型的函数</span>
+<span class="k">fn</span> <span class="nf">thisIsAFunction</span><span class="p">(</span><span class="n">parA</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span> <span class="n">parB</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">int</span> <span class="p">{</span>
+    <span class="c">//some implementation</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>函数的实现体本质上是一个<code class="highlighter-rouge">block</code>，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它还支持Ruby风格的自动返回最后一个表达式的写法，
+仅仅需要最后一个表达式省略分号即可；比如这个简单的函数</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">five</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
+    <span class="mi">5</span>
+<span class="p">}</span>
+</code></pre>
+</div>
 
 <h3 id="错误检查机制">错误检查机制</h3>
 
