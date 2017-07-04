@@ -488,7 +488,7 @@
 
 
 
-  11 minute read
+  15 minute read
 
 </p>
           
@@ -562,8 +562,15 @@
 <h4 id="复合类型">复合类型`</h4>
 <p>比较新一点的语言都支持一些复杂一点的基本组合类型。</p>
 
-<p><code class="highlighter-rouge">tuple</code>和其它语言的比较类似，用括号语法来声明，如<code class="highlighter-rouge">let tup = (1, 2.2, "something")</code>声明一个含有三个不同类型的元素的元组；<code class="highlighter-rouge">let (a, b, c) = tup</code> 则将元组中的元素逐一取出，和Python的用法比较类似。
-除了这种提取方式，元组元素<strong>也可以用点语法</strong>来访问元素，如<code class="highlighter-rouge">tup.1</code>则取出第二个元素<code class="highlighter-rouge">2.2</code>；比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
+<p><code class="highlighter-rouge">tuple</code>和其它语言的比较类似，用括号语法来声明，基本用法可以看下边这个简单的例子</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s">"something"</span><span class="p">)</span>
+<span class="k">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">=</span> <span class="n">tup</span>
+<span class="k">let</span> <span class="n">secondElem</span> <span class="o">=</span> <span class="n">tup</span><span class="err">.</span><span class="mi">1</span>
+</code></pre>
+</div>
+<p>第一行代码声明一个含有三个不同类型的元素的元组；第二行代码则将元组中的元素逐一取出，和Python的用法比较类似。
+除了这种提取方式，元组元素<strong>也可以用点语法</strong>来访问元素，如上边的第三行代码则用<code class="highlighter-rouge">tup.1</code>则取出第二个元素；
+比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
 
 <p>数组则用于表示<strong>具有相同类型的元素的集合</strong>，如<code class="highlighter-rouge">let arr = [1, 2, 3, 4, 5]</code>,如果类型不一致则会有编译错误报出。
 和C/C++这中的类似，数组元素一般是分配在栈上的，其大小在编译器应该是预先确定的；如果需要可变长的容器，则需要<code class="highlighter-rouge">Vector</code>类型。
@@ -602,7 +609,8 @@
 <span class="p">}</span>
 </code></pre>
 </div>
-<p>懒惰是伟大程序员的优良品质哈。</p>
+<p>懒惰是伟大程序员的优良品质嘛。由于我们有内置的<code class="highlighter-rouge">tuple</code>类型，因此Rust是可以允许有多个返回值的；
+比较典型的一个场景是用户错误处理的情况，可以返回一个<code class="highlighter-rouge">Result</code>，同时携带错误码和可能的原因;稍后会仔细看一下异常处理的部分。</p>
 
 <h4 id="函数和宏">函数和宏</h4>
 
@@ -643,7 +651,7 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
 </code></pre>
 </div>
 
-<p>可以使用枚举类型的模式匹配（见后述) 来优雅的解决，譬如这个操作文件的例子</p>
+<p>可以使用枚举类型的<strong>模式匹配</strong>（见后述) 来优雅的解决，譬如这个操作文件的例子</p>
 
 <div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="n">File</span><span class="p">;</span>
 
@@ -660,12 +668,58 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
 </code></pre>
 </div>
 
-<p>Rust支持一种<strong>更简洁的方法</strong>来简化上述的样板代码<code class="highlighter-rouge">let f = File::open("hello.txt").unwrap()</code>则返回正常情况下的返回值，如果有异常则直接调用<code class="highlighter-rouge">panic!</code>来终止程序。</p>
+<p>Rust支持一种<strong>更简洁的方法</strong>来简化上述的样板代码<code class="highlighter-rouge">let f = File::open("hello.txt").unwrap()</code>则返回正常情况下的返回值，如果有异常则直接调用<code class="highlighter-rouge">panic!</code>来终止程序。
+还有一种更”偷懒/简洁”的做法是，加上额外的描述字符串 - 大部分情况下出错了我们总想额外打印一些信息,可以用</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.text"</span><span class="p">)</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Unable to open file..."</span><span class="p">)</span>
+</code></pre>
+</div>
 
-<p><strong>TBD</strong></p>
+<h4 id="异常的传递和扩散">异常的传递和扩散</h4>
+<p>这是一个常见的场景，某个API的使用者不想自己去处理异常场景，仅仅想将其传递给自己的调用者去处理，或者程序中有个统一的地方处理异常(通常来说可能不是一个好的主意！)。
+最基本的思路是，直接将异常返回的类型签名写出来，显示让调用者处理。</p>
+
+<p>下边这段代码实现读入一个文件，从里边读取某个字符串，如果成功则返回该字符串，期间有任何错误，则传递给调用者。</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">);</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">f</span> <span class="o">=</span> <span class="k">match</span> <span class="n">f</span> <span class="p">{</span>
+        <span class="nf">Ok</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="n">file</span><span class="p">,</span>
+        <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="k">return</span> <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+    <span class="p">};</span>
+
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+    <span class="k">match</span> <span class="n">f</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Ok</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nf">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">),</span>
+        <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Rust提供了一种更<strong>简洁的方式(惯用法)</strong> - 用<code class="highlighter-rouge">"?"操作符</code>来传递错误，类似的代码可以重写为</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+    <span class="n">f</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>需要注意到上边的代码使用了<code class="highlighter-rouge">block</code>的写法省略<code class="highlighter-rouge">return</code>关键字。</p>
+
+<p>如果追求更精简的代码，我们甚至可以用一行代码来完成上述的函数体</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="err">?</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+<span class="nf">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>是否有种熟悉的函数式编程的链式写法的味道？</p>
 
 <h2 id="内存访问模型和并发">内存访问模型和并发</h2>
-<p>为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。</p>
+<p>作为一门面向系统编程的语言，Rust决定了不使用GC，同时基于工程上的原因，让工程师自己来管理内存又显得不符合时代潮流。
+Rust采用的策略是让程序员提供一定的指示给编译器，然后由编译器来确保内存的分配和访问总是安全的。
+对于Rust程序用而言，<strong>理解堆和栈以及对象的生存期/作用域是必须的</strong>，虽然编译器在后台做了很多工作。
+为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。</p>
 
 <h3 id="对象的唯一ownership">对象的唯一Ownership</h3>
 
