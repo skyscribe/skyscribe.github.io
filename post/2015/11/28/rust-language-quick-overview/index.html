@@ -488,7 +488,7 @@
 
 
 
-  15 minute read
+  19 minute read
 
 </p>
           
@@ -717,11 +717,80 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
 
 <h2 id="内存访问模型和并发">内存访问模型和并发</h2>
 <p>作为一门面向系统编程的语言，Rust决定了不使用GC，同时基于工程上的原因，让工程师自己来管理内存又显得不符合时代潮流。
-Rust采用的策略是让程序员提供一定的指示给编译器，然后由编译器来确保内存的分配和访问总是安全的。
-对于Rust程序用而言，<strong>理解堆和栈以及对象的生存期/作用域是必须的</strong>，虽然编译器在后台做了很多工作。
+Rust采用的策略是让程序员提供一定的指示给编译器，然后由编译器来确保内存的分配和访问总是安全的。</p>
+
+<p>对于Rust程序用而言，<strong>理解堆和栈以及对象的生存期/作用域是必须的</strong>，虽然编译器在后台做了很多工作。
 为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。</p>
 
+<p>从语法的角度来看，Rust取消了<code class="highlighter-rouge">-&gt;</code>操作符，因此所有的方法调用都是采用<code class="highlighter-rouge">obj.doSth()</code>的方式；这点没什么惊喜，没有了C的<a href="http://www.gotw.ca/publications/c_family_interview.htm">后向兼容负担</a>，基本上新的语言都是这么干的。在语言层面上，Rust仍然<strong>有引用类型的概念</strong>;由于要借助编译器来管理内存，Rust的对象作用域规则有些特殊。</p>
+
 <h3 id="对象的唯一ownership">对象的唯一Ownership</h3>
+<p>默认每个对象都是有唯一的所有权的，这个贯穿在Rust的基本设计规则中</p>
+<ol>
+  <li><strong>任何一个值</strong>（基本类型或对象）都唯一关联一个变量，这个变量被称为其Owner</li>
+  <li>任何一个时间点，同一个值<strong>仅仅有一个Owner</strong></li>
+  <li>当其Owner离开作用域的时候（无法被程序再次访问），值将会被从内存中释放</li>
+</ol>
+
+<p>举个简单的例子，当我们声明<code class="highlighter-rouge">let s = "hello world"</code>的时候，字面量<code class="highlighter-rouge">"hello world"</code>的Owner就是<code class="highlighter-rouge">s</code>本身；当<code class="highlighter-rouge">s</code>离开作用域的时候,对应的字面量空间就会被释放。
+作用域的概念和传统的C/C++/Java中的很类似，大部分情况下，是通过大括号来限定作用域的。</p>
+
+<p>比较特殊一点的情况和变量的<code class="highlighter-rouge">shadow</code>有关，当一个变量通过<code class="highlighter-rouge">shadow</code>的方式重新指向另外一个对象的时候，原来的值因为<strong>失去了Owner也应该被编译器悄悄释放</strong>了；
+当然这里行为仍然是安全的,因为程序没有通过其它办法再访问原来的值。编译器也可以选择在真正碰到作用域结束的时候再释放，然而这些已经属于编译器的实现细节了，应用程序无需关心。
+非常优雅的<strong>关注点分离</strong>设计!</p>
+
+<h3 id="函数调用中的所有权转移">函数调用中的所有权转移</h3>
+<p>和C/C++中不一样的是，函数调用的时候，<strong>参数传递会造成所有权转移</strong>即调用者失去了对原来参数的所有权！考虑下边的例子</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+    <span class="nf">do_something</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="c">//s失去对字符串的所有权！</span>
+    <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="nf">do_somethingElse</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="c">//内置类型被拷贝！</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">do_something</span><span class="p">(</span><span class="n">par</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">//par 拥有外部传入参数的所有权</span>
+<span class="p">}</span> <span class="c">//作用域结束的时候，par对应的对象会被释放</span>
+
+<span class="k">fn</span> <span class="nf">do_somethingElse</span><span class="p">(</span><span class="n">par</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// play with par</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>上述例子中，当调用了<code class="highlighter-rouge">do_something(s)</code>之后，虽然<code class="highlighter-rouge">s</code>还可以访问但已经失去了对应对象的所有权，其行为和<a href="http://www.gotw.ca/publications/c_family_interview.htm">C++11/14中的Move</a>很像。第二个例子中<code class="highlighter-rouge">x</code>对象却依然可以访问，这里的不同是，Rust对象对<strong>分配在栈上的对象默认采用copy方式</strong>处理，
+所以仅分配在内存堆上的对象被Move，栈上的对象（编译期必须知道大小）默认是被复制过去的。</p>
+
+<p>对于分配于堆上的（大小运行期才知道）对象，Rust也提供了<code class="highlighter-rouge">clone</code>方法来（其实是泛型的annotation）执行深度拷贝。</p>
+
+<p><strong>函数返回的时候，默认也会转移所有权</strong>，这点和函数调用的参数传递情况类似，只不过是传递/接收参数的顺序反了过来，不再详述。</p>
+
+<h4 id="引用类型">引用类型</h4>
+<p>如果默认的转移所有权的方式不符合实际的场景，Rust还提供了引用类型来指示传递过程中，<strong>仅仅保留对原来参数的引用</strong>而不转移所有权；
+概念上和C的指针很想象，只是有很多额外的措施避免滥用指针可能出现的空指针、悬挂指针等复杂问题。</p>
+
+<p>引用类型在语法上用<code class="highlighter-rouge">&amp;</code>符号来表示，可以用于修饰标志符，熟悉C/C++的应该不陌生；唯一有点麻烦的是，调用者和函数声明都必须显示声明引用类型，
+如下边的例子</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">calculate_lenght</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
+    <span class="n">s</span><span class="nf">.len</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="k">let</span> <span class="n">s1</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+<span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="nf">calculate_length</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+<span class="nd">println!</span><span class="p">(</span><span class="s">"The length of '{}' is {}"</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>默认的引用类型是只读的，因为这个<strong>对象是借来的</strong>，被调用函数没有所有权；尝试去修改的话，则会被编译器报错拦住。
+又是一个精妙的设计，多少粗心的错误可以被精明的编译器拦住。</p>
+
+<h4 id="可修改的引用和安全性">可修改的引用和安全性</h4>
+
+<p>如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 <code class="highlighter-rouge">&amp;mut SomeType</code>的，只是出于数据安全性的考虑（避免可能的运行期错误), Rust做了如下限制</p>
+
+<ol>
+  <li>T.B.D.</li>
+</ol>
 
 <h3 id="智能指针">智能指针</h3>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-04T19:30:51+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-05T08:40:37+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1362,11 +1362,80 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
 
 &lt;h2 id=&quot;内存访问模型和并发&quot;&gt;内存访问模型和并发&lt;/h2&gt;
 &lt;p&gt;作为一门面向系统编程的语言，Rust决定了不使用GC，同时基于工程上的原因，让工程师自己来管理内存又显得不符合时代潮流。
-Rust采用的策略是让程序员提供一定的指示给编译器，然后由编译器来确保内存的分配和访问总是安全的。
-对于Rust程序用而言，&lt;strong&gt;理解堆和栈以及对象的生存期/作用域是必须的&lt;/strong&gt;，虽然编译器在后台做了很多工作。
+Rust采用的策略是让程序员提供一定的指示给编译器，然后由编译器来确保内存的分配和访问总是安全的。&lt;/p&gt;
+
+&lt;p&gt;对于Rust程序用而言，&lt;strong&gt;理解堆和栈以及对象的生存期/作用域是必须的&lt;/strong&gt;，虽然编译器在后台做了很多工作。
 为了支持其内存安全和高效约束的目标，Rust提供了一些特殊的语言机制，包括其独特的对象唯一所有权的概念和引用语法，其智能指针的概念也比较有特色。&lt;/p&gt;
 
+&lt;p&gt;从语法的角度来看，Rust取消了&lt;code class=&quot;highlighter-rouge&quot;&gt;-&amp;gt;&lt;/code&gt;操作符，因此所有的方法调用都是采用&lt;code class=&quot;highlighter-rouge&quot;&gt;obj.doSth()&lt;/code&gt;的方式；这点没什么惊喜，没有了C的&lt;a href=&quot;http://www.gotw.ca/publications/c_family_interview.htm&quot;&gt;后向兼容负担&lt;/a&gt;，基本上新的语言都是这么干的。在语言层面上，Rust仍然&lt;strong&gt;有引用类型的概念&lt;/strong&gt;;由于要借助编译器来管理内存，Rust的对象作用域规则有些特殊。&lt;/p&gt;
+
 &lt;h3 id=&quot;对象的唯一ownership&quot;&gt;对象的唯一Ownership&lt;/h3&gt;
+&lt;p&gt;默认每个对象都是有唯一的所有权的，这个贯穿在Rust的基本设计规则中&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;任何一个值&lt;/strong&gt;（基本类型或对象）都唯一关联一个变量，这个变量被称为其Owner&lt;/li&gt;
+  &lt;li&gt;任何一个时间点，同一个值&lt;strong&gt;仅仅有一个Owner&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;当其Owner离开作用域的时候（无法被程序再次访问），值将会被从内存中释放&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;举个简单的例子，当我们声明&lt;code class=&quot;highlighter-rouge&quot;&gt;let s = &quot;hello world&quot;&lt;/code&gt;的时候，字面量&lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;hello world&quot;&lt;/code&gt;的Owner就是&lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt;本身；当&lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt;离开作用域的时候,对应的字面量空间就会被释放。
+作用域的概念和传统的C/C++/Java中的很类似，大部分情况下，是通过大括号来限定作用域的。&lt;/p&gt;
+
+&lt;p&gt;比较特殊一点的情况和变量的&lt;code class=&quot;highlighter-rouge&quot;&gt;shadow&lt;/code&gt;有关，当一个变量通过&lt;code class=&quot;highlighter-rouge&quot;&gt;shadow&lt;/code&gt;的方式重新指向另外一个对象的时候，原来的值因为&lt;strong&gt;失去了Owner也应该被编译器悄悄释放&lt;/strong&gt;了；
+当然这里行为仍然是安全的,因为程序没有通过其它办法再访问原来的值。编译器也可以选择在真正碰到作用域结束的时候再释放，然而这些已经属于编译器的实现细节了，应用程序无需关心。
+非常优雅的&lt;strong&gt;关注点分离&lt;/strong&gt;设计!&lt;/p&gt;
+
+&lt;h3 id=&quot;函数调用中的所有权转移&quot;&gt;函数调用中的所有权转移&lt;/h3&gt;
+&lt;p&gt;和C/C++中不一样的是，函数调用的时候，&lt;strong&gt;参数传递会造成所有权转移&lt;/strong&gt;即调用者失去了对原来参数的所有权！考虑下边的例子&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;do_something&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//s失去对字符串的所有权！&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;do_somethingElse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//内置类型被拷贝！&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;do_something&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;par&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//par 拥有外部传入参数的所有权&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//作用域结束的时候，par对应的对象会被释放&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;do_somethingElse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;par&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;// play with par&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;上述例子中，当调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;do_something(s)&lt;/code&gt;之后，虽然&lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt;还可以访问但已经失去了对应对象的所有权，其行为和&lt;a href=&quot;http://www.gotw.ca/publications/c_family_interview.htm&quot;&gt;C++11/14中的Move&lt;/a&gt;很像。第二个例子中&lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;对象却依然可以访问，这里的不同是，Rust对象对&lt;strong&gt;分配在栈上的对象默认采用copy方式&lt;/strong&gt;处理，
+所以仅分配在内存堆上的对象被Move，栈上的对象（编译期必须知道大小）默认是被复制过去的。&lt;/p&gt;
+
+&lt;p&gt;对于分配于堆上的（大小运行期才知道）对象，Rust也提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;clone&lt;/code&gt;方法来（其实是泛型的annotation）执行深度拷贝。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;函数返回的时候，默认也会转移所有权&lt;/strong&gt;，这点和函数调用的参数传递情况类似，只不过是传递/接收参数的顺序反了过来，不再详述。&lt;/p&gt;
+
+&lt;h4 id=&quot;引用类型&quot;&gt;引用类型&lt;/h4&gt;
+&lt;p&gt;如果默认的转移所有权的方式不符合实际的场景，Rust还提供了引用类型来指示传递过程中，&lt;strong&gt;仅仅保留对原来参数的引用&lt;/strong&gt;而不转移所有权；
+概念上和C的指针很想象，只是有很多额外的措施避免滥用指针可能出现的空指针、悬挂指针等复杂问题。&lt;/p&gt;
+
+&lt;p&gt;引用类型在语法上用&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;&lt;/code&gt;符号来表示，可以用于修饰标志符，熟悉C/C++的应该不陌生；唯一有点麻烦的是，调用者和函数声明都必须显示声明引用类型，
+如下边的例子&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;calculate_lenght&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;calculate_length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;The length of '{}' is {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;默认的引用类型是只读的，因为这个&lt;strong&gt;对象是借来的&lt;/strong&gt;，被调用函数没有所有权；尝试去修改的话，则会被编译器报错拦住。
+又是一个精妙的设计，多少粗心的错误可以被精明的编译器拦住。&lt;/p&gt;
+
+&lt;h4 id=&quot;可修改的引用和安全性&quot;&gt;可修改的引用和安全性&lt;/h4&gt;
+
+&lt;p&gt;如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;mut SomeType&lt;/code&gt;的，只是出于数据安全性的考虑（避免可能的运行期错误), Rust做了如下限制&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;T.B.D.&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;h3 id=&quot;智能指针&quot;&gt;智能指针&lt;/h3&gt;
 
