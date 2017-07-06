@@ -488,7 +488,7 @@
 
 
 
-  19 minute read
+  29 minute read
 
 </p>
           
@@ -786,15 +786,121 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 <h4 id="可修改的引用和安全性">可修改的引用和安全性</h4>
 
-<p>如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 <code class="highlighter-rouge">&amp;mut SomeType</code>的，只是出于数据安全性的考虑（避免可能的运行期错误), Rust做了如下限制</p>
+<p>如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 <code class="highlighter-rouge">&amp;mut SomeType</code>的，只是出于数据安全性的考虑（避免可能的运行期错误), 
+Rust定义了如下规则来<strong>保证对象的访问总是安全的</strong>；任何可能引起Race Condition的访问模式都<strong>尽量被编译器拦截住</strong>，这样成功编译的代码，出现运行期错误的可能性被大大降低了。</p>
 
 <ol>
-  <li>T.B.D.</li>
+  <li>引用的对象必须是合法的</li>
+  <li>同一个作用域内（对象是可以被程序访问到的），可以有多个只读的引用</li>
+  <li>同一个作用域内，如果已经有一个可修改引用，那么不允许存在其它任何引用，<strong>即使是只读的也不行</strong></li>
+  <li>不同的作用域内，可以有多个可修改的引用；这里因为对对象的修改是相互隔离的，因此不会有意外情况发生;该规则能保证程序逻辑正确的同时，又尽可能给上层程序更多的自由度</li>
 </ol>
+
+<p>上述最后一条规则其实意味着我们可以有意利用它，通过大括号来创建不同的作用域，写出更简洁的代码，比如</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">aStr</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">let</span> <span class="n">r1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">;</span>
+    <span class="c">//do sth with r1</span>
+<span class="p">}</span> <span class="c">//r1 离开作用域</span>
+
+<span class="k">let</span> <span class="n">r2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">;</span>
+<span class="c">//基于r2的修改操作</span>
+</code></pre>
+</div>
+
+<p>另外一种常见的指针错误是”悬挂指针”,在传统的C++程序中，当一个指针指向一个不存在的对象的时候，紧接着所有对指针的操作会<strong>导致未定义的行为</strong>；
+由于实际出现错误的地方和真正“制造出悬挂指针”的地方可能相距万里，这类运行期的错误往往会耗费程序员大量宝贵的时间。考虑下边的例子</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">reference_to_nothing</span> <span class="o">=</span> <span class="nf">dangle</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">dangle</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">String</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+    <span class="o">&amp;</span><span class="n">s</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>如果尝试编译上述代码，rust编译器会清晰的报告一个<strong>对象生存期</strong>错误</p>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>error[E0106]: missing lifetime specifier
+ --&gt; dangle.rs:5:16
+   |
+ 5 | fn dangle<span class="o">()</span> -&gt; &amp;String <span class="o">{</span>
+   |                ^^^^^^^
+   |
+   <span class="o">=</span> <span class="nb">help</span>: this <span class="k">function</span><span class="s1">'s return type contains a borrowed value, but there is no
+     value for it to be borrowed from
+   = help: consider giving it a '</span>static lifetime
+
+error: aborting due to previous error
+</code></pre>
+</div>
+<h4 id="对象生存期">对象生存期</h4>
+<p>在Rust的内部实现中，一个隐含的逻辑是，<strong>任何一个引用都关联着一个对于的生存期</strong>，大部分情况下生存期都可以由编译器自动推导得到而不需要使用者格外留意。
+当具体的实现中期望引用的生存期可以根据某些条件呈现不同的行为的时候，程序员必须提供一些辅助措施告诉编译器这些额外的判断信息。</p>
+
+<p>Rust编译器内部有一个成为BorrowChecker的工具，它在程序编译的过程中会检查是否所有的引用是合法的。
+当它无法判断引用的生存期的时候，程序员需要在定义的地方传入一些类似于检查点的生存期指示帮助编译器正常检查。</p>
+
+<p>考虑一个取2个字符串slice长度最大者并将其返回的一个函数</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">longest</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">x</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">y</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">x</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">y</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>编译这段程序的时候，编译器就会报错说，不知道如何决定返回的引用的生存期，因为它要么是<code class="highlighter-rouge">x</code>，要么是<code class="highlighter-rouge">y</code>，
+却是由程序的<strong>运行期的行为来动态决定</strong>的，编译器没有办法在编译的过程中做决定。修补这个错误则需要在函数签名中加入生存期标记</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="n">longest</span><span class="o">&lt;</span><span class="err">'</span><span class="n">a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">x</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">y</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">x</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">y</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>这样编译器就可以知道其实参数和返回值的生存期是一致的，不会产生意外的非法访问或者Race Condition。这里采用的语法是泛型的语法，后边会详细考察一下Rust的泛型支持。</p>
+
+<p>生存期检查的概念是Rust独有的，其采用的类泛型的语法学习起来也显得不是很清晰易懂；这也许是最迷人也最晦涩的特性，从设计的角度来说，
+<strong>牺牲一定的简单性来达到安全编程又不损失性能的目标</strong>也许是个不错的折中;
+既想要高层的抽象，又想要极致的性能，还不想有太多意外的错误是个<strong>刀剑上跳舞的极致挑战</strong>，这方面Rust做的很不错。</p>
 
 <h3 id="智能指针">智能指针</h3>
 
+<p>默认的引用方式支持生存期检查和对象借用，实质上采用的任然是所有者唯一的模型；实际应用场景中，程序员可能需要选择一个可以<strong>被多个所有者共享</strong>的对象生存期模型，
+一如C++中很常用的基于<a href="https://en.wikipedia.org/wiki/Automatic_Reference_Counting">自动引用计数</a>的<a href="http://en.cppreference.com/w/cpp/memory/shared_ptr">shared_ptr</a>的样子。</p>
+
+<p>Rust通过标准库的方式提供了额外的对象生存期管理模型，包括</p>
+<ul>
+  <li><code class="highlighter-rouge">Box&lt;T&gt;</code>类型用于表示一个指向单个堆上分配的对象的指针，该<strong>指针的大小在编译期间是可知的</strong>从而我们可以用它来定义递归的数据结构</li>
+  <li><code class="highlighter-rouge">Deref Trait</code>用于表示一个允许通过解引用来访问其封装的数据的智能指针</li>
+  <li><code class="highlighter-rouge">RefCell&lt;T&gt;</code> 用来支持可以修改某个不可变参数内部隐藏的数据的模式；默认情况下，引用规则不允许这样的操作。这种情况下会产生不安全的代码，需要程序员做一些额外的处理</li>
+  <li><code class="highlighter-rouge">Rc&lt;T&gt;</code>和<code class="highlighter-rouge">RefCell&lt;T&gt;</code>用于支持环形引用而不引入内存泄露，这个在GC的算法中很常见</li>
+</ul>
+
+<p>细节不一一展开探讨，总体上而言智能指针其实是接管了对象的所有权，并且<strong>在智能指针内部做自动的控制</strong>；这一思路现代C++的实践是英雄所见略同。</p>
+
 <h3 id="更简洁的并发支持">更简洁的并发支持</h3>
+
+<p>支持<strong>安全而又高效</strong>的并发编程是Rust另外一个雄心勃勃的目标。同时Rust又力图做到尽可能的简洁。
+从语言实现上来说，Rust采用了和控制内存安全访问以及对象所有权/生存期以及类型系统完全相同的工具来解决并发的问题，
+尽管这些机制看起来和并发安全相差甚远。</p>
+
+<p>经由大量的类型系统检查、对象生存期检查；大量的并发编程问题都可以在编译器被捕获，从而<strong>编译通过的代码往往就意味着没有并发安全性的问题</strong>找上门；
+程序员可以放心的重构其代码而不用太担心重构后的代码会破坏并发安全性；因此Rust称之为“无所畏惧的并发”。</p>
+
+<p>Rust的并发编程支持一些流行的并发编程模型</p>
+<ul>
+  <li>基于消息传递的<a href="https://en.wikipedia.org/wiki/Communicating_sequential_processes">CSP模型</a>,这也是Golang所采用的并发方式</li>
+  <li>传统的基于<code class="highlighter-rouge">Mutex</code>和对象的所有权来控制共享数据访问的方式 - Rust的类型系统和所有权控制使得其中的挑战降低了不少</li>
+</ul>
+
+<p>从设计上来说，并发支持不是Rust的核心语言的部分，所有的<strong>并发机制都是通过标准库</strong>来提供的，这也意味着更多扩展的可能;有新的并发访问方式，那就写新的库呗。</p>
 
 <h2 id="模块系统">模块系统</h2>
 
@@ -810,15 +916,45 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 <h2 id="软件工程支持---工具和方法">软件工程支持 - 工具和方法</h2>
 
-<h3 id="在线文档和可执行的文档"><a href="https://doc.rust-lang.org/book/second-edition/">在线文档</a>和可执行的文档</h3>
+<p>Rust提供了成熟的软件工程实践支持；有相对完善的模块文档和<a href="https://doc.rust-lang.org/book/second-edition/">官方的<code class="highlighter-rouge">gitboook</code></a>。</p>
 
-<h3 id="creates">Creates</h3>
+<h3 id="creates--cargo系统">Creates &amp;&amp; Cargo系统</h3>
+<p>作为一门站在巨人肩上的语言，Rust吸收了已有的一些成熟的包管理系统的经验，并提供了类似的极致来支持更好的协作</p>
+<ul>
+  <li>Creates和其包分发系统有点<code class="highlighter-rouge">Hackage</code>的影子，又有点NPM的味道</li>
+  <li>版本依赖管理上，和Ruby Gems的处理方式也有些像，虽然<code class="highlighter-rouge">toml</code>的格式没有Ruby的DSL那么灵活强大</li>
+</ul>
 
-<h3 id="cargo系统">Cargo系统</h3>
+<p>Cargo是一个类似于C++中的CMake的系统，同时还提供了一些创建项目模板的快捷方式，帮助程序员快速创建项目骨架，更快专注于具体的实现而不是构建细节。
+可以用它的子命令来</p>
+<ul>
+  <li>检查依赖，自动升级依赖</li>
+  <li>增量编译代码并报告错误</li>
+  <li>根据特定的开关选项执行对应的测试</li>
+  <li>生成文档</li>
+  <li>运行项目生成的可执行文件（如果不是编译一个库）</li>
+  <li>运行benchmark</li>
+  <li>安装编译好的二进制构建结果</li>
+  <li>搜索crates中注册的模块</li>
+</ul>
+
+<p>具体功能可以查看其命令行帮助。</p>
+
+<h3 id="ide和编辑器插件支持">IDE和编辑器插件支持</h3>
+<p>某些程序员更喜欢IDE，另外一些人则更熟悉命令行的Vim/Emacs或者其它轻量级的编辑器。社区目前提供了比较丰富的支持，包括对Eclipse/IntelliJ/Visual Studio的IDE插件，
+以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上比较主流的编程环境都有了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。</p>
 
 <h3 id="测试">测试</h3>
 
-<h2 id="总结">总结</h2>
+<p>Rust支持在包中提供单元测试和功能测试。默认的工具会搜索源码目录中的所有单元测试，并自动组织起来运行，同时也提供了一些高级的测试支持。
+Rust希望程序员明确的区分这两种测试，并采用不同的约定</p>
+<ul>
+  <li>所有的单元测试都和被测试的源代码放在一起，并且支持对private方法的测试（当然这个很有争议，个人建议不要测试private）</li>
+  <li>集成测试被放在专门的<code class="highlighter-rouge">test</code>文件夹下边，可以放在多个文件中，Cargo将会为每个文件生成一个crates</li>
+</ul>
+
+<p><code class="highlighter-rouge">cargo test</code>命令可用来执行所有的测试，并且<strong>默认是并发执行</strong>的;这样开发的反馈周期会更短；也可以用命令来显示要求线性执行 - 传入 <code class="highlighter-rouge">--test-threads=1</code>即可。
+一些更复杂的特性，如指定某个case的执行，跳过某些特定的case，以及按照某个过滤条件来选择特定的case，忽略case运行过程中的打印输出等特性也被贴心的支持了。</p>
 
 
         

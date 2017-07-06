@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-05T08:43:42+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-06T22:24:59+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1431,15 +1431,121 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 &lt;h4 id=&quot;可修改的引用和安全性&quot;&gt;可修改的引用和安全性&lt;/h4&gt;
 
-&lt;p&gt;如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;mut SomeType&lt;/code&gt;的，只是出于数据安全性的考虑（避免可能的运行期错误), Rust做了如下限制&lt;/p&gt;
+&lt;p&gt;如果实在需要在被调用函数中修改传入的引用参数，那么也是可以声明类型为 &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;mut SomeType&lt;/code&gt;的，只是出于数据安全性的考虑（避免可能的运行期错误), 
+Rust定义了如下规则来&lt;strong&gt;保证对象的访问总是安全的&lt;/strong&gt;；任何可能引起Race Condition的访问模式都&lt;strong&gt;尽量被编译器拦截住&lt;/strong&gt;，这样成功编译的代码，出现运行期错误的可能性被大大降低了。&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;T.B.D.&lt;/li&gt;
+  &lt;li&gt;引用的对象必须是合法的&lt;/li&gt;
+  &lt;li&gt;同一个作用域内（对象是可以被程序访问到的），可以有多个只读的引用&lt;/li&gt;
+  &lt;li&gt;同一个作用域内，如果已经有一个可修改引用，那么不允许存在其它任何引用，&lt;strong&gt;即使是只读的也不行&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;不同的作用域内，可以有多个可修改的引用；这里因为对对象的修改是相互隔离的，因此不会有意外情况发生;该规则能保证程序逻辑正确的同时，又尽可能给上层程序更多的自由度&lt;/li&gt;
 &lt;/ol&gt;
+
+&lt;p&gt;上述最后一条规则其实意味着我们可以有意利用它，通过大括号来创建不同的作用域，写出更简洁的代码，比如&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aStr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//do sth with r1&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//r1 离开作用域&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;//基于r2的修改操作&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;另外一种常见的指针错误是”悬挂指针”,在传统的C++程序中，当一个指针指向一个不存在的对象的时候，紧接着所有对指针的操作会&lt;strong&gt;导致未定义的行为&lt;/strong&gt;；
+由于实际出现错误的地方和真正“制造出悬挂指针”的地方可能相距万里，这类运行期的错误往往会耗费程序员大量宝贵的时间。考虑下边的例子&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reference_to_nothing&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;dangle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;dangle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;如果尝试编译上述代码，rust编译器会清晰的报告一个&lt;strong&gt;对象生存期&lt;/strong&gt;错误&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error[E0106]: missing lifetime specifier
+ --&amp;gt; dangle.rs:5:16
+   |
+ 5 | fn dangle&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; -&amp;gt; &amp;amp;String &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+   |                ^^^^^^^
+   |
+   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;help&lt;/span&gt;: this &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'s return type contains a borrowed value, but there is no
+     value for it to be borrowed from
+   = help: consider giving it a '&lt;/span&gt;static lifetime
+
+error: aborting due to previous error
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h4 id=&quot;对象生存期&quot;&gt;对象生存期&lt;/h4&gt;
+&lt;p&gt;在Rust的内部实现中，一个隐含的逻辑是，&lt;strong&gt;任何一个引用都关联着一个对于的生存期&lt;/strong&gt;，大部分情况下生存期都可以由编译器自动推导得到而不需要使用者格外留意。
+当具体的实现中期望引用的生存期可以根据某些条件呈现不同的行为的时候，程序员必须提供一些辅助措施告诉编译器这些额外的判断信息。&lt;/p&gt;
+
+&lt;p&gt;Rust编译器内部有一个成为BorrowChecker的工具，它在程序编译的过程中会检查是否所有的引用是合法的。
+当它无法判断引用的生存期的时候，程序员需要在定义的地方传入一些类似于检查点的生存期指示帮助编译器正常检查。&lt;/p&gt;
+
+&lt;p&gt;考虑一个取2个字符串slice长度最大者并将其返回的一个函数&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;longest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;编译这段程序的时候，编译器就会报错说，不知道如何决定返回的引用的生存期，因为它要么是&lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;，要么是&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;，
+却是由程序的&lt;strong&gt;运行期的行为来动态决定&lt;/strong&gt;的，编译器没有办法在编译的过程中做决定。修补这个错误则需要在函数签名中加入生存期标记&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;longest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这样编译器就可以知道其实参数和返回值的生存期是一致的，不会产生意外的非法访问或者Race Condition。这里采用的语法是泛型的语法，后边会详细考察一下Rust的泛型支持。&lt;/p&gt;
+
+&lt;p&gt;生存期检查的概念是Rust独有的，其采用的类泛型的语法学习起来也显得不是很清晰易懂；这也许是最迷人也最晦涩的特性，从设计的角度来说，
+&lt;strong&gt;牺牲一定的简单性来达到安全编程又不损失性能的目标&lt;/strong&gt;也许是个不错的折中;
+既想要高层的抽象，又想要极致的性能，还不想有太多意外的错误是个&lt;strong&gt;刀剑上跳舞的极致挑战&lt;/strong&gt;，这方面Rust做的很不错。&lt;/p&gt;
 
 &lt;h3 id=&quot;智能指针&quot;&gt;智能指针&lt;/h3&gt;
 
+&lt;p&gt;默认的引用方式支持生存期检查和对象借用，实质上采用的任然是所有者唯一的模型；实际应用场景中，程序员可能需要选择一个可以&lt;strong&gt;被多个所有者共享&lt;/strong&gt;的对象生存期模型，
+一如C++中很常用的基于&lt;a href=&quot;https://en.wikipedia.org/wiki/Automatic_Reference_Counting&quot;&gt;自动引用计数&lt;/a&gt;的&lt;a href=&quot;http://en.cppreference.com/w/cpp/memory/shared_ptr&quot;&gt;shared_ptr&lt;/a&gt;的样子。&lt;/p&gt;
+
+&lt;p&gt;Rust通过标准库的方式提供了额外的对象生存期管理模型，包括&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Box&amp;lt;T&amp;gt;&lt;/code&gt;类型用于表示一个指向单个堆上分配的对象的指针，该&lt;strong&gt;指针的大小在编译期间是可知的&lt;/strong&gt;从而我们可以用它来定义递归的数据结构&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Deref Trait&lt;/code&gt;用于表示一个允许通过解引用来访问其封装的数据的智能指针&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;RefCell&amp;lt;T&amp;gt;&lt;/code&gt; 用来支持可以修改某个不可变参数内部隐藏的数据的模式；默认情况下，引用规则不允许这样的操作。这种情况下会产生不安全的代码，需要程序员做一些额外的处理&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Rc&amp;lt;T&amp;gt;&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;RefCell&amp;lt;T&amp;gt;&lt;/code&gt;用于支持环形引用而不引入内存泄露，这个在GC的算法中很常见&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;细节不一一展开探讨，总体上而言智能指针其实是接管了对象的所有权，并且&lt;strong&gt;在智能指针内部做自动的控制&lt;/strong&gt;；这一思路现代C++的实践是英雄所见略同。&lt;/p&gt;
+
 &lt;h3 id=&quot;更简洁的并发支持&quot;&gt;更简洁的并发支持&lt;/h3&gt;
+
+&lt;p&gt;支持&lt;strong&gt;安全而又高效&lt;/strong&gt;的并发编程是Rust另外一个雄心勃勃的目标。同时Rust又力图做到尽可能的简洁。
+从语言实现上来说，Rust采用了和控制内存安全访问以及对象所有权/生存期以及类型系统完全相同的工具来解决并发的问题，
+尽管这些机制看起来和并发安全相差甚远。&lt;/p&gt;
+
+&lt;p&gt;经由大量的类型系统检查、对象生存期检查；大量的并发编程问题都可以在编译器被捕获，从而&lt;strong&gt;编译通过的代码往往就意味着没有并发安全性的问题&lt;/strong&gt;找上门；
+程序员可以放心的重构其代码而不用太担心重构后的代码会破坏并发安全性；因此Rust称之为“无所畏惧的并发”。&lt;/p&gt;
+
+&lt;p&gt;Rust的并发编程支持一些流行的并发编程模型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;基于消息传递的&lt;a href=&quot;https://en.wikipedia.org/wiki/Communicating_sequential_processes&quot;&gt;CSP模型&lt;/a&gt;,这也是Golang所采用的并发方式&lt;/li&gt;
+  &lt;li&gt;传统的基于&lt;code class=&quot;highlighter-rouge&quot;&gt;Mutex&lt;/code&gt;和对象的所有权来控制共享数据访问的方式 - Rust的类型系统和所有权控制使得其中的挑战降低了不少&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;从设计上来说，并发支持不是Rust的核心语言的部分，所有的&lt;strong&gt;并发机制都是通过标准库&lt;/strong&gt;来提供的，这也意味着更多扩展的可能;有新的并发访问方式，那就写新的库呗。&lt;/p&gt;
 
 &lt;h2 id=&quot;模块系统&quot;&gt;模块系统&lt;/h2&gt;
 
@@ -1455,15 +1561,45 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 &lt;h2 id=&quot;软件工程支持---工具和方法&quot;&gt;软件工程支持 - 工具和方法&lt;/h2&gt;
 
-&lt;h3 id=&quot;在线文档和可执行的文档&quot;&gt;&lt;a href=&quot;https://doc.rust-lang.org/book/second-edition/&quot;&gt;在线文档&lt;/a&gt;和可执行的文档&lt;/h3&gt;
+&lt;p&gt;Rust提供了成熟的软件工程实践支持；有相对完善的模块文档和&lt;a href=&quot;https://doc.rust-lang.org/book/second-edition/&quot;&gt;官方的&lt;code class=&quot;highlighter-rouge&quot;&gt;gitboook&lt;/code&gt;&lt;/a&gt;。&lt;/p&gt;
 
-&lt;h3 id=&quot;creates&quot;&gt;Creates&lt;/h3&gt;
+&lt;h3 id=&quot;creates--cargo系统&quot;&gt;Creates &amp;amp;&amp;amp; Cargo系统&lt;/h3&gt;
+&lt;p&gt;作为一门站在巨人肩上的语言，Rust吸收了已有的一些成熟的包管理系统的经验，并提供了类似的极致来支持更好的协作&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Creates和其包分发系统有点&lt;code class=&quot;highlighter-rouge&quot;&gt;Hackage&lt;/code&gt;的影子，又有点NPM的味道&lt;/li&gt;
+  &lt;li&gt;版本依赖管理上，和Ruby Gems的处理方式也有些像，虽然&lt;code class=&quot;highlighter-rouge&quot;&gt;toml&lt;/code&gt;的格式没有Ruby的DSL那么灵活强大&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;h3 id=&quot;cargo系统&quot;&gt;Cargo系统&lt;/h3&gt;
+&lt;p&gt;Cargo是一个类似于C++中的CMake的系统，同时还提供了一些创建项目模板的快捷方式，帮助程序员快速创建项目骨架，更快专注于具体的实现而不是构建细节。
+可以用它的子命令来&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;检查依赖，自动升级依赖&lt;/li&gt;
+  &lt;li&gt;增量编译代码并报告错误&lt;/li&gt;
+  &lt;li&gt;根据特定的开关选项执行对应的测试&lt;/li&gt;
+  &lt;li&gt;生成文档&lt;/li&gt;
+  &lt;li&gt;运行项目生成的可执行文件（如果不是编译一个库）&lt;/li&gt;
+  &lt;li&gt;运行benchmark&lt;/li&gt;
+  &lt;li&gt;安装编译好的二进制构建结果&lt;/li&gt;
+  &lt;li&gt;搜索crates中注册的模块&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;具体功能可以查看其命令行帮助。&lt;/p&gt;
+
+&lt;h3 id=&quot;ide和编辑器插件支持&quot;&gt;IDE和编辑器插件支持&lt;/h3&gt;
+&lt;p&gt;某些程序员更喜欢IDE，另外一些人则更熟悉命令行的Vim/Emacs或者其它轻量级的编辑器。社区目前提供了比较丰富的支持，包括对Eclipse/IntelliJ/Visual Studio的IDE插件，
+以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上比较主流的编程环境都有了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。&lt;/p&gt;
 
 &lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
 
-&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
+&lt;p&gt;Rust支持在包中提供单元测试和功能测试。默认的工具会搜索源码目录中的所有单元测试，并自动组织起来运行，同时也提供了一些高级的测试支持。
+Rust希望程序员明确的区分这两种测试，并采用不同的约定&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;所有的单元测试都和被测试的源代码放在一起，并且支持对private方法的测试（当然这个很有争议，个人建议不要测试private）&lt;/li&gt;
+  &lt;li&gt;集成测试被放在专门的&lt;code class=&quot;highlighter-rouge&quot;&gt;test&lt;/code&gt;文件夹下边，可以放在多个文件中，Cargo将会为每个文件生成一个crates&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cargo test&lt;/code&gt;命令可用来执行所有的测试，并且&lt;strong&gt;默认是并发执行&lt;/strong&gt;的;这样开发的反馈周期会更短；也可以用命令来显示要求线性执行 - 传入 &lt;code class=&quot;highlighter-rouge&quot;&gt;--test-threads=1&lt;/code&gt;即可。
+一些更复杂的特性，如指定某个case的执行，跳过某些特定的case，以及按照某个过滤条件来选择特定的case，忽略case运行过程中的打印输出等特性也被贴心的支持了。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
