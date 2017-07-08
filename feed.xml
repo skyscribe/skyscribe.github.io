@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-06T22:24:59+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-08T22:43:36+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1150,8 +1150,8 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;h2 id=&quot;核心语言特性设计目标&quot;&gt;核心语言特性设计目标&lt;/h2&gt;
 &lt;p&gt;按照其官方描述，Rust需要满足其以下几个核心目标&lt;/p&gt;
 &lt;ol&gt;
-  &lt;li&gt;应用于系统设计场景&lt;/li&gt;
-  &lt;li&gt;开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，开源社区的影响力不容忽视&lt;/li&gt;
+  &lt;li&gt;使用于系统编程场景 - 这意味着能够有直接访问操作系统基础设施和硬件的能力。&lt;/li&gt;
+  &lt;li&gt;开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，比任何商业公司更懂得依靠&lt;strong&gt;开源社区的力量&lt;/strong&gt;&lt;/li&gt;
   &lt;li&gt;安全而又高效 - 在现代的软件工程环境中，安全是不可或缺的，而面向系统编程场景的语言必然少不了对&lt;strong&gt;性能的极致要求&lt;/strong&gt;&lt;/li&gt;
   &lt;li&gt;充分利用现代&lt;strong&gt;多核和并发处理&lt;/strong&gt;技术的能力 - 这也是传统的C/C++语言的软肋所在；同时也是Google的Golang的设计目标之一&lt;/li&gt;
   &lt;li&gt;容易学习的语法 - 减少类似于段错误或隐式的多线程编程等相对底层的细节应该尽量被隐藏&lt;/li&gt;
@@ -1550,14 +1550,131 @@ error: aborting due to previous error
 &lt;h2 id=&quot;模块系统&quot;&gt;模块系统&lt;/h2&gt;
 
 &lt;h2 id=&quot;编程范式和高级特性&quot;&gt;编程范式和高级特性&lt;/h2&gt;
+&lt;p&gt;从编程范式的角度来看，Rust本身其实支持多种编程范式因为其某种程度上对标的是现代的C++或者Golang这样的竞争对手。&lt;/p&gt;
 
-&lt;h3 id=&quot;面向对象编程&quot;&gt;面向对象编程&lt;/h3&gt;
+&lt;h3 id=&quot;过程式编程&quot;&gt;过程式编程&lt;/h3&gt;
+&lt;p&gt;传统的过程式编程风格和基本的C模型比较接近；
+其定义结构体的方式和C比较类似，依然是采用&lt;code class=&quot;highlighter-rouge&quot;&gt;struct&lt;/code&gt;来组织数据，所不同的是Rust支持&lt;strong&gt;“方法”和实现分开&lt;/strong&gt;定义，通过新的关键字&lt;code class=&quot;highlighter-rouge&quot;&gt;impl&lt;/code&gt;来添加新的方法实现。&lt;/p&gt;
+
+&lt;p&gt;考虑一个简答的例子，定义个矩形以及对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;area&lt;/code&gt;方法来计算其面积&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rectangle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rectangle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;area&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u32&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.width&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;area&lt;/code&gt;方法绑定于该&lt;code class=&quot;highlighter-rouge&quot;&gt;Rectangle&lt;/code&gt;上，第一个参数总是&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;self&lt;/code&gt;这样编译器可以自动推导出其类型是所绑定的&lt;code class=&quot;highlighter-rouge&quot;&gt;struct&lt;/code&gt;对象；因为这里的参数仍然是一个引用，
+默认是不能修改结构体的参数，当需要修改时候，可以指定&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;mut self&lt;/code&gt;从而获取一个可修改的引用。这里引用的生存周期模型仍然是适用的。&lt;/p&gt;
+
+&lt;p&gt;调用的时候，只需要构造一个结构然后，采用&lt;code class=&quot;highlighter-rouge&quot;&gt;structObj.callMethod(...)&lt;/code&gt;语法即可;大概是出于简化语言的考虑，Rust只支持简单的&lt;code class=&quot;highlighter-rouge&quot;&gt;.&lt;/code&gt;语法而丢弃了古老的&lt;code class=&quot;highlighter-rouge&quot;&gt;-&amp;gt;&lt;/code&gt;操作符；
+&lt;code class=&quot;highlighter-rouge&quot;&gt;-&amp;gt;&lt;/code&gt;的使用仅仅限于指定函数的返回类型上，干净清爽了许多。&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rect&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rectangle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;The area of rectangle is {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rect&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.area&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Rust也支持类似C++中的静态函数的概念，对应的机制Rust称为&lt;strong&gt;关联函数&lt;/strong&gt;，这样的机制对大型代码的组织是很有意义的,可以方便地解决名字冲突的问题。
+当定义在&lt;code class=&quot;highlighter-rouge&quot;&gt;impl&lt;/code&gt;块里的函数其参数中没有&lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt;的时候，Rust会认为其实一个和某个具体的数据结构无关的函数，它和该结构体类&lt;strong&gt;在同一个命名空间&lt;/strong&gt;中。
+比如我们前边已经看到的&lt;code class=&quot;highlighter-rouge&quot;&gt;String::from(&quot;hello&quot;)&lt;/code&gt;这样的调用就是将构造方法放置在&lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;impl&lt;/code&gt;块里，但是完全没有使用&lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt;参数。&lt;/p&gt;
+
+&lt;p&gt;只是现代的C++社区因为有更完善的语言层面的命名空间隔离机制，其实已不太推荐这种古老的静态函数组织方式。&lt;/p&gt;
+
+&lt;h3 id=&quot;面向对象和泛型编程&quot;&gt;面向对象和泛型编程&lt;/h3&gt;
+
+&lt;p&gt;从形式上来说，Rust不提供对传统的面向对象编程的直接支持，但提供了一些更复杂的&lt;strong&gt;面向接口编程的语言级别机制&lt;/strong&gt;。
+这一核心武器就是Rust的&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;。某种程度上说，面向接口编程是面向对象编程最核心的精髓之一；
+继承、封装和多态这些基本的武器都可以用面向接口编程的方式来达到。&lt;/p&gt;
+
+&lt;p&gt;Rust的泛型编程实现上有很明显的C++的影子，不同的是它通过&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;机制巧妙的将&lt;strong&gt;编译器多态和运行期多态统一为一体&lt;/strong&gt;了。&lt;/p&gt;
+
+&lt;h4 id=&quot;traits&quot;&gt;Traits&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;从&lt;strong&gt;概念上来说就是接口&lt;/strong&gt;，它是Rust支持可扩展程序的基础；它既可以支持编译器多态（类似于C++的模板元但是比模板元更为简单一些），也可以支持基于动态分发技术的运行期多态。
+从设计的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;机制受&lt;strong&gt;C++的设计哲学&lt;/strong&gt;影响比较深,同样希望达到&lt;strong&gt;零成本的抽象&lt;/strong&gt;这一至高目标&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;C++ implementations obey the zero-overhead principle: What you don’t use, you don’t pay for [Stroustrup, 1994]. And further: What you do use, you couldn’t hand code any better.&lt;/p&gt;
+
+  &lt;ul&gt;
+    &lt;li&gt;Stroustroup&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;一个描述Hash函数的&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;定义如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//can have more functions&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;两个实现了该&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;的结构可以定于如下(不一定必须放在同一个源代码文件中)&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u64&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;i64&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u64&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u64&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;和传统的C++中的抽象类或Java中的接口不同的时候，&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;是半开放的，这意味着我们可以&lt;strong&gt;打开某个定义好的结构&lt;/strong&gt;，为其添加新的实现；有点类似Ruby的模块扩展方式。
+当然Rust 仍然是静态语言并且是强类型的。C++的模板元虽然可以达到类似的效果，但只支持编译器多态，并且其&lt;a href=&quot;http://www.infoworld.com/article/3044727/application-development/qa-bjarne-stroustrup-previews-c-17.html&quot;&gt;Concept的支持虽然千呼万唤却一直没有进入语言标准&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;基于泛型的编译器多态&quot;&gt;基于泛型的编译器多态&lt;/h4&gt;
+
+&lt;p&gt;考虑一个适用上述&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;的例子&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Hash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;The hash is {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nf&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;// calls with T=bool&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_i64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//calls with T=i64&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里定义了一个打印Hash的泛型函数&lt;code class=&quot;highlighter-rouge&quot;&gt;print_hash&lt;/code&gt;，要求对应的类型必须实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;Hash&lt;/code&gt;；实际调用的时候，编译器可以做类型检查来判断对应的实际类型是否满足&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;约束；
+和C++的Concept非常相像。&lt;/p&gt;
+
+&lt;p&gt;此外这种类型约束方式还是可以组合的，当期望泛型类满足多个&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;约束的时候，可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;+&lt;/code&gt;将其串起来，
+比如 &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;T: Hash + Eq&amp;gt;&lt;/code&gt;则要求泛型类&lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;必须同时实现&lt;code class=&quot;highlighter-rouge&quot;&gt;Hash&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;Eq&lt;/code&gt;才能编译通过。&lt;/p&gt;
+
+&lt;h4 id=&quot;动态分发的运行期多态&quot;&gt;动态分发的运行期多态&lt;/h4&gt;
+
+&lt;p&gt;当多态行为依赖于具体运行期才精确得知的条件的时候，泛型就无能为力了。Rust的解决方式是，采用&lt;strong&gt;额外的中间层&lt;/strong&gt;-指针来达到。
+比如在GUI编程中，我们经常需要处理界面元素的点击事件，传统的面向对象思路是定义一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;,然后在具体的界面元素上添加一个事件监听者列表&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;trait ClickCallback {
+    fn on_click(&amp;amp;self, x: i64, y: i64);
+}
+
+struct Button&amp;lt;T: ClickCallback&amp;gt; {
+    listeners: Vec&amp;lt;Box&amp;lt;ClickCallback&amp;gt;&amp;gt;;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;由于结构体的大小必须在编译期确定，因而直接放一个大小不确定的&lt;code class=&quot;highlighter-rouge&quot;&gt;ClickCallback&lt;/code&gt;就不能编译通过了；标准库中提供了智能指针来帮我们很优雅地解决了这个问题；因为指针的大小总是确定的。具体到实现上，其&lt;strong&gt;原理和C++中的虚函数表&lt;/strong&gt;非常类似，一个封装了&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;的智能指针（这里是&lt;code class=&quot;highlighter-rouge&quot;&gt;Box&lt;/code&gt;）内部结构上类似于一个&lt;code class=&quot;highlighter-rouge&quot;&gt;vtable&lt;/code&gt;，其指向一个在运行期动态构造的函数表。在调用的地方，编译器可以自动查找具体实现了对应&lt;code class=&quot;highlighter-rouge&quot;&gt;Traits&lt;/code&gt;的结构的函数表，转到正确的调用地址。&lt;/p&gt;
 
 &lt;h3 id=&quot;函数式编程&quot;&gt;函数式编程&lt;/h3&gt;
 
 &lt;h4 id=&quot;option类型&quot;&gt;Option类型&lt;/h4&gt;
 
-&lt;h3 id=&quot;traits&quot;&gt;Traits&lt;/h3&gt;
+&lt;h4 id=&quot;闭包closure&quot;&gt;闭包Closure&lt;/h4&gt;
 
 &lt;h2 id=&quot;软件工程支持---工具和方法&quot;&gt;软件工程支持 - 工具和方法&lt;/h2&gt;
 
@@ -1587,7 +1704,7 @@ error: aborting due to previous error
 
 &lt;h3 id=&quot;ide和编辑器插件支持&quot;&gt;IDE和编辑器插件支持&lt;/h3&gt;
 &lt;p&gt;某些程序员更喜欢IDE，另外一些人则更熟悉命令行的Vim/Emacs或者其它轻量级的编辑器。社区目前提供了比较丰富的支持，包括对Eclipse/IntelliJ/Visual Studio的IDE插件，
-以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上比较主流的编程环境都有了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。&lt;/p&gt;
+以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上&lt;strong&gt;比较主流的编程环境的支持都有&lt;/strong&gt;了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。&lt;/p&gt;
 
 &lt;h3 id=&quot;测试&quot;&gt;测试&lt;/h3&gt;
 

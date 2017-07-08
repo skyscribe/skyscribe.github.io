@@ -488,7 +488,7 @@
 
 
 
-  29 minute read
+  36 minute read
 
 </p>
           
@@ -505,8 +505,8 @@
 <h2 id="核心语言特性设计目标">核心语言特性设计目标</h2>
 <p>按照其官方描述，Rust需要满足其以下几个核心目标</p>
 <ol>
-  <li>应用于系统设计场景</li>
-  <li>开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，开源社区的影响力不容忽视</li>
+  <li>使用于系统编程场景 - 这意味着能够有直接访问操作系统基础设施和硬件的能力。</li>
+  <li>开源参与和协作 - 毕竟其背后的推动者是创造了第一代浏览器的Mozilla，比任何商业公司更懂得依靠<strong>开源社区的力量</strong></li>
   <li>安全而又高效 - 在现代的软件工程环境中，安全是不可或缺的，而面向系统编程场景的语言必然少不了对<strong>性能的极致要求</strong></li>
   <li>充分利用现代<strong>多核和并发处理</strong>技术的能力 - 这也是传统的C/C++语言的软肋所在；同时也是Google的Golang的设计目标之一</li>
   <li>容易学习的语法 - 减少类似于段错误或隐式的多线程编程等相对底层的细节应该尽量被隐藏</li>
@@ -905,14 +905,131 @@ error: aborting due to previous error
 <h2 id="模块系统">模块系统</h2>
 
 <h2 id="编程范式和高级特性">编程范式和高级特性</h2>
+<p>从编程范式的角度来看，Rust本身其实支持多种编程范式因为其某种程度上对标的是现代的C++或者Golang这样的竞争对手。</p>
 
-<h3 id="面向对象编程">面向对象编程</h3>
+<h3 id="过程式编程">过程式编程</h3>
+<p>传统的过程式编程风格和基本的C模型比较接近；
+其定义结构体的方式和C比较类似，依然是采用<code class="highlighter-rouge">struct</code>来组织数据，所不同的是Rust支持<strong>“方法”和实现分开</strong>定义，通过新的关键字<code class="highlighter-rouge">impl</code>来添加新的方法实现。</p>
+
+<p>考虑一个简答的例子，定义个矩形以及对应的<code class="highlighter-rouge">area</code>方法来计算其面积</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Rectangle</span> <span class="p">{</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">Rectangle</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">area</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u32</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.length</span> <span class="o">*</span> <span class="k">self</span><span class="py">.width</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>这里的<code class="highlighter-rouge">area</code>方法绑定于该<code class="highlighter-rouge">Rectangle</code>上，第一个参数总是<code class="highlighter-rouge">&amp;self</code>这样编译器可以自动推导出其类型是所绑定的<code class="highlighter-rouge">struct</code>对象；因为这里的参数仍然是一个引用，
+默认是不能修改结构体的参数，当需要修改时候，可以指定<code class="highlighter-rouge">&amp;mut self</code>从而获取一个可修改的引用。这里引用的生存周期模型仍然是适用的。</p>
+
+<p>调用的时候，只需要构造一个结构然后，采用<code class="highlighter-rouge">structObj.callMethod(...)</code>语法即可;大概是出于简化语言的考虑，Rust只支持简单的<code class="highlighter-rouge">.</code>语法而丢弃了古老的<code class="highlighter-rouge">-&gt;</code>操作符；
+<code class="highlighter-rouge">-&gt;</code>的使用仅仅限于指定函数的返回类型上，干净清爽了许多。</p>
+
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span> <span class="p">{</span> <span class="n">length</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="mi">30</span> <span class="p">};</span>
+<span class="nd">println!</span><span class="p">(</span><span class="s">"The area of rectangle is {}"</span><span class="p">,</span> <span class="n">rect</span><span class="nf">.area</span><span class="p">())</span>
+</code></pre>
+</div>
+
+<p>Rust也支持类似C++中的静态函数的概念，对应的机制Rust称为<strong>关联函数</strong>，这样的机制对大型代码的组织是很有意义的,可以方便地解决名字冲突的问题。
+当定义在<code class="highlighter-rouge">impl</code>块里的函数其参数中没有<code class="highlighter-rouge">self</code>的时候，Rust会认为其实一个和某个具体的数据结构无关的函数，它和该结构体类<strong>在同一个命名空间</strong>中。
+比如我们前边已经看到的<code class="highlighter-rouge">String::from("hello")</code>这样的调用就是将构造方法放置在<code class="highlighter-rouge">String</code>的<code class="highlighter-rouge">impl</code>块里，但是完全没有使用<code class="highlighter-rouge">self</code>参数。</p>
+
+<p>只是现代的C++社区因为有更完善的语言层面的命名空间隔离机制，其实已不太推荐这种古老的静态函数组织方式。</p>
+
+<h3 id="面向对象和泛型编程">面向对象和泛型编程</h3>
+
+<p>从形式上来说，Rust不提供对传统的面向对象编程的直接支持，但提供了一些更复杂的<strong>面向接口编程的语言级别机制</strong>。
+这一核心武器就是Rust的<code class="highlighter-rouge">Traits</code>。某种程度上说，面向接口编程是面向对象编程最核心的精髓之一；
+继承、封装和多态这些基本的武器都可以用面向接口编程的方式来达到。</p>
+
+<p>Rust的泛型编程实现上有很明显的C++的影子，不同的是它通过<code class="highlighter-rouge">Traits</code>机制巧妙的将<strong>编译器多态和运行期多态统一为一体</strong>了。</p>
+
+<h4 id="traits">Traits</h4>
+
+<p><code class="highlighter-rouge">Traits</code>从<strong>概念上来说就是接口</strong>，它是Rust支持可扩展程序的基础；它既可以支持编译器多态（类似于C++的模板元但是比模板元更为简单一些），也可以支持基于动态分发技术的运行期多态。
+从设计的角度来看，<code class="highlighter-rouge">Traits</code>机制受<strong>C++的设计哲学</strong>影响比较深,同样希望达到<strong>零成本的抽象</strong>这一至高目标</p>
+
+<blockquote>
+  <p>C++ implementations obey the zero-overhead principle: What you don’t use, you don’t pay for [Stroustrup, 1994]. And further: What you do use, you couldn’t hand code any better.</p>
+
+  <ul>
+    <li>Stroustroup</li>
+  </ul>
+</blockquote>
+
+<p>一个描述Hash函数的<code class="highlighter-rouge">Traits</code>定义如下</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Hash</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u64</span><span class="p">;</span>
+
+    <span class="c">//can have more functions</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>两个实现了该<code class="highlighter-rouge">Traits</code>的结构可以定于如下(不一定必须放在同一个源代码文件中)</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">impl</span> <span class="n">Hash</span> <span class="k">for</span> <span class="nb">bool</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u64</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="o">*</span><span class="k">self</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="mi">1</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">Hash</span> <span class="k">for</span> <span class="nb">i64</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u64</span> <span class="p">{</span>
+        <span class="k">self</span> <span class="k">as</span> <span class="nb">u64</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>和传统的C++中的抽象类或Java中的接口不同的时候，<code class="highlighter-rouge">Traits</code>是半开放的，这意味着我们可以<strong>打开某个定义好的结构</strong>，为其添加新的实现；有点类似Ruby的模块扩展方式。
+当然Rust 仍然是静态语言并且是强类型的。C++的模板元虽然可以达到类似的效果，但只支持编译器多态，并且其<a href="http://www.infoworld.com/article/3044727/application-development/qa-bjarne-stroustrup-previews-c-17.html">Concept的支持虽然千呼万唤却一直没有进入语言标准</a>。</p>
+
+<h4 id="基于泛型的编译器多态">基于泛型的编译器多态</h4>
+
+<p>考虑一个适用上述<code class="highlighter-rouge">Traits</code>的例子</p>
+<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="n">print_hash</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Hash</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"The hash is {}"</span><span class="p">,</span> <span class="n">t</span><span class="nf">.hash</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="nf">print_hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">true</span><span class="p">);</span> <span class="c">// calls with T=bool</span>
+<span class="nf">print_hash</span><span class="p">(</span><span class="o">&amp;</span><span class="mi">12</span><span class="n">_i64</span><span class="p">);</span> <span class="c">//calls with T=i64</span>
+</code></pre>
+</div>
+
+<p>这里定义了一个打印Hash的泛型函数<code class="highlighter-rouge">print_hash</code>，要求对应的类型必须实现了<code class="highlighter-rouge">Hash</code>；实际调用的时候，编译器可以做类型检查来判断对应的实际类型是否满足<code class="highlighter-rouge">Traits</code>约束；
+和C++的Concept非常相像。</p>
+
+<p>此外这种类型约束方式还是可以组合的，当期望泛型类满足多个<code class="highlighter-rouge">Traits</code>约束的时候，可以用<code class="highlighter-rouge">+</code>将其串起来，
+比如 <code class="highlighter-rouge">&lt;T: Hash + Eq&gt;</code>则要求泛型类<code class="highlighter-rouge">T</code>必须同时实现<code class="highlighter-rouge">Hash</code>和<code class="highlighter-rouge">Eq</code>才能编译通过。</p>
+
+<h4 id="动态分发的运行期多态">动态分发的运行期多态</h4>
+
+<p>当多态行为依赖于具体运行期才精确得知的条件的时候，泛型就无能为力了。Rust的解决方式是，采用<strong>额外的中间层</strong>-指针来达到。
+比如在GUI编程中，我们经常需要处理界面元素的点击事件，传统的面向对象思路是定义一个<code class="highlighter-rouge">Traits</code>,然后在具体的界面元素上添加一个事件监听者列表</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>trait ClickCallback {
+    fn on_click(&amp;self, x: i64, y: i64);
+}
+
+struct Button&lt;T: ClickCallback&gt; {
+    listeners: Vec&lt;Box&lt;ClickCallback&gt;&gt;;
+}
+</code></pre>
+</div>
+<p>由于结构体的大小必须在编译期确定，因而直接放一个大小不确定的<code class="highlighter-rouge">ClickCallback</code>就不能编译通过了；标准库中提供了智能指针来帮我们很优雅地解决了这个问题；因为指针的大小总是确定的。具体到实现上，其<strong>原理和C++中的虚函数表</strong>非常类似，一个封装了<code class="highlighter-rouge">Traits</code>的智能指针（这里是<code class="highlighter-rouge">Box</code>）内部结构上类似于一个<code class="highlighter-rouge">vtable</code>，其指向一个在运行期动态构造的函数表。在调用的地方，编译器可以自动查找具体实现了对应<code class="highlighter-rouge">Traits</code>的结构的函数表，转到正确的调用地址。</p>
 
 <h3 id="函数式编程">函数式编程</h3>
 
 <h4 id="option类型">Option类型</h4>
 
-<h3 id="traits">Traits</h3>
+<h4 id="闭包closure">闭包Closure</h4>
 
 <h2 id="软件工程支持---工具和方法">软件工程支持 - 工具和方法</h2>
 
@@ -942,7 +1059,7 @@ error: aborting due to previous error
 
 <h3 id="ide和编辑器插件支持">IDE和编辑器插件支持</h3>
 <p>某些程序员更喜欢IDE，另外一些人则更熟悉命令行的Vim/Emacs或者其它轻量级的编辑器。社区目前提供了比较丰富的支持，包括对Eclipse/IntelliJ/Visual Studio的IDE插件，
-以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上比较主流的编程环境都有了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。</p>
+以及对Atom/Visual Studio Code/Sublime/Vim/Emacs的插件支持；基本上<strong>比较主流的编程环境的支持都有</strong>了；具体支持程度如何，有待进一步验证；官方的文档看起来非常值得一试。</p>
 
 <h3 id="测试">测试</h3>
 
