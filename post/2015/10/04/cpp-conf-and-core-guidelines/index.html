@@ -488,7 +488,7 @@
 
 
 
-本文有 1747 字，大约需要 4 分钟可以读完
+本文有 2786 字，大约需要 6 分钟可以读完
 
 
 
@@ -565,18 +565,40 @@ Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核�
 
 <p>除了上述编程规范，还有一些演讲让人眼前一亮</p>
 
+<h3 id="ranges-library">Ranges Library</h3>
+<p>来自于Eric Niebler的Ranges库(<a href="https://github.com/CppCon/CppCon2015/blob/master/Keynotes/Ranges%20for%20the%20Standard%20Library/Ranges%20for%20the%20Standard%20Library%20-%20Eric%20Niebler%20-%20CppCon%202015.pptx">演讲材料</a>) 
+ 将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑。
+示例代码是一个优雅地打印一个字符界面的日历的例子，可以简洁地写为</p>
+
+<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span>
+    <span class="n">dates_in_year</span><span class="p">(</span><span class="mi">2015</span><span class="p">)</span>                         <span class="c1">//0. Raw range data (Date objects)
+</span>        <span class="o">|</span> <span class="n">by_month</span><span class="p">()</span>                            <span class="c1">//1. Group the dates by month
+</span>        <span class="o">|</span> <span class="n">layout_months</span><span class="p">()</span>                       <span class="c1">//2. format the months as a range of strings 
+</span>        <span class="o">|</span> <span class="n">chunk</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                              <span class="c1">//3. Group the months as chunks of 3 side by side
+</span>        <span class="o">|</span> <span class="n">transpose_months</span><span class="p">()</span>                    <span class="c1">//4. Transpose the rows and columns of the side-by-side months
+</span>        <span class="o">|</span> <span class="n">view</span><span class="o">::</span><span class="n">join</span>                            <span class="c1">//5. Ungroup the months 
+</span>        <span class="o">|</span> <span class="n">join_months</span><span class="p">(),</span>                        <span class="c1">//6. Join the string of transposed months
+</span>    <span class="n">std</span><span class="o">::</span><span class="n">ostream_iterator</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre>
+</div>
+<p>函数式编程的可组合、高度可重用、不需要循环而仅仅关注意图的编程风格带来更容易维护、更简洁清晰的代码。 
+声明式编程风格对C++而言不再遥远。期望它能早日进入新的语言标准库中造福广大程序员。</p>
+
+<p>更多细节和Proposal详见<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html">N4128</a>和<a href="http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2015/n4382.pd">N4382</a>。
+基于C++11实现的库代码开源在<a href="http://www.github.com/ericniebler/range-v3">Github</a>。
+项目文档在该项目的<a href="https://ericniebler.github.io/range-v3/index.html">GitHub Pages</a>页面上；包含有几个基本部分的文档</p>
 <ul>
-  <li>
-    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Keynotes/Ranges%20for%20the%20Standard%20Library/Ranges%20for%20the%20Standard%20Library%20-%20Eric%20Niebler%20-%20CppCon%202015.pptx">Range Library</a> 来自于Eric Niebler；
- 将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑，声明式编程风格对C++而言不再遥远。期望它能进新的语言标准</p>
-  </li>
-  <li>
-    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf">C++11, 14, 17 Atomics - the Deep Dive</a> 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思</p>
-  </li>
-  <li>
-    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf">Parralellizing the C++ STL</a>介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上</p>
-  </li>
+  <li>基本安装和使用：基于头文件的轻量级的库，仅仅需要放置在合适的安装路径中，包含头文件即可；本身也提供了一个<code class="highlighter-rouge">&lt;range/v3/all.hpp&gt;</code>的头文件方便使用。</li>
+  <li>可组合的Views类，采用函数式风格的组合模式。</li>
+  <li>Actions类用于对range做一些修改性操作，譬如join/erase/insert/drop等。</li>
 </ul>
+
+<h4 id="c中的atomics">C++中的Atomics</h4>
+<p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf">C++11, 14, 17 Atomics - the Deep Dive</a> 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思。</p>
+
+<h4 id="并行stl">并行STL</h4>
+<p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf">Parralellizing the C++ STL</a>介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上</p>
 
 
         
