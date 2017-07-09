@@ -488,7 +488,7 @@
 
 
 
-本文有 2786 字，大约需要 6 分钟可以读完
+本文有 3004 字，大约需要 7 分钟可以读完
 
 
 
@@ -596,6 +596,10 @@ Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核�
 
 <h4 id="c中的atomics">C++中的Atomics</h4>
 <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf">C++11, 14, 17 Atomics - the Deep Dive</a> 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思。</p>
+
+<p>Michael Wong回顾了传统C++编程中的性能、并发、一致性的挑战，以及语言层面的逐步进化：从早期C++98/03标准的未置一词，到C++11首次引入的内存模型，原子类型等基本概念的支持，
+进而是C++14的无所算法增强和无锁算法支持和<code class="highlighter-rouge">atomic_signal_fence</code>，再到未来的C++17中需要定义的内存访问次序强一致性保证和原子性视图，
+有一些追赶Java并发支持的味道，当然C++有自己的挑战需要解决；看来是个长期的任务。</p>
 
 <h4 id="并行stl">并行STL</h4>
 <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf">Parralellizing the C++ STL</a>介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上</p>
