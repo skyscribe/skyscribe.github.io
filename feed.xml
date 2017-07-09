@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-09T15:37:15+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-09T16:36:38+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1861,127 +1861,82 @@ Rust希望程序员明确的区分这两种测试，并采用不同的约定&lt;
 中心化的软件仓库以及对流行IDE、编辑器环境的支持使得它可以更好地赢得社区的支持。&lt;/p&gt;
 
 &lt;p&gt;于此同时随着更新节奏的加快，基于ISO标准化的C++语言也在通过更快的迭代速度和更短的更新周期对这些新加入的竞争者予以反击；
-期望Rust能在系统编程领域掀起新的波澜。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">Agile software development - the cooperative game - 笔记 - 4</title><link href="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/" rel="alternate" type="text/html" title="Agile software development - the cooperative game - 笔记 - 4" /><published>2013-08-24T19:32:00+08:00</published><updated>2013-08-24T19:32:00+08:00</updated><id>http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4</id><content type="html" xml:base="http://www.skyscribe.me/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">&lt;p&gt;本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地&lt;strong&gt;定制和应用&lt;/strong&gt;这些规则。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html&quot;&gt;第一部分&lt;/a&gt;。&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/14/agile-software-development-the-cooperative-game-reading-2/index.html&quot;&gt;第二部分&lt;/a&gt;。&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2013/08/18/agile-software-development-the-cooperative-game-reading-3/index.html&quot;&gt;第三部分&lt;/a&gt;。&lt;/li&gt;
-&lt;/ul&gt;
+期望Rust能在系统编程领域掀起新的波澜。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">CppCon2015 and Cpp Core Guidelines</title><link href="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" rel="alternate" type="text/html" title="CppCon2015 and Cpp Core Guidelines" /><published>2015-10-04T00:00:00+08:00</published><updated>2015-10-04T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/">&lt;p&gt;C++社区的第二届编程语言社区活动&lt;a href=&quot;https://cppcon.org/2015program/&quot;&gt;CppCon2015&lt;/a&gt;落下了帷幕；作为C++语言的发明人和灵魂人物，
+Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（&lt;strong&gt;Core Guidelines&lt;/strong&gt;）并发布
+在&lt;a href=&quot;https://github.com/isocpp/cppcoreguidelines&quot;&gt;GitHub&lt;/a&gt;上，并立即引起了轰动。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;h2 id=&quot;构建发布软件的生态系统&quot;&gt;构建发布软件的生态系统&lt;/h2&gt;
+&lt;p&gt;CppCon大会所有的演进材料和培训资料都放在&lt;a href=&quot;https://github.com/CppCon/CppCon2015&quot;&gt;Github&lt;/a&gt;上；今年的重头戏无疑属于Core Guidelines。&lt;/p&gt;
 
-&lt;p&gt;方法论的目的在于使用所有可行的手段来保证我们可以发布预期的软件，并且这样的方法是可以&lt;strong&gt;确定持续&lt;/strong&gt;进行的。方法学本身即使社交行为的创建过程。方法本身是一个关于职位描述，过程，团队中每个人需要遵守的传统的集合。&lt;/p&gt;
+&lt;h2 id=&quot;核心编程规范&quot;&gt;核心编程规范&lt;/h2&gt;
 
-&lt;p&gt;每一个组织都有自己的方法论，这些方法就是他们怎样做商业的方式。一种方法论可以说是你的组织同意采取的一种传统；这些过程可能在大部分公司并没有很正式的打印出来或者写下来。这种一致同意的传统需要我们不时得&lt;strong&gt;重新审视&lt;/strong&gt;，&lt;strong&gt;持续的&lt;/strong&gt;构建。&lt;/p&gt;
+&lt;p&gt;该规范目前主要的编辑依然是Herb Sutter和Stroustroup；其目的是为了提供一份相对&lt;strong&gt;官方的编程指南&lt;/strong&gt;；帮助社区程序员用好C++语言，避免误用，提高现代C++
+的使用率，减少不合理的误用、滥用，因为C++语言实在是太复杂了；很多是仅仅是因为语言提供了某些机制，就像到处使用该机制制造出难以理解和维护的代码；
+毕竟&lt;strong&gt;可以这样做并不意味值就必须要这样做&lt;/strong&gt;。&lt;/p&gt;
 
-&lt;h2 id=&quot;方法论概念&quot;&gt;方法论概念&lt;/h2&gt;
+&lt;p&gt;另外一个诱因是，现代的C++语言引入了很多新的语言特性导致很多传统的C++程序员有点疑惑这是否是一门新的语言了。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;“Within C++ is a smaller, simpler, safer language struggling to get out.” – Bjarne Stroustrup&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;p&gt;方法论是关于一些方法的固化和规则定义，其对过程的约束是它不同于方法本身的地方 - 你可以在不同的时候采用不同的方法；然而在一系列开发过程中，方法论代表着一直认可的基本规则和约定。&lt;/p&gt;
+&lt;p&gt;文档提供了一份在线版本，可以从&lt;a href=&quot;http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines&quot;&gt;项目的GitHub Pages页面&lt;/a&gt;来访问和浏览非常方便。&lt;/p&gt;
 
-&lt;p&gt;集合一群聪明人又想获得成功，我们就必须做好协调/合作和协调，离开这些手段，最聪明的人组合的团队也会变得杂乱无章，从而很难取得成功。&lt;/p&gt;
+&lt;h3 id=&quot;顶层目标&quot;&gt;顶层目标&lt;/h3&gt;
 
-&lt;h3 id=&quot;结构性术语&quot;&gt;结构性术语&lt;/h3&gt;
-
-&lt;p&gt;方法学有如下几个结构性要素&lt;/p&gt;
-
+&lt;p&gt;该编程规范的目的明显的不同于传统商业公司或者项目团队的编程规范；因为它不会侧重于解释某一些语言特性或者特定的问题；而是更多&lt;strong&gt;从设计的角度&lt;/strong&gt;给出建议，包括&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;角色：明确的角色分工至关重要，什么样的角色需要什么样的&lt;strong&gt;职责和技能&lt;/strong&gt;等&lt;/li&gt;
-  &lt;li&gt;技能：角色需要的技能和专长&lt;/li&gt;
-  &lt;li&gt;团队：不同的情况之下工作于一起的一种集体角色&lt;/li&gt;
-  &lt;li&gt;技术：赖以完成具体工作的技术技能，关于怎样完成某种特定工作的一些知识&lt;/li&gt;
-  &lt;li&gt;活动：人们怎样完成某些特定工作的过程，譬如计划，编码，测试等&lt;/li&gt;
-  &lt;li&gt;过程：各种各样的活动如何连接在一起&lt;/li&gt;
-  &lt;li&gt;工作产品： 可以是中间过程的产出，如CRC卡或者故事卡片等&lt;/li&gt;
-  &lt;li&gt;里程碑：一些关键的时间节点，往往是关于整体进度的一个节点&lt;/li&gt;
-  &lt;li&gt;标准：关于一些工具/类库/方法的一些传统/约束等&lt;/li&gt;
-  &lt;li&gt;质量：关于活动和工作产物的质量属性&lt;/li&gt;
-  &lt;li&gt;团队价值：什么样的价值被大家普遍认可&lt;/li&gt;
+  &lt;li&gt;接口设计和使用&lt;/li&gt;
+  &lt;li&gt;模板元编程的取舍，什么场景下应该使用，什么情况下算误用&lt;/li&gt;
+  &lt;li&gt;设计约束和限制，例外情况&lt;/li&gt;
+  &lt;li&gt;设计/编码哲学，如何取舍不同方案等&lt;/li&gt;
+  &lt;li&gt;工程实践推荐，使用工具，如何使用&lt;/li&gt;
+  &lt;li&gt;错误处理机制，异常，返回值等&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;不同的方法论在上述的要素上有很多各不相同之处。&lt;/p&gt;
-
-&lt;p&gt;依据上述的结构性要素，常见的方法类可以划分为以下类型：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Normative方法，强调采用的步骤或者解决方案是完全遵守已有的工作记录。&lt;/li&gt;
-  &lt;li&gt;Rational方法，基于工具和方法来构建&lt;/li&gt;
-  &lt;li&gt;Participative方法，基于利益相关方和客户参与的方面&lt;/li&gt;
-  &lt;li&gt;Heuristic方法，基于已经学习得到的经验，启发式进行&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;很多情况下，随着人们经验的基积累，方法论可能沿着Heuristics的方法慢慢固化下来，慢慢演进到Normative方法；譬如在计算机编程领域，算法设计方面就达到了标准化的地步；而关于将人们放在开放的办公区还是私有的办公室的方面却没有。&lt;/p&gt;
-
-&lt;p&gt;大部分的软件开发货活动还处于&lt;strong&gt;Heuristic方法就足够适用&lt;/strong&gt;的阶段。&lt;/p&gt;
-
-&lt;h3 id=&quot;范围&quot;&gt;范围&lt;/h3&gt;
-
-&lt;p&gt;一种方法论的范围涵盖了关于它要关注的角色范围和相关的一些活动。早期的面向对象方法论被认为是设计师作为核心的角色，活动主要是讨论技术工具和描述对应标准图形的活动；然而这样的描述&lt;em&gt;不够宽泛&lt;/em&gt;的同时，又显得&lt;strong&gt;限制太多&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;方法论的范围可以被概括为如下几个方面：&lt;/p&gt;
-
+&lt;h3 id=&quot;基本组成&quot;&gt;基本组成&lt;/h3&gt;
+&lt;p&gt;规范采用统一格式的条目组成，这些条目按照主题被分成为不同的章节，包括&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;生命周期的覆盖，什么时间开始，什么时候结束&lt;/li&gt;
-  &lt;li&gt;角色覆盖，什么样的角色参与什么样的活动&lt;/li&gt;
-  &lt;li&gt;活动覆盖，什么样的活动在什么样的情况下开展&lt;/li&gt;
+  &lt;li&gt;概要介绍：规范的目标，非目标，文档结构和一些主要的章节&lt;/li&gt;
+  &lt;li&gt;设计哲学：如何表述编码意图，采纳标准语言设施，表述业务意图，采用强类型，优先采纳编译器类型检查机制，采用RAII防止资源泄露，使用合适的工具或库等&lt;/li&gt;
+  &lt;li&gt;接口设计：遵循良好的业界&lt;strong&gt;基于接口编程&lt;/strong&gt;的实践，避免全局变量，采用强类型的接口；明确表述前置条件/后置条件等&lt;/li&gt;
+  &lt;li&gt;其它按照语言特性分开描述的章节&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;从这样的角度看，早起的面向对象方法仅仅局限于讨论一个很狭窄的领域，只有设计师参与，仅仅关系到项目设计阶段，从而导致经验丰富的面相对象设计师认为他们不适合参与项目的整个生命周期。从这些因素来考虑，有助于我们更好的理解怎样的方法论在怎样的场景下是更合适的。&lt;/p&gt;
+&lt;h3 id=&quot;单独条目组织方式&quot;&gt;单独条目组织方式&lt;/h3&gt;
+&lt;p&gt;每个具体的条目规则采用示例代码加描述的方式，便于搜索和参考。大部分条目由5个部分组成。&lt;/p&gt;
 
-&lt;h3 id=&quot;概念性要素&quot;&gt;概念性要素&lt;/h3&gt;
+&lt;p&gt;Reason部分描述为什么需要遵守给定的规则；会简单的描述一下特定规则背后的动机和原因。&lt;/p&gt;
 
-&lt;p&gt;为了更好的设计和定制方法论，我们需得考虑如下一些要素：&lt;/p&gt;
+&lt;p&gt;Example会给出具体的例子来阐述规则的内容。大部分情况下，会给出好的示例和坏的示例。比较复杂的条目，可能给出多个例子便于参考。
+语言机制有所演进的时候，不同的语言版本下的好的或者坏的例子都会给出来。&lt;/p&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;方法论本身的规模大小，有多少标准，活动，质量度量物，技术描述等&lt;/li&gt;
-  &lt;li&gt;正规性，多大的精度控制和什么程度的过程控制是需要的，是否需要更严格的控制和错误容忍率&lt;/li&gt;
-  &lt;li&gt;方法论的重度，控制元素的个数，流程/活动的数目&lt;/li&gt;
-  &lt;li&gt;问题域大小，需要多少问题去解决，&lt;strong&gt;内部复杂性&lt;/strong&gt;如何&lt;/li&gt;
-  &lt;li&gt;项目本身的大小，&lt;strong&gt;多少个人&lt;/strong&gt;需要协调&lt;/li&gt;
-  &lt;li&gt;系统重要性，如果发生了错误，造成的损害如何，是仅仅&lt;strong&gt;损失钱财还是造成人命有关的灾难&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;精确度如何，譬如设计的粒度如何，高层设计到什么样的程度为好&lt;/li&gt;
-  &lt;li&gt;准确度，怎样更接近真是精确度，如何算好&lt;/li&gt;
-  &lt;li&gt;相关性，什么样的讨论是不相关的&lt;/li&gt;
-  &lt;li&gt;错误容忍度&lt;/li&gt;
-  &lt;li&gt;可见行 - 外部怎么知道某种方法论是否被很好遵循，是否需要审计等&lt;/li&gt;
-  &lt;li&gt;扩展性&lt;/li&gt;
-  &lt;li&gt;稳定性 - 多大程度上它可能发生变化&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;Note部分会给出一些额外需要注意的地方；或者参照应用链接等。&lt;/p&gt;
 
-&lt;h3 id=&quot;发布一种方法论&quot;&gt;发布一种方法论&lt;/h3&gt;
+&lt;p&gt;Enforcement会列出对应规则的附加限制条件。&lt;/p&gt;
 
-&lt;p&gt;发布方法论需要发布两种组件，一时可视的&lt;strong&gt;形象化视图&lt;/strong&gt;，一是&lt;strong&gt;文本&lt;/strong&gt;本身。形象化的视图可能无法显示实践/标准和其它一些对组织很重要的协作方式描述。这些信息很难作出一个形象化的视图来呈现，这时候我们必须用文本来列出来。&lt;/p&gt;
+&lt;p&gt;Exception对适应的规则会给出一些例外情况，因为大部分规则通常都有例外情况。有例子的话也会一并给出。&lt;/p&gt;
 
-&lt;p&gt;发布出来的方法论文本需要描述技术/活动/会议/质量度量/工作角色的指责标准这样的东西。方法论的文本可能变得异常庞大，即使一个很&lt;em&gt;细微&lt;/em&gt;的方法论，譬如只有4种角色，每种角色只有4种产出，每个产出只有4个里程碑，最终也会产生出&lt;strong&gt;68=4+16+48&lt;/strong&gt;个互锁的子部分需要描述清楚。即使是以轻量级著称的XP方法论，最初只有200页那么多，现在已经达到了1000页才可以描述清楚。&lt;/p&gt;
+&lt;h3 id=&quot;项目支持工具&quot;&gt;项目支持工具&lt;/h3&gt;
 
-&lt;p&gt;但是很多时候，公司组织并不会将这些东西打印出来，因为&lt;/p&gt;
+&lt;p&gt;Microsoft开源了一个相关的规范支持工具 - &lt;a href=&quot;https://github.com/Microsoft/GSL&quot;&gt;GSL&lt;/a&gt;，这是一个仅有头文件组成的库，应该很容易集成到支持C++14的编程环境中。
+该项目提供了一系列测试用例，可以在GCC/VC/LLVM上编译。&lt;/p&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;理解这些比文档本身重要 - Jim Highsmith&lt;/li&gt;
-  &lt;li&gt;组织的需求总是在变化的，固定下来的文本很容易过时也没有实用性&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;希望该编程规范可以被更多的C++项目团队所采纳。&lt;/p&gt;
 
-&lt;p&gt;组织需要不断的演进既有的方法论，变更不合适的部分，在组织内部的&lt;strong&gt;不同团队之间传递好的习惯和实践&lt;/strong&gt;。有很多中方法来减少这些方法论文本的厚度:&lt;/p&gt;
+&lt;h2 id=&quot;其它印象深刻的材料&quot;&gt;其它印象深刻的材料&lt;/h2&gt;
 
-&lt;ol&gt;
-  &lt;li&gt;提供工作产出物的范本&lt;/li&gt;
-  &lt;li&gt;移除技术操作指南，让人们用更自然的方式协作&lt;/li&gt;
-  &lt;li&gt;根据角色来组织方法论文本，某种产出物按照不同的角色给出简单的描述&lt;/li&gt;
-  &lt;li&gt;做些关于流程的小实践，通过小的练习实践这些方法，然后再用于具体的工作&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;除了上述编程规范，还有一些演讲让人眼前一亮&lt;/p&gt;
 
-&lt;h2 id=&quot;方法论设计原则&quot;&gt;方法论设计原则&lt;/h2&gt;
-
-&lt;h3 id=&quot;常见的设计错误&quot;&gt;常见的设计错误&lt;/h3&gt;
-
-&lt;h3 id=&quot;成功的方法论项目&quot;&gt;成功的方法论项目&lt;/h3&gt;
-
-&lt;h3 id=&quot;作者敏感度&quot;&gt;作者敏感度&lt;/h3&gt;
-
-&lt;h3 id=&quot;七大准则&quot;&gt;七大准则&lt;/h3&gt;
-
-&lt;h2 id=&quot;审视xp&quot;&gt;审视XP&lt;/h2&gt;
-
-&lt;h2 id=&quot;究竟为何需要方法论&quot;&gt;究竟为何需要方法论&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><summary type="html">本文是第四部分，主要讨论方法论和方法设计的一些基本规则，已经如何清晰地定制和应用这些规则。</summary></entry></feed>
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Keynotes/Ranges%20for%20the%20Standard%20Library/Ranges%20for%20the%20Standard%20Library%20-%20Eric%20Niebler%20-%20CppCon%202015.pptx&quot;&gt;Range Library&lt;/a&gt; 来自于Eric Niebler；
+ 将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑，声明式编程风格对C++而言不再遥远。期望它能进新的语言标准&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf&quot;&gt;C++11, 14, 17 Atomics - the Deep Dive&lt;/a&gt; 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf&quot;&gt;Parralellizing the C++ STL&lt;/a&gt;介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="cpp" /><category term="guideline" /><summary type="html">C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物， Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布 在GitHub上，并立即引起了轰动。</summary></entry></feed>

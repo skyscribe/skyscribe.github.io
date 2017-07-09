@@ -221,6 +221,10 @@
 <lastmod>2013-08-24T19:32:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/</loc>
+<lastmod>2015-10-04T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/</loc>
 <lastmod>2015-11-28T00:00:00+08:00</lastmod>
 </url>
@@ -368,6 +372,9 @@
 <loc>http://www.skyscribe.me/tags/debug/</loc>
 </url>
 <url>
+<loc>http://www.skyscribe.me/tags/guideline/</loc>
+</url>
+<url>
 <loc>http://www.skyscribe.me/tags/concurrency/</loc>
 </url>
 <url>
@@ -375,9 +382,6 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/tags/strategy/</loc>
-</url>
-<url>
-<loc>http://www.skyscribe.me/tags/guideline/</loc>
 </url>
 <url>
 <loc>http://www.skyscribe.me/tags/engineering/</loc>

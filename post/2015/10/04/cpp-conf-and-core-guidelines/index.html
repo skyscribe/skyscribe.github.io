@@ -19,12 +19,12 @@
 
 
 
-<title>利用CMake搭建开发build环境 - 驭风万里无垠</title>
+<title>CppCon2015 and Cpp Core Guidelines - 驭风万里无垠</title>
 
 
 
 
-<meta name="description" content="对于经常在终端下写程序的non-windows程序员，Makefile绝对是最常用的工具，小到一个文件的简单的测试程序，大到数百个文件的商业软件，只需要有shell，一个make命令就可得到可运行的程序，Makefile绝对功不可没；可惜世界中不是那么太平，不但各个Posix系统的API千差万别，硬件平台各异，就连Makefile本身也有多个不兼容的格式，譬如GNU Makefile 拿到Solaris平台上就没法make下去，除非你有gmake，但gmake对并行编译的支持就没有solaris自带的dmake要好了。">
+<meta name="description" content="C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物，Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布在GitHub上，并立即引起了轰动。">
 
 
 
@@ -33,22 +33,22 @@
 
 <meta property="og:locale" content="en">
 <meta property="og:site_name" content="驭风万里无垠">
-<meta property="og:title" content="利用CMake搭建开发build环境">
+<meta property="og:title" content="CppCon2015 and Cpp Core Guidelines">
 
 
-  <link rel="canonical" href="http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/">
-  <meta property="og:url" content="http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/">
+  <link rel="canonical" href="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/">
 
 
 
-  <meta property="og:description" content="对于经常在终端下写程序的non-windows程序员，Makefile绝对是最常用的工具，小到一个文件的简单的测试程序，大到数百个文件的商业软件，只需要有shell，一个make命令就可得到可运行的程序，Makefile绝对功不可没；可惜世界中不是那么太平，不但各个Posix系统的API千差万别，硬件平台各异，就连Makefile本身也有多个不兼容的格式，譬如GNU Makefile 拿到Solaris平台上就没法make下去，除非你有gmake，但gmake对并行编译的支持就没有solaris自带的dmake要好了。">
+  <meta property="og:description" content="C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物，Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布在GitHub上，并立即引起了轰动。">
 
 
 
   <meta name="twitter:site" content="@skyscribe">
-  <meta name="twitter:title" content="利用CMake搭建开发build环境">
-  <meta name="twitter:description" content="对于经常在终端下写程序的non-windows程序员，Makefile绝对是最常用的工具，小到一个文件的简单的测试程序，大到数百个文件的商业软件，只需要有shell，一个make命令就可得到可运行的程序，Makefile绝对功不可没；可惜世界中不是那么太平，不但各个Posix系统的API千差万别，硬件平台各异，就连Makefile本身也有多个不兼容的格式，譬如GNU Makefile 拿到Solaris平台上就没法make下去，除非你有gmake，但gmake对并行编译的支持就没有solaris自带的dmake要好了。">
-  <meta name="twitter:url" content="http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/">
+  <meta name="twitter:title" content="CppCon2015 and Cpp Core Guidelines">
+  <meta name="twitter:description" content="C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物，Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布在GitHub上，并立即引起了轰动。">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/">
 
   
     <meta name="twitter:card" content="summary">
@@ -66,7 +66,7 @@
 
 
   <meta property="og:type" content="article">
-  <meta property="article:published_time" content="2009-07-01T21:51:00+08:00">
+  <meta property="article:published_time" content="2015-10-04T00:00:00+08:00">
 
 
 
@@ -472,15 +472,15 @@
 
 
   <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
-    <meta itemprop="headline" content="利用CMake搭建开发build环境">
-    <meta itemprop="description" content="对于经常在终端下写程序的non-windows程序员，Makefile绝对是最常用的工具，小到一个文件的简单的测试程序，大到数百个文件的商业软件，只需要有shell，一个make命令就可得到可运行的程序，Makefile绝对功不可没；可惜世界中不是那么太平，不但各个Posix系统的API千差万别，硬件平台各异，就连Makefile本身也有多个不兼容的格式，譬如GNU Makefile 拿到Solaris平台上就没法make下去，除非你有gmake，但gmake对并行编译的支持就没有solaris自带的dmake要好了。">
-    <meta itemprop="datePublished" content="July 01, 2009">
+    <meta itemprop="headline" content="CppCon2015 and Cpp Core Guidelines">
+    <meta itemprop="description" content="C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物，Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布在GitHub上，并立即引起了轰动。">
+    <meta itemprop="datePublished" content="October 04, 2015">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 class="page__title" itemprop="headline">利用CMake搭建开发build环境
+          <h1 class="page__title" itemprop="headline">CppCon2015 and Cpp Core Guidelines
 </h1>
           
             <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
@@ -488,7 +488,7 @@
 
 
 
-本文有 1229 字，大约需要 3 分钟可以读完
+本文有 1747 字，大约需要 4 分钟可以读完
 
 
 
@@ -498,37 +498,85 @@
       
 
       <section class="page__content" itemprop="text">
-        <p>对于经常在终端下写程序的non-windows程序员，Makefile绝对是最常用的工具，小到一个文件的简单的测试程序，大到数百个文件的商业软件，只需要有shell，一个make命令就可得到可运行的程序，Makefile绝对功不可没；可惜世界中不是那么太平，不但各个Posix系统的API千差万别，硬件平台各异，就连Makefile本身也有多个不兼容的格式，譬如GNU Makefile 拿到Solaris平台上就没法make下去，除非你有gmake，但gmake对并行编译的支持就没有solaris自带的dmake要好了。</p>
+        <p>C++社区的第二届编程语言社区活动<a href="https://cppcon.org/2015program/">CppCon2015</a>落下了帷幕；作为C++语言的发明人和灵魂人物，
+Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（<strong>Core Guidelines</strong>）并发布
+在<a href="https://github.com/isocpp/cppcoreguidelines">GitHub</a>上，并立即引起了轰动。</p>
 
-<p>GNU autotools提供了一个不错的选择，可以做到组织工具链来生成所需的Makefile，但缺陷是学习起来比较麻烦，而且模版文件写起来比较费劲。老实说我跟Makefile打了近3年的交道，几乎没有自己写过automake脚本，相反的工作倒是干了不少，譬如分析生成的Makefile运行过程，然后模拟自己手写Makefile；得到一个轻爽的定制环境。</p>
+<!--more-->
 
-<p>除了autotools，其实也有不少其他的工具，譬如apache的ant，基于Python的scons；ant在java界是鼎鼎大名了，可惜对c++的支持确实让我感觉很不习惯；scons号称可以嵌入Python代码，用起来也算简单，但是想实现复杂的功能就很头疼了，而且运行速度让人挠头。</p>
+<p>CppCon大会所有的演进材料和培训资料都放在<a href="https://github.com/CppCon/CppCon2015">Github</a>上；今年的重头戏无疑属于Core Guidelines。</p>
 
-<p>cmake则弥补了上述几个工具的诸多缺陷：
-<!--more--></p>
+<h2 id="核心编程规范">核心编程规范</h2>
 
-<ol>
-  <li>易于学习，文档易懂，只需牢记以下命令即可：
-    <div class="language-bash highlighter-rouge"><pre class="highlight"><code>cmake --help
-cmake --help-command-list
-cmake --help-command xxx
-cmake --help-variable-list
-cmake --help-variable yyy
-</code></pre>
-    </div>
+<p>该规范目前主要的编辑依然是Herb Sutter和Stroustroup；其目的是为了提供一份相对<strong>官方的编程指南</strong>；帮助社区程序员用好C++语言，避免误用，提高现代C++
+的使用率，减少不合理的误用、滥用，因为C++语言实在是太复杂了；很多是仅仅是因为语言提供了某些机制，就像到处使用该机制制造出难以理解和维护的代码；
+毕竟<strong>可以这样做并不意味值就必须要这样做</strong>。</p>
+
+<p>另外一个诱因是，现代的C++语言引入了很多新的语言特性导致很多传统的C++程序员有点疑惑这是否是一门新的语言了。</p>
+<blockquote>
+  <p>“Within C++ is a smaller, simpler, safer language struggling to get out.” – Bjarne Stroustrup</p>
+</blockquote>
+
+<p>文档提供了一份在线版本，可以从<a href="http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">项目的GitHub Pages页面</a>来访问和浏览非常方便。</p>
+
+<h3 id="顶层目标">顶层目标</h3>
+
+<p>该编程规范的目的明显的不同于传统商业公司或者项目团队的编程规范；因为它不会侧重于解释某一些语言特性或者特定的问题；而是更多<strong>从设计的角度</strong>给出建议，包括</p>
+<ul>
+  <li>接口设计和使用</li>
+  <li>模板元编程的取舍，什么场景下应该使用，什么情况下算误用</li>
+  <li>设计约束和限制，例外情况</li>
+  <li>设计/编码哲学，如何取舍不同方案等</li>
+  <li>工程实践推荐，使用工具，如何使用</li>
+  <li>错误处理机制，异常，返回值等</li>
+</ul>
+
+<h3 id="基本组成">基本组成</h3>
+<p>规范采用统一格式的条目组成，这些条目按照主题被分成为不同的章节，包括</p>
+<ul>
+  <li>概要介绍：规范的目标，非目标，文档结构和一些主要的章节</li>
+  <li>设计哲学：如何表述编码意图，采纳标准语言设施，表述业务意图，采用强类型，优先采纳编译器类型检查机制，采用RAII防止资源泄露，使用合适的工具或库等</li>
+  <li>接口设计：遵循良好的业界<strong>基于接口编程</strong>的实践，避免全局变量，采用强类型的接口；明确表述前置条件/后置条件等</li>
+  <li>其它按照语言特性分开描述的章节</li>
+</ul>
+
+<h3 id="单独条目组织方式">单独条目组织方式</h3>
+<p>每个具体的条目规则采用示例代码加描述的方式，便于搜索和参考。大部分条目由5个部分组成。</p>
+
+<p>Reason部分描述为什么需要遵守给定的规则；会简单的描述一下特定规则背后的动机和原因。</p>
+
+<p>Example会给出具体的例子来阐述规则的内容。大部分情况下，会给出好的示例和坏的示例。比较复杂的条目，可能给出多个例子便于参考。
+语言机制有所演进的时候，不同的语言版本下的好的或者坏的例子都会给出来。</p>
+
+<p>Note部分会给出一些额外需要注意的地方；或者参照应用链接等。</p>
+
+<p>Enforcement会列出对应规则的附加限制条件。</p>
+
+<p>Exception对适应的规则会给出一些例外情况，因为大部分规则通常都有例外情况。有例子的话也会一并给出。</p>
+
+<h3 id="项目支持工具">项目支持工具</h3>
+
+<p>Microsoft开源了一个相关的规范支持工具 - <a href="https://github.com/Microsoft/GSL">GSL</a>，这是一个仅有头文件组成的库，应该很容易集成到支持C++14的编程环境中。
+该项目提供了一系列测试用例，可以在GCC/VC/LLVM上编译。</p>
+
+<p>希望该编程规范可以被更多的C++项目团队所采纳。</p>
+
+<h2 id="其它印象深刻的材料">其它印象深刻的材料</h2>
+
+<p>除了上述编程规范，还有一些演讲让人眼前一亮</p>
+
+<ul>
+  <li>
+    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Keynotes/Ranges%20for%20the%20Standard%20Library/Ranges%20for%20the%20Standard%20Library%20-%20Eric%20Niebler%20-%20CppCon%202015.pptx">Range Library</a> 来自于Eric Niebler；
+ 将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑，声明式编程风格对C++而言不再遥远。期望它能进新的语言标准</p>
   </li>
-  <li>以文本文件组织，利用cache的方式，所有的自定义cache变量可直接用vim查看。</li>
-  <li>生成的Makefile文件简洁易懂</li>
-  <li>编译器选项可自己在ccmake中编辑，利于交叉编译</li>
-  <li>支持集成ctest/cpack,前者可以方便的做单元测试，后者则可以打包生成tgz/rpm</li>
-  <li>支持多个生成器，可以生成eclipse/codeblocks/gmake/unix make文件，甚至可以生成VC各个版本的dsw/sln.</li>
-  <li>内嵌语言，可以自己写函数、宏等</li>
-</ol>
-
-<p>对于经常写小测试程序的人来说，在test目录下加上个CMakeLists.txt，里边加上几行简单的语句就可以方便的以后重复使用了。对于这种情况，手工写的Makefile碰到依赖检测这种麻烦的事情往往力不从心，automake又太小题大作，而cmake则恰到好处了。</p>
-
-<p>对于大型程序，cmake可以自己定制生成的中间文件和目标文件路径，有效避免了automake带来的每个目录下生成一大堆文件的弊端，也不需要手工写Makefile。
-最有用的是可以生成多个知名IDE的工程文件，包括Windows下的vc6-vc9.</p>
+  <li>
+    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf">C++11, 14, 17 Atomics - the Deep Dive</a> 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf">Parralellizing the C++ STL</a>介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上</p>
+  </li>
+</ul>
 
 
         
@@ -551,471 +599,11 @@ cmake --help-variable yyy
     
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
+    <li>
+        <a href="/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">Excessive null checks in Java Defensive Programming? <span class="label label-default">programming</span>  <span class="label label-default">design</span> </a>
+    </li>
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
 
     
@@ -1025,17 +613,11 @@ cmake --help-variable yyy
     
 
     
-
-    
-
-    
-
-    
-
+    <li>
+        <a href="/post/2017/06/24/migrate-blog-to-jekyll/">Migrate blog to Jekyll</a>
+    </li>
     
-
     
-
     
 
     
@@ -1045,11 +627,11 @@ cmake --help-variable yyy
     
 
     
-
+    <li>
+        <a href="/post/2017/06/05/kotlin-variable-invariants/">Kotlin语言之变量约束设计 <span class="label label-default">programming</span> </a>
+    </li>
     
-
     
-
     
 
     
@@ -1059,11 +641,11 @@ cmake --help-variable yyy
     
 
     
-
+    <li>
+        <a href="/post/2017/06/04/kotlin-language-functional-programming/">Kotlin语言之函数式编程 <span class="label label-default">programming</span> </a>
+    </li>
     
-
     
-
     
     </ul>
 
@@ -1073,6 +655,37 @@ cmake --help-variable yyy
       <footer class="page__meta">
         
         
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/guideline" class="page__taxonomy-item" rel="tag">guideline</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
 
 
   
@@ -1088,18 +701,26 @@ cmake --help-variable yyy
     
       
       
-      <a href="http://www.skyscribe.me/categories/build" class="page__taxonomy-item" rel="tag">build</a><span class="sep">, </span>
+      <a href="http://www.skyscribe.me/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
     
       
       
-      <a href="http://www.skyscribe.me/categories/tools" class="page__taxonomy-item" rel="tag">tools</a>
+      <a href="http://www.skyscribe.me/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
     
     </span>
   </p>
 
 
         
-          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2009-07-01T21:51:00+08:00">July 01, 2009</time></p>
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2015-10-04T00:00:00+08:00">October 04, 2015</time></p>
         
       </footer>
 
@@ -1108,13 +729,13 @@ cmake --help-variable yyy
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=利用CMake搭建开发build环境 http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=CppCon2015 and Cpp Core Guidelines http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2009/07/01/li-yong-cmakeda-jian-kai-fa-buildhuan-jing/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
