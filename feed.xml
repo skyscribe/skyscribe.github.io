@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-09T21:52:33+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-10T21:51:46+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1141,7 +1141,123 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
   &lt;li&gt;Take use of better file system to boost compiling speed, like using memory mapped file system - a lot of GCC’s runtime are spent on IO&lt;/li&gt;
   &lt;li&gt;Saving previous workspace (or tagged workspace) and not cleaning everything&lt;/li&gt;
   &lt;li&gt;Using distcc/ninja for better C++ building performance&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry><entry><title type="html">Rust编程语言初探</title><link href="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" rel="alternate" type="text/html" title="Rust编程语言初探" /><published>2015-11-28T00:00:00+08:00</published><updated>2015-11-28T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">&lt;p&gt;&lt;strong&gt;静态、强类型而又不带垃圾收集&lt;/strong&gt;的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路&lt;strong&gt;已经不太适合新时代的编程需求&lt;/strong&gt;，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的&lt;a href=&quot;https://www.rust-lang.org/en-US/&quot;&gt;Rustlang&lt;/a&gt;(以下简称&lt;code class=&quot;highlighter-rouge&quot;&gt;Rust&lt;/code&gt;)被创造出来，其新版本的发布不时引起&lt;a href=&quot;https://news.ycombinator.com/item?id=9551937&quot;&gt;HackNews&lt;/a&gt;等极客圈的关注。&lt;/p&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry><entry><title type="html">用C++11/14实现一个现代的一部任务调度程序</title><link href="http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" rel="alternate" type="text/html" title="用C++11/14实现一个现代的一部任务调度程序" /><published>2015-12-19T00:00:00+08:00</published><updated>2015-12-19T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">&lt;p&gt;很多C++项目中都存在一个能够&lt;strong&gt;异步调度任务&lt;/strong&gt;的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，
+要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。
+当然，这个是一个新轮子，用很少的代码实现一些核心的想法，同时又额外获得一些对新的C++的更深刻的理解，何乐而不为？&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;目标概要&quot;&gt;目标概要&lt;/h2&gt;
+&lt;p&gt;主要的目的是实现一个能够异步、高效地调用用户任务的库；当然具体调用的形式可以由用户指定。任务可以以服务的方式存在，可以被存储起来以支持延迟调用；便于用户层解耦。
+比如A模块向库注册了一个名为&lt;code class=&quot;highlighter-rouge&quot;&gt;someService&lt;/code&gt;的任务，并携带实现定义好的参数签名（参数列表以及类型), B模块可以按照名字来调用这个具体的service实现的任务。&lt;/p&gt;
+
+&lt;p&gt;调用的方式可以是&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;异步的或同步的；所谓异步即实际任务执行发生在调用返回之后；同步调用则必须等实际任务执行后才返回&lt;/li&gt;
+  &lt;li&gt;阻塞的或非阻塞的：如果指定为非阻塞的，那么存储进来的参数会被临时存放起来(放在一个closure中），等到内部的线程等的合适的时间才调用；当前&lt;strong&gt;调用者的线程不会被暂停&lt;/strong&gt;执行，
+而阻塞调用则会直接暂停当前的调用者线程&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;调用者可以传入一个回调，指定在实际任务执行完毕之后再执行，典型的应用场景是任务完成之后的链式操作，譬如要求A Task执行完毕后，执行一个调用者传入的动作；该动作中可能产生一个新的任务调用哪个。&lt;/p&gt;
+
+&lt;p&gt;局部排序调用 - 譬如要求某些&lt;strong&gt;打了同一个标签&lt;/strong&gt;的任务必须严格按照顺序执行；而没有带标签的任务可以任意并行调度，类似于操作系统调用进程的affinity特性。
+这种特性在一些复杂的应用场景中很有用，譬如某个比较耗费CPU的任务执行的中间，可能需要等待IO等操作，又&lt;strong&gt;不希望堵塞调度线程&lt;/strong&gt;，一个简单的想法就是将其分解成多个子任务，那么期望这些子任务不会被乱序执行。&lt;/p&gt;
+
+&lt;h3 id=&quot;调用属性结构&quot;&gt;调用属性结构&lt;/h3&gt;
+&lt;p&gt;可以用一个结构来描述这些基本参数组合。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//will the job be scheduled asynchronously (under same context)
+&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;waitForDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//if interfaceCall will be blocked (for done) or not, will be ignored for async call
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;onCallDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//calls with same strand will be scheduled by same thread, async only
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;可变参数&quot;&gt;可变参数&lt;/h3&gt;
+&lt;p&gt;由于注册的任务可能需要一些运行期的参数在真正调用的点才知道，我们需要支持预先定义好这些参数签名，仅仅在实际调用段再传入具体的参数；即如下的使用方式&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//registration
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InterfaceScheduler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//starting a pool of 4 threads
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serviceImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;registerInterfaceFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;serviceName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serviceImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//calling site
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//asynchronous call, non-blocking, no strand
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interfaceCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;serviceName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;actualParam&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;参数的定义可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;结合closure来实现灵活的绑定&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParaArgsBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParaArgsBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...){}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typeid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Types&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple_element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Types&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Types&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;设计&quot;&gt;设计&lt;/h2&gt;
+&lt;p&gt;设计起来比较简单，有几个核心类和典型场景所约束。&lt;/p&gt;
+
+&lt;h3 id=&quot;核心的类设计&quot;&gt;核心的类设计&lt;/h3&gt;
+&lt;p&gt;主要类的职责和写作交互用CRC图来描述，见下图
+&lt;img src=&quot;/assets/async_lib/crc.png&quot; alt=&quot;crc_class_design&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;基于接口的注册&quot;&gt;基于接口的注册&lt;/h3&gt;
+&lt;p&gt;支持多种注册方式&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;注册后才能调用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/registerInterface.png&quot; alt=&quot;register interface&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;对注册行为的订阅（观察者）：其它用户可以对某个特定的服务注册进行监控，当某个服务被实际注册的时候得到通知并以回调的方式通知观察者。如果实际设置观察者的时候，
+对应的服务以及注册，则直接回调通知观察者&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/subscribeForRegistration.png&quot; alt=&quot;subscribe for registration&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;使用场景&quot;&gt;使用场景&lt;/h3&gt;
+
+&lt;p&gt;以下是一些具体使用的例子，包括&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;异步非阻塞的场景 （最常用场景）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/asyncNonBlock.png&quot; alt=&quot;asyncNonBlockCall&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;异步的阻塞调用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/asyncAndBlock.png&quot; alt=&quot;asyncAndBlockCall&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;同步的阻塞调用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/syncAndBlock.png&quot; alt=&quot;syncAndBlockCall&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Strand局部Affinity约束&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/async_lib/strandCall.png&quot; alt=&quot;strandCall&quot; /&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="cpp" /><category term="fp" /><summary type="html">很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难， 要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。 当然，这个是一个新轮子，用很少的代码实现一些核心的想法，同时又额外获得一些对新的C++的更深刻的理解，何乐而不为？</summary></entry><entry><title type="html">Rust编程语言初探</title><link href="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/" rel="alternate" type="text/html" title="Rust编程语言初探" /><published>2015-11-28T00:00:00+08:00</published><updated>2015-11-28T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/11/28/rust-language-quick-overview/">&lt;p&gt;&lt;strong&gt;静态、强类型而又不带垃圾收集&lt;/strong&gt;的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路&lt;strong&gt;已经不太适合新时代的编程需求&lt;/strong&gt;，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的&lt;a href=&quot;https://www.rust-lang.org/en-US/&quot;&gt;Rustlang&lt;/a&gt;(以下简称&lt;code class=&quot;highlighter-rouge&quot;&gt;Rust&lt;/code&gt;)被创造出来，其新版本的发布不时引起&lt;a href=&quot;https://news.ycombinator.com/item?id=9551937&quot;&gt;HackNews&lt;/a&gt;等极客圈的关注。&lt;/p&gt;
 
 &lt;p&gt;本文试图通过其官方文档对该语言（以及其相关的生态系统）做简单的研习。&lt;/p&gt;
 
@@ -1861,108 +1977,4 @@ Rust希望程序员明确的区分这两种测试，并采用不同的约定&lt;
 中心化的软件仓库以及对流行IDE、编辑器环境的支持使得它可以更好地赢得社区的支持。&lt;/p&gt;
 
 &lt;p&gt;于此同时随着更新节奏的加快，基于ISO标准化的C++语言也在通过更快的迭代速度和更短的更新周期对这些新加入的竞争者予以反击；
-期望Rust能在系统编程领域掀起新的波澜。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry><entry><title type="html">CppCon2015 and Cpp Core Guidelines</title><link href="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/" rel="alternate" type="text/html" title="CppCon2015 and Cpp Core Guidelines" /><published>2015-10-04T00:00:00+08:00</published><updated>2015-10-04T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/10/04/cpp-conf-and-core-guidelines/">&lt;p&gt;C++社区的第二届编程语言社区活动&lt;a href=&quot;https://cppcon.org/2015program/&quot;&gt;CppCon2015&lt;/a&gt;落下了帷幕；作为C++语言的发明人和灵魂人物，
-Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（&lt;strong&gt;Core Guidelines&lt;/strong&gt;）并发布
-在&lt;a href=&quot;https://github.com/isocpp/cppcoreguidelines&quot;&gt;GitHub&lt;/a&gt;上，并立即引起了轰动。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;p&gt;CppCon大会所有的演进材料和培训资料都放在&lt;a href=&quot;https://github.com/CppCon/CppCon2015&quot;&gt;Github&lt;/a&gt;上；今年的重头戏无疑属于Core Guidelines。&lt;/p&gt;
-
-&lt;h2 id=&quot;核心编程规范&quot;&gt;核心编程规范&lt;/h2&gt;
-
-&lt;p&gt;该规范目前主要的编辑依然是Herb Sutter和Stroustroup；其目的是为了提供一份相对&lt;strong&gt;官方的编程指南&lt;/strong&gt;；帮助社区程序员用好C++语言，避免误用，提高现代C++
-的使用率，减少不合理的误用、滥用，因为C++语言实在是太复杂了；很多是仅仅是因为语言提供了某些机制，就像到处使用该机制制造出难以理解和维护的代码；
-毕竟&lt;strong&gt;可以这样做并不意味值就必须要这样做&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;另外一个诱因是，现代的C++语言引入了很多新的语言特性导致很多传统的C++程序员有点疑惑这是否是一门新的语言了。&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;“Within C++ is a smaller, simpler, safer language struggling to get out.” – Bjarne Stroustrup&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;文档提供了一份在线版本，可以从&lt;a href=&quot;http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines&quot;&gt;项目的GitHub Pages页面&lt;/a&gt;来访问和浏览非常方便。&lt;/p&gt;
-
-&lt;h3 id=&quot;顶层目标&quot;&gt;顶层目标&lt;/h3&gt;
-
-&lt;p&gt;该编程规范的目的明显的不同于传统商业公司或者项目团队的编程规范；因为它不会侧重于解释某一些语言特性或者特定的问题；而是更多&lt;strong&gt;从设计的角度&lt;/strong&gt;给出建议，包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;接口设计和使用&lt;/li&gt;
-  &lt;li&gt;模板元编程的取舍，什么场景下应该使用，什么情况下算误用&lt;/li&gt;
-  &lt;li&gt;设计约束和限制，例外情况&lt;/li&gt;
-  &lt;li&gt;设计/编码哲学，如何取舍不同方案等&lt;/li&gt;
-  &lt;li&gt;工程实践推荐，使用工具，如何使用&lt;/li&gt;
-  &lt;li&gt;错误处理机制，异常，返回值等&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;基本组成&quot;&gt;基本组成&lt;/h3&gt;
-&lt;p&gt;规范采用统一格式的条目组成，这些条目按照主题被分成为不同的章节，包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;概要介绍：规范的目标，非目标，文档结构和一些主要的章节&lt;/li&gt;
-  &lt;li&gt;设计哲学：如何表述编码意图，采纳标准语言设施，表述业务意图，采用强类型，优先采纳编译器类型检查机制，采用RAII防止资源泄露，使用合适的工具或库等&lt;/li&gt;
-  &lt;li&gt;接口设计：遵循良好的业界&lt;strong&gt;基于接口编程&lt;/strong&gt;的实践，避免全局变量，采用强类型的接口；明确表述前置条件/后置条件等&lt;/li&gt;
-  &lt;li&gt;其它按照语言特性分开描述的章节&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;单独条目组织方式&quot;&gt;单独条目组织方式&lt;/h3&gt;
-&lt;p&gt;每个具体的条目规则采用示例代码加描述的方式，便于搜索和参考。大部分条目由5个部分组成。&lt;/p&gt;
-
-&lt;p&gt;Reason部分描述为什么需要遵守给定的规则；会简单的描述一下特定规则背后的动机和原因。&lt;/p&gt;
-
-&lt;p&gt;Example会给出具体的例子来阐述规则的内容。大部分情况下，会给出好的示例和坏的示例。比较复杂的条目，可能给出多个例子便于参考。
-语言机制有所演进的时候，不同的语言版本下的好的或者坏的例子都会给出来。&lt;/p&gt;
-
-&lt;p&gt;Note部分会给出一些额外需要注意的地方；或者参照应用链接等。&lt;/p&gt;
-
-&lt;p&gt;Enforcement会列出对应规则的附加限制条件。&lt;/p&gt;
-
-&lt;p&gt;Exception对适应的规则会给出一些例外情况，因为大部分规则通常都有例外情况。有例子的话也会一并给出。&lt;/p&gt;
-
-&lt;h3 id=&quot;项目支持工具&quot;&gt;项目支持工具&lt;/h3&gt;
-
-&lt;p&gt;Microsoft开源了一个相关的规范支持工具 - &lt;a href=&quot;https://github.com/Microsoft/GSL&quot;&gt;GSL&lt;/a&gt;，这是一个仅有头文件组成的库，应该很容易集成到支持C++14的编程环境中。
-该项目提供了一系列测试用例，可以在GCC/VC/LLVM上编译。&lt;/p&gt;
-
-&lt;p&gt;希望该编程规范可以被更多的C++项目团队所采纳。&lt;/p&gt;
-
-&lt;h2 id=&quot;其它印象深刻的材料&quot;&gt;其它印象深刻的材料&lt;/h2&gt;
-
-&lt;p&gt;除了上述编程规范，还有一些演讲让人眼前一亮&lt;/p&gt;
-
-&lt;h3 id=&quot;ranges-library&quot;&gt;Ranges Library&lt;/h3&gt;
-&lt;p&gt;来自于Eric Niebler的Ranges库(&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Keynotes/Ranges%20for%20the%20Standard%20Library/Ranges%20for%20the%20Standard%20Library%20-%20Eric%20Niebler%20-%20CppCon%202015.pptx&quot;&gt;演讲材料&lt;/a&gt;) 
- 将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑。
-示例代码是一个优雅地打印一个字符界面的日历的例子，可以简洁地写为&lt;/p&gt;
-
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;dates_in_year&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2015&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;                         &lt;span class=&quot;c1&quot;&gt;//0. Raw range data (Date objects)
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;by_month&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;                            &lt;span class=&quot;c1&quot;&gt;//1. Group the dates by month
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout_months&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;                       &lt;span class=&quot;c1&quot;&gt;//2. format the months as a range of strings 
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;chunk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;                              &lt;span class=&quot;c1&quot;&gt;//3. Group the months as chunks of 3 side by side
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transpose_months&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;                    &lt;span class=&quot;c1&quot;&gt;//4. Transpose the rows and columns of the side-by-side months
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;                            &lt;span class=&quot;c1&quot;&gt;//5. Ungroup the months 
-&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;join_months&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;                        &lt;span class=&quot;c1&quot;&gt;//6. Join the string of transposed months
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ostream_iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;函数式编程的可组合、高度可重用、不需要循环而仅仅关注意图的编程风格带来更容易维护、更简洁清晰的代码。 
-声明式编程风格对C++而言不再遥远。期望它能早日进入新的语言标准库中造福广大程序员。&lt;/p&gt;
-
-&lt;p&gt;更多细节和Proposal详见&lt;a href=&quot;http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4128.html&quot;&gt;N4128&lt;/a&gt;和&lt;a href=&quot;http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2015/n4382.pd&quot;&gt;N4382&lt;/a&gt;。
-基于C++11实现的库代码开源在&lt;a href=&quot;http://www.github.com/ericniebler/range-v3&quot;&gt;Github&lt;/a&gt;。
-项目文档在该项目的&lt;a href=&quot;https://ericniebler.github.io/range-v3/index.html&quot;&gt;GitHub Pages&lt;/a&gt;页面上；包含有几个基本部分的文档&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;基本安装和使用：基于头文件的轻量级的库，仅仅需要放置在合适的安装路径中，包含头文件即可；本身也提供了一个&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;range/v3/all.hpp&amp;gt;&lt;/code&gt;的头文件方便使用。&lt;/li&gt;
-  &lt;li&gt;可组合的Views类，采用函数式风格的组合模式。&lt;/li&gt;
-  &lt;li&gt;Actions类用于对range做一些修改性操作，譬如join/erase/insert/drop等。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;c中的atomics&quot;&gt;C++中的Atomics&lt;/h4&gt;
-&lt;p&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Presentations/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive/C++11,%2014,%2017%20Atomics%20-%20the%20Deep%20Dive%20-%20Michael%20Wong%20-%20CppCon%202015.pdf&quot;&gt;C++11, 14, 17 Atomics - the Deep Dive&lt;/a&gt; 来自于前OpenMP项目创始人的华人C++大拿的深入探讨新的C++语言中的原子性操作支持和并发编程；读来让人深思。&lt;/p&gt;
-
-&lt;p&gt;Michael Wong回顾了传统C++编程中的性能、并发、一致性的挑战，以及语言层面的逐步进化：从早期C++98/03标准的未置一词，到C++11首次引入的内存模型，原子类型等基本概念的支持，
-进而是C++14的无所算法增强和无锁算法支持和&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_signal_fence&lt;/code&gt;，再到未来的C++17中需要定义的内存访问次序强一致性保证和原子性视图，
-有一些追赶Java并发支持的味道，当然C++有自己的挑战需要解决；看来是个长期的任务。&lt;/p&gt;
-
-&lt;h4 id=&quot;并行stl&quot;&gt;并行STL&lt;/h4&gt;
-&lt;p&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2015/blob/master/Presentations/Parallelizing%20the%20C++%20STL/Parallelizing%20the%20C++%20STL%20-%20Grant%20Mercer%20and%20Daniel%20Bourgeois%20-%20CppCon%202015.pdf&quot;&gt;Parralellizing the C++ STL&lt;/a&gt;介绍了新的C++中，容器算法的并行化做法，基本上一些耦合不紧易于分解的数据算法，可以很简单的调度到多核CPU上&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="cpp" /><category term="guideline" /><summary type="html">C++社区的第二届编程语言社区活动CppCon2015落下了帷幕；作为C++语言的发明人和灵魂人物， Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核心语言的编程规范（Core Guidelines）并发布 在GitHub上，并立即引起了轰动。</summary></entry></feed>
+期望Rust能在系统编程领域掀起新的波澜。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="concurrency" /><category term="design" /><category term="rustlang" /><summary type="html">静态、强类型而又不带垃圾收集的编程语言领域内，很久没有新加入者参与竞争了，大概大部分开发者认为传统的C/C++的思路已经不太适合新时代的编程需求，即便有Ken Tompson这样的大神参与设计的golang也采用了GC的思路来设计其新一代的语言；一方面垃圾收集技术和即使编译技术一直在发展和完善，另一方面是大量的未经过严格计算机科学基础训练的开发人员进入市场，似乎让开发者永远停留在逻辑层面而不是去直接操纵内存是个更为现代的选择，Mozilla却仍然坚信一门静态而又高效低利用系统资源的“偏底层”的语言也依然会有巨大的生命力；于是站在现代成熟的软件工程实践上的Rustlang(以下简称Rust)被创造出来，其新版本的发布不时引起HackNews等极客圈的关注。</summary></entry></feed>

@@ -229,6 +229,10 @@
 <lastmod>2015-11-28T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/</loc>
+<lastmod>2015-12-19T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/post/2016/03/03/faster-large-cmake-project-build-optimization/</loc>
 <lastmod>2016-03-03T00:00:00+08:00</lastmod>
 </url>
@@ -490,5 +494,8 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/page13/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/page14/</loc>
 </url>
 </urlset>
