@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-12T22:02:52+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-12T22:59:37+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -868,9 +868,90 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。&lt;/p&gt;
 
 &lt;h2 id=&quot;optional类型&quot;&gt;Optional类型&lt;/h2&gt;
+&lt;p&gt;Optional类型是个典型的容器类型，用来表示有一个合法值或者空值；其本身是一种简单的&lt;a href=&quot;http://learnyouahaskell.com/a-fistful-of-monads&quot;&gt;Monad类型&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;从错误处理方式说起&quot;&gt;从错误处理方式说起&lt;/h3&gt;
+&lt;p&gt;长久以来，Java都是采用两种方式处理可能的逻辑例外情况，要么是采用返回对象的方式，要么是采用异常传递。
+Java的异常在设计上被分类为检查异常和非检查异常；前者别用来表述一些可以恢复的意外情况，编译器会在编译的时候检查可能抛出该类异常的API的&lt;strong&gt;调用方必须显式的处理&lt;/strong&gt;检查异常；
+非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。&lt;/p&gt;
+
+&lt;p&gt;Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都&lt;strong&gt;主张永远不使用检查异常&lt;/strong&gt;；
+遍布&lt;code class=&quot;highlighter-rouge&quot;&gt;try/catch&lt;/code&gt;块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
+于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I call it my billion-dollar mistake. It was the invention of the null reference in 1965. At that time, I was designing the first comprehensive type system for references in an object oriented language (ALGOL W). My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, simply because it was so easy to implement. This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.
+– Tony Honare, apology for inventing the null reference&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;用optional来处理错误&quot;&gt;用Optional来处理错误&lt;/h3&gt;
+&lt;p&gt;传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类则提供了&lt;strong&gt;一种新的错误处理方式&lt;/strong&gt;；从概念上来说，这三种方式是不能同时采用的，要么采用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;要么采用异常，但是不应该两者都采用。&lt;/p&gt;
+
+&lt;p&gt;从概念上来说，一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
+看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是个静态语言，null对象不是一个合法初始化过的对象，对它做任何方法调用都会引起引用异常；
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;则不同，即使没有正确的初始化某个对象，它&lt;strong&gt;本身依然是一个合法的对象&lt;/strong&gt;。它用一套统一的接口来操作内部封装的对象。&lt;/p&gt;
+
+&lt;p&gt;具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EMPTY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;从容器封装的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;可以&lt;strong&gt;看作是集合类的一个特殊的退化情况&lt;/strong&gt; - 它要么保护一个对象，要么什么也没有；但是不能包含超过两个或更多个对象。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;提供了很多API供我们使用&lt;/p&gt;
+
+&lt;h3 id=&quot;构造出新的optional对象&quot;&gt;构造出新的Optional对象&lt;/h3&gt;
+
+&lt;p&gt;构造的方式有很多种，可以用默认的空构造创建一个空的对象，此时内部的封装对象没有被初始化；另外一种方式是静态方法&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;of&lt;/code&gt;方法传入一个&lt;strong&gt;非null&lt;/strong&gt;的对象，构造出包含给定对象的容器&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;方法传入一个可能为null的对象；构造中会依据是否为null来决定是创建初始化的容器还是空容器&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象一经创建就不允许在修改其内部的状态；但是可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;方法来获取内部存储的对象 - 如果是空则会抛出&lt;code class=&quot;highlighter-rouge&quot;&gt;NoSuchElementException&lt;/code&gt;。
+一般情况下不建议未经检查便直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;方法；因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;本身提供了很多函数式编程的模式。&lt;/p&gt;
+
+&lt;h3 id=&quot;模式&quot;&gt;模式&lt;/h3&gt;
+
+&lt;p&gt;有如下模式可以供我们组合使用&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt; 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt; 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
+这里&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;保证传给参数函数的输入值一定不会是空对象，即&lt;strong&gt;转换函数不需要做null判断&lt;/strong&gt;因为map实现本身已经帮你判断了。
+从函数式编程的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;是一个高阶函数 - 其参数是另外一个函数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt; 和上边的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作为返回；
+为避免&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;Optional&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;的麻烦，&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;会将这个二层封装给解开，生成一个单一的封装。
+其实现代码非常简单
+    &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Objects&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requireNonNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isPresent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt; 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
+这里的提取实际上是一个解封装操作；返回的对象同样也抱枕是非null的，&lt;strong&gt;拿到这个对象的调用者不需要做额外的null判断&lt;/strong&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseGet&lt;/code&gt; 是一个类似的提取操作，和&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;不同的是对于空容器的处理，返回值由一个传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;来提供；同样&lt;strong&gt;也要保证尽量不要提供nulli&lt;/strong&gt;
+以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseThrow&lt;/code&gt; 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
+没有则调用传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&amp;lt;? extends Throwable&amp;gt;&lt;/code&gt;抛出一个异常。这同样是一个高阶函数&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;p&gt;T.B.D&lt;/p&gt;
-&lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;
-&lt;p&gt;T.B.D&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+
+&lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;

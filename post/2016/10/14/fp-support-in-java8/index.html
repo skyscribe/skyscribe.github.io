@@ -488,7 +488,7 @@
 
 
 
-本文有 2728 字，大约需要 6 分钟可以读完
+本文有 5804 字，大约需要 14 分钟可以读完
 
 
 
@@ -595,9 +595,90 @@
 当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。</p>
 
 <h2 id="optional类型">Optional类型</h2>
+<p>Optional类型是个典型的容器类型，用来表示有一个合法值或者空值；其本身是一种简单的<a href="http://learnyouahaskell.com/a-fistful-of-monads">Monad类型</a>。</p>
+
+<h3 id="从错误处理方式说起">从错误处理方式说起</h3>
+<p>长久以来，Java都是采用两种方式处理可能的逻辑例外情况，要么是采用返回对象的方式，要么是采用异常传递。
+Java的异常在设计上被分类为检查异常和非检查异常；前者别用来表述一些可以恢复的意外情况，编译器会在编译的时候检查可能抛出该类异常的API的<strong>调用方必须显式的处理</strong>检查异常；
+非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。</p>
+
+<p>Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都<strong>主张永远不使用检查异常</strong>；
+遍布<code class="highlighter-rouge">try/catch</code>块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
+于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。</p>
+
+<blockquote>
+  <p>I call it my billion-dollar mistake. It was the invention of the null reference in 1965. At that time, I was designing the first comprehensive type system for references in an object oriented language (ALGOL W). My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, simply because it was so easy to implement. This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.
+– Tony Honare, apology for inventing the null reference</p>
+</blockquote>
+
+<h3 id="用optional来处理错误">用Optional来处理错误</h3>
+<p>传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。
+<code class="highlighter-rouge">Optional</code>类则提供了<strong>一种新的错误处理方式</strong>；从概念上来说，这三种方式是不能同时采用的，要么采用<code class="highlighter-rouge">Optional</code>要么采用异常，但是不应该两者都采用。</p>
+
+<p>从概念上来说，一个<code class="highlighter-rouge">Optional</code>对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
+看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是个静态语言，null对象不是一个合法初始化过的对象，对它做任何方法调用都会引起引用异常；
+<code class="highlighter-rouge">Optional</code>则不同，即使没有正确的初始化某个对象，它<strong>本身依然是一个合法的对象</strong>。它用一套统一的接口来操作内部封装的对象。</p>
+
+<p>具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Optional</span><span class="o">&lt;?&gt;</span> <span class="n">EMPTY</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Optional</span><span class="o">&lt;&gt;();</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="n">T</span> <span class="n">value</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>从容器封装的角度来看，<code class="highlighter-rouge">Optional</code>可以<strong>看作是集合类的一个特殊的退化情况</strong> - 它要么保护一个对象，要么什么也没有；但是不能包含超过两个或更多个对象。
+<code class="highlighter-rouge">Optional</code>提供了很多API供我们使用</p>
+
+<h3 id="构造出新的optional对象">构造出新的Optional对象</h3>
+
+<p>构造的方式有很多种，可以用默认的空构造创建一个空的对象，此时内部的封装对象没有被初始化；另外一种方式是静态方法</p>
+<ul>
+  <li><code class="highlighter-rouge">of</code>方法传入一个<strong>非null</strong>的对象，构造出包含给定对象的容器</li>
+  <li><code class="highlighter-rouge">ofNullable</code>方法传入一个可能为null的对象；构造中会依据是否为null来决定是创建初始化的容器还是空容器</li>
+</ul>
+
+<p><code class="highlighter-rouge">Optional</code>对象一经创建就不允许在修改其内部的状态；但是可以通过<code class="highlighter-rouge">get</code>方法来获取内部存储的对象 - 如果是空则会抛出<code class="highlighter-rouge">NoSuchElementException</code>。
+一般情况下不建议未经检查便直接调用<code class="highlighter-rouge">get</code>方法；因为<code class="highlighter-rouge">Optional</code>本身提供了很多函数式编程的模式。</p>
+
+<h3 id="模式">模式</h3>
+
+<p>有如下模式可以供我们组合使用</p>
+
+<ul>
+  <li><code class="highlighter-rouge">filter</code> 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器</li>
+  <li><code class="highlighter-rouge">map</code> 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
+这里<code class="highlighter-rouge">Optional</code>保证传给参数函数的输入值一定不会是空对象，即<strong>转换函数不需要做null判断</strong>因为map实现本身已经帮你判断了。
+从函数式编程的角度来看，<code class="highlighter-rouge">map</code>是一个高阶函数 - 其参数是另外一个函数</li>
+  <li><code class="highlighter-rouge">flatMap</code> 和上边的<code class="highlighter-rouge">map</code>类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的<code class="highlighter-rouge">Optional</code>类型作为返回；
+为避免<code class="highlighter-rouge">Optional&lt;Optional&lt;T&gt;&gt;</code>的麻烦，<code class="highlighter-rouge">flatMap</code>会将这个二层封装给解开，生成一个单一的封装。
+其实现代码非常简单
+    <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="nf">map</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">T</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">U</span><span class="o">&gt;</span> <span class="n">mapper</span><span class="o">)</span> <span class="o">{</span>
+<span class="n">Objects</span><span class="o">.</span><span class="na">requireNonNull</span><span class="o">(</span><span class="n">mapper</span><span class="o">);</span>
+<span class="k">if</span> <span class="o">(!</span><span class="n">isPresent</span><span class="o">())</span>
+  <span class="k">return</span> <span class="nf">empty</span><span class="o">();</span>
+<span class="k">else</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">value</span><span class="o">));</span>
+<span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+    </div>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">orElse</code> 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
+这里的提取实际上是一个解封装操作；返回的对象同样也抱枕是非null的，<strong>拿到这个对象的调用者不需要做额外的null判断</strong></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">orElseGet</code> 是一个类似的提取操作，和<code class="highlighter-rouge">orElse</code>不同的是对于空容器的处理，返回值由一个传入的<code class="highlighter-rouge">Supplier</code>来提供；同样<strong>也要保证尽量不要提供nulli</strong>
+以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。</p>
+  </li>
+  <li><code class="highlighter-rouge">orElseThrow</code> 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
+没有则调用传入的<code class="highlighter-rouge">Supplier&lt;? extends Throwable&gt;</code>抛出一个异常。这同样是一个高阶函数</li>
+</ul>
+
 <p>T.B.D</p>
+
 <h2 id="streams-api">Streams API</h2>
-<p>T.B.D</p>
 
         
       </section>
