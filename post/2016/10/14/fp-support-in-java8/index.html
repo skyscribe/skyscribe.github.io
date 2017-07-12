@@ -1,0 +1,874 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Java8中的函数式编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Java8中的函数式编程">
+
+
+  <link rel="canonical" href="http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/">
+  <meta property="og:url" content="http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/">
+
+
+
+  <meta property="og:description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Java8中的函数式编程">
+  <meta name="twitter:description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+  <meta name="twitter:url" content="http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2016-10-14T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="http://www.skyscribe.me/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://www.skyscribe.me/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="http://www.skyscribe.me/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="http://www.skyscribe.me/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="http://www.skyscribe.me/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(10)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(4)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(32)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(12)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Java8中的函数式编程">
+    <meta itemprop="description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+    <meta itemprop="datePublished" content="October 14, 2016">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Java8中的函数式编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 2728 字，大约需要 6 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>Java8是日益臃肿、略显老态的老牌程序语言对日益流行的<strong>新的函数式编程范式</strong>的反击；
+它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</p>
+
+<!--more-->
+
+<h2 id="fp的基本要素函数">FP的基本要素：函数</h2>
+<p>Java并不打算放弃其面向对象的内核 - 所以的东西必须都是对象，那么函数也不例外，它依然是对象。具体而言，是一个特殊的函数式接口的实现。</p>
+
+<h3 id="函数依然是对象">函数依然是对象</h3>
+<p>在新的<code class="highlighter-rouge">java.util.function</code>包里，预定义了形形色色的函数接口,譬如带2个参数的函数</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">R</span><span class="o">&gt;{</span>
+  <span class="c1">//all functions implements apply that takes t of type T and u of type U, and returns R</span>
+  <span class="n">R</span> <span class="nf">apply</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">,</span> <span class="n">U</span> <span class="n">u</span><span class="o">);</span>
+
+  <span class="c1">//compose function</span>
+  <span class="k">default</span> <span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="nf">andThen</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">R</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">after</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Objects</span><span class="o">.</span><span class="na">requrieNotNull</span><span class="o">(</span><span class="n">after</span><span class="o">);</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">,</span> <span class="n">U</span> <span class="n">u</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">after</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">apply</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">u</span><span class="o">));</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>从定义来看，它是一个接口，任何实现了该接口的对象都是一个二元函数。从纯粹的面向对象思路来看，只要让所有实现类似调用的类也实现新的接口就行。
+仔细考虑则发现该思路有个不足 - 很可能我们已经有一个已有的接口</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyInterface</span><span class="o">{</span>
+  <span class="n">ReturnType</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyBusinessClassA</span> <span class="kd">implements</span> <span class="n">MyInterface</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="n">ReturnType</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">){</span>
+    <span class="c1">//detailed implementation</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>考虑用户代码想要使用上述的接口，同时希望采用函数式编程的思路，接受一个函数参数</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">//client code</span>
+<span class="kt">void</span> <span class="nf">myMethod</span><span class="o">(</span><span class="n">BiFunction</span><span class="o">&lt;</span><span class="n">ArgType1</span><span class="o">,</span> <span class="n">ArgType2</span><span class="o">,</span> <span class="n">ReturnType</span><span class="o">&gt;</span> <span class="n">certainProcessing</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">//calls certainProcessing.apply(arg1, arg2);</span>
+<span class="o">}</span>
+
+<span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
+<span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">myMethod</span><span class="o">(</span><span class="cm">/*use existing business classes?*/</span><span class="o">)</span>
+</code></pre>
+</div>
+<p>如果仅仅是因为需要采用函数式编程风格来编写代码，就必须要求我们修改原来的接口或者class定义破坏性就太大了。Java8采用了变通机制，
+当<strong>某个接口有且仅有一个方法定义</strong>的时候，该接口可以被编译器隐式地转换为一个函数式接口的一个扩展；实现了此业务接口的类则被视为函数式接口的一个具体实现。
+对应的这个方法(<code class="highlighter-rouge">doSomething</code>)会被认为是默认的<code class="highlighter-rouge">apply</code>方法，即使这个方法的名字是别的，
+只要参数个数、类型、返回类型能匹配到对应的泛型函数接口的对应类型(<code class="highlighter-rouge">doSomething(...)</code>)，它就会被视为是实际实现的方法。
+当用户代码用函数式编程的风格来调用抽象的函数式对象(<code class="highlighter-rouge">BiFunction</code>)的<code class="highlighter-rouge">apply</code>方法时，实际调用会被委托为实际实现方法(<code class="highlighter-rouge">doSomething</code>)的调用。</p>
+
+<p>为方便代码维护和协助编译器检查的考虑，Java8提供了<code class="highlighter-rouge">@FunctionalInterface</code>注解方便我们清晰的知道某个接口符合函数式接口的要求。
+也许是为了更灵活的配合函数式编程，Java8也允许一个接口中有提供默认实现(用<code class="highlighter-rouge">default</code>关键字标识)，此时这样的方法被认为是具体的而非抽象的；
+这样只要一个接口中<strong>有且只有一个抽象的方法</strong>，它依然符合函数对象的要求。</p>
+
+<p>如果接口声明没有加上<code class="highlighter-rouge">@FunctionalInterface</code>注解，调用的地方却使用了lambda表达式语法，编译器会检查对应的类接口中是否满足函数式对象的约束如有违反则报错。
+因而该注解不是必要的；出于代码可读性的考虑，还是建议尽量加上该注解。</p>
+
+<h3 id="内置函数">内置函数</h3>
+
+<p>Java8的工具库中提供了一些常见的基于泛型的函数式接口</p>
+
+<ul>
+  <li>返回值为布尔类型的函数 - Predicate</li>
+  <li>参数类型和返回值类型一样的函数 - <code class="highlighter-rouge">Operator</code></li>
+  <li>没有返回值的函数 - <code class="highlighter-rouge">Consumer</code></li>
+  <li>不带参数而能产生某些返回的函数 - <code class="highlighter-rouge">Producer</code></li>
+  <li>基于非装箱原始类型的特殊函数 - 某些时候希望避免自动装箱和自动解箱的性能开销</li>
+  <li>添加了参数个数信息的函数，譬如<code class="highlighter-rouge">BinaryOperator&lt;T&gt;</code>用于描述签名为<code class="highlighter-rouge">(T a, T b) -&gt; T</code>的函数;对应的<code class="highlighter-rouge">UnaryOperator&lt;T&gt;</code>用于描述的函数签名为<code class="highlighter-rouge">(T a) -&gt; T</code></li>
+</ul>
+
+<p>依据以上的命名风格，<code class="highlighter-rouge">java.util.function</code>中定义了几十个泛型的函数接口，可以满足几乎所有的简单场景。查看<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">JDK文档</a>可以发现, Java8<strong>没有提供超过2个参数</strong>的函数接口定义，默认的<code class="highlighter-rouge">Function&lt;T, R&gt;</code>描述的是最普通的单映射函数。</p>
+
+<h3 id="匿名函数和lambda">匿名函数和Lambda</h3>
+
+<p>匿名函数其实是被Java8给封装成具体的函数对象（实现某个预定义的接口)。语法上没什么奇特的地方，和C++/Haskell的都比较类似。
+在任何一个可以传入函数调用的地方，都可以传入lambda表达式或者代码块，并且类型信息可以省略,如上边代码的例子</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
+<span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">myMethod</span><span class="o">((</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">businessClass</span><span class="o">.</span><span class="na">doSomething</span><span class="o">(</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">));</span>
+</code></pre>
+</div>
+
+<p>lambda表达式中引用上下文变量的情况下，该lambda表达式自然形成了一个闭包。
+当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。</p>
+
+<h2 id="optional类型">Optional类型</h2>
+<p>T.B.D</p>
+<h2 id="streams-api">Streams API</h2>
+<p>T.B.D</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>你可能也对下列文章感兴趣</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">Excessive null checks in Java Defensive Programming? <span class="label label-default">programming</span>  <span class="label label-default">java</span>  <span class="label label-default">design</span>  <span class="label label-default">fp</span>  <span class="label label-default">language</span> </a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/24/migrate-blog-to-jekyll/">Migrate blog to Jekyll</a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/05/kotlin-variable-invariants/">Kotlin语言之变量约束设计 <span class="label label-default">programming</span>  <span class="label label-default">language</span>  <span class="label label-default">fp</span> </a>
+    </li>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+    <li>
+        <a href="/post/2017/06/04/kotlin-language-functional-programming/">Kotlin语言之函数式编程 <span class="label label-default">programming</span>  <span class="label label-default">language</span>  <span class="label label-default">fp</span> </a>
+    </li>
+    
+    
+    
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/java" class="page__taxonomy-item" rel="tag">java</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/optional" class="page__taxonomy-item" rel="tag">optional</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/pattern" class="page__taxonomy-item" rel="tag">pattern</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/tags/stream" class="page__taxonomy-item" rel="tag">stream</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="http://www.skyscribe.me/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2016-10-14T00:00:00+08:00">October 14, 2016</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Java8中的函数式编程 http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+    <h4 class="page__comments-title">Leave a Comment</h4>
+    <section id="disqus_thread"></section>
+  
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="http://www.skyscribe.me/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="http://www.skyscribe.me/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+  
+  <script type="text/javascript">
+  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  	var disqus_shortname = 'skyscribe';
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function() {
+  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  	})();
+
+  	/* * * DON'T EDIT BELOW THIS LINE * * */
+  	(function () {
+  		var s = document.createElement('script'); s.async = true;
+  		s.type = 'text/javascript';
+  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  	}());
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+  </body>
+</html>
