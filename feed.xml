@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-12T22:59:37+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-13T19:30:26+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -918,40 +918,112 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 
 &lt;p&gt;有如下模式可以供我们组合使用&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt; 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt; 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
+&lt;h4 id=&quot;对封装数据的修改转换相关的模式&quot;&gt;对封装数据的修改/转换相关的模式&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt; 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt; 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
 这里&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;保证传给参数函数的输入值一定不会是空对象，即&lt;strong&gt;转换函数不需要做null判断&lt;/strong&gt;因为map实现本身已经帮你判断了。
-从函数式编程的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;是一个高阶函数 - 其参数是另外一个函数&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt; 和上边的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作为返回；
+从函数式编程的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;是一个高阶函数 - 其参数是另外一个函数&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt; 和上边的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作为返回；
 为避免&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;Optional&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;的麻烦，&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;会将这个二层封装给解开，生成一个单一的封装。
-其实现代码非常简单
-    &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Objects&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requireNonNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isPresent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+其实现代码非常简单&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;Objects&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requireNonNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isPresent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
-    &lt;/div&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt; 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
+&lt;/div&gt;
+
+&lt;h4 id=&quot;数据提取相关的模式&quot;&gt;数据提取相关的模式&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt; 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
 这里的提取实际上是一个解封装操作；返回的对象同样也抱枕是非null的，&lt;strong&gt;拿到这个对象的调用者不需要做额外的null判断&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseGet&lt;/code&gt; 是一个类似的提取操作，和&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;不同的是对于空容器的处理，返回值由一个传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;来提供；同样&lt;strong&gt;也要保证尽量不要提供nulli&lt;/strong&gt;
+以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseThrow&lt;/code&gt; 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
+没有则调用传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&amp;lt;? extends Throwable&amp;gt;&lt;/code&gt;抛出一个异常。这同样是一个高阶函数&lt;/p&gt;
+
+&lt;p&gt;上述的模式提供了丰富的组合功能使我们对一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象做函数式编程变得简单明了；甚至不需要一个&lt;code class=&quot;highlighter-rouge&quot;&gt;if&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;else&lt;/code&gt;分支判断就可以做一些复杂的操作。
+比如下面的一段代码&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;AnotherResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;someObj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;someResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;someResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;meetSomeCondition&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conditionalResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transformAsAnotherResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conditionalResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//.flatMap(conditionalResult -&amp;gt; transformAsAnotherResult(conditionalResult)) if transformAsAnotherResult returns optional&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElseGet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anotherEmptyResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//.orElseThrow(() -&amp;gt; new SomeRunTimeException()); //if we want to throw&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//Now result wouldn't be null at all!&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;反模式&quot;&gt;反模式&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;可以帮助我们大大简化代码，然而也有一些&lt;strong&gt;反模式需要小心留意&lt;/strong&gt;；比如以下这些&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;混用异常和&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型返回 - 显然两种机制是鱼和熊掌的关系，设计方法的时候必须选择其中一个，而不是两者混用。
+如果&lt;strong&gt;选择让方法返回Optional类型，就不要在实现内部再抛出异常&lt;/strong&gt;，否则你的用户将会抓狂。&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseGet&lt;/code&gt; 是一个类似的提取操作，和&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;不同的是对于空容器的处理，返回值由一个传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;来提供；同样&lt;strong&gt;也要保证尽量不要提供nulli&lt;/strong&gt;
-以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。&lt;/p&gt;
+    &lt;p&gt;在Optional的值中存放&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt; - 这是明显违背设计契约的做法，导致&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;封装完全失去意义。如果想重新构造一个Optional,
+如果不能确保它不是null，请用&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;&lt;/p&gt;
   &lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseThrow&lt;/code&gt; 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
-没有则调用传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&amp;lt;? extends Throwable&amp;gt;&lt;/code&gt;抛出一个异常。这同样是一个高阶函数&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 明显这里是不必要的，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。
+譬如下边的实现纯粹是画蛇添足
+```java
+anOptional.map(v -&amp;gt; doSth(v));&lt;/p&gt;
+  &lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;T.B.D&lt;/p&gt;
+&lt;p&gt;private SomeType doSthn(ValueType v) {
+  if (v != null) {
+    //do something and generates return type
+  } else {
+    //This won’t be ran!
+  }
+}&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+- 混用`if/else`和Optional的`isPresent()`和`get()` - 这是一种非常常见的误用；往往使得代码变得更加复杂。
+因为`Optional`本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。
+如果需要提取出值对象，就用`orElse`系列方法；如果不需要产生任何类型的新值，可以用`ifPresent`传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。
 
-&lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+- 复杂的链式操作，即多个连续的`map`操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的**重构技巧抽出新的子函数**即可。
+逻辑上来说，`anOptional.map(a -&amp;gt; transformAsB(a)).map(b -&amp;gt; transformAsC(b))` 等价于 `anOptional.map(a -&amp;gt; composeTransformAAndB(a))`；这里的字函数都不需要做null判断
+
+- 用`Optional`类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
+原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
+任何用`Optional`在函数中传递的写法，都**对应一个更简单的复合Optional模式**的写法;为什么不采用这些模式而要自己写判断？
+
+比如如下的例子
+```java
+Optional&amp;lt;SomeType&amp;gt; anOptional = ///initialize;
+RetType b = doSth(anOptional);
+
+private RetType doSthn(Optional&amp;lt;SomeType&amp;gt; opt){
+  return opt.map(obj -&amp;gt; obj.transform()).orElse(new RetType());
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;可以重构为更符合局部性的形式&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;
+&lt;p&gt;T.B.D&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;
