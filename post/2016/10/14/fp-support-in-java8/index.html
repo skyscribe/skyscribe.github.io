@@ -488,7 +488,7 @@
 
 
 
-本文有 9666 字，大约需要 24 分钟可以读完
+本文有 10930 字，大约需要 27 分钟可以读完
 
 
 
@@ -693,7 +693,10 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 <h4 id="反模式">反模式</h4>
 <p><code class="highlighter-rouge">Optional</code>可以帮助我们大大简化代码，然而也有一些<strong>反模式需要小心留意</strong>；比如以下这些</p>
 
-<ul>
+<h5 id="违反基本的约束">违反基本的约束</h5>
+<p>以下列举了几个常见的基本错误，这些错误只要稍微深入理解下<code class="highlighter-rouge">Optional</code>的设计思想就可以避免</p>
+
+<ol>
   <li>
     <p>混用异常和<code class="highlighter-rouge">Optional</code>类型返回 - 显然两种机制是鱼和熊掌的关系，设计方法的时候必须选择其中一个，而不是两者混用。
 如果<strong>选择让方法返回Optional类型，就不要在实现内部再抛出异常</strong>，否则你的用户将会抓狂。</p>
@@ -703,10 +706,11 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 如果不能确保它不是null，请用<code class="highlighter-rouge">ofNullable</code></p>
   </li>
   <li>
-    <p>在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为<code class="highlighter-rouge">Optional</code>已经给你保证了传给你的参数不会是<code class="highlighter-rouge">null</code>。
-譬如下边的实现纯粹是画蛇添足</p>
+    <p>在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为<code class="highlighter-rouge">Optional</code>已经给你保证了传给你的参数不会是<code class="highlighter-rouge">null</code>。</p>
   </li>
-</ul>
+</ol>
+
+<p>譬如下边的实现纯粹是画蛇添足</p>
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSth</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
 
@@ -720,14 +724,17 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 </code></pre>
 </div>
 
-<ul>
+<h5 id="冗余的判断">冗余的判断</h5>
+<p>还有一些典型的误用和<strong>不熟悉函数式编程的惯用法</strong>有关，可以通过简单的重构解决</p>
+
+<ol>
   <li>混用<code class="highlighter-rouge">if/else</code>和Optional的<code class="highlighter-rouge">isPresent()</code>和<code class="highlighter-rouge">get()</code> - 这是一种非常常见的误用；往往使得代码变得更加复杂。
 因为<code class="highlighter-rouge">Optional</code>本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。</li>
-</ul>
+</ol>
 
 <p>如果需要提取出值对象，就用<code class="highlighter-rouge">orElse</code>系列方法；如果不需要产生任何类型的新值，可以用<code class="highlighter-rouge">ifPresent</code>传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。</p>
 
-<ul>
+<ol>
   <li>
     <p>复杂的链式操作，即多个连续的<code class="highlighter-rouge">map</code>操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的<strong>重构技巧抽出新的子函数</strong>即可。
 逻辑上来说，<code class="highlighter-rouge">anOptional.map(a -&gt; transformAsB(a)).map(b -&gt; transformAsC(b))</code> 等价于 <code class="highlighter-rouge">anOptional.map(a -&gt; composeTransformAAndB(a))</code>；这里的字函数都不需要做null判断</p>
@@ -737,7 +744,7 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
 任何用<code class="highlighter-rouge">Optional</code>在函数中传递的写法，都<strong>对应一个更简单的复合Optional模式</strong>的写法;为什么不采用这些模式而要自己写判断？</p>
   </li>
-</ul>
+</ol>
 
 <p>比如如下的例子</p>
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
@@ -813,6 +820,7 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 
 <h4 id="streamt接口"><code class="highlighter-rouge">Stream&lt;T&gt;</code>接口</h4>
 <p>最平凡的Stream是名为<code class="highlighter-rouge">Stream&lt;T&gt;</code>的泛型接口</p>
+
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
   <span class="c1">//operations...</span>
   <span class="c1">//terminators...</span>
@@ -834,13 +842,57 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 <p>该接口包含一些<strong>转换操作和终止操作</strong>组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
 终止操作则直接终止流水线，返回某些汇聚之后的结果出来。</p>
 
-<h3 id="构造和生成stream">构造和生成Stream</h3>
+<h4 id="以java基本类型为数据元素的特殊stream">以Java基本类型为数据元素的特殊Stream</h4>
+<p>Java泛型技术的一个限制是，对基本的数据类型（这些类型不是一个Object）必须用包装类，
+直接用包装类替换基本类型则会带来比较大的<a href="https://tavianator.com/java-autoboxing-performance/">性能开销</a>；
+尤其是Java5之后引入的自动装箱对程序员隐藏了这些实现细节，某种程度上加剧了问题的严重性。</p>
+
+<p><code class="highlighter-rouge">Stream</code>对所有的基本类型都提供了一个对应的接口，比如<code class="highlighter-rouge">IntStream</code>、<code class="highlighter-rouge">LongStream</code>等等。这些接口都继承自<code class="highlighter-rouge">BasicStream</code>,暴露的方法和<code class="highlighter-rouge">Stream</code>比较类似；从接口声明上看，
+很多方法和<code class="highlighter-rouge">Stream&lt;T&gt;</code>都是类似的，仅仅是针对类型做了特殊处理，这个也是很老的一个对Java语言设计的槽点了。</p>
+
+<h3 id="生成stream">生成Stream</h3>
+<p>大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生</p>
+
+<ul>
+  <li>使用<code class="highlighter-rouge">Collection</code>接口的<code class="highlighter-rouge">.stream()</code>方法；还有一个对应的<code class="highlighter-rouge">.parallelStream()</code>返回一个可以并发执行的对象</li>
+  <li>使用<code class="highlighter-rouge">Arrays</code>工具类的<code class="highlighter-rouge">.stream(Object[])</code>从一个数组构造出来</li>
+  <li>使用<code class="highlighter-rouge">Stream</code>本身的一些静态方法产生，包括
+    <ol>
+      <li><code class="highlighter-rouge">Stream.of(T t)</code>产生单个元素的Stream对象</li>
+      <li><code class="highlighter-rouge">Stream.of(T... values)</code>从对象列表中产生</li>
+      <li><code class="highlighter-rouge">Stream.generate(Supplier&lt;T&gt; s)</code> 用给定的<code class="highlighter-rouge">Supplier</code>函数产生无穷序列(其实受<code class="highlighter-rouge">Long</code>类型的最大可能值限制)</li>
+      <li><code class="highlighter-rouge">Stream.concat(Stream&lt;? extends T&gt; a, Stream&lt;? extends T&gt; b)</code>连接两个已有的流</li>
+    </ol>
+  </li>
+</ul>
+
+<p>这些方法也有对应的针对基本类型的Stream的版本。</p>
+
+<ul>
+  <li>使用<code class="highlighter-rouge">StreamSupport</code>辅助类来产生，包括
+    <ol>
+      <li><code class="highlighter-rouge">stream(Spliterator&lt;T&gt; spliterator, boolean parallel)</code>从一个迭代器产生，可以支持并发的<code class="highlighter-rouge">Stream</code></li>
+      <li><code class="highlighter-rouge">stream(Supplier&lt;? extends Spliterator&lt;T&gt;&gt; supplier, int characteristics, boolean parallel)</code>支持从给定的迭代器的Supplier中一一调用<code class="highlighter-rouge">.get()</code>方法；支持并发方式迭代</li>
+      <li>类似功能的针对基本类型的Stream的封装</li>
+    </ol>
+  </li>
+  <li>特定场景的构造方法，比如
+    <ol>
+      <li>随机数产生器流，用<code class="highlighter-rouge">Random.ints()</code></li>
+      <li>缓冲的IO流中产生的流 - <code class="highlighter-rouge">BufferedReader.lines()</code></li>
+      <li>其它形形色色的JDK库提供的封装；以及第三方库提供的封装</li>
+    </ol>
+  </li>
+</ul>
 
 <h3 id="流水线操作和变换">流水线操作和变换</h3>
+<p>T.B.D</p>
 
 <h3 id="归并">归并</h3>
 
 <h3 id="副作用和顺序性">副作用和顺序性</h3>
+
+<h3 id="并发流">并发流</h3>
 
 
         

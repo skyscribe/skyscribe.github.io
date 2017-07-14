@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-14T11:36:05+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-14T12:30:29+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -966,7 +966,10 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 &lt;h4 id=&quot;反模式&quot;&gt;反模式&lt;/h4&gt;
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;可以帮助我们大大简化代码，然而也有一些&lt;strong&gt;反模式需要小心留意&lt;/strong&gt;；比如以下这些&lt;/p&gt;
 
-&lt;ul&gt;
+&lt;h5 id=&quot;违反基本的约束&quot;&gt;违反基本的约束&lt;/h5&gt;
+&lt;p&gt;以下列举了几个常见的基本错误，这些错误只要稍微深入理解下&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;的设计思想就可以避免&lt;/p&gt;
+
+&lt;ol&gt;
   &lt;li&gt;
     &lt;p&gt;混用异常和&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型返回 - 显然两种机制是鱼和熊掌的关系，设计方法的时候必须选择其中一个，而不是两者混用。
 如果&lt;strong&gt;选择让方法返回Optional类型，就不要在实现内部再抛出异常&lt;/strong&gt;，否则你的用户将会抓狂。&lt;/p&gt;
@@ -976,10 +979,11 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 如果不能确保它不是null，请用&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。
-譬如下边的实现纯粹是画蛇添足&lt;/p&gt;
+    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;譬如下边的实现纯粹是画蛇添足&lt;/p&gt;
 
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
 
@@ -993,14 +997,17 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;ul&gt;
+&lt;h5 id=&quot;冗余的判断&quot;&gt;冗余的判断&lt;/h5&gt;
+&lt;p&gt;还有一些典型的误用和&lt;strong&gt;不熟悉函数式编程的惯用法&lt;/strong&gt;有关，可以通过简单的重构解决&lt;/p&gt;
+
+&lt;ol&gt;
   &lt;li&gt;混用&lt;code class=&quot;highlighter-rouge&quot;&gt;if/else&lt;/code&gt;和Optional的&lt;code class=&quot;highlighter-rouge&quot;&gt;isPresent()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;get()&lt;/code&gt; - 这是一种非常常见的误用；往往使得代码变得更加复杂。
 因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。&lt;/li&gt;
-&lt;/ul&gt;
+&lt;/ol&gt;
 
 &lt;p&gt;如果需要提取出值对象，就用&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;系列方法；如果不需要产生任何类型的新值，可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;ifPresent&lt;/code&gt;传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。&lt;/p&gt;
 
-&lt;ul&gt;
+&lt;ol&gt;
   &lt;li&gt;
     &lt;p&gt;复杂的链式操作，即多个连续的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的&lt;strong&gt;重构技巧抽出新的子函数&lt;/strong&gt;即可。
 逻辑上来说，&lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; transformAsB(a)).map(b -&amp;gt; transformAsC(b))&lt;/code&gt; 等价于 &lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; composeTransformAAndB(a))&lt;/code&gt;；这里的字函数都不需要做null判断&lt;/p&gt;
@@ -1010,7 +1017,7 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
 任何用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;在函数中传递的写法，都&lt;strong&gt;对应一个更简单的复合Optional模式&lt;/strong&gt;的写法;为什么不采用这些模式而要自己写判断？&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ul&gt;
+&lt;/ol&gt;
 
 &lt;p&gt;比如如下的例子&lt;/p&gt;
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
@@ -1086,6 +1093,7 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 
 &lt;h4 id=&quot;streamt接口&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;接口&lt;/h4&gt;
 &lt;p&gt;最平凡的Stream是名为&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的泛型接口&lt;/p&gt;
+
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;c1&quot;&gt;//operations...&lt;/span&gt;
   &lt;span class=&quot;c1&quot;&gt;//terminators...&lt;/span&gt;
@@ -1107,13 +1115,57 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 &lt;p&gt;该接口包含一些&lt;strong&gt;转换操作和终止操作&lt;/strong&gt;组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
 终止操作则直接终止流水线，返回某些汇聚之后的结果出来。&lt;/p&gt;
 
-&lt;h3 id=&quot;构造和生成stream&quot;&gt;构造和生成Stream&lt;/h3&gt;
+&lt;h4 id=&quot;以java基本类型为数据元素的特殊stream&quot;&gt;以Java基本类型为数据元素的特殊Stream&lt;/h4&gt;
+&lt;p&gt;Java泛型技术的一个限制是，对基本的数据类型（这些类型不是一个Object）必须用包装类，
+直接用包装类替换基本类型则会带来比较大的&lt;a href=&quot;https://tavianator.com/java-autoboxing-performance/&quot;&gt;性能开销&lt;/a&gt;；
+尤其是Java5之后引入的自动装箱对程序员隐藏了这些实现细节，某种程度上加剧了问题的严重性。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;对所有的基本类型都提供了一个对应的接口，比如&lt;code class=&quot;highlighter-rouge&quot;&gt;IntStream&lt;/code&gt;、&lt;code class=&quot;highlighter-rouge&quot;&gt;LongStream&lt;/code&gt;等等。这些接口都继承自&lt;code class=&quot;highlighter-rouge&quot;&gt;BasicStream&lt;/code&gt;,暴露的方法和&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;比较类似；从接口声明上看，
+很多方法和&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;都是类似的，仅仅是针对类型做了特殊处理，这个也是很老的一个对Java语言设计的槽点了。&lt;/p&gt;
+
+&lt;h3 id=&quot;生成stream&quot;&gt;生成Stream&lt;/h3&gt;
+&lt;p&gt;大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;接口的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream()&lt;/code&gt;方法；还有一个对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;.parallelStream()&lt;/code&gt;返回一个可以并发执行的对象&lt;/li&gt;
+  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Arrays&lt;/code&gt;工具类的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream(Object[])&lt;/code&gt;从一个数组构造出来&lt;/li&gt;
+  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;本身的一些静态方法产生，包括
+    &lt;ol&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T t)&lt;/code&gt;产生单个元素的Stream对象&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T... values)&lt;/code&gt;从对象列表中产生&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.generate(Supplier&amp;lt;T&amp;gt; s)&lt;/code&gt; 用给定的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;函数产生无穷序列(其实受&lt;code class=&quot;highlighter-rouge&quot;&gt;Long&lt;/code&gt;类型的最大可能值限制)&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.concat(Stream&amp;lt;? extends T&amp;gt; a, Stream&amp;lt;? extends T&amp;gt; b)&lt;/code&gt;连接两个已有的流&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这些方法也有对应的针对基本类型的Stream的版本。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;StreamSupport&lt;/code&gt;辅助类来产生，包括
+    &lt;ol&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream(Spliterator&amp;lt;T&amp;gt; spliterator, boolean parallel)&lt;/code&gt;从一个迭代器产生，可以支持并发的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream(Supplier&amp;lt;? extends Spliterator&amp;lt;T&amp;gt;&amp;gt; supplier, int characteristics, boolean parallel)&lt;/code&gt;支持从给定的迭代器的Supplier中一一调用&lt;code class=&quot;highlighter-rouge&quot;&gt;.get()&lt;/code&gt;方法；支持并发方式迭代&lt;/li&gt;
+      &lt;li&gt;类似功能的针对基本类型的Stream的封装&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;特定场景的构造方法，比如
+    &lt;ol&gt;
+      &lt;li&gt;随机数产生器流，用&lt;code class=&quot;highlighter-rouge&quot;&gt;Random.ints()&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;缓冲的IO流中产生的流 - &lt;code class=&quot;highlighter-rouge&quot;&gt;BufferedReader.lines()&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;其它形形色色的JDK库提供的封装；以及第三方库提供的封装&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;流水线操作和变换&quot;&gt;流水线操作和变换&lt;/h3&gt;
+&lt;p&gt;T.B.D&lt;/p&gt;
 
 &lt;h3 id=&quot;归并&quot;&gt;归并&lt;/h3&gt;
 
-&lt;h3 id=&quot;副作用和顺序性&quot;&gt;副作用和顺序性&lt;/h3&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+&lt;h3 id=&quot;副作用和顺序性&quot;&gt;副作用和顺序性&lt;/h3&gt;
+
+&lt;h3 id=&quot;并发流&quot;&gt;并发流&lt;/h3&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;
