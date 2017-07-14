@@ -488,7 +488,7 @@
 
 
 
-本文有 7975 字，大约需要 19 分钟可以读完
+本文有 9666 字，大约需要 24 分钟可以读完
 
 
 
@@ -507,7 +507,7 @@
 <p>Java并不打算放弃其面向对象的内核 - 所以的东西必须都是对象，那么函数也不例外，它依然是对象。具体而言，是一个特殊的函数式接口的实现。</p>
 
 <h3 id="函数依然是对象">函数依然是对象</h3>
-<p>在新的<code class="highlighter-rouge">java.util.function</code>包里，预定义了形形色色的函数接口,譬如带2个参数的函数</p>
+<p>在新的<code class="highlighter-rouge">java.util.function</code>包里，预定义了形形色色的函数接口，譬如带2个参数的函数的定义如下</p>
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
 <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">R</span><span class="o">&gt;{</span>
@@ -699,48 +699,57 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 如果<strong>选择让方法返回Optional类型，就不要在实现内部再抛出异常</strong>，否则你的用户将会抓狂。</p>
   </li>
   <li>
-    <p>在Optional的值中存放<code class="highlighter-rouge">null</code> - 这是明显违背设计契约的做法，导致<code class="highlighter-rouge">Optional</code>封装完全失去意义。如果想重新构造一个Optional,
+    <p>在Optional的值中存放<code class="highlighter-rouge">null</code> - 这是明显<strong>违背设计契约</strong>的做法，导致<code class="highlighter-rouge">Optional</code>封装完全失去意义。如果想重新构造一个Optional,
 如果不能确保它不是null，请用<code class="highlighter-rouge">ofNullable</code></p>
   </li>
   <li>
-    <p>在模式提供的高阶函数的实现中检查参数是否为null - 明显这里是不必要的，因为<code class="highlighter-rouge">Optional</code>已经给你保证了传给你的参数不会是<code class="highlighter-rouge">null</code>。
-譬如下边的实现纯粹是画蛇添足
-```java
-anOptional.map(v -&gt; doSth(v));</p>
+    <p>在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为<code class="highlighter-rouge">Optional</code>已经给你保证了传给你的参数不会是<code class="highlighter-rouge">null</code>。
+譬如下边的实现纯粹是画蛇添足</p>
   </li>
 </ul>
 
-<p>private SomeType doSthn(ValueType v) {
-  if (v != null) {
-    //do something and generates return type
-  } else {
-    //This won’t be ran!
-  }
-}</p>
-<div class="highlighter-rouge"><pre class="highlight"><code>
-- 混用`if/else`和Optional的`isPresent()`和`get()` - 这是一种非常常见的误用；往往使得代码变得更加复杂。
-因为`Optional`本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。
-如果需要提取出值对象，就用`orElse`系列方法；如果不需要产生任何类型的新值，可以用`ifPresent`传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSth</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
 
-- 复杂的链式操作，即多个连续的`map`操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的**重构技巧抽出新的子函数**即可。
-逻辑上来说，`anOptional.map(a -&gt; transformAsB(a)).map(b -&gt; transformAsC(b))` 等价于 `anOptional.map(a -&gt; composeTransformAAndB(a))`；这里的字函数都不需要做null判断
-
-- 用`Optional`类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
-原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
-任何用`Optional`在函数中传递的写法，都**对应一个更简单的复合Optional模式**的写法;为什么不采用这些模式而要自己写判断？
-
-比如如下的例子
-```java
-Optional&lt;SomeType&gt; anOptional = ///initialize;
-RetType b = doSth(anOptional);
-
-private RetType doSthn(Optional&lt;SomeType&gt; opt){
-  return opt.map(obj -&gt; obj.transform()).orElse(new RetType());
-}
+<span class="kd">private</span> <span class="n">SomeType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">ValueType</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">v</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//do something and generates return type</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="c1">//This won't be ran!</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 
-<p>可以重构为更符合局部性的形式</p>
+<ul>
+  <li>混用<code class="highlighter-rouge">if/else</code>和Optional的<code class="highlighter-rouge">isPresent()</code>和<code class="highlighter-rouge">get()</code> - 这是一种非常常见的误用；往往使得代码变得更加复杂。
+因为<code class="highlighter-rouge">Optional</code>本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。</li>
+</ul>
+
+<p>如果需要提取出值对象，就用<code class="highlighter-rouge">orElse</code>系列方法；如果不需要产生任何类型的新值，可以用<code class="highlighter-rouge">ifPresent</code>传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。</p>
+
+<ul>
+  <li>
+    <p>复杂的链式操作，即多个连续的<code class="highlighter-rouge">map</code>操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的<strong>重构技巧抽出新的子函数</strong>即可。
+逻辑上来说，<code class="highlighter-rouge">anOptional.map(a -&gt; transformAsB(a)).map(b -&gt; transformAsC(b))</code> 等价于 <code class="highlighter-rouge">anOptional.map(a -&gt; composeTransformAAndB(a))</code>；这里的字函数都不需要做null判断</p>
+  </li>
+  <li>
+    <p>用<code class="highlighter-rouge">Optional</code>类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
+原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
+任何用<code class="highlighter-rouge">Optional</code>在函数中传递的写法，都<strong>对应一个更简单的复合Optional模式</strong>的写法;为什么不采用这些模式而要自己写判断？</p>
+  </li>
+</ul>
+
+<p>比如如下的例子</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
+<span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">doSth</span><span class="o">(</span><span class="n">anOptional</span><span class="o">);</span>
+
+<span class="kd">private</span> <span class="n">RetType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">opt</span><span class="o">){</span>
+  <span class="k">return</span> <span class="n">opt</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">obj</span> <span class="o">-&gt;</span> <span class="n">obj</span><span class="o">.</span><span class="na">transform</span><span class="o">()).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>可以重构为更符合<a href="https://en.wikipedia.org/wiki/Locality_of_reference">局部性原理</a>的形式,避免<code class="highlighter-rouge">Optional</code>类型的蔓延</p>
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
 <span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSthn</span><span class="o">(</span><span class="n">v</span><span class="o">)).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
 
@@ -750,7 +759,89 @@ private RetType doSthn(Optional&lt;SomeType&gt; opt){
 </code></pre>
 </div>
 <h2 id="streams-api">Streams API</h2>
-<p>T.B.D</p>
+<p>Java8新提供了<code class="highlighter-rouge">Streams</code> API来实现更类似于Haskell的<a href="http://learnyouahaskell.com/a-fistful-of-monads">List Monad</a>风格的函数式编程设施；
+值得注意的是，在老版本的Java库里边，<code class="highlighter-rouge">List</code>这个接口已经用来描述传统的基于共享内存模型的数据结构了（和C++的类似）；
+这也许是Java8另起炉灶新添加新的接口来描述这一概念。</p>
+
+<p>类似于Functional Interface,Streams API也是包含一系列<strong>新的Java接口</strong>的包的简称；这些接口都放在<code class="highlighter-rouge">java.util.stream</code>包中。</p>
+
+<h3 id="基本概念">基本概念</h3>
+<p>Stream是一个函数式编程概念的接口抽象；它和集合类的概念比较类似；比较大的差异在于Stream是</p>
+<ul>
+  <li>
+    <p>关于<strong>操作的抽象</strong>而不是关于数据的抽象，可以将其看作一个流水线，
+一些数据流入抽象的Stream,经过某些操作变换产生某些输出；这些输出可能成为流的下一步处理的输入</p>
+  </li>
+  <li>
+    <p>无状态的，所有绑定的<strong>操作不能修改数据源</strong>，即只能决定产生的输出是什么样子，不能回头修改输入的数据；
+这也是纯函数式编程所要求的<strong>无副作用</strong>；同样的数据经过某个处理操作产生的输出一定要是一样的。</p>
+  </li>
+  <li>
+    <p><strong>惰性运算</strong>赋值的，即Stream上的操作不一定会消耗所有的输入数据，譬如我们在一个Stream上取前3个数据，
+那么即使输入数据有无穷多个，操作也能在取到3个的时候就结束返回给下一步处理。</p>
+  </li>
+  <li>
+    <p>可能有无限多个输入，只要后续的操作是有限的</p>
+  </li>
+  <li>
+    <p>同一个Stream的输入<strong>只能被使用一次</strong>，下一次若想操作必须重新生成Stream；从这点设计约束看，Java的Stream没有Haskell的纯粹;
+也可以认为流水线一旦被处理，最原始的数据就不存在了。</p>
+  </li>
+</ul>
+
+<h3 id="基本的stream类型">基本的Stream类型</h3>
+<p>所有的<code class="highlighter-rouge">Stream</code>接口都继承自一个公共的<strong>泛型接口</strong></p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;&gt;</span> <span class="kd">extends</span> <span class="n">AutoClosurable</span> <span class="o">{</span>
+  <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">();</span>
+  <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">spliterator</span><span class="o">();</span>
+
+  <span class="nd">@Override</span>
+  <span class="kt">void</span> <span class="nf">close</span><span class="o">();</span>
+  <span class="n">S</span> <span class="nf">onClose</span><span class="o">(</span><span class="n">Runnable</span> <span class="n">closeHandler</span><span class="o">);</span>
+
+  <span class="c1">//...other common interfaces...</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+<p>其中<code class="highlighter-rouge">T</code>用于声明其初始输入的元素的类型，<code class="highlighter-rouge">S</code>则用于将子类的类型带上来，和C++的<a href="https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern">CRTP</a>技巧类似。
+从接口声明上看，一个Stream类也</p>
+<ul>
+  <li>提供了迭代器访问接口，可以用传统的迭代器访问模式操作<code class="highlighter-rouge">Stream</code></li>
+  <li>实现了<code class="highlighter-rouge">AutoClosurable</code>接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。
+<strong>大部分的Stream实现并不会管理资源</strong>，因而不显示关闭Stream往往也不会带来什么问题。</li>
+</ul>
+
+<h4 id="streamt接口"><code class="highlighter-rouge">Stream&lt;T&gt;</code>接口</h4>
+<p>最平凡的Stream是名为<code class="highlighter-rouge">Stream&lt;T&gt;</code>的泛型接口</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
+  <span class="c1">//operations...</span>
+  <span class="c1">//terminators...</span>
+  <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Builder</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">Consumer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kt">void</span> <span class="nf">accept</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">);</span>
+
+    <span class="k">default</span> <span class="n">Builder</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">add</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">){</span>
+      <span class="n">accept</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+      <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">build</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>该接口包含一些<strong>转换操作和终止操作</strong>组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
+终止操作则直接终止流水线，返回某些汇聚之后的结果出来。</p>
+
+<h3 id="构造和生成stream">构造和生成Stream</h3>
+
+<h3 id="流水线操作和变换">流水线操作和变换</h3>
+
+<h3 id="归并">归并</h3>
+
+<h3 id="副作用和顺序性">副作用和顺序性</h3>
+
 
         
       </section>

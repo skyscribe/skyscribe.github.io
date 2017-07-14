@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-13T19:30:26+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-14T11:36:05+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -780,7 +780,7 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 &lt;p&gt;Java并不打算放弃其面向对象的内核 - 所以的东西必须都是对象，那么函数也不例外，它依然是对象。具体而言，是一个特殊的函数式接口的实现。&lt;/p&gt;
 
 &lt;h3 id=&quot;函数依然是对象&quot;&gt;函数依然是对象&lt;/h3&gt;
-&lt;p&gt;在新的&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.function&lt;/code&gt;包里，预定义了形形色色的函数接口,譬如带2个参数的函数&lt;/p&gt;
+&lt;p&gt;在新的&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.function&lt;/code&gt;包里，预定义了形形色色的函数接口，譬如带2个参数的函数的定义如下&lt;/p&gt;
 
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@FunctionalInterface&lt;/span&gt;
 &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;BiFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;{&lt;/span&gt;
@@ -972,48 +972,57 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 如果&lt;strong&gt;选择让方法返回Optional类型，就不要在实现内部再抛出异常&lt;/strong&gt;，否则你的用户将会抓狂。&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;在Optional的值中存放&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt; - 这是明显违背设计契约的做法，导致&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;封装完全失去意义。如果想重新构造一个Optional,
+    &lt;p&gt;在Optional的值中存放&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt; - 这是明显&lt;strong&gt;违背设计契约&lt;/strong&gt;的做法，导致&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;封装完全失去意义。如果想重新构造一个Optional,
 如果不能确保它不是null，请用&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;&lt;/p&gt;
   &lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 明显这里是不必要的，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。
-譬如下边的实现纯粹是画蛇添足
-```java
-anOptional.map(v -&amp;gt; doSth(v));&lt;/p&gt;
+    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。
+譬如下边的实现纯粹是画蛇添足&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;private SomeType doSthn(ValueType v) {
-  if (v != null) {
-    //do something and generates return type
-  } else {
-    //This won’t be ran!
-  }
-}&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-- 混用`if/else`和Optional的`isPresent()`和`get()` - 这是一种非常常见的误用；往往使得代码变得更加复杂。
-因为`Optional`本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。
-如果需要提取出值对象，就用`orElse`系列方法；如果不需要产生任何类型的新值，可以用`ifPresent`传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
 
-- 复杂的链式操作，即多个连续的`map`操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的**重构技巧抽出新的子函数**即可。
-逻辑上来说，`anOptional.map(a -&amp;gt; transformAsB(a)).map(b -&amp;gt; transformAsC(b))` 等价于 `anOptional.map(a -&amp;gt; composeTransformAAndB(a))`；这里的字函数都不需要做null判断
-
-- 用`Optional`类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
-原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
-任何用`Optional`在函数中传递的写法，都**对应一个更简单的复合Optional模式**的写法;为什么不采用这些模式而要自己写判断？
-
-比如如下的例子
-```java
-Optional&amp;lt;SomeType&amp;gt; anOptional = ///initialize;
-RetType b = doSth(anOptional);
-
-private RetType doSthn(Optional&amp;lt;SomeType&amp;gt; opt){
-  return opt.map(obj -&amp;gt; obj.transform()).orElse(new RetType());
-}
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValueType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//do something and generates return type&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//This won't be ran!&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;可以重构为更符合局部性的形式&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;混用&lt;code class=&quot;highlighter-rouge&quot;&gt;if/else&lt;/code&gt;和Optional的&lt;code class=&quot;highlighter-rouge&quot;&gt;isPresent()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;get()&lt;/code&gt; - 这是一种非常常见的误用；往往使得代码变得更加复杂。
+因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果需要提取出值对象，就用&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;系列方法；如果不需要产生任何类型的新值，可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;ifPresent&lt;/code&gt;传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;复杂的链式操作，即多个连续的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的&lt;strong&gt;重构技巧抽出新的子函数&lt;/strong&gt;即可。
+逻辑上来说，&lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; transformAsB(a)).map(b -&amp;gt; transformAsC(b))&lt;/code&gt; 等价于 &lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; composeTransformAAndB(a))&lt;/code&gt;；这里的字函数都不需要做null判断&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
+原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
+任何用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;在函数中传递的写法，都&lt;strong&gt;对应一个更简单的复合Optional模式&lt;/strong&gt;的写法;为什么不采用这些模式而要自己写判断？&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;比如如下的例子&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;可以重构为更符合&lt;a href=&quot;https://en.wikipedia.org/wiki/Locality_of_reference&quot;&gt;局部性原理&lt;/a&gt;的形式,避免&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型的蔓延&lt;/p&gt;
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
 
@@ -1023,7 +1032,88 @@ private RetType doSthn(Optional&amp;lt;SomeType&amp;gt; opt){
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;
-&lt;p&gt;T.B.D&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+&lt;p&gt;Java8新提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;Streams&lt;/code&gt; API来实现更类似于Haskell的&lt;a href=&quot;http://learnyouahaskell.com/a-fistful-of-monads&quot;&gt;List Monad&lt;/a&gt;风格的函数式编程设施；
+值得注意的是，在老版本的Java库里边，&lt;code class=&quot;highlighter-rouge&quot;&gt;List&lt;/code&gt;这个接口已经用来描述传统的基于共享内存模型的数据结构了（和C++的类似）；
+这也许是Java8另起炉灶新添加新的接口来描述这一概念。&lt;/p&gt;
+
+&lt;p&gt;类似于Functional Interface,Streams API也是包含一系列&lt;strong&gt;新的Java接口&lt;/strong&gt;的包的简称；这些接口都放在&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.stream&lt;/code&gt;包中。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本概念&quot;&gt;基本概念&lt;/h3&gt;
+&lt;p&gt;Stream是一个函数式编程概念的接口抽象；它和集合类的概念比较类似；比较大的差异在于Stream是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;关于&lt;strong&gt;操作的抽象&lt;/strong&gt;而不是关于数据的抽象，可以将其看作一个流水线，
+一些数据流入抽象的Stream,经过某些操作变换产生某些输出；这些输出可能成为流的下一步处理的输入&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;无状态的，所有绑定的&lt;strong&gt;操作不能修改数据源&lt;/strong&gt;，即只能决定产生的输出是什么样子，不能回头修改输入的数据；
+这也是纯函数式编程所要求的&lt;strong&gt;无副作用&lt;/strong&gt;；同样的数据经过某个处理操作产生的输出一定要是一样的。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;惰性运算&lt;/strong&gt;赋值的，即Stream上的操作不一定会消耗所有的输入数据，譬如我们在一个Stream上取前3个数据，
+那么即使输入数据有无穷多个，操作也能在取到3个的时候就结束返回给下一步处理。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;可能有无限多个输入，只要后续的操作是有限的&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;同一个Stream的输入&lt;strong&gt;只能被使用一次&lt;/strong&gt;，下一次若想操作必须重新生成Stream；从这点设计约束看，Java的Stream没有Haskell的纯粹;
+也可以认为流水线一旦被处理，最原始的数据就不存在了。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;基本的stream类型&quot;&gt;基本的Stream类型&lt;/h3&gt;
+&lt;p&gt;所有的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口都继承自一个公共的&lt;strong&gt;泛型接口&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AutoClosurable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;spliterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onClose&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Runnable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;closeHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;//...other common interfaces...&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;其中&lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;用于声明其初始输入的元素的类型，&lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt;则用于将子类的类型带上来，和C++的&lt;a href=&quot;https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern&quot;&gt;CRTP&lt;/a&gt;技巧类似。
+从接口声明上看，一个Stream类也&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;提供了迭代器访问接口，可以用传统的迭代器访问模式操作&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;AutoClosurable&lt;/code&gt;接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。
+&lt;strong&gt;大部分的Stream实现并不会管理资源&lt;/strong&gt;，因而不显示关闭Stream往往也不会带来什么问题。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;streamt接口&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;接口&lt;/h4&gt;
+&lt;p&gt;最平凡的Stream是名为&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的泛型接口&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//operations...&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//terminators...&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Consumer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;该接口包含一些&lt;strong&gt;转换操作和终止操作&lt;/strong&gt;组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
+终止操作则直接终止流水线，返回某些汇聚之后的结果出来。&lt;/p&gt;
+
+&lt;h3 id=&quot;构造和生成stream&quot;&gt;构造和生成Stream&lt;/h3&gt;
+
+&lt;h3 id=&quot;流水线操作和变换&quot;&gt;流水线操作和变换&lt;/h3&gt;
+
+&lt;h3 id=&quot;归并&quot;&gt;归并&lt;/h3&gt;
+
+&lt;h3 id=&quot;副作用和顺序性&quot;&gt;副作用和顺序性&lt;/h3&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;
