@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-14T12:30:29+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-14T22:40:42+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -876,20 +876,28 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。&lt;/p&gt;
 
 &lt;p&gt;Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都&lt;strong&gt;主张永远不使用检查异常&lt;/strong&gt;；
-遍布&lt;code class=&quot;highlighter-rouge&quot;&gt;try/catch&lt;/code&gt;块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
+遍布&lt;code class=&quot;highlighter-rouge&quot;&gt;try/catch&lt;/code&gt;块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。&lt;/p&gt;
+
+&lt;p&gt;仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
 于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;I call it my billion-dollar mistake. It was the invention of the null reference in 1965. At that time, I was designing the first comprehensive type system for references in an object oriented language (ALGOL W). My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, simply because it was so easy to implement. This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.
-– Tony Honare, apology for inventing the null reference&lt;/p&gt;
+  &lt;p&gt;I call it my billion-dollar mistake. It was the invention of the null reference in 1965. … My goal was to ensure that all use of references should be absolutely safe,
+with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, &lt;strong&gt;simply because it was so easy to implement.&lt;/strong&gt; 
+This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.&lt;/p&gt;
+  &lt;blockquote&gt;
+    &lt;p&gt;– Tony Honare, apology for inventing the null reference&lt;/p&gt;
+  &lt;/blockquote&gt;
 &lt;/blockquote&gt;
 
 &lt;h3 id=&quot;用optional来处理错误&quot;&gt;用Optional来处理错误&lt;/h3&gt;
-&lt;p&gt;传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类则提供了&lt;strong&gt;一种新的错误处理方式&lt;/strong&gt;；从概念上来说，这三种方式是不能同时采用的，要么采用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;要么采用异常，但是不应该两者都采用。&lt;/p&gt;
+
+&lt;p&gt;传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类则提供了&lt;strong&gt;一种新的错误处理方式&lt;/strong&gt;；从概念上来说，这三种方式是不能同时采用的，要么采用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;要么采用异常，但是不应该两者都采用。&lt;/p&gt;
 
 &lt;p&gt;从概念上来说，一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
-看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是个静态语言，null对象不是一个合法初始化过的对象，对它做任何方法调用都会引起引用异常；
+看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是种静态语言，&lt;strong&gt;null对象不是一个合法初始化过的对象&lt;/strong&gt;，对它做任何方法调用都会引起引用异常；
 &lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;则不同，即使没有正确的初始化某个对象，它&lt;strong&gt;本身依然是一个合法的对象&lt;/strong&gt;。它用一套统一的接口来操作内部封装的对象。&lt;/p&gt;
 
 &lt;p&gt;具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码&lt;/p&gt;
@@ -1087,11 +1095,15 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 从接口声明上看，一个Stream类也&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;提供了迭代器访问接口，可以用传统的迭代器访问模式操作&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;AutoClosurable&lt;/code&gt;接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。
-&lt;strong&gt;大部分的Stream实现并不会管理资源&lt;/strong&gt;，因而不显示关闭Stream往往也不会带来什么问题。&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;AutoClosurable&lt;/code&gt;接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;大部分的Stream实现并不会管理资源&lt;/strong&gt;，因而不显示关闭Stream往往也不会带来什么问题。&lt;/p&gt;
+  &lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h4 id=&quot;streamt接口&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;接口&lt;/h4&gt;
+
 &lt;p&gt;最平凡的Stream是名为&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的泛型接口&lt;/p&gt;
 
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
@@ -1127,9 +1139,14 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 &lt;p&gt;大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;接口的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream()&lt;/code&gt;方法；还有一个对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;.parallelStream()&lt;/code&gt;返回一个可以并发执行的对象&lt;/li&gt;
-  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Arrays&lt;/code&gt;工具类的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream(Object[])&lt;/code&gt;从一个数组构造出来&lt;/li&gt;
-  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;本身的一些静态方法产生，包括
+  &lt;li&gt;
+    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;接口的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream()&lt;/code&gt;方法；还有一个对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;.parallelStream()&lt;/code&gt;返回一个可以并发执行的对象&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Arrays&lt;/code&gt;工具类的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream(Object[])&lt;/code&gt;从一个数组构造出来&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;本身的一些静态方法产生，包括&lt;/p&gt;
     &lt;ol&gt;
       &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T t)&lt;/code&gt;产生单个元素的Stream对象&lt;/li&gt;
       &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T... values)&lt;/code&gt;从对象列表中产生&lt;/li&gt;
@@ -1156,16 +1173,161 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
       &lt;li&gt;其它形形色色的JDK库提供的封装；以及第三方库提供的封装&lt;/li&gt;
     &lt;/ol&gt;
   &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;接口
+该接口是&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的内部接口，扩展了&lt;code class=&quot;highlighter-rouge&quot;&gt;Consumer&amp;lt;T&amp;gt;&lt;/code&gt;；可以利用&lt;code class=&quot;highlighter-rouge&quot;&gt;add(T t)&lt;/code&gt;方法添加元素到Stream中；该操作支持链式调用，最后用&lt;code class=&quot;highlighter-rouge&quot;&gt;build()&lt;/code&gt;方法生成最终的Stream对象。
+实现在&lt;code class=&quot;highlighter-rouge&quot;&gt;Consumer&lt;/code&gt;的接口则具有和&lt;code class=&quot;highlighter-rouge&quot;&gt;add&lt;/code&gt;类似的语意，只是不支持链式操作。比如&lt;code class=&quot;highlighter-rouge&quot;&gt;IntStream.Builder.add(1).add(2).add(3).build&lt;/code&gt;生成一个包含3个数字为输入的Stream。&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;流水线操作和变换&quot;&gt;流水线操作和变换&lt;/h3&gt;
-&lt;p&gt;T.B.D&lt;/p&gt;
+&lt;p&gt;作为一种函数式编程工具，Stream就天然是为组合而生的；这些组合本身就构成了流水线处理 - 初始化的元素作为流水线的输入，而中间的转换步骤可以有任意多个，
+最终则往往会有一个终止操作来产生期望的输出 - 该输出也是我们从流水线上拿到最终结果的地方。&lt;/p&gt;
+
+&lt;h4 id=&quot;中间操作和终止操作&quot;&gt;中间操作和终止操作&lt;/h4&gt;
+&lt;p&gt;所有这些中间操作每次返回一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;状态，其输入是经过转换的 - 如前所述&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的输入是不可修改的；该新的Stream的输入是对前一次的输入，
+输出则由前一次操作的针对每一个输入做运算之后的输出组成；如果某些运算不产生输出，则这些数据就像筛子一样被过滤下来了。&lt;/p&gt;
+
+&lt;p&gt;所有的终止操作从函数签名上来看，都不会返回新的Stream对象。&lt;/p&gt;
+
+&lt;p&gt;所有的中间操作都符合&lt;strong&gt;延迟计算&lt;/strong&gt;规则；即真正的输出并没有在调用这些转换操作的时候被计算出来；
+只有&lt;strong&gt;当终止操作被调用以取出需要的值的时候&lt;/strong&gt;，这些转换操作才真正被计算出来。&lt;/p&gt;
+
+&lt;p&gt;当我们提供一个无限长的输入提供给Stream的时候，真正参与具体操作的元素个数仅仅以满足终止条件为准。&lt;/p&gt;
+
+&lt;p&gt;譬如下边的代码&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first5PrimeSum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IntStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;iterate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isPrime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;limit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;初始构造的Stream包含无穷多个元素（受限于int类型的长度），但是经过&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;操作之后，由用&lt;code class=&quot;highlighter-rouge&quot;&gt;limit&lt;/code&gt;取出前5个，并最终求和；
+那么实际参与运算的初始输入元素只有1到11而已。&lt;/p&gt;
+
+&lt;p&gt;根据以上的赋值求值规则，我们可以认为终止操作是&lt;strong&gt;贪婪求值&lt;/strong&gt;的并会产生副作用；一旦调用了终止操作，Stream对象即产生了最终的运算结果；
+原始的输入元素遭到了破坏，无法回头重新来过。
+例外的情况隐藏在&lt;code class=&quot;highlighter-rouge&quot;&gt;iterator()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;splititerator()&lt;/code&gt;操作上，它们虽然是终止操作，却不会破坏流水线的状态，用户可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;iterator&lt;/code&gt;接口来决定流水线的运算时间点。&lt;/p&gt;
+
+&lt;h4 id=&quot;中间操作模式&quot;&gt;中间操作模式&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口提供了很多传统的符合函数式编程风格的方法，一些甚至允许更灵活的高阶函数&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;用于普通的函数变化，其参数是一个转换函数，将数据从一种类型转换为新的类型&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap(Function&amp;lt;? super T, ? extend Stream&amp;lt;? extends R&amp;gt;&amp;gt; mapper)&lt;/code&gt;将Stream的每一个元素应用之转换函数，然后将转换结果流中的数据取出来汇聚为新的Stream。
+ 该操作是一种相对高阶的模式，可以避免手工来拼接流&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;skip&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;limit&lt;/code&gt;分别用于截取或者跳过某些元素&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sorted&lt;/code&gt;则产生按照给定排序规则排列为有序输出数据的流&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;用来过滤流中满足给定谓词逻辑判断的数据&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;distinct&lt;/code&gt;会删除重复的元素&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;peek&lt;/code&gt;用于在产生输出数据的同时，做一些参数指定的函数操作；该操作大部分时候可以用于方便debug，比如
+    &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;two&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;lenth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;peek&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Filtered value: &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;String:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toUpperCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;peek&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Mapped value: &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;collect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collectors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;有状态和无状态的中间操作&quot;&gt;有状态和无状态的中间操作&lt;/h4&gt;
+
+&lt;p&gt;中间操作可以携带lambda表达式，从而可以简单将其分类为有状态的和无状态的操作。
+有状态的操作会&lt;strong&gt;携带额外的上下文信息&lt;/strong&gt;，如果这些操作的运算结果跟操作的中间结果有关，则Stream的行为会变得依赖于流水线的执行顺序 - 如果操作被并发调度，
+结果就会显得不确定。&lt;/p&gt;
+
+&lt;p&gt;比如这个例子&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Set&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collections&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;synchronizedSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HashSet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parallel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;seen&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reduction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;第一个&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;操作时间的执行体中会根据给定的元素是否已经处理过来决定返回0或元素本身；这个lambda操作本身依赖于之前的运算所以是有状态的。&lt;/p&gt;
+
+&lt;p&gt;显然有状态的操作在用&lt;code class=&quot;highlighter-rouge&quot;&gt;parallelStream&lt;/code&gt;调度计算的时候&lt;strong&gt;会产生不确定结果&lt;/strong&gt;；而无状态的操作则没有这样的副作用。&lt;/p&gt;
+
+&lt;p&gt;Java8引入&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的首要目的就是并行计算和并发，默认串行的操作，仅仅需要在生成&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的地方加上&lt;code class=&quot;highlighter-rouge&quot;&gt;parallel()&lt;/code&gt;就可以自动获得多核并发调度的好处。&lt;/p&gt;
+
+&lt;h4 id=&quot;潜在的操作干扰&quot;&gt;潜在的操作干扰&lt;/h4&gt;
+
+&lt;p&gt;传给Stream的数据在Stream运算的过程中被视为静态的；如果这些数据可能被同时修改，则操作的正确性就难以保证了。
+考虑一个用Java的ArrayList产生的Stream做运算的情况&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Arrays&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;asList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;two&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strm&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;four&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//WoW!&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;collect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;joining&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;有状态的函数操作或者互相干扰的函数操作会&lt;strong&gt;破坏并发安全性并带来出乎意料的行为&lt;/strong&gt;（因为多线程、同步、调度的细节被隐藏了）；应该不建议使用。&lt;/p&gt;
+
+&lt;h4 id=&quot;常用的终止操作&quot;&gt;常用的终止操作&lt;/h4&gt;
+&lt;p&gt;终止操作的方法很多，基本上&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的API中，除了静态方法以外，所有的返回类型不是&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的都是终止操作，常用的有&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;allMatch&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;anyMatch/nonMatch&lt;/code&gt;接受一个谓词函数作为参数，返回是否流中的元素都满足给定的条件，或至少有一个满足条件;以及是否没有满足条件的元素&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;collect(Collector&amp;lt;? super T, A, R&amp;gt;)&lt;/code&gt;用于收集流参数到给定的集合中;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collector&lt;/code&gt;是一个可修改的归并操作运算抽象；
+ 常用的方式是使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collectors&lt;/code&gt;这一工具类提供的静态方法传入各种各样的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collector&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;collect(Supplier&amp;lt;R&amp;gt; supplier, BiConsumer&amp;lt;R, ? extends T&amp;gt; accumulator, BiConsumer&amp;lt;R, R&amp;gt; combiner)&lt;/code&gt;是上述接口的一个简化版本，显示提供了归并操作的其中三个函数参数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;count&lt;/code&gt;返回元素的个数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;toArray&lt;/code&gt;返回元素为数组形式&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;forEach&lt;/code&gt;则提供遍历操作&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;findFirst&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;findAny&lt;/code&gt;返回第一个/任意一个元素，由于可能不存在希望取的元素（没有元素的情况），返回类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;归并操作，包含几个重载形式&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;归并&quot;&gt;归并&lt;/h3&gt;
+&lt;p&gt;归并操作是map/reduce模式中比较复杂和灵活的终止操作；&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口也提供了丰富的支持。其实这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;在其它的函数式语言中也被称为&lt;code class=&quot;highlighter-rouge&quot;&gt;fold&lt;/code&gt;。&lt;/p&gt;
 
-&lt;h3 id=&quot;副作用和顺序性&quot;&gt;副作用和顺序性&lt;/h3&gt;
+&lt;h4 id=&quot;最灵活的形式&quot;&gt;最灵活的形式&lt;/h4&gt;
 
-&lt;h3 id=&quot;并发流&quot;&gt;并发流&lt;/h3&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
+&lt;p&gt;一般形式的&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;操作支持如下几个参数&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;U identity&lt;/code&gt;是单位元元素，同时作为输出的默认值&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BiFunction&amp;lt;U, ? super T, U&amp;gt; accumulator&lt;/code&gt; 负责中间的每一次运算的累加&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BinaryOperator&amp;lt;U&amp;gt; combiner&lt;/code&gt; 约束accumulator 和 identity的函数，需要满足 &lt;code class=&quot;highlighter-rouge&quot;&gt;combiner.apply(u, accumulator.apply(identity, t)) = accumulator.apply(u, t)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;调用的效果类似于&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;element:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;combiner&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accumulator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;省略combiner的版本-t-reducet-identity-binaryoperatort-accumulator&quot;&gt;省略&lt;code class=&quot;highlighter-rouge&quot;&gt;combiner&lt;/code&gt;的版本: &lt;code class=&quot;highlighter-rouge&quot;&gt;T reduce(T identity, BinaryOperator&amp;lt;T&amp;gt; accumulator)&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;该形式下，accumulator的类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;BinaryOperator&amp;lt;T&amp;gt;&lt;/code&gt;,同时&lt;code class=&quot;highlighter-rouge&quot;&gt;identity&lt;/code&gt;的类型必须和Stream中的元素类型相同。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sum&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;max&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;min&lt;/code&gt;等都可视作是该版本的特化实现；即&lt;/p&gt;
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//same as&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;Integer:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;只有accumulator的版本&quot;&gt;只有&lt;code class=&quot;highlighter-rouge&quot;&gt;accumulator&lt;/code&gt;的版本&lt;/h4&gt;
+&lt;p&gt;这种情况下，返回的类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;T&amp;gt;&lt;/code&gt;;由于没有默认值，因此返回合适的结果必须至少有2个元素可以参与累加器运算；如果少于2个则返回空的Optional。
+等价的代码为&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;element:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;found&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accumulator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;该种形式的操作将Stream和Optional结合了起来。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;

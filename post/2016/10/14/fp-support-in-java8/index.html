@@ -488,7 +488,7 @@
 
 
 
-本文有 10930 字，大约需要 27 分钟可以读完
+本文有 15101 字，大约需要 37 分钟可以读完
 
 
 
@@ -603,20 +603,28 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。</p>
 
 <p>Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都<strong>主张永远不使用检查异常</strong>；
-遍布<code class="highlighter-rouge">try/catch</code>块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
+遍布<code class="highlighter-rouge">try/catch</code>块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。</p>
+
+<p>仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
 于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。</p>
 
 <blockquote>
-  <p>I call it my billion-dollar mistake. It was the invention of the null reference in 1965. At that time, I was designing the first comprehensive type system for references in an object oriented language (ALGOL W). My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, simply because it was so easy to implement. This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.
-– Tony Honare, apology for inventing the null reference</p>
+  <p>I call it my billion-dollar mistake. It was the invention of the null reference in 1965. … My goal was to ensure that all use of references should be absolutely safe,
+with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, <strong>simply because it was so easy to implement.</strong> 
+This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.</p>
+  <blockquote>
+    <p>– Tony Honare, apology for inventing the null reference</p>
+  </blockquote>
 </blockquote>
 
 <h3 id="用optional来处理错误">用Optional来处理错误</h3>
-<p>传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。
-<code class="highlighter-rouge">Optional</code>类则提供了<strong>一种新的错误处理方式</strong>；从概念上来说，这三种方式是不能同时采用的，要么采用<code class="highlighter-rouge">Optional</code>要么采用异常，但是不应该两者都采用。</p>
+
+<p>传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。</p>
+
+<p><code class="highlighter-rouge">Optional</code>类则提供了<strong>一种新的错误处理方式</strong>；从概念上来说，这三种方式是不能同时采用的，要么采用<code class="highlighter-rouge">Optional</code>要么采用异常，但是不应该两者都采用。</p>
 
 <p>从概念上来说，一个<code class="highlighter-rouge">Optional</code>对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
-看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是个静态语言，null对象不是一个合法初始化过的对象，对它做任何方法调用都会引起引用异常；
+看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是种静态语言，<strong>null对象不是一个合法初始化过的对象</strong>，对它做任何方法调用都会引起引用异常；
 <code class="highlighter-rouge">Optional</code>则不同，即使没有正确的初始化某个对象，它<strong>本身依然是一个合法的对象</strong>。它用一套统一的接口来操作内部封装的对象。</p>
 
 <p>具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码</p>
@@ -814,11 +822,15 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 从接口声明上看，一个Stream类也</p>
 <ul>
   <li>提供了迭代器访问接口，可以用传统的迭代器访问模式操作<code class="highlighter-rouge">Stream</code></li>
-  <li>实现了<code class="highlighter-rouge">AutoClosurable</code>接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。
-<strong>大部分的Stream实现并不会管理资源</strong>，因而不显示关闭Stream往往也不会带来什么问题。</li>
+  <li>
+    <p>实现了<code class="highlighter-rouge">AutoClosurable</code>接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。</p>
+
+    <p><strong>大部分的Stream实现并不会管理资源</strong>，因而不显示关闭Stream往往也不会带来什么问题。</p>
+  </li>
 </ul>
 
 <h4 id="streamt接口"><code class="highlighter-rouge">Stream&lt;T&gt;</code>接口</h4>
+
 <p>最平凡的Stream是名为<code class="highlighter-rouge">Stream&lt;T&gt;</code>的泛型接口</p>
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
@@ -854,9 +866,14 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
 <p>大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生</p>
 
 <ul>
-  <li>使用<code class="highlighter-rouge">Collection</code>接口的<code class="highlighter-rouge">.stream()</code>方法；还有一个对应的<code class="highlighter-rouge">.parallelStream()</code>返回一个可以并发执行的对象</li>
-  <li>使用<code class="highlighter-rouge">Arrays</code>工具类的<code class="highlighter-rouge">.stream(Object[])</code>从一个数组构造出来</li>
-  <li>使用<code class="highlighter-rouge">Stream</code>本身的一些静态方法产生，包括
+  <li>
+    <p>使用<code class="highlighter-rouge">Collection</code>接口的<code class="highlighter-rouge">.stream()</code>方法；还有一个对应的<code class="highlighter-rouge">.parallelStream()</code>返回一个可以并发执行的对象</p>
+  </li>
+  <li>
+    <p>使用<code class="highlighter-rouge">Arrays</code>工具类的<code class="highlighter-rouge">.stream(Object[])</code>从一个数组构造出来</p>
+  </li>
+  <li>
+    <p>使用<code class="highlighter-rouge">Stream</code>本身的一些静态方法产生，包括</p>
     <ol>
       <li><code class="highlighter-rouge">Stream.of(T t)</code>产生单个元素的Stream对象</li>
       <li><code class="highlighter-rouge">Stream.of(T... values)</code>从对象列表中产生</li>
@@ -883,16 +900,161 @@ Java的异常在设计上被分类为检查异常和非检查异常；前者别�
       <li>其它形形色色的JDK库提供的封装；以及第三方库提供的封装</li>
     </ol>
   </li>
+  <li><code class="highlighter-rouge">Builder</code>接口
+该接口是<code class="highlighter-rouge">Stream&lt;T&gt;</code>的内部接口，扩展了<code class="highlighter-rouge">Consumer&lt;T&gt;</code>；可以利用<code class="highlighter-rouge">add(T t)</code>方法添加元素到Stream中；该操作支持链式调用，最后用<code class="highlighter-rouge">build()</code>方法生成最终的Stream对象。
+实现在<code class="highlighter-rouge">Consumer</code>的接口则具有和<code class="highlighter-rouge">add</code>类似的语意，只是不支持链式操作。比如<code class="highlighter-rouge">IntStream.Builder.add(1).add(2).add(3).build</code>生成一个包含3个数字为输入的Stream。</li>
 </ul>
 
 <h3 id="流水线操作和变换">流水线操作和变换</h3>
-<p>T.B.D</p>
+<p>作为一种函数式编程工具，Stream就天然是为组合而生的；这些组合本身就构成了流水线处理 - 初始化的元素作为流水线的输入，而中间的转换步骤可以有任意多个，
+最终则往往会有一个终止操作来产生期望的输出 - 该输出也是我们从流水线上拿到最终结果的地方。</p>
+
+<h4 id="中间操作和终止操作">中间操作和终止操作</h4>
+<p>所有这些中间操作每次返回一个新的<code class="highlighter-rouge">Stream</code>状态，其输入是经过转换的 - 如前所述<code class="highlighter-rouge">Stream</code>的输入是不可修改的；该新的Stream的输入是对前一次的输入，
+输出则由前一次操作的针对每一个输入做运算之后的输出组成；如果某些运算不产生输出，则这些数据就像筛子一样被过滤下来了。</p>
+
+<p>所有的终止操作从函数签名上来看，都不会返回新的Stream对象。</p>
+
+<p>所有的中间操作都符合<strong>延迟计算</strong>规则；即真正的输出并没有在调用这些转换操作的时候被计算出来；
+只有<strong>当终止操作被调用以取出需要的值的时候</strong>，这些转换操作才真正被计算出来。</p>
+
+<p>当我们提供一个无限长的输入提供给Stream的时候，真正参与具体操作的元素个数仅仅以满足终止条件为准。</p>
+
+<p>譬如下边的代码</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">int</span> <span class="n">first5PrimeSum</span> <span class="o">=</span> <span class="n">IntStream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="n">isPrime</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">5</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">sum</span><span class="o">();</span>
+</code></pre>
+</div>
+
+<p>初始构造的Stream包含无穷多个元素（受限于int类型的长度），但是经过<code class="highlighter-rouge">filter</code>操作之后，由用<code class="highlighter-rouge">limit</code>取出前5个，并最终求和；
+那么实际参与运算的初始输入元素只有1到11而已。</p>
+
+<p>根据以上的赋值求值规则，我们可以认为终止操作是<strong>贪婪求值</strong>的并会产生副作用；一旦调用了终止操作，Stream对象即产生了最终的运算结果；
+原始的输入元素遭到了破坏，无法回头重新来过。
+例外的情况隐藏在<code class="highlighter-rouge">iterator()</code>和<code class="highlighter-rouge">splititerator()</code>操作上，它们虽然是终止操作，却不会破坏流水线的状态，用户可以用<code class="highlighter-rouge">iterator</code>接口来决定流水线的运算时间点。</p>
+
+<h4 id="中间操作模式">中间操作模式</h4>
+<p><code class="highlighter-rouge">Stream</code>接口提供了很多传统的符合函数式编程风格的方法，一些甚至允许更灵活的高阶函数</p>
+<ul>
+  <li><code class="highlighter-rouge">map</code>用于普通的函数变化，其参数是一个转换函数，将数据从一种类型转换为新的类型</li>
+  <li><code class="highlighter-rouge">flatMap(Function&lt;? super T, ? extend Stream&lt;? extends R&gt;&gt; mapper)</code>将Stream的每一个元素应用之转换函数，然后将转换结果流中的数据取出来汇聚为新的Stream。
+ 该操作是一种相对高阶的模式，可以避免手工来拼接流</li>
+  <li><code class="highlighter-rouge">skip</code>/<code class="highlighter-rouge">limit</code>分别用于截取或者跳过某些元素</li>
+  <li><code class="highlighter-rouge">sorted</code>则产生按照给定排序规则排列为有序输出数据的流</li>
+  <li><code class="highlighter-rouge">filter</code>用来过滤流中满足给定谓词逻辑判断的数据</li>
+  <li><code class="highlighter-rouge">distinct</code>会删除重复的元素</li>
+  <li><code class="highlighter-rouge">peek</code>用于在产生输出数据的同时，做一些参数指定的函数操作；该操作大部分时候可以用于方便debug，比如
+    <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="o">.</span><span class="na">lenth</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="o">)</span>
+<span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Filtered value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
+<span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">String:</span><span class="o">:</span><span class="n">toUpperCase</span><span class="o">())</span>
+<span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Mapped value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
+<span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<h4 id="有状态和无状态的中间操作">有状态和无状态的中间操作</h4>
+
+<p>中间操作可以携带lambda表达式，从而可以简单将其分类为有状态的和无状态的操作。
+有状态的操作会<strong>携带额外的上下文信息</strong>，如果这些操作的运算结果跟操作的中间结果有关，则Stream的行为会变得依赖于流水线的执行顺序 - 如果操作被并发调度，
+结果就会显得不确定。</p>
+
+<p>比如这个例子</p>
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">Set</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">seen</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="n">synchronizedSet</span><span class="p">(</span><span class="n">new</span> <span class="n">HashSet</span><span class="o">&lt;&gt;</span><span class="p">());</span>
+<span class="n">stream</span><span class="o">.</span><span class="n">parallel</span><span class="p">()</span><span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="p">(</span><span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
+    <span class="p">})</span>
+  <span class="o">.</span><span class="n">reduction</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>第一个<code class="highlighter-rouge">map</code>操作时间的执行体中会根据给定的元素是否已经处理过来决定返回0或元素本身；这个lambda操作本身依赖于之前的运算所以是有状态的。</p>
+
+<p>显然有状态的操作在用<code class="highlighter-rouge">parallelStream</code>调度计算的时候<strong>会产生不确定结果</strong>；而无状态的操作则没有这样的副作用。</p>
+
+<p>Java8引入<code class="highlighter-rouge">Stream</code>的首要目的就是并行计算和并发，默认串行的操作，仅仅需要在生成<code class="highlighter-rouge">Stream</code>的地方加上<code class="highlighter-rouge">parallel()</code>就可以自动获得多核并发调度的好处。</p>
+
+<h4 id="潜在的操作干扰">潜在的操作干扰</h4>
+
+<p>传给Stream的数据在Stream运算的过程中被视为静态的；如果这些数据可能被同时修改，则操作的正确性就难以保证了。
+考虑一个用Java的ArrayList产生的Stream做运算的情况</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">);</span>
+<span class="n">Stream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strm</span> <span class="o">=</span> <span class="n">strList</span><span class="o">.</span><span class="na">stream</span><span class="o">();</span>
+<span class="n">strList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"four"</span><span class="o">);</span> <span class="c1">//WoW!</span>
+<span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">strm</span><span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">" "</span><span class="o">));</span>
+</code></pre>
+</div>
+<p>有状态的函数操作或者互相干扰的函数操作会<strong>破坏并发安全性并带来出乎意料的行为</strong>（因为多线程、同步、调度的细节被隐藏了）；应该不建议使用。</p>
+
+<h4 id="常用的终止操作">常用的终止操作</h4>
+<p>终止操作的方法很多，基本上<code class="highlighter-rouge">Stream</code>的API中，除了静态方法以外，所有的返回类型不是<code class="highlighter-rouge">Stream</code>的都是终止操作，常用的有</p>
+<ul>
+  <li><code class="highlighter-rouge">allMatch</code>/<code class="highlighter-rouge">anyMatch/nonMatch</code>接受一个谓词函数作为参数，返回是否流中的元素都满足给定的条件，或至少有一个满足条件;以及是否没有满足条件的元素</li>
+  <li><code class="highlighter-rouge">collect(Collector&lt;? super T, A, R&gt;)</code>用于收集流参数到给定的集合中;这里的<code class="highlighter-rouge">Collector</code>是一个可修改的归并操作运算抽象；
+ 常用的方式是使用<code class="highlighter-rouge">Collectors</code>这一工具类提供的静态方法传入各种各样的<code class="highlighter-rouge">Collector</code></li>
+  <li><code class="highlighter-rouge">collect(Supplier&lt;R&gt; supplier, BiConsumer&lt;R, ? extends T&gt; accumulator, BiConsumer&lt;R, R&gt; combiner)</code>是上述接口的一个简化版本，显示提供了归并操作的其中三个函数参数</li>
+  <li><code class="highlighter-rouge">count</code>返回元素的个数</li>
+  <li><code class="highlighter-rouge">toArray</code>返回元素为数组形式</li>
+  <li><code class="highlighter-rouge">forEach</code>则提供遍历操作</li>
+  <li><code class="highlighter-rouge">findFirst</code>/<code class="highlighter-rouge">findAny</code>返回第一个/任意一个元素，由于可能不存在希望取的元素（没有元素的情况），返回类型是<code class="highlighter-rouge">Optional&lt;T&gt;</code></li>
+  <li><code class="highlighter-rouge">reduce</code>归并操作，包含几个重载形式</li>
+</ul>
 
 <h3 id="归并">归并</h3>
+<p>归并操作是map/reduce模式中比较复杂和灵活的终止操作；<code class="highlighter-rouge">Stream</code>接口也提供了丰富的支持。其实这里的<code class="highlighter-rouge">reduce</code>在其它的函数式语言中也被称为<code class="highlighter-rouge">fold</code>。</p>
 
-<h3 id="副作用和顺序性">副作用和顺序性</h3>
+<h4 id="最灵活的形式">最灵活的形式</h4>
 
-<h3 id="并发流">并发流</h3>
+<p>一般形式的<code class="highlighter-rouge">reduce</code>操作支持如下几个参数</p>
+<ul>
+  <li><code class="highlighter-rouge">U identity</code>是单位元元素，同时作为输出的默认值</li>
+  <li><code class="highlighter-rouge">BiFunction&lt;U, ? super T, U&gt; accumulator</code> 负责中间的每一次运算的累加</li>
+  <li><code class="highlighter-rouge">BinaryOperator&lt;U&gt; combiner</code> 约束accumulator 和 identity的函数，需要满足 <code class="highlighter-rouge">combiner.apply(u, accumulator.apply(identity, t)) = accumulator.apply(u, t)</code></li>
+</ul>
+
+<p>调用的效果类似于</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">U</span> <span class="n">result</span> <span class="o">=</span> <span class="n">identity</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">combiner</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">accumulator</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">identity</span><span class="o">,</span> <span class="n">t</span><span class="o">))</span>
+<span class="k">return</span> <span class="n">result</span>
+</code></pre>
+</div>
+
+<h4 id="省略combiner的版本-t-reducet-identity-binaryoperatort-accumulator">省略<code class="highlighter-rouge">combiner</code>的版本: <code class="highlighter-rouge">T reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></h4>
+<p>该形式下，accumulator的类型是<code class="highlighter-rouge">BinaryOperator&lt;T&gt;</code>,同时<code class="highlighter-rouge">identity</code>的类型必须和Stream中的元素类型相同。</p>
+
+<p><code class="highlighter-rouge">sum</code>/<code class="highlighter-rouge">max</code>/<code class="highlighter-rouge">min</code>等都可视作是该版本的特化实现；即</p>
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
+<span class="c1">//same as</span>
+<span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">sum</span><span class="o">);</span>
+</code></pre>
+</div>
+
+<h4 id="只有accumulator的版本">只有<code class="highlighter-rouge">accumulator</code>的版本</h4>
+<p>这种情况下，返回的类型是<code class="highlighter-rouge">Optional&lt;T&gt;</code>;由于没有默认值，因此返回合适的结果必须至少有2个元素可以参与累加器运算；如果少于2个则返回空的Optional。
+等价的代码为</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">boolean</span> <span class="n">found</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+<span class="n">T</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(!</span><span class="n">found</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">accumulator</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">element</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</code></pre>
+</div>
+<p>该种形式的操作将Stream和Optional结合了起来。</p>
 
 
         
