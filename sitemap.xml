@@ -269,6 +269,10 @@
 <lastmod>2017-06-27T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2017/07/14/missing-connections-by-socket-accept/</loc>
+<lastmod>2017-07-14T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/about/</loc>
 </url>
 <url>
@@ -423,6 +427,12 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/tags/patterns/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/netty/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/debugging/</loc>
 </url>
 <url>
 <loc>http://www.skyscribe.me/categories/cpp/</loc>

@@ -184,6 +184,38 @@
     
     <h2 class="archive__item-title" itemprop="headline">
       
+        <a href="http://www.skyscribe.me/post/2017/07/14/missing-connections-by-socket-accept/" rel="permalink">TCP服务端socket会丢连接的诡异问题及思考
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 3171 字，大约需要 7 分钟可以读完
+
+
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少：
+总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。
+
+</p>
+  </article>
+</div>
+    
+      
+
+
+
+<div class="list__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
         <a href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="permalink">Excessive null checks in Java Defensive Programming?
 </a>
       

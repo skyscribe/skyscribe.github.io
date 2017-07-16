@@ -1,4 +1,86 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-16T16:43:24+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-07-16T22:48:15+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">TCP服务端socket会丢连接的诡异问题及思考</title><link href="http://www.skyscribe.me/post/2017/07/14/missing-connections-by-socket-accept/" rel="alternate" type="text/html" title="TCP服务端socket会丢连接的诡异问题及思考" /><published>2017-07-14T00:00:00+08:00</published><updated>2017-07-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/07/14/missing-connections-by-socket-accept</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/07/14/missing-connections-by-socket-accept/">&lt;p&gt;最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：&lt;strong&gt;Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少&lt;/strong&gt;：
+总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。&lt;/p&gt;
+
+&lt;p&gt;深入追踪下去，发现问题不在Netty身上，而是&lt;strong&gt;操作系统没有通过IO事件反馈给&lt;/strong&gt;应用程序(Netty)导致了丢连接的情况出现。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;问题发现和定位&quot;&gt;问题发现和定位&lt;/h2&gt;
+
+&lt;p&gt;项目的服务器端和客户端之间采用的是基于&lt;strong&gt;TCP长连接&lt;/strong&gt;的应用层自定制协议；协议的基本工作流程如下&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;服务端监听在事先设置的服务端口上；用Netty的&lt;code class=&quot;highlighter-rouge&quot;&gt;ServerBootstrap&lt;/code&gt;来封装服务器端的监听&lt;code class=&quot;highlighter-rouge&quot;&gt;socket&lt;/code&gt;处理;其内部封装了&lt;code class=&quot;highlighter-rouge&quot;&gt;listen&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;accept&lt;/code&gt;等底层API&lt;/li&gt;
+  &lt;li&gt;针对每个连接上来的客户端，Netty会创建一个新的SocketChannel,其初始化方法中会初始化应用层的协议处理
+（即一些列的&lt;code class=&quot;highlighter-rouge&quot;&gt;ChannelHandler&lt;/code&gt;对象）来负责对应连接上的IO事件以及应用层逻辑&lt;/li&gt;
+  &lt;li&gt;连接建立成功后，客户端会处于Idle状态，&lt;strong&gt;等待服务器端发起第一条消息&lt;/strong&gt;，初始化应用层握手。&lt;/li&gt;
+  &lt;li&gt;客户端收到握手消息后，确认相关信息，之后即进入正常的协议交互处理&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;项目的初始设计目标是需要处理最多20000条并发连接；为了验证该目标，我们设计了&lt;strong&gt;针对性的性能测试模拟器&lt;/strong&gt;用于并发地发起大量的并发连接以确认服务器端的健壮性和可靠性。
+当上述第二步模拟器端以每秒近1000条连接的配置从本地环回端口(loopback)发起并发连接的时候，实际走到第三步的连接数有&lt;strong&gt;一定的概率&lt;/strong&gt;少于1000个，
+而模拟器端显示所有的连接都成功建立。&lt;/p&gt;
+
+&lt;p&gt;由于模拟器的主框架是用Python语言写成的，一开始大家都怀疑是否是Python的性能缺陷导致的；毕竟Python的性能一直为人诟病。
+查了一堆的log之后，最后还是决定看tcpdump的抓包，并过滤TCP协议的初始握手包更为简单直接，只是过滤器的设置稍微复杂一点；google一下不难找到。
+Tcpdump的抓包分析表明，每次这些连接全部都建立成功了；即从网络层来看，第二步其实已经全部完成。&lt;/p&gt;
+
+&lt;p&gt;显然问题出现在服务器端了；接下来就是尝试修改Netty的源码加入更多的打印来观察其是否调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;ChannelInitializer&lt;/code&gt;对连接上来的客户端初始化ChannelHandler。
+仔细看下来，居然是Initializer的数目就根本不对。&lt;/p&gt;
+
+&lt;h3 id=&quot;排除netty的嫌疑&quot;&gt;排除Netty的嫌疑&lt;/h3&gt;
+
+&lt;p&gt;稍微阅读Netty的代码后，发现并没有特别的逻辑漏洞 - 它默认采用的是异步IO模型，用&lt;code class=&quot;highlighter-rouge&quot;&gt;select/poll&lt;/code&gt;模型来做连接的多路复合(Multiplexer);即使有传说中的&lt;a href=&quot;https://github.com/netty/netty/issues/2616&quot;&gt;CPU空跑的问题&lt;/a&gt;,看了代码之后发现对应的问题在新版本中早已fix掉了。&lt;/p&gt;
+
+&lt;p&gt;保险起见，我们又尝试&lt;a href=&quot;http://netty.io/wiki/native-transports.html&quot;&gt;换默认的NioEventLoop为Linux本身的Epoll&lt;/a&gt;，问题依然没有得到解决。从行为上来说，
+epoll机制也仅仅能解决效率高低的问题，并不应该解决行为不一致的问题。&lt;/p&gt;
+
+&lt;p&gt;回想到我们采用的线程模型上，server socket上的事件循环还承担着应用层程序和协议栈交互的任务（我们通过UserEvent的方式向对应的pipeline上发事件来避免数据同步），
+默认的单线程处理这些应用层事件的处理方式是否会导致效率低下也是一个值得验证的点；等到增大了线程数之后，问题依旧没有什么眉目。
+和上面的处理机制类似，这样的方式也只是从效率的思路出发尝试解决问题，&lt;strong&gt;逻辑上依然是无法解决行为不一致&lt;/strong&gt;的问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;从操作系统的角度分析&quot;&gt;从操作系统的角度分析&lt;/h3&gt;
+
+&lt;p&gt;转了一圈，发现问题还是出在&lt;code class=&quot;highlighter-rouge&quot;&gt;listen&lt;/code&gt;调用和&lt;code class=&quot;highlighter-rouge&quot;&gt;accept&lt;/code&gt;的交接的地方；这里实际的TCP行为是发生在Linux的内核空间的；逻辑上其内部也是有个类似的异步队列，
+对进来的TCP连接请求，内核会设置相关的socket状态，分配相关的数据结构，自动完成TCP协议的握手过程，待到握手完毕之后，将这个连接成功事件通知给应用层（select/epoll)；
+然后应用层可以检查对应的socket读事件，调用&lt;code class=&quot;highlighter-rouge&quot;&gt;accept&lt;/code&gt;获取新的socket文件描述符。&lt;/p&gt;
+
+&lt;p&gt;这一系列过程都是异步的，并且跨用户空间处理和内核空间调度。
+确定了可能出问题的地方，查找的方向就比较明确了；只需要找找可能影响server socket的行为就可以了。
+此时一个可以的关于SO_BACKLOG的设置引起了我们的注意,因为这里设置的值是&lt;code class=&quot;highlighter-rouge&quot;&gt;8&lt;/code&gt;，尝试调大这个参数后，丢连接的情况突然消失了。&lt;/p&gt;
+
+&lt;h3 id=&quot;检查socket选项---backlog设置&quot;&gt;检查socket选项 - &lt;code class=&quot;highlighter-rouge&quot;&gt;backlog&lt;/code&gt;设置&lt;/h3&gt;
+
+&lt;p&gt;上述的参数是从Java的API中继承来的，实际设置的时候，其实也是传给了JDK的对应的参数；引用JDK的参数说明&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;The maximum queue length for incoming connection indications (a request to connect) is set to the backlog parameter. If a connection indication arrives when the queue is full, the connection is refused.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;这里比较奇怪的是，当队列满了之后，从抓包的角度来看，&lt;strong&gt;对应的连接并没有被拒绝&lt;/strong&gt;，而是显示连接成功了！如果后续没有任何手法数据通信的话，对应的socket其实也诶西泄露了。&lt;/p&gt;
+
+&lt;p&gt;对比Linux的&lt;code class=&quot;highlighter-rouge&quot;&gt;listen&lt;/code&gt;的manpage，对&lt;code class=&quot;highlighter-rouge&quot;&gt;backlog&lt;/code&gt;选项的说明如下&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The backlog argument defines the maximum length to which the queue of pending connections for sockfd may grow.&lt;br /&gt;
+If a connection request arrives when the queue is full, the client &lt;strong&gt;may receive an error&lt;/strong&gt; with
+an indication of ECONNREFUSED or, if the underlying protocol supports retransmission, the request may be ignored
+so that a later reattempt at connection succeeds.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;不确定这是否是一个bug，因为客户端测并没有检测到这个&lt;code class=&quot;highlighter-rouge&quot;&gt;ECONNREFUSED&lt;/code&gt;的错误而是显示连接成功。
+从抓包的角度来看，要想得到这样的错误，必然应该有特殊的TCP RESET才对；这也许是操作系统的一个实现问题了。&lt;/p&gt;
+
+&lt;h3 id=&quot;如何解决和避免再次发生&quot;&gt;如何解决和避免再次发生&lt;/h3&gt;
+&lt;p&gt;对设计用来处理比较高的并发处理请求的服务器程序来说，设置&lt;code class=&quot;highlighter-rouge&quot;&gt;backlog&lt;/code&gt;选项为比较小的值是个比较糟糕的主意，更容易”踩上这个坑”。也许这也是默认情况下，
+Linux将这个值设置为128的原因；如果想修改它，最好&lt;strong&gt;设置的比128更大一些&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;由于这种情况在连接状态的backlog缓冲满了之后，再有新连接完成三次握手之后就可能出现，设置再大的值，理论上来说都不是足够保险;除非我们能提前预测或者限制客户端的行为，
+避免大量的并发连接上来，或者让客户端能检测到这种情况。&lt;/p&gt;
+
+&lt;p&gt;考虑到实际环境中，&lt;strong&gt;这种情况出现的概率还是很低的&lt;/strong&gt;，只有在基于内网的模拟器环境下，才会有这么“巧合”的情况出现，在不能修改客户端行为的情况下，
+将该选项的值修改大一些即可有效地降低其出现的几率。要想彻底解决这个问题，单单从socket层面来看，应该是吃力不讨好的事情，因为行为的不一致发生在
+操作系统的系统调用和用户程序的交互的地方；一个可行的思路是从更高层的应用层及时检测这种情况；这样的解决方案需要应用协议层面的特别处理才行。&lt;/p&gt;
+
+&lt;h2 id=&quot;对协议设计的影响&quot;&gt;对协议设计的影响&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="linux" /><category term="programming" /><category term="netty" /><category term="java" /><category term="debugging" /><category term="design" /><summary type="html">最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少： 总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。</summary></entry><entry><title type="html">Excessive null checks in Java Defensive Programming?</title><link href="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/" rel="alternate" type="text/html" title="Excessive null checks in Java Defensive Programming?" /><published>2017-06-27T00:00:00+08:00</published><updated>2017-06-27T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/06/27/excessive-null-checks-in-java-defensive-programming/">&lt;p&gt;最近在参与某开发小组的&lt;a href=&quot;https://atendesigngroup.com/blog/group-code-reviews&quot;&gt;团体代码审查&lt;/a&gt;会的时候，发现组内的一线开发工程师对于何时应该做空指针检查并没有很清晰的认识；然而这在Java社区里早已经是个老生常谈的争论 。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -1711,239 +1793,4 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
   &lt;li&gt;Take use of better file system to boost compiling speed, like using memory mapped file system - a lot of GCC’s runtime are spent on IO&lt;/li&gt;
   &lt;li&gt;Saving previous workspace (or tagged workspace) and not cleaning everything&lt;/li&gt;
   &lt;li&gt;Using distcc/ninja for better C++ building performance&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry><entry><title type="html">用C++11/14实现一个现代的异步服务调度库</title><link href="http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" rel="alternate" type="text/html" title="用C++11/14实现一个现代的异步服务调度库" /><published>2015-12-19T00:00:00+08:00</published><updated>2015-12-19T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp</id><content type="html" xml:base="http://www.skyscribe.me/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">&lt;p&gt;很多C++项目中都存在一个能够&lt;strong&gt;异步调度任务&lt;/strong&gt;的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，
-要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。&lt;/p&gt;
-
-&lt;p&gt;当然，这个是一个新轮子，用很少的代码实现一些核心的想法，同时又额外获得一些对新的C++的更深刻的理解，何乐而不为？&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;目标概要&quot;&gt;目标概要&lt;/h2&gt;
-&lt;p&gt;主要的目的是实现一个能够异步、高效地调用用户任务/服务的库；&lt;strong&gt;具体调用的形式可以由用户指定&lt;/strong&gt;。任务以服务的方式存在，可以被存储起来以支持延迟调用；便于服务提供方和服务适用方解耦，增加应用程序的灵活性。&lt;/p&gt;
-
-&lt;p&gt;比如A模块向库注册了一个名为&lt;code class=&quot;highlighter-rouge&quot;&gt;someService&lt;/code&gt;的任务，并携带实现定义好的参数签名（参数列表以及类型), B模块可以按照名字来调用这个具体的service实现的任务。&lt;/p&gt;
-
-&lt;p&gt;调用的方式可以是&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;strong&gt;异步&lt;/strong&gt;的或&lt;strong&gt;同步&lt;/strong&gt;的；所谓异步即实际任务执行发生在调用返回之后；同步调用则必须等实际任务执行后才返回&lt;/li&gt;
-  &lt;li&gt;阻塞的或非阻塞的：如果指定为非阻塞的，那么存储进来的参数会被临时存放起来(放在一个closure中），等到内部的线程等的合适的时间才调用；当前&lt;strong&gt;调用者的线程不会被暂停&lt;/strong&gt;执行，
-而阻塞调用则会直接暂停当前的调用者线程&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;调用者可以传入一个&lt;strong&gt;任务完成时候的回调&lt;/strong&gt;，指定在实际任务执行完毕之后在&lt;strong&gt;同一个线程的上下文中&lt;/strong&gt;执行，典型的应用场景是任务完成之后的链式操作，譬如要求A Task执行完毕后，执行一个调用者传入的动作；该动作中可能产生一个新的任务调用。&lt;/p&gt;
-
-&lt;p&gt;调用方可以添加一个&lt;strong&gt;局部线型执行约束&lt;/strong&gt;（其实是对&lt;a href=&quot;http://www.boost.org/doc/libs/1_59_0/doc/html/boost_asio/overview/core/strands.html&quot;&gt;Boost.asio strand&lt;/a&gt;的模拟) - 譬如要求某些&lt;strong&gt;打了同一个标签&lt;/strong&gt;的某些任务&lt;strong&gt;不能被并发执行&lt;/strong&gt;；这些打了标签的任务的执行相互之间不需要加显示的锁；而没有带标签的任务可以任意并行调度，类似于操作系统调用进程的affinity特性。&lt;/p&gt;
-
-&lt;p&gt;这种特性在一些复杂的应用场景中很有用，譬如某个比较耗费CPU的任务执行的中间，可能需要等待IO等操作，又&lt;strong&gt;不希望堵塞调度线程&lt;/strong&gt;，一个简单的想法就是将其分解成多个子任务，那么期望这些子任务不会被交叉执行。&lt;/p&gt;
-
-&lt;h3 id=&quot;调用属性结构&quot;&gt;调用属性结构&lt;/h3&gt;
-&lt;p&gt;可以用一个结构来描述这些基本参数组合。&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//will the job be scheduled asynchronously (under same context)
-&lt;/span&gt;    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;waitForDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//if interfaceCall will be blocked (for done) or not, will be ignored for async call
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;onCallDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//calls with same strand will be scheduled by same thread, async only
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h3 id=&quot;可变参数&quot;&gt;可变参数&lt;/h3&gt;
-&lt;p&gt;由于注册的任务可能需要一些运行期的参数在真正调用的点才知道，我们需要支持预先定义好这些参数签名，仅仅在实际调用端才传入具体的参数；即如下的使用方式&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//registration
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InterfaceScheduler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//starting a pool of 4 threads
-&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serviceImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;registerInterfaceFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;serviceName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serviceImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;//calling site
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//asynchronous call, non-blocking, no strand
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interfaceCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;serviceName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;actualParam&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;参数的定义可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;结合closure来实现灵活的绑定&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParaArgsBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParaArgsBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...){}&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typeid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Types&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple_element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Types&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Types&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h2 id=&quot;设计&quot;&gt;设计&lt;/h2&gt;
-&lt;p&gt;设计起来比较简单，可以通过几个核心类和典型场景来描述。&lt;/p&gt;
-
-&lt;h3 id=&quot;核心的类设计&quot;&gt;核心的类设计&lt;/h3&gt;
-&lt;p&gt;主要的接口类通过一个具体的class - &lt;code class=&quot;highlighter-rouge&quot;&gt;InterfaceScheduler&lt;/code&gt; 来提供，它作为库本身的入口提供；底下封装了线程池细节，允许用户在启动的时候传入内部运行的线程池数量（并发度）；同时提供注册和异步的&lt;code class=&quot;highlighter-rouge&quot;&gt;interfaceCall&lt;/code&gt;接口来调用已注册的服务。具体的业务代码或服务实现类可以使用该class来注册服务或者发起服务调用。&lt;/p&gt;
-
-&lt;p&gt;内部实现上，&lt;code class=&quot;highlighter-rouge&quot;&gt;InterfaceScheduler&lt;/code&gt;组合了一个同步的&lt;code class=&quot;highlighter-rouge&quot;&gt;SyncWorker&lt;/code&gt;类来实现同步任务实现，以及一个一个或多个&lt;code class=&quot;highlighter-rouge&quot;&gt;AsyncWorker&lt;/code&gt;类来完成具体某个工作线程上的任务队列。&lt;/p&gt;
-
-&lt;p&gt;主要类的职责和写作交互用&lt;a href=&quot;https://en.wikipedia.org/wiki/Class-responsibility-collaboration_card&quot;&gt;类CRC方法&lt;/a&gt;来描述，见下图
-&lt;img src=&quot;/assets/async_lib/crc.png&quot; alt=&quot;crc_class_design&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;基于接口的注册&quot;&gt;基于接口的注册&lt;/h3&gt;
-&lt;p&gt;支持多种注册方式;处于&lt;strong&gt;&lt;a href=&quot;https://dzone.com/articles/how-design-good-regular-api&quot;&gt;对称性&lt;/a&gt;&lt;/strong&gt;考虑，一个服务可以注册，也可以被解注册。调用尚未注册的服务或者已经解注册的服务，都会返回错误给调用者。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;注册后才能调用: 这是最&lt;strong&gt;正常&lt;/strong&gt;的使用场景; 由于注册的时候尚不知道真正的参数，但是参数签名确实由服务提供者确定的，因此需要使用类型签名。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/registerInterface.png&quot; alt=&quot;register interface&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;对注册行为的订阅（观察者）：其它用户可以对某个特定的&lt;strong&gt;服务注册进行监控&lt;/strong&gt;，当某个服务被实际注册的时候得到通知。&lt;code class=&quot;highlighter-rouge&quot;&gt;InterfaceScheduler&lt;/code&gt;负责维护这些观察者，并在实际的服务提供者进行注册的时候，以回调的方式通知观察者。如果实际设置观察者的时候，对应的服务以及注册，则直接回调通知观察者。
-这样服务的使用者可以在使用之前用一个回调做检查，确保服务被真正注册以后，才会发起调用，减小耦合。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;所有在服务注册之前订阅的观察者（不管有多少个）在实际服务被注册的时候会被逐一通知到（同样&lt;strong&gt;有阻塞操作&lt;/strong&gt;）并被清理。服务注册和观察者唤醒可以并发但不能有Race Condition。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/subscribeForRegistration.png&quot; alt=&quot;subscribe for registration&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;使用场景&quot;&gt;使用场景&lt;/h3&gt;
-
-&lt;p&gt;以下是一些具体使用的例子，包括&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;异步非阻塞的场景 （最常用场景）: 实际执行的动作会被保存为闭包放在内部的任务队列上；当线程池有空闲调度到给定任务的时候，之前注册的回调会在内部线程池的上下文执行。
-调用者如果提供了完成回调，则需要保证回调中的操作&lt;strong&gt;不能阻塞&lt;/strong&gt;。实际的动作执行和完成通知都是在用户库内部的线程池上执行，
-所以调用者需要处理好&lt;strong&gt;数据并发访问的安全性问题&lt;/strong&gt;，加锁或者其它数据一致性保证措施。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/asyncNonBlock.png&quot; alt=&quot;asyncNonBlockCall&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;异步的阻塞调用: 这里其实是用异步操作来实现程序逻辑上的同步；调用者发起调用之后，并不直接返回而是等待实际任务被执行完毕后才能返回。
-这里的阻塞调用可以确保调用者返回后，对应的操作一定是完成的；显然中间过程调用者线程会被阻塞。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/asyncAndBlock.png&quot; alt=&quot;asyncAndBlockCall&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;同步的阻塞调用&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/syncAndBlock.png&quot; alt=&quot;syncAndBlockCall&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Strand局部Affinity约束: 这种场景下，某些任务会被显示排队放在一个线程中执行，确保没有&lt;strong&gt;并发调度&lt;/strong&gt;的发生，从而这些调用之间是可以保证不会产生Race Condition；
-调用方可以避免显示加锁的麻烦。
-当然多个任务之间的顺序没有很强的保证，最简单的实现是保留发起调用的顺序来（内部放在一个队列上）一一调度。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/async_lib/strandCall.png&quot; alt=&quot;strandCall&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;实现&quot;&gt;实现&lt;/h2&gt;
-&lt;p&gt;整体的实现风格是基于闭包和函数对象的；由于C++11/14新引入了可变的模板参数，用该特性实现调用端的可变参数列比传统的C++03
-枚举所有可能（其实往往枚举9～19个）的泛型参数个数要省事儿很多。&lt;/p&gt;
-
-&lt;p&gt;线程池的实现也没有什么特别之处，只是实现异步阻塞调用的时候，C++11的lambda表达式更有利于我们写出干净的代码。&lt;/p&gt;
-
-&lt;h3 id=&quot;服务注册类型安全性检查&quot;&gt;服务注册类型安全性检查&lt;/h3&gt;
-&lt;p&gt;服务注册的时候需要编码进类型信息，方便后续调用的时候进行类型签名检查，防止参数不匹配。
-这些检查都是通过一些全局的工具类函数来实现的&lt;/p&gt;
-
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ActionType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;registerInterfaceFor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InterfaceScheduler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActionType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//Check templateype-safety as possible, lambdas/binds shall have targets, while functions may not
-&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FuncType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;static_assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is_convertible&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is_convertibleActionType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FuncType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Incompatible type!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;//lambdas/mem_fun_ref_tunc may not define operator bool() to check - explicit convert as a workwaround
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;FuncType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;invalid_argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Null action specified for interface:&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-    &lt;span class=&quot;n&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;registerInterfaceForace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParaArgsBase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;static_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;由于实际注册的&lt;code class=&quot;highlighter-rouge&quot;&gt;action&lt;/code&gt;可以是任何合法的函数对象，这个wrapper里做了一些额外的判断&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;类型签名是否匹配，用&lt;code class=&quot;highlighter-rouge&quot;&gt;is_convertible&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;static_assert&lt;/code&gt;做编译器检查即可&lt;/li&gt;
-  &lt;li&gt;是否传入了空函数，显然注册没有任何动作的服务是编程错误，我们希望如果这么做则抛出运行期异常，马上修改代码&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;调用类型检查&quot;&gt;调用类型检查&lt;/h3&gt;
-&lt;p&gt;调用通过一个内部带类型比对和匿名函数封装的实现函数和一个公有的可变长参数模板函数来实现。&lt;/p&gt;
-
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//Schedule a previously registered interface cally by CallProperty (see its definition)
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;interfaceCallfaceCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CallProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;checkAndInvokeCall&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;waitForDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-        &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;onCallDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;..);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;//actual internal method
-//Actual call under the hood
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;checkAndInvokeCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;boolool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;waitForDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
-    &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;onCallDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParamArgs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;CallablebackType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isCallRegisteredAndTypesMatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;invokeCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;ActualType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...);&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;param&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;waitForDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;onCallDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;我们很喜欢C++作为强类型语言的特性，希望编译器能多帮程序员检查一些类型不匹配错误，就先用传入的参数类型和注册时候提供的类型做一比较。
-注意这里实际发生调用的时候已经是程序运行过程中了，所以模板元技术要用的话需要多费一些功夫，通过构造一个具体的&lt;code class=&quot;highlighter-rouge&quot;&gt;ActualType&lt;/code&gt;和内部存储的类型做逐一比对。
-如果比对没错误，就可以构造出来一个可调用的函数传给具体的&lt;code class=&quot;highlighter-rouge&quot;&gt;invokeCall&lt;/code&gt;了。底层调度任务的时候&lt;strong&gt;已经不知道外层传入的参数&lt;/strong&gt;了（除非我们用可以放异构类型的容器 - 可惜variant）
-，简单的想法是采用闭包将上下文操作封装起来传给&lt;code class=&quot;highlighter-rouge&quot;&gt;InvokeCall&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;类型比对的函数实现利用&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;的类型签名来比较，需要&lt;code class=&quot;highlighter-rouge&quot;&gt;typeid&lt;/code&gt;的参与，毕竟这是运行期的判断。&lt;/p&gt;
-
-&lt;h3 id=&quot;异步阻塞的实现&quot;&gt;异步阻塞的实现&lt;/h3&gt;
-
-&lt;p&gt;默认异步的工作线程是处理非阻塞任务的 - 用户调用之后，生成一个job放在内部的队列里，然后立刻返回给调用者。
-对于阻塞方式，调用需要在内部实现同步机制，保证阻塞调用者线程直到异步任务实际被调度完毕 - &lt;strong&gt;简单直接的思路是利用已有的API&lt;/strong&gt;，内部就地构造一个完成调用做显示同步。
-简单优雅的实现如下&lt;/p&gt;
-
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AsyncWorker&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doSyncJob&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;onDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finished&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;mutex&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flagMutex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;condition_variable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cond&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;n&quot;&gt;doJob&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Callable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;onDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;onDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-
-        &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lock_guard&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mutex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flagMutex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;finished&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;cond&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;notify_all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
-    &lt;span class=&quot;n&quot;&gt;unique_lock&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mutex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flagMutex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;cond&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wait&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;finished&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;});&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;由于代码上下文很清晰，我们甚至不需要写任何子函数，直接通过lambda表达式构造完成调用，通过捕获的上下午获取（注意&lt;code class=&quot;highlighter-rouge&quot;&gt;[&amp;amp;]&lt;/code&gt;指示）条件变量和同步标记变量的引用,在内部唤醒环境变量；
-外部线程执行完异步调用之后，就守候环境变量保护的标记变量知道更新完毕。&lt;/p&gt;
-
-&lt;p&gt;这段代码之所以简单清晰，一方面是由于新的lambda表达式语法威力强大，另外一个重要因素应该归于C++11对多线程编程基础设施、库的标准化 - 我们不再需要写一大堆&lt;code class=&quot;highlighter-rouge&quot;&gt;pthread&lt;/code&gt;调用了，标准库已经帮我们打理好了细节。&lt;/p&gt;
-
-&lt;p&gt;项目的源代码可以在&lt;a href=&quot;https://github.com/skyscribe/servicelib&quot;&gt;这里&lt;/a&gt;找到。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="cpp" /><category term="fp" /><category term="library" /><summary type="html">很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难， 要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。</summary></entry></feed>
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="build" /><category term="tools" /><category term="cmake" /><category term="cpp" /><summary type="html">Building time is always a big concern for large scale C/C++ based software projects, there’ve been a lot of outstanding tools invented to relief the pain, CMake is an emering de-facto standard for big projects, however there’re lots of misuse that may slow down project building dramatically. This post would cover a real life case on how to correct those gotchas to improve build time and enable delta build to boost R&amp;amp;D efficiency. Background In daily development work, engineers are frequently frustrated by the slow build system</summary></entry></feed>
