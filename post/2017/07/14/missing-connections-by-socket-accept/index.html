@@ -488,7 +488,7 @@
 
 
 
-本文有 3171 字，大约需要 7 分钟可以读完
+本文有 3247 字，大约需要 8 分钟可以读完
 
 
 
@@ -567,7 +567,9 @@ so that a later reattempt at connection succeeds.</p>
 </blockquote>
 
 <p>不确定这是否是一个bug，因为客户端测并没有检测到这个<code class="highlighter-rouge">ECONNREFUSED</code>的错误而是显示连接成功。
-从抓包的角度来看，要想得到这样的错误，必然应该有特殊的TCP RESET才对；这也许是操作系统的一个实现问题了。</p>
+StackOverflow上有人提了<a href="https://stackoverflow.com/questions/37609951/why-i-dont-get-an-error-when-i-connect-more-sockets-than-the-argument-backlog-g">类似的问题</a>，
+合理的解释是，因为TCP支持重传，所以该请求<strong>仅仅是被忽略了</strong>，直到下一次连接过来的时候，对应的连接会直接成功！这样样能工作，
+操作系统必须在其他地方保存已经分配好的socket以便下次可以通过<code class="highlighter-rouge">accept</code>取到。</p>
 
 <h3 id="如何解决和避免再次发生">如何解决和避免再次发生</h3>
 <p>对设计用来处理比较高的并发处理请求的服务器程序来说，设置<code class="highlighter-rouge">backlog</code>选项为比较小的值是个比较糟糕的主意，更容易”踩上这个坑”。也许这也是默认情况下，
@@ -581,7 +583,7 @@ Linux将这个值设置为128的原因；如果想修改它，最好<strong>设�
 操作系统的系统调用和用户程序的交互的地方；一个可行的思路是从更高层的应用层及时检测这种情况；这样的解决方案需要应用协议层面的特别处理才行。</p>
 
 <h2 id="对协议设计的影响">对协议设计的影响</h2>
-
+<p>T.B.D</p>
 
         
       </section>
