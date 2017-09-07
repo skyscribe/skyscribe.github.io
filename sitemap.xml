@@ -273,6 +273,10 @@
 <lastmod>2017-07-14T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/</loc>
+<lastmod>2017-08-22T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/about/</loc>
 </url>
 <url>
@@ -433,6 +437,12 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/tags/debugging/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/tuning/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/tags/performance/</loc>
 </url>
 <url>
 <loc>http://www.skyscribe.me/categories/cpp/</loc>
