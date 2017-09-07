@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-09-08T06:36:56+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；因为Java语言显著
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-09-08T06:43:37+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；因为Java语言显著
 降低了程序员的准入门槛，真正到系统性能这一块，仍然需要大量的调试和优化，即所谓的JVM性能调优。&lt;/p&gt;
 
 &lt;p&gt;Java Flight Recorder（后文简称JFR）是Oracle官方推出的商业环境的性能调优利器；其本身对运行期系统的侵入性很小，同时又能提供相对准确和丰富的运行期信息；
 合理使用改工具可以极大地提高工作效率。本文就个人工作环境中的一些实际使用情况做一简单的总结。&lt;/p&gt;
 
-&lt;p&gt;&amp;lt;!–more–!&amp;gt;&lt;/p&gt;
+&lt;!--more--&gt;
+
 &lt;h2 id=&quot;基本工作模型和采样&quot;&gt;基本工作模型和采样&lt;/h2&gt;
 
 &lt;p&gt;JFR本身是基于周期性对JVM虚拟机的运行状况进行采样记录的，其采样的频率可以通过其参数传入;只是需要留意的是，采样间隔越小对系统的性能干扰就越大。
