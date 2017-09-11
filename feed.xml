@@ -1,4 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-09-10T22:32:17+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身早已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-09-11T22:37:25+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">架构服务化的一点思考</title><link href="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/" rel="alternate" type="text/html" title="架构服务化的一点思考" /><published>2017-08-29T00:00:00+08:00</published><updated>2017-08-29T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/">&lt;p&gt;微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；
+似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在铺开，Amazon又挑起了无服务器架构的大旗，引来无数人的关注。
+本文试图对这些概念和架构思想做一简单的分析和梳理。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;T.B.D.&lt;/p&gt;
+
+&lt;h2 id=&quot;微服务之前有什么&quot;&gt;微服务之前有什么&lt;/h2&gt;
+
+&lt;h2 id=&quot;微服务和soa是什么关系&quot;&gt;微服务和SOA是什么关系&lt;/h2&gt;
+
+&lt;h2 id=&quot;微服务是银弹吗&quot;&gt;微服务是“银弹”吗&lt;/h2&gt;
+
+&lt;h2 id=&quot;微服务适合那些人组织&quot;&gt;微服务适合那些人、组织&lt;/h2&gt;
+
+&lt;h2 id=&quot;微服务与云计算&quot;&gt;微服务与云计算&lt;/h2&gt;
+
+&lt;h2 id=&quot;未来的方向&quot;&gt;未来的方向&lt;/h2&gt;
+
+&lt;p&gt;T.B.D.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="architecture" /><category term="SOA" /><category term="microservice" /><category term="monolith" /><summary type="html">微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务； 似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在铺开，Amazon又挑起了无服务器架构的大旗，引来无数人的关注。 本文试图对这些概念和架构思想做一简单的分析和梳理。</summary></entry><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身早已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；
 因为Java语言显著降低了程序员的准入门槛，真正到系统性能这一块，仍然需要大量的调试和优化，即所谓的JVM性能调优。&lt;/p&gt;
 
 &lt;p&gt;Java Flight Recorder（后文简称JFR）是Oracle官方推出的商业环境的性能调优利器；其本身对运行期系统的侵入性很小，同时又能提供相对准确和丰富的运行期信息；
@@ -111,21 +131,68 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 &lt;p&gt;概览页面会显示按照Java的包情况统计的采样数和相对总体的百分比；可以按照具体的列点击排序。最下边的视图则显式热点的类列表。
 同样这些视图都可以根据选定的时间间隔来同步数据，使得我们可以方便的按照具体时间来分别查看CPU被占用在什么地方。&lt;/p&gt;
 
-&lt;p&gt;以下是上述采样的代码概要视图
+&lt;p&gt;对于上述的程序运行采样，以下是其代码概要视图
 &lt;img src=&quot;/assets/images/jfr/jfr_code_overview.jpg&quot; alt=&quot;code overview&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-&lt;h4 id=&quot;热点的调用栈&quot;&gt;热点的调用栈、&lt;/h4&gt;
+&lt;p&gt;可以看出在给定的CPU热点时间，有超过20%的采样都提取到了&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util&lt;/code&gt;包的活跃样本，紧随其后的是一个Guava的工具函数包以及用户程序的一个基础工具库。
+热点的类统计中，Java基本的Array类更是占据前列，这个在大规模的Java程序中是很常见的情况，同时也使得&lt;strong&gt;深入的分析变得困难&lt;/strong&gt;而又必要，
+因为对Java基础库或API的调用是被层层封装过的。&lt;/p&gt;
 
 &lt;h4 id=&quot;热点方法&quot;&gt;热点方法&lt;/h4&gt;
 
+&lt;p&gt;热点方法标签则提供了基于调用栈的采样排序情况，可以点击具体的调用栈展开，具体查看可疑热点的调用情况从而做针对性的深入优化。
+同样地对于上述的采样，其热点方法如下
+&lt;img src=&quot;/assets/images/jfr/jfr_code_hot_methods.jpg&quot; alt=&quot;hot methods&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;显然繁忙的CPU活动依然发生在Java API的内部，排在第一的是Stream API的pipeline操作，逐级展开JDK的封装，最终还是能找到应用程序的调用点。
+同时每一个调用栈的右侧会显示对应的采样数和百分比。
+这里的Stream操作会在运行的时候被多个上层函数所调用，则每个调用栈极其采样个数都被显示出来，可以顺势点开查看详情。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;基于80/20原则&lt;/strong&gt;，一般收效最大的是仅仅对占比最大的函数栈进行针对性优化；同时如果上一级函数的调用和字函数的采样个数不一致，说明函数内部的其它代码也需要仔细查看。
+最麻烦的情况是80/20原则不太明显的地方；此时我们必须对多个可能的热点方法做优化，耗费的精力和时间就会更多。&lt;/p&gt;
+
+&lt;p&gt;这个具体的例子中，排行第一和第二的两个栈的采样数基本差不多，是因为对应的采样是已经优化了一部分之后的中间结果。
+令人惊讶的是，Guava的Interner API也占用了相当多的CPU时间；在CPU已经满的情况下，针对性的优化就要麻烦一些。&lt;/p&gt;
+
+&lt;h4 id=&quot;热点的调用栈&quot;&gt;热点的调用栈、&lt;/h4&gt;
+
+&lt;p&gt;调用栈试图提供了和上述热点方法类似的信息，所不同的是其调用栈情况聚合了所有的API情况，譬如多个线程的同一个底层方法调用会被聚合在一起；
+这样更容易从一个系统性的视角去理解程序实际运行时候的概况。&lt;/p&gt;
+
+&lt;p&gt;回到这个具体的采样样本，其热点调用栈如下
+&lt;img src=&quot;/assets/images/jfr/jfr_code_calltrace.jpg&quot; alt=&quot;call trace&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;可以看出大部分的CPU样本落在&lt;code class=&quot;highlighter-rouge&quot;&gt;Thread::run&lt;/code&gt;方法中，这在多线程的后端程序中是最正常不过的情形了。具体展开来看，大部分的时间花费在了Netty的管线处理中；
+由于Netty的管线处理是采用调用链的方式逐级深入的，调用栈展开起来比较繁琐一点；最终展开的时候，可以看出这里的大部分CPU花费在了消息解码上。&lt;/p&gt;
+
 &lt;h3 id=&quot;线程面板&quot;&gt;线程面板&lt;/h3&gt;
+&lt;p&gt;如今几乎所有的后端Java程序都是基于多线程的，运行期同时有数十乃至上百个线程在多核CPU上执行也是屡见不鲜的。
+各色各样的第三方框架、库都会创建各种&lt;code class=&quot;highlighter-rouge&quot;&gt;ExecutorServie&lt;/code&gt;实例，依据负载情况动态的创建或者调度线程。&lt;/p&gt;
+
+&lt;p&gt;线程面板从JVM线程的角度来分析采样的数据。其概要面板同样提供了最基本的CPU情况，并且支持根据时间选择来刷新其它标签页视图数据、表信息等。
+其线程信息则显示线程数量的历史信息，包括后台线程和活跃线程数等信息。&lt;/p&gt;
 
 &lt;h4 id=&quot;热点线程&quot;&gt;热点线程&lt;/h4&gt;
+&lt;p&gt;热点的线程显示在该标签页中，其中包含了丰富的信息&lt;/p&gt;
 
-&lt;h4 id=&quot;线程竞争和上下文切换情况&quot;&gt;线程竞争和上下文切换情况&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_hot_threads.jpg&quot; alt=&quot;hot threads&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;最上边的面板中显示地给出了线程上下文切换的频率；换算为多核的CPU就很容易看出来是否对应的采样时间内，CPU在忙于做上下文切换。
+如果开启了很多个用户线程，这些线程又有比较粗粒度的锁，那么上下文切换的开销就很客观需要考虑优化。
+比如这个例子中，在8个CPU核参与运算的情况下，CPU切换在2500多，平均Linux的10ms的时间片内，平均每个线程切换了3次多，属于比较正常的情况。&lt;/p&gt;
+
+&lt;p&gt;具体的热点线程数据和其调用栈情况，可以依据采样计数排序后详细查看。这个例子中，String的&lt;code class=&quot;highlighter-rouge&quot;&gt;append&lt;/code&gt;操作消耗了大量的CPU，这个也算是大规模应用程序常见的情况。&lt;/p&gt;
+
+&lt;h4 id=&quot;线程竞争&quot;&gt;线程竞争&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_contention.jpg&quot; alt=&quot;contention&quot; /&gt;
+&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;时延和锁竞争情况&quot;&gt;时延和锁竞争情况&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_latency.jpg&quot; alt=&quot;threads latency&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_lock.jpg&quot; alt=&quot;threads locks&quot; /&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;线程dump情况&quot;&gt;线程Dump情况&lt;/h4&gt;
 
@@ -1688,149 +1755,4 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 &lt;p&gt;介于两者之间的是预先小量的设计，采用这种方式可能是更好的一种这种，譬如在一开始阶段，通过对系统风险的分析对最大的风险采用预先设计的方式防范最首要的风险，然后随着项目的逐步推进，采用演进式设计来逐步完善整个系统的整体设计图景；当然这里最重要的前提是，&lt;strong&gt;确保重构、持续集成、测试驱动开发等关键的敏捷开发实践能够落到实处&lt;/strong&gt;。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;T.B.D&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="engineering" /><category term="software architecture" /><category term="agile" /><summary type="html">随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了客户对交付时间和质量的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以借助各种成熟的基础设施和成熟完善的开发工具在很短的时间内完成复杂的功能。然而软件架构和抽象洞察能力这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。</summary></entry><entry><title type="html">A software design and test guideline for C++ project</title><link href="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/" rel="alternate" type="text/html" title="A software design and test guideline for C++ project" /><published>2016-04-07T00:00:00+08:00</published><updated>2016-04-07T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/04/07/a-software-design-and-test-guideline/">&lt;p&gt;To make large scale C++ software project in good shape is not an easy job, especially when you have &lt;strong&gt;a pretty big development team that may form multiple sub-teams&lt;/strong&gt;. One of the key actions is to have &lt;strong&gt;common understanding on software design and testing strategies, rules and guidelines&lt;/strong&gt;, which are far more important than simply coding guidelines.&lt;/p&gt;
-
-&lt;p&gt;This article is my personal understanding and suggestion on such a critical (yet controversial) topic.&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h1 id=&quot;designtest-strategy&quot;&gt;Design/Test Strategy&lt;/h1&gt;
-&lt;p&gt;Here’s the general rules regarding design and testing strategy.&lt;/p&gt;
-
-&lt;h2 id=&quot;testing-strategy&quot;&gt;Testing Strategy&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Software testing strategy would be &lt;strong&gt;UT + SCT&lt;/strong&gt; during development.&lt;/li&gt;
-  &lt;li&gt;Obsolete MT(module test) cases in all domains in the long run, consider adding SCT to cover specific scenarios while counting whole binary as SUT&lt;/li&gt;
-  &lt;li&gt;Consider UT and SCT as different level of tests, so &lt;strong&gt;SCT coverage wouldn’t replace UT coverage&lt;/strong&gt;, vice versa&lt;/li&gt;
-  &lt;li&gt;Remove legacy MT case when it’s considered to be too heavy to maintain&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;DONOT&lt;/strong&gt; test &lt;del&gt;against internal implementation of an entity&lt;/del&gt; (either a class or binary), test its interface (public methods or exposed component interfaces) intensively&lt;/li&gt;
-  &lt;li&gt;Design complicated scenarios into different layers, so unit tests can be written &lt;strong&gt;separately in different levels&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;Avoid writing tests that treats different layers of implementations as SUT, write testing against lowest layer directly as possible&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;class-design-for-testability&quot;&gt;Class Design For Testability&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;Program your class to interface than implementation&lt;/li&gt;
-  &lt;li&gt;Keep class as &lt;strong&gt;small with single responsibility&lt;/strong&gt; as possible&lt;/li&gt;
-  &lt;li&gt;Design your class so it can easily be tested, with small interface, clear responsibility and explicit collaboration with other classes&lt;/li&gt;
-  &lt;li&gt;Also take SCT testability into account in design&lt;/li&gt;
-  &lt;li&gt;Wrap utility functions within nested namespaces, and test them individually. DONOT place them in a class with static qualifier.&lt;/li&gt;
-  &lt;li&gt;DONOT add code to a legacy big smelly class, consider &lt;strong&gt;extract the changes into smaller classes&lt;/strong&gt; and use &lt;strong&gt;dependency injection&lt;/strong&gt; to make changes testable&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;technical-detailed-guidelines&quot;&gt;Technical Detailed Guidelines&lt;/h1&gt;
-&lt;p&gt;A few detailed guidelines are listed here for reference.&lt;/p&gt;
-
-&lt;h2 id=&quot;class-design&quot;&gt;Class Design&lt;/h2&gt;
-&lt;p&gt;Class is the basic element of object oriented software, the majority of the unit tests shall be taken a single class as SUT. Here lists some general guidelines:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A class should not provide too many public interfaces, generally 3~7 public methods shall be preferred&lt;/li&gt;
-  &lt;li&gt;A class should not leak its internal states to external users by public interfaces&lt;/li&gt;
-  &lt;li&gt;A class should initialize its collaborators through &lt;strong&gt;dependency injection&lt;/strong&gt; than directly construct by instance&lt;/li&gt;
-  &lt;li&gt;A class should not work on different abstract levels&lt;/li&gt;
-  &lt;li&gt;High level classes (working towards the center of business logic interaction) should not work directly with low level details - design lower level classes to finish the low level work&lt;/li&gt;
-  &lt;li&gt;A class should not collaborate with too many external classes, no specific number is suggested here, while working with &lt;strong&gt;tens of external classes would be definitely problematic&lt;/strong&gt; in most cases&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;boundary-class-design&quot;&gt;Boundary Class Design&lt;/h3&gt;
-&lt;p&gt;A boundary class is designed to be the interface to external entities (module or higher level entities), the design should apply below guidelines&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;It should be an abstract class with visible interfaces, main intention is the &lt;strong&gt;separation of concerns&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;It should never reveal internal design details&lt;/li&gt;
-  &lt;li&gt;It should not bring unnecessary dependencies (like introducing template meta-programming elements)&lt;/li&gt;
-  &lt;li&gt;It should not handle processing details rather act as the bridge to other entities&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Above guidelines also holds for general class design, while special care shall be taken when you’re designing a boundary class, since violation of them might turn overall software architecture into &lt;em&gt;a big ball of mud&lt;/em&gt;.&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;A Big Ball of Mud is a haphazardly structured, sprawling, sloppy, duct-tape-and-baling-wire, spaghetti-code jungle. &lt;strong&gt;These systems show unmistakable signs of unregulated growth, and repeated, expedient repair&lt;/strong&gt;. Information is shared promiscuously among distant elements of the system, often to the point where &lt;strong&gt;nearly all the important information becomes global or duplicated&lt;/strong&gt;. The overall structure of the system may never have been well defined. If it was, it may have eroded beyond recognition. Programmers with a shred of architectural sensibility shun these quagmires. Only those who are unconcerned about architecture, and, perhaps, are comfortable with the inertia of the day-to-day chore of patching the holes in these failing dikes, are content to work on such systems.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;— Brian Foote and Joseph Yoder, Big Ball of Mud. Fourth Conference on Patterns ? Languages of Programs (PLoP ‘97/EuroPLoP ‘97) Monticello, Illinois, September 1997&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Also be careful not to introduce too many boundary classes.&lt;/p&gt;
-
-&lt;h3 id=&quot;application-logic-class-design&quot;&gt;Application-logic Class Design&lt;/h3&gt;
-&lt;p&gt;Application logic specific classes are those who are created to fulfill certain specific business logic. It shall comply with below guidelines&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;It should be kept as low in coupling and high in cohesion&lt;/li&gt;
-  &lt;li&gt;It should have single responsibility, have &lt;strong&gt;good balance between SOLID principles&lt;/strong&gt;, and not violate the law of Demeter
-    &lt;blockquote&gt;
-      &lt;p&gt;Each unit should have only limited knowledge about other units : only units “closely” related to the current unit.&lt;/p&gt;
-
-      &lt;p&gt;Each unit should only talk to its friends; don’t talk to strangers.&lt;/p&gt;
-
-      &lt;p&gt;Only talk to your immediate friends.&lt;/p&gt;
-    &lt;/blockquote&gt;
-  &lt;/li&gt;
-  &lt;li&gt;It should never work on different abstraction levels, like a &lt;strong&gt;manager/controller class handles low level platform APIs should be discouraged&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;It should not contain too many data members, which is typically sever violation of single responsibility&lt;/li&gt;
-  &lt;li&gt;They may further by abstracted into different levels, if this is the case, keep &lt;strong&gt;dependency inversion principle&lt;/strong&gt; followed such that abstractions (higher level classes) shall not depend on implementation details (lower level classes)
-    &lt;blockquote&gt;
-      &lt;p&gt;A. High-level modules should not depend on low-level modules. Both should depend on abstractions.&lt;/p&gt;
-
-      &lt;p&gt;B. Abstractions should not depend on details. Details should depend on abstractions.&lt;/p&gt;
-    &lt;/blockquote&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;tmp-usage&quot;&gt;TMP Usage&lt;/h3&gt;
-&lt;p&gt;Template-meta-programming are widely adopted by modern programmers, unfortunately it’s quite often misused/overused. When it’s overtaken, compiling dependence might be a serious problem, and compiler diagnostics messages might kill your time. It’s not a problem of generics itself, but rather a limitation of compilers and c++ language.Here’s some general ideas&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;DONOT bring TMP to public interfaces unless you’re designing low level utilities&lt;/li&gt;
-  &lt;li&gt;Balance OOD and TMP, hide TMP into implementation details would be a good idea&lt;/li&gt;
-  &lt;li&gt;DONOT reinvent the wheels, make good use of standard libraries&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;unit-test-design&quot;&gt;Unit Test Design&lt;/h2&gt;
-&lt;p&gt;This chapter would &lt;strong&gt;not&lt;/strong&gt; cover basic howtos about unit testing, although some important guidelines are listed. Walk through &lt;a href=&quot;cpri_handler_unit_test_guide.md&quot;&gt;unit test guide&lt;/a&gt; for that purpose.&lt;/p&gt;
-
-&lt;h3 id=&quot;general-rules&quot;&gt;General Rules&lt;/h3&gt;
-&lt;p&gt;Below general rules shall be applied always as possible&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Each non-trivial classes shall be tested&lt;/li&gt;
-  &lt;li&gt;DONOT test against factory method or classes since they’re designed to bring up other objects - it’s still valuable to test against complicated startup procedures&lt;/li&gt;
-  &lt;li&gt;Keep &lt;strong&gt;test design and class design as synchronized&lt;/strong&gt; - whenever class design is changed, test design shall be refined accordingly&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;test-case-intention-and-focus&quot;&gt;Test Case Intention And Focus&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;A test case/suite shall &lt;strong&gt;test against a sinle class in most of the time&lt;/strong&gt;, testing against multiple classes without abstraction generally makes tests fragile and hard to maintain; be careful when you want to bring multiple classes into SUT&lt;/li&gt;
-  &lt;li&gt;A test case shall &lt;strong&gt;test against the public (exposed) interface&lt;/strong&gt; only, and consider the SUT (specific class) as black box as possible&lt;/li&gt;
-  &lt;li&gt;A test case shall focus on the behavior (business intention) of its SUT than internal implementation, which are more subject to change&lt;/li&gt;
-  &lt;li&gt;Different test cases shall be added to &lt;strong&gt;cover both normal scenarios and exceptional scenarios based on intention&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;A test case shall be as specific as possible, and shall have &lt;strong&gt;clear expectation and strict validation&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;DONOT try to cover more than one scenario in one test case, feel free to add more cases for exceptional scenarios&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;testing-interaction-with-mocksstubs&quot;&gt;Testing Interaction With Mocks/Stubs&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Be careful on heavy mocks, and &lt;strong&gt;add strong checks on matchers and set desired actions&lt;/strong&gt; if you want to validate the output (interaction) in customized mocks&lt;/li&gt;
-  &lt;li&gt;Prefer grouping mocks in different test suites than organizing them in common functions, the latter is harder to maintain&lt;/li&gt;
-  &lt;li&gt;Combine stubs with mocks wisely&lt;/li&gt;
-  &lt;li&gt;DONOT create threads before careful reasoning - introducing threads to unit tests makes test cases hared to maintain and track&lt;/li&gt;
-  &lt;li&gt;DONOT introduce real timers to test cases - advance a mocked timer to simulate the timeout behavior makes tests more stable and predictable&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;Never sleep nor wait&lt;/strong&gt; in test cases&lt;/li&gt;
-  &lt;li&gt;Make unit tests run fast as possible - generally one unit test shall not take over &lt;strong&gt;300 milliseconds&lt;/strong&gt; to finish&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;test-cases-groupingsuites&quot;&gt;Test Cases Grouping/Suites&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Generalize common operations and reuse them&lt;/strong&gt; as test fixtures that can be shared by multiple test cases&lt;/li&gt;
-  &lt;li&gt;Prefer split big/complicated tests into smaller ones and group them according to logical abstractions - big tests typically indicates design smelly in SUT&lt;/li&gt;
-  &lt;li&gt;DONOT create very large fixtures, consider ways to re-organize setups/fixtures by abstraction&lt;/li&gt;
-  &lt;li&gt;Keep one test group (based on a common fixture typically) in one or more source files, &lt;strong&gt;DONOT&lt;/strong&gt; place irreverent tests in one source file&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://agilemodeling.com/artifacts/crcModel.htm&quot;&gt;Class Responsibility Collaboration(CRC) models: An Agile Introduction&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Class-responsibility-collaboration_card&quot;&gt;Wikipedia:CRC Cards&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Dependency_inversion_principle&quot;&gt;Dependency Inversion Principle&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://www.laputan.org/mud/&quot;&gt;Big Ball of Mud&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="test" /><category term="strategy" /><category term="guideline" /><summary type="html">To make large scale C++ software project in good shape is not an easy job, especially when you have a pretty big development team that may form multiple sub-teams. One of the key actions is to have common understanding on software design and testing strategies, rules and guidelines, which are far more important than simply coding guidelines.</summary></entry></feed>
+&lt;p&gt;&lt;strong&gt;T.B.D&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="engineering" /><category term="software architecture" /><category term="agile" /><summary type="html">随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了客户对交付时间和质量的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以借助各种成熟的基础设施和成熟完善的开发工具在很短的时间内完成复杂的功能。然而软件架构和抽象洞察能力这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。</summary></entry></feed>
