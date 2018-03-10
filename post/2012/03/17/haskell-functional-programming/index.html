@@ -518,14 +518,13 @@
 
 <p>任何函数在Haskell中本质上仅仅绑定一个参数，如果在声明了可以绑定多个参数的函数后边提供少于期望个数的参数后，便可以得到一个新的函数，新函数的参数个数等于原函数的参数数减去已经提供的参数个数。如果提供的参数个数和期望的参数个数相同，则对应的就是一个新的函数调用；否则，我们得到了一个 partial function, 其中未指定的参数可以在随后调用中指定。例如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">foldl</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">foldl</span>
 <span class="n">foldl</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">a</span>
 <span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">foldl</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span>
 <span class="n">foldl</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">b</span> <span class="o">=&gt;</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">b</span>
 <span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">foldl</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="mi">2</span>
 <span class="n">foldl</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="mi">2</span> <span class="o">::</span> <span class="kt">Num</span> <span class="n">b</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">b</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>上边的例子中，<code class="highlighter-rouge">foldl</code>函数本身可接受一个cumulate函数，一个cumulate变量，和一个List。通过一次提供一个和两个参数，分别得到了2个 partial function, 并且随着新提供参数的类型，2 个 partial function 的类型也被自动推倒出来。</p>
 
 <p>由于Haskell的<strong>lazy evaluation</strong>特征，partial function中的中间参数只有在函数被实际调用的时候才会赋值。</p>
@@ -536,7 +535,7 @@
 
 <p>对于一些很常见的从一个链表中计算一个结果的操作，haskell提供了一些fold函数来简化代码，不再需要通过手工编写的 recursion/pattern matching来完成。如下的代码完成给定字符串转换为对应的<strong>Int</strong>数（仅仅处理正整数）：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">type</span> <span class="kt">ErrorMessage</span> <span class="o">=</span> <span class="kt">String</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">type</span> <span class="kt">ErrorMessage</span> <span class="o">=</span> <span class="kt">String</span>
 <span class="n">asInt_either</span> <span class="o">::</span> <span class="kt">String</span> <span class="o">-&gt;</span> <span class="kt">Either</span> <span class="kt">ErrorMessage</span> <span class="kt">Int</span>
 <span class="n">asInt_either</span> <span class="s">""</span> <span class="o">=</span> <span class="kt">Left</span> <span class="s">"None string can't be converted!"</span>
 <span class="n">asInt_either</span> <span class="p">(</span><span class="sc">'-'</span><span class="o">:</span><span class="kr">_</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Left</span> <span class="s">"negates not supported!"</span>
@@ -555,8 +554,7 @@
 <span class="n">isDigit</span> <span class="n">c</span> <span class="o">|</span> <span class="n">ord</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">ord</span> <span class="sc">'0'</span> <span class="o">=</span> <span class="kt">False</span>
           <span class="o">|</span> <span class="n">ord</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="n">ord</span> <span class="sc">'9'</span> <span class="o">=</span> <span class="kt">False</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>
@@ -577,47 +575,42 @@
 
 <p>lambda 在 haskell 中用的并不是太多，因为其会造成程序可读性下降，而Haskell中可以通过 <code class="highlighter-rouge">let .. in</code> 或者 <code class="highlighter-rouge">where</code>的方式很轻松的定义局部函数。此外局部函数可以用一个描述其目的的名字来更好的帮助理解调用点的逻辑。例如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">func</span> <span class="o">::</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">func</span> <span class="o">::</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span>
 <span class="n">func</span> <span class="o">=</span> <span class="n">map</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span><span class="p">))</span> 
 
 <span class="c1">-- equals to below func</span>
 <span class="n">func</span> <span class="o">=</span> <span class="n">map</span> <span class="n">calc</span> <span class="kr">where</span> <span class="n">calc</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">^</span> <span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>函数可以相互组合，默认的方式是从左到右从而生成高阶函数，<code class="highlighter-rouge">.</code>可以用于组合函数使得先调用右侧函数，再作用于左侧。即:</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">func1</span> <span class="n">func2</span> <span class="n">func3</span> <span class="n">param</span> <span class="o">=</span> <span class="p">((</span><span class="n">func1</span> <span class="n">func2</span><span class="p">)</span> <span class="n">func3</span><span class="p">)</span> <span class="n">param</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">func1</span> <span class="n">func2</span> <span class="n">func3</span> <span class="n">param</span> <span class="o">=</span> <span class="p">((</span><span class="n">func1</span> <span class="n">func2</span><span class="p">)</span> <span class="n">func3</span><span class="p">)</span> <span class="n">param</span>
 <span class="n">func1</span> <span class="o">.</span> <span class="n">func2</span> <span class="o">.</span> <span class="n">func3</span> <span class="n">param</span> <span class="o">=</span> <span class="n">func1</span> <span class="p">(</span> <span class="n">func2</span> <span class="p">(</span> <span class="n">func3</span> <span class="n">param</span><span class="p">)</span> <span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="sections-as-pattern-and-lazy-evaluation">sections, as pattern and lazy evaluation</h2>
 
 <p>Section 用于简化函数的组合，使得函数调用可以用中缀表达式的方法来书写，以增强代码可读性。譬如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">)</span> <span class="mi">2</span><span class="n">j</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">)</span> <span class="mi">2</span><span class="n">j</span>
 <span class="n">map</span> <span class="p">(</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span><span class="mi">36</span><span class="p">]</span>
 <span class="p">(`</span><span class="n">elem</span><span class="p">`</span> <span class="p">[</span><span class="sc">'a'</span><span class="o">..</span><span class="sc">'z'</span><span class="p">]</span> <span class="sc">'f'</span>
 <span class="n">isAny</span> <span class="n">needle</span> <span class="n">haystack</span> <span class="o">=</span> <span class="n">any</span> <span class="p">(</span><span class="n">need</span> <span class="p">`</span><span class="n">isInfixOf</span><span class="p">`)</span> <span class="n">haystack</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As-pattern 用于提高代码可读性，并减少新list的copy开销，<code class="highlighter-rouge">@</code>之后的部分将绑定到之前的一个变量之上，之后可以直接引用此变量而不需要创建新的List,例如：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">suffixes</span> <span class="o">::</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[[</span><span class="n">a</span><span class="p">]]</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">suffixes</span> <span class="o">::</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[[</span><span class="n">a</span><span class="p">]]</span>
 <span class="n">suffixes</span> <span class="n">xs</span><span class="o">@</span><span class="p">(</span><span class="kr">_</span><span class="o">:</span><span class="n">xs'</span><span class="p">)</span> <span class="o">=</span> <span class="n">xs</span> <span class="o">:</span> <span class="n">suffixes</span> <span class="n">xs'</span>
 <span class="n">suffixes</span> <span class="kr">_</span> <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><code class="highlighter-rouge">seq</code>可以用于解决lazy-evaluation导致某些部分由于没有被调用而没有赋值的情况。<code class="highlighter-rouge">seq</code>的应用需要注意：</p>
 
 <ol>
   <li><code class="highlighter-rouge">seq</code>表达式必须表达式中第一个被赋值的，例如：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">forceEv</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">someFunc</span> <span class="n">y</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">forceEv</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">someFunc</span> <span class="n">y</span>
 <span class="n">chained</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">y</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">someFunction</span> <span class="n">z</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li><code class="highlighter-rouge">seq</code>在遇到一个Constructor的时候即停止，对于ADT （Algegric Data Type), Constructor之后的东西将不会被预先赋值。</li>
   <li><code class="highlighter-rouge">seq</code>在有可能的时候需要尽量少用，多思考 lazy evaluation。</li>

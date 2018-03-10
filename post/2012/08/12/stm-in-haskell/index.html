@@ -536,7 +536,7 @@
 
 <p>GHC的支持在<code class="highlighter-rouge">Control.Concurrent.STM</code>中，并提供了<code class="highlighter-rouge">TVar</code>(相对于<code class="highlighter-rouge">MVar</code>)：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">STM</span> <span class="n">a</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">STM</span> <span class="n">a</span> 
     <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Conc</span><span class="o">.</span><span class="kt">Sync</span><span class="o">.</span><span class="kt">STM</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span>
                          <span class="o">-&gt;</span> <span class="p">(</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span><span class="p">,</span> <span class="n">a</span> <span class="o">#</span><span class="p">))</span>
 
@@ -557,8 +557,7 @@
 
 <span class="c1">-- atomically provide wrapper to convert STM types to plain IO type</span>
 <span class="n">atomically</span> <span class="o">::</span> <span class="kt">STM</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里<code class="highlighter-rouge">STM</code>提供了一个STM类型的抽象，并且定义其自身为<code class="highlighter-rouge">Monad</code>和<code class="highlighter-rouge">Functor</code>的实例。<code class="highlighter-rouge">TVar</code>则提供了对数据类型的封装和<code class="highlighter-rouge">Monadic</code>操作。</p>
 
 <h3 id="一个简单的例子">一个简单的例子</h3>
@@ -601,7 +600,7 @@
 <p>Haskell的STM API提供了retry机制，当某个transaction不能成功的时候，retry可以重新启动整个Transaction，当然这个Transaction只有当其它线程对共享数据做修改之后才会重新启动，从而避免性能损失。
 下边是一个例子：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">transfer</span> <span class="o">::</span> <span class="kt">Gold</span> <span class="o">-&gt;</span> <span class="kt">Balance</span> <span class="o">-&gt;</span> <span class="kt">Balance</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transfer</span> <span class="o">::</span> <span class="kt">Gold</span> <span class="o">-&gt;</span> <span class="kt">Balance</span> <span class="o">-&gt;</span> <span class="kt">Balance</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
 
 <span class="n">transfer</span> <span class="n">qty</span> <span class="n">fromBal</span> <span class="n">toBal</span> <span class="o">=</span> <span class="kr">do</span>
   <span class="n">fromQty</span> <span class="o">&lt;-</span> <span class="n">readTVar</span> <span class="n">fromBal</span>
@@ -609,8 +608,7 @@
         <span class="n">retry</span>
   <span class="n">writeTVar</span> <span class="n">fromBal</span> <span class="p">(</span><span class="n">fromQty</span> <span class="o">-</span> <span class="n">qty</span><span class="p">)</span>
   <span class="n">readTVar</span> <span class="n">toBal</span> <span class="o">&gt;&gt;=</span> <span class="n">writeTVar</span> <span class="n">toBal</span> <span class="o">.</span> <span class="p">(</span><span class="n">qty</span> <span class="o">+</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <h2 id="参考">参考</h2>
 <ol>
   <li><a href="http://book.realworldhaskell.org/read/software-transactional-memory.html">STM in Real World Haskell, chapter 28</a></li>

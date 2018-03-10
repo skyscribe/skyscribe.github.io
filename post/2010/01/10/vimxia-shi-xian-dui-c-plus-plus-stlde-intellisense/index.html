@@ -508,29 +508,26 @@
 
 <!--more-->
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">skyscribe@skyscribe-ubuntu:~$ </span>ctags --version
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>skyscribe@skyscribe-ubuntu:~<span class="nv">$ </span>ctags <span class="nt">--version</span>
 Exuberant Ctags 5.9~svn20110310, Copyright <span class="o">(</span>C<span class="o">)</span> 1996-2009 Darren Hiebert
     Compiled: Jul 27 2011, 11:05:43
     Addresses: &lt;dhiebert@users.sourceforge.net&gt;, http://ctags.sourceforge.net
     Optional compiled features: +wildcards, +regex
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="加入autoload">加入autoload</h2>
 
 <p>在 ~/.vimrc 里边加入autoload taglist功能，为了方便自动更新当前tags，设置一个快捷键（这里）：</p>
-<div class="language-vim highlighter-rouge"><pre class="highlight"><code>map <span class="p">&lt;</span>C<span class="p">-</span>F12<span class="p">&gt;</span> <span class="p">:!</span>ctags <span class="p">-</span>R <span class="p">--</span><span class="k">c</span><span class="p">++-</span>kinds<span class="p">=+</span><span class="k">p</span> <span class="p">--</span>fields<span class="p">=+</span>iaS <span class="p">--</span>extra<span class="p">=+</span><span class="k">q</span> <span class="p">.&lt;</span>CR<span class="p">&gt;</span>
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code>map <span class="p">&lt;</span>C<span class="p">-</span>F12<span class="p">&gt;</span> <span class="p">:!</span>ctags <span class="p">-</span>R <span class="p">--</span><span class="k">c</span><span class="p">++-</span>kinds<span class="p">=+</span><span class="k">p</span> <span class="p">--</span>fields<span class="p">=+</span>iaS <span class="p">--</span>extra<span class="p">=+</span><span class="k">q</span> <span class="p">.&lt;</span>CR<span class="p">&gt;</span>
 source <span class="p">~</span><span class="sr">/.vim/</span>my<span class="p">.</span><span class="k">vim</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的自动加载已有vim的功能，就用一个vim脚步来实现 (参考 vim :help glob给的例子)：</p>
 
-<div class="language-vim highlighter-rouge"><pre class="highlight"><code><span class="k">cat</span> <span class="p">~</span><span class="sr">/.vim/</span>my<span class="p">.</span><span class="k">vim</span> 
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">cat</span> <span class="p">~</span><span class="sr">/.vim/</span>my<span class="p">.</span><span class="k">vim</span> 
 <span class="k">let</span> tagfiles <span class="p">=</span> glob<span class="p">(</span><span class="s2">"`find ~/.vim/tagfiles -name tags -print`"</span><span class="p">)</span>
 <span class="k">let</span> &amp;<span class="k">tags</span> <span class="p">=</span> substitute<span class="p">(</span>tagfiles<span class="p">,</span> <span class="s2">"\n"</span><span class="p">,</span> <span class="s2">","</span><span class="p">,</span> <span class="s2">"g"</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>以后需要新的taglist，只需要放在~/.vim/tagfiles目录下就好了。
 vim启动的时候，会自动执行~/.vimrc，从而调用my.vim，将事先准备好的taglist更新进去；这里一般放一些不太变化的静态头文件tag就可以了。</p>
@@ -540,16 +537,14 @@ vim启动的时候，会自动执行~/.vimrc，从而调用my.vim，将事先准
 <p>要有STL的intelliSense，自然要有STL C++的tags database了，这里需要生成之。
 根据上一步的惯例，需要生成一个tags文件，放在~/.vim/tagfiles/的某个子目录下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>mkdir -p ~/.vim/tagfiles/gcc&lt;ver&gt;/
-ls –l /usr/include/c++/
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir <span class="nt">-p</span> ~/.vim/tagfiles/gcc&lt;ver&gt;/
+<span class="nb">ls</span> –l /usr/include/c++/
+</code></pre></div></div>
 <p>这里需要将ver换成当前系统的libstdc++版本，Ubuntu 9.10上的是4.4.1.</p>
 
 <p>用上边的命令生成taglist：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>ctags -R --c++-kinds<span class="o">=</span>+p --fields<span class="o">=</span>+iaS --extra<span class="o">=</span>+q . -o ~/.vim/tagfiles/gcc4.4/tags /usr/include/c++/4.4
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctags <span class="nt">-R</span> <span class="nt">--c</span>++-kinds<span class="o">=</span>+p <span class="nt">--fields</span><span class="o">=</span>+iaS <span class="nt">--extra</span><span class="o">=</span>+q <span class="nb">.</span> <span class="nt">-o</span> ~/.vim/tagfiles/gcc4.4/tags /usr/include/c++/4.4
+</code></pre></div></div>
 
 <h2 id="可能的问题">可能的问题</h2>
 
@@ -561,58 +556,56 @@ ls –l /usr/include/c++/
   <li>将/usr/include/c++/4.4.1/的内容全部拷贝到一个目录下：</li>
 </ol>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>mkdir gcc4.4
-cp -R /usr/include/c++/4.4 ./
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir gcc4.4
+cp <span class="nt">-R</span> /usr/include/c++/4.4 ./
+</code></pre></div></div>
 
 <ol>
   <li>写一个脚步替换所有的NAMESPACE宏定义(这里用sed完成宏替换，为了避免过于晦涩，还是放在一个临时的脚步文件里边来，便于调试吧)</li>
 </ol>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
-<span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span>-eq 0 <span class="o">]</span>;<span class="k">then
-    </span><span class="nv">dir</span><span class="o">=</span>.
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span><span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span><span class="k">then
+    </span><span class="nv">dir</span><span class="o">=</span><span class="nb">.</span>
 <span class="k">else
     </span><span class="nv">dir</span><span class="o">=</span><span class="nv">$1</span>
 <span class="k">fi</span>
 
 <span class="c">#Substitute scripts</span>
-cat &gt; .edit.sed <span class="sh">&lt;&lt;- EOF
+<span class="nb">cat</span> <span class="o">&gt;</span> .edit.sed <span class="o">&lt;&lt;-</span> <span class="no">EOF</span><span class="sh">
 s/\b_GLIBCXX_BEGIN_NAMESPACE\b\s*\(\s*(\w+)\s*\)/namespace \1{/g
 s/_GLIBCXX_BEGIN_NESTED_NAMESPACE\s*\(\s*std\s*,\s*_GLIBCXX_STD_[DP]\s*\)/namespace std{/g
 s/\b_GLIBCXX_END_NAMESPACE\b/}/g
 s/\b_GLIBCXX_END_(NESTED_\?NAMESPACE\b/}/g
-EOF
+</span><span class="no">EOF
 
 </span><span class="nv">count</span><span class="o">=</span>0
 <span class="nv">cols</span><span class="o">=</span><span class="sb">`</span>tput cols<span class="sb">`</span>
 <span class="nv">cols</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$cols</span><span class="s2"> - 8"</span>|bc<span class="sb">`</span>
-<span class="k">for </span>file <span class="k">in</span> <span class="sb">`</span>find <span class="nv">$dir</span> -type f<span class="sb">`</span>;<span class="k">do
-    if</span> <span class="o">[</span> <span class="s2">"T"</span><span class="nv">$file</span> !<span class="o">=</span> <span class="s2">"T"</span><span class="nv">$0</span> <span class="o">]</span>;<span class="k">then
-            </span>sed -nf <span class="s2">".edit.sed"</span> <span class="nv">$file</span>
+<span class="k">for </span>file <span class="k">in</span> <span class="sb">`</span>find <span class="nv">$dir</span> <span class="nt">-type</span> f<span class="sb">`</span><span class="p">;</span><span class="k">do
+    if</span> <span class="o">[</span> <span class="s2">"T"</span><span class="nv">$file</span> <span class="o">!=</span> <span class="s2">"T"</span><span class="nv">$0</span> <span class="o">]</span><span class="p">;</span><span class="k">then
+            </span>sed <span class="nt">-nf</span> <span class="s2">".edit.sed"</span> <span class="nv">$file</span>
             <span class="nv">count</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$count</span><span class="s2">+1"</span>|bc<span class="sb">`</span>
-            <span class="nb">echo</span> -ne <span class="s2">"="</span>
-            <span class="k">if</span> <span class="o">[</span> <span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$count</span><span class="s2">%</span><span class="nv">$cols</span><span class="s2">"</span>|bc<span class="sb">`</span> -eq 0 <span class="o">]</span>;<span class="k">then
+            <span class="nb">echo</span> <span class="nt">-ne</span> <span class="s2">"="</span>
+            <span class="k">if</span> <span class="o">[</span> <span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$count</span><span class="s2">%</span><span class="nv">$cols</span><span class="s2">"</span>|bc<span class="sb">`</span> <span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span><span class="k">then
                 </span><span class="nb">echo</span> <span class="s2">" </span><span class="nv">$count</span><span class="s2">"</span>
             <span class="k">fi
     fi
 done
 
 </span><span class="nb">echo</span> <span class="s2">"Processed </span><span class="nv">$count</span><span class="s2"> files!"</span>
-rm -fr .edit.sed
+rm <span class="nt">-fr</span> .edit.sed
 
 <span class="c"># Generate ctag file</span>
-ctags -R --c++-kinds<span class="o">=</span>+p --fields<span class="o">=</span>+iaS --extra<span class="o">=</span>+q 
+ctags <span class="nt">-R</span> <span class="nt">--c</span>++-kinds<span class="o">=</span>+p <span class="nt">--fields</span><span class="o">=</span>+iaS <span class="nt">--extra</span><span class="o">=</span>+q 
 <span class="nb">echo</span> <span class="s2">"generated tag file!"</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ol>
   <li>生成tags</li>
 </ol>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">skyscribe@skyscribe:~/libstdc++/gcc4.4$ </span>./generate-tags.sh . 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>skyscribe@skyscribe:~/libstdc++/gcc4.4<span class="nv">$ </span>./generate-tags.sh <span class="nb">.</span> 
 <span class="o">====================================================================================================</span> 100
 <span class="o">====================================================================================================</span> 200
 <span class="o">====================================================================================================</span> 300
@@ -622,11 +615,10 @@ ctags -R --c++-kinds<span class="o">=</span>+p --fields<span class="o">=</span>+
 <span class="o">===============================================================</span>Processed 663 files!
 
 generated tag file!
-ls tags -lh
--rw-r--r-- 1 skyscribe skyscribe 4.2M 2010-01-10 18:21 tags
+<span class="nb">ls </span>tags <span class="nt">-lh</span>
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe 4.2M 2010-01-10 18:21 tags
 cp tags ~/.vim/tagfiles/gcc4.4/
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="实验效果">实验效果</h2>
 

@@ -506,7 +506,7 @@
 
 <p>在传统的函数式语言中，<strong>map/filter/any</strong>通常是最为builtin的高阶函数提供的，它们都携带一个函数作为第一个参数，并且作用于一个list作为第二个参数，并且返回满足条件的结果 - 或者是一个子list，或者是一个Bool，如下：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">map</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">map</span>
 <span class="n">map</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span>
 <span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">fmap</span>
 <span class="n">fmap</span> <span class="o">::</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
@@ -516,75 +516,65 @@
 <span class="n">any</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="kt">Bool</span>
 <span class="kt">Prelude</span><span class="o">&gt;</span> <span class="o">:</span><span class="kr">type</span> <span class="n">all</span>
 <span class="n">all</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="kt">Bool</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这些函数的意义通常都比较简单明了，不过它们仅仅作用于list类型。对于更复杂的类型，譬如说一个wrapper类型，这些函数就无能为力了。</p>
 
 <h2 id="更高级的抽象---functor">更高级的抽象 - Functor</h2>
 
 <p>考虑如下的例子，定义一个Tree类型：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kt">Tree</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Node</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">Tree</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Node</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span>
        <span class="o">|</span> <span class="kt">Leaf</span> <span class="n">a</span>
      <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的Tree中保存的是一个抽象数据。假设这里的a是个String，并且我们希望据此生成一个新的Tree，对应的每个节点中的数据存放的是对应String的长度，那么其实现可以如下：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">treeLengths</span> <span class="p">(</span><span class="kt">Leaf</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Leaf</span> <span class="p">(</span><span class="n">length</span> <span class="n">s</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">treeLengths</span> <span class="p">(</span><span class="kt">Leaf</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Leaf</span> <span class="p">(</span><span class="n">length</span> <span class="n">s</span><span class="p">)</span>
 <span class="n">treeLengths</span> <span class="p">(</span><span class="kt">Node</span> <span class="n">l</span> <span class="n">r</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Node</span> <span class="p">(</span><span class="n">treeLengths</span> <span class="n">l</span><span class="p">)</span> <span class="p">(</span><span class="n">treeLengths</span> <span class="n">r</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>因为这里的length仅仅是一个作用于所封装的类型（String）的一个函数，一个很自然的想法是可以将这个函数操作本身抽象出来，生成一个抽象的TreeMap:</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">treeMap</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Tree</span> <span class="n">b</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">treeMap</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Tree</span> <span class="n">b</span>
 <span class="n">treeMap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Leaf</span> <span class="n">a</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Leaf</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">)</span>
 <span class="n">treeMap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Node</span> <span class="n">l</span> <span class="n">r</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Node</span> <span class="p">(</span><span class="n">treeMap</span> <span class="n">l</span><span class="p">)</span> <span class="p">(</span><span class="n">treeMap</span> <span class="n">r</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里通过定义treeMap，实现将参数函数应用于ADT类型Tree中所封装的类型，将函数运算结果重新用Tree做封装。Functor就是绑定于某一个函数（譬如这里的Tree类型构造）之上并定义了一个<strong>fmap</strong>函数的typeclass：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Functor</span> <span class="n">f</span> <span class="kr">where</span>
     <span class="n">fmap</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="n">b</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>通过上述定义，我们可以发现treeMap实际完成了famp的功能；自然地可以让Tree作为Functor的一个instance来继承这个Typeclass:</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">Tree</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">Tree</span> <span class="kr">where</span>
     <span class="n">fmap</span> <span class="o">=</span> <span class="n">treeMap</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <h2 id="list--maybe">list &amp; Maybe</h2>
 
 <p>Maybe类型是一个基本类型，用于封装某个数据或者空，而List则用于描述数据列表。对于List类型，其fmap对应的实现其实就是map - <strong>fmap可以看作是map的一个扩展</strong>; 对于Maybe类型，fmap的定义如下：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">Maybe</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">Maybe</span> <span class="kr">where</span>
     <span class="n">fmap</span> <span class="kr">_</span> <span class="kt">Nothing</span> <span class="o">=</span> <span class="kt">Nothing</span>
     <span class="n">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Just</span> <span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="kt">Just</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>也就是说，对于空数据，famp的结果仍然是空，而对于实际封装的数据，则返回Just封装的函数运算结果。</p>
 
 <h2 id="monad-liftm-和-ap">Monad, liftM 和 ap</h2>
 
 <p>Monad 是一种特殊的typeclass，其封装的原始数据在任何运算过程中都不能暴露其中间运算结果，任何一个monadic函数返回的都是一个新的monadic变量；如果需要将一个纯函数作用于Monad所封装的数据类型，并得到一个对于元算结果的Monad封装，则需要用<strong>liftM</strong>:</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">liftM</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Monad</span> <span class="n">m</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">liftM</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Monad</span> <span class="n">m</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span>
 <span class="n">liftM</span> <span class="n">f</span> <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="n">i</span> <span class="o">-&gt;</span> <span class="n">return</span> <span class="p">(</span><span class="n">f</span> <span class="n">i</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>对于多个变量的函数，haskell中定义了<code class="highlighter-rouge">liftM2</code>/<code class="highlighter-rouge">liftM3</code>…<code class="highlighter-rouge">liftM5</code>,以下是<code class="highlighter-rouge">liftM2</code>的定义：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">liftM2</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Monad</span> <span class="n">m</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">c</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">c</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">liftM2</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Monad</span> <span class="n">m</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">a</span><span class="o">-&gt;</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">c</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">c</span>
 <span class="n">liftM2</span> <span class="n">f</span> <span class="n">m1</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m2</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="n">return</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的操作可以依次作用于2个monadic变量，并且得到一个新的moandic变量。对于无穷集合运算来说，liftM系列函数就无能无力了；这个时候 <code class="highlighter-rouge">ap</code>则可以派上用场：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ap</span> <span class="o">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span>
-</code></pre>
-</div>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ap</span> <span class="o">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">m</span> <span class="n">b</span>
+</code></pre></div></div>
 
 <p>如下例：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MovieReview</span> <span class="o">=</span> <span class="kt">MovieReview</span> <span class="p">{</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MovieReview</span> <span class="o">=</span> <span class="kt">MovieReview</span> <span class="p">{</span>
       <span class="n">revTitle</span> <span class="o">::</span> <span class="kt">String</span>
     <span class="p">,</span> <span class="n">revUser</span> <span class="o">::</span> <span class="kt">String</span>
     <span class="p">,</span> <span class="n">revReview</span> <span class="o">::</span> <span class="kt">String</span>
@@ -605,8 +595,7 @@
     <span class="n">liftM3</span> <span class="kt">MovieReview</span> <span class="p">(</span><span class="n">lookup1</span> <span class="s">"title"</span> <span class="n">alist</span><span class="p">)</span>
                        <span class="p">(</span><span class="n">lookup1</span> <span class="s">"user"</span> <span class="n">alist</span><span class="p">)</span>
                        <span class="p">(</span><span class="n">lookup1</span> <span class="s">"review"</span> <span class="n">alist</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里有2中等价的实现方式，而liftM结合ap的方式提供了更高的灵活性，可以直接扩展至多个参数的情形。</p>
 
 <h2 id="参考">参考</h2>

@@ -506,16 +506,14 @@
 
 <ul>
   <li>用’/’分隔的字符串(‘/’ 本身需 ‘\/’ 转义）
-    <div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="sr">/myPattern/mi</span>
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sr">/myPattern/mi</span>
 <span class="s2">"Ruby matches uby"</span> <span class="o">=~</span> <span class="sr">/aTch/im</span> <span class="c1">#result is 6</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>用 %r 开头，然后以其后第一个字符为分隔符的串
-    <div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="sr">%r!/usr/local/!</span>
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sr">%r!/usr/local/!</span>
 <span class="s2">"/usr/local/bin/"</span> <span class="o">=~</span> <span class="sr">%r!/usr/local/!</span> <span class="c1"># =&gt; 6</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <!--more-->
   </li>
 </ul>
@@ -556,14 +554,13 @@
   <li>替换函数： sub/gsub 前者仅仅匹配第一个，后者找到所有匹配</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="mi">1</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">016</span> <span class="o">&gt;</span>   <span class="n">text</span> <span class="o">=</span> <span class="s2">"Some string for test only, more..."</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mf">1.9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">016</span> <span class="o">&gt;</span>   <span class="n">text</span> <span class="o">=</span> <span class="s2">"Some string for test only, more..."</span>
 <span class="o">=&gt;</span> <span class="s2">"Some string for test only, more..."</span> 
-<span class="mi">1</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">017</span> <span class="o">&gt;</span> <span class="n">text</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="s1">'or'</span><span class="p">,</span> <span class="s1">'|'</span><span class="p">)</span>
+<span class="mf">1.9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">017</span> <span class="o">&gt;</span> <span class="n">text</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="s1">'or'</span><span class="p">,</span> <span class="s1">'|'</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="s2">"Some string f| test only, more..."</span> 
-<span class="mi">1</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">01</span><span class="mi">8</span> <span class="o">&gt;</span> <span class="n">text</span><span class="p">.</span><span class="nf">gsub</span><span class="p">(</span><span class="s1">'or'</span><span class="p">,</span> <span class="s1">'|'</span><span class="p">)</span>
+<span class="mf">1.9</span><span class="o">.</span><span class="mi">2</span><span class="n">p290</span> <span class="p">:</span><span class="mo">01</span><span class="mi">8</span> <span class="o">&gt;</span> <span class="n">text</span><span class="p">.</span><span class="nf">gsub</span><span class="p">(</span><span class="s1">'or'</span><span class="p">,</span> <span class="s1">'|'</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="s2">"Some string f| test only, m|e..."</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 <ul>
   <li>匹配： 用 <strong>~</strong> 来完成匹配</li>
 </ul>
@@ -571,17 +568,16 @@
 <h2 id="regexp-对象">Regexp 对象</h2>
 
 <p>基本的正则表达式语法实际上对应着一个regexp对象，Regexp类定义了<code class="highlighter-rouge">match</code>函数，其返回一个MatchData 对象，即：</p>
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">obj</span> <span class="o">=</span> <span class="sr">/testRege[xX]p/i</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">obj</span> <span class="o">=</span> <span class="sr">/testRege[xX]p/i</span>
 <span class="n">obj</span><span class="p">.</span><span class="nf">class</span> <span class="c1">#Regexp</span>
 <span class="n">mat</span> <span class="o">=</span> <span class="n">obj</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="s1">'testRegexp'</span><span class="p">)</span>
 <span class="n">mat</span><span class="p">.</span><span class="nf">class</span> <span class="c1">#MatchData</span>
 <span class="n">mat</span><span class="p">.</span><span class="nf">regexp</span> <span class="c1">#/testRege[xX]p/i</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>MatchData 对象中的<code class="highlighter-rouge">length</code>可以用于查询group的数量，而<code class="highlighter-rouge">[]</code>则可以返回匹配部分的每一个<code class="highlighter-rouge">()</code>分隔的group, 其中<code class="highlighter-rouge">[0]</code>返回整个匹配的字符串，而[1]…[N]返回第N个子group. 例如：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">pattern</span> <span class="o">=</span> <span class="sr">/^(\w+)\s*=\s*(\w+)\s*(#*.*)$/</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pattern</span> <span class="o">=</span> <span class="sr">/^(\w+)\s*=\s*(\w+)\s*(#*.*)$/</span>
 <span class="n">testStr1</span> <span class="o">=</span> <span class="s2">"key = value1"</span>
 <span class="n">testStr2</span> <span class="o">=</span> <span class="s2">"key = value2 #a comment"</span>
 <span class="n">mat1</span> <span class="o">=</span> <span class="n">pattern</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="n">testStr1</span><span class="p">)</span>
@@ -589,17 +585,15 @@
 <span class="c1">#mat1.length = mat2.length = 4</span>
 <span class="c1"># mat1[0] = "key = value1", mat1[1] = "key", mat1[2] = "value1", mat1[3] = ""</span>
 <span class="c1"># mat2[0] = "key = value2 #a comment", mat2[1] = "key", mat2[2] = "value2", mat2[3] = "#a comment"</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><code class="highlighter-rouge">offset</code>函数用于查询第N个子group的开始/结束 offset，参数为0时返回整个匹配的offset：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">mat1</span><span class="p">.</span><span class="nf">offset</span> <span class="mi">0</span> <span class="c1"># [0,12]</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mat1</span><span class="p">.</span><span class="nf">offset</span> <span class="mi">0</span> <span class="c1"># [0,12]</span>
 <span class="n">mat1</span><span class="p">.</span><span class="nf">offset</span> <span class="n">mat1</span><span class="p">.</span><span class="nf">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1">#[12,12]</span>
 <span class="n">mat2</span><span class="p">.</span><span class="nf">offset</span> <span class="n">mat2</span><span class="p">.</span><span class="nf">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1">#[13,23]</span>
 <span class="n">testStr2</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">)</span>  <span class="c1"># "#a comment"</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="参考">参考</h2>
 <ol>

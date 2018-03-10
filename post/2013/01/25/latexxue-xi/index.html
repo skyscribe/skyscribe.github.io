@@ -520,20 +520,19 @@
 
 <p>windwos平台的安装还需安装Tex工具，都是Exe格式的安装包。装完之后，根据其文档，如下的命令就可以简单的生成PDF文档了（还是写个Makefile方便一些吧）:</p>
 
-<div class="language-make highlighter-rouge"><pre class="highlight"><code><span class="nl">target</span><span class="o">:</span> <span class="nf">test.markdown test.pdf test.html</span>
+<div class="language-make highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">target</span><span class="o">:</span> <span class="nf">test.markdown test.pdf test.html</span>
     <span class="err">echo</span> <span class="s2">"done"</span>
 
 <span class="nl">%.pdf </span><span class="o">:</span> <span class="nf">%.markdown</span>
     <span class="c">#pandoc --highlight-style=pygments -t beamer -o $@ $&lt;
-</span>    <span class="err">pandoc</span> <span class="nv">--highlight-stylee</span><span class="o">=</span>pygments --listings  -o <span class="nv">$@</span> <span class="nv">$&lt;</span>
+</span>    <span class="err">pandoc</span> <span class="nv">--highlight-stylee</span><span class="o">=</span>pygments <span class="nt">--listings</span>  <span class="nt">-o</span> <span class="nv">$@</span> <span class="nv">$&lt;</span>
 
 <span class="nl">%.html </span><span class="o">:</span> <span class="nf">%.markdown</span>
     <span class="err">pandoc</span> <span class="err">--highlightt-style</span> <span class="err">pygments</span> <span class="err">-t</span> <span class="err">html5</span> <span class="err">-o</span> <span class="err">$@</span> <span class="err">$&lt;</span>
 
 <span class="nl">clean</span><span class="o">:</span>
     <span class="err">rm</span> <span class="err">-fr</span> <span class="err">*.pdf</span> <span class="err">*.htm</span> <span class="err">*.html</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>最简单的转化自不必说，没错的话，PDF已经给你生成好了。但是当你面对一个比较大的markdown文件的时候，Pandoc的转换可能就不那么好玩儿了，出错的东东都在tex里头；当然你可能也会有其它的想法，比如生成的PDF格式想多定制一些东西，那么必须面对latex模板修改的问题。要想根本上解决这个问题，还是得从根源上学起；所以还是仔细学学Latex吧。</p>
 
@@ -544,18 +543,17 @@
 <h2 id="最基本任务--hello-world">最基本任务 – Hello World</h2>
 <p>最简单的文件非<strong>hello world</strong>莫属了，但是需要生成hello world也还是需要不少基本的工作的；当然比起word里边敲敲字符要费劲一些，但是短期的痛苦只是为了长久的便利。完成这个最简单的任务大概是需要这些：</p>
 
-<div class="language-tex highlighter-rouge"><pre class="highlight"><code><span class="k">\documentclass</span><span class="p">{</span>article<span class="p">}</span>
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">\documentclass</span><span class="p">{</span>article<span class="p">}</span>
 <span class="nt">\begin{document}</span>
 Hello world
 <span class="nt">\end{document}</span>
-</code></pre>
-</div>
-<p>Tex的语法看起来和正式的变成语言类似，所有的命令都已<code class="highlighter-rouge">\</code>来开始，如果命令需要携带参数的话，就用<code class="highlighter-rouge"><span class="p">{}</span></code>传入进去就是。在<code class="highlighter-rouge">\begin</code>和<code class="highlighter-rouge">\end</code>之间的部分就是文档的正文，正文之前的那些命令被认为是关于整个文档的一些控制，譬如使用某些额外的包等。这里仅仅指定本文用的模板是<code class="highlighter-rouge">article</code>模式。</p>
+</code></pre></div></div>
+<p>Tex的语法看起来和正式的变成语言类似，所有的命令都已<code class="highlighter-rouge">\</code>来开始，如果命令需要携带参数的话，就用<code class="highlighter-rouge">{}</code>传入进去就是。在<code class="highlighter-rouge">\begin</code>和<code class="highlighter-rouge">\end</code>之间的部分就是文档的正文，正文之前的那些命令被认为是关于整个文档的一些控制，譬如使用某些额外的包等。这里仅仅指定本文用的模板是<code class="highlighter-rouge">article</code>模式。</p>
 
 <h2 id="基本文档结构">基本文档结构</h2>
 <p>在<code class="highlighter-rouge">\begin</code>和<code class="highlighter-rouge">\end</code>之间的部分是对应文档的内容了。文档的内容组织可以用段落和子段落的方式来组织，默认对段落是自动标号的，譬如下边的代码：</p>
 
-<div class="language-tex highlighter-rouge"><pre class="highlight"><code><span class="c">%preambles</span>
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">%preambles</span>
 <span class="k">\documentclass</span><span class="p">{</span>article<span class="p">}</span>
 <span class="k">\usepackage</span><span class="p">{</span>times<span class="p">}</span>
 <span class="k">\usepackage</span><span class="p">{</span>lipsum<span class="p">}</span>
@@ -609,8 +607,7 @@ Some introduction text
 <span class="k">\lipsum</span><span class="na">[7]</span>
 
 <span class="nt">\end{document}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>
@@ -644,7 +641,7 @@ Some introduction text
 在文档结束之后，可以通过<code class="highlighter-rouge">\begin{thebibliography}{9}</code>的格式来定义参考文献列表，其后用`\end{thebibliography}’结束，譬如如下例子：</li>
 </ol>
 
-<div class="language-tex highlighter-rouge"><pre class="highlight"><code><span class="nt">\begin{thebibliography}</span><span class="p">{</span>9<span class="p">}</span>
+<div class="language-tex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">\begin{thebibliography}</span><span class="p">{</span>9<span class="p">}</span>
     <span class="k">\bibitem</span><span class="p">{</span>autha91<span class="p">}</span>
     some auther, 
     <span class="k">\emph</span><span class="p">{</span><span class="k">\Latex</span>: the title<span class="p">}</span>.
@@ -652,8 +649,7 @@ Some introduction text
     1st Edition, 
     1991.
 <span class="nt">\end{thebibliography}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的第二个参数定义了参考文献的个数，但是实际上定义了索引号码的宽度，因为小于10个的仅需一列就够用了，反之则需要多列；这样可以保证所以的对齐。每一个条目用<code class="highlighter-rouge">bibitem</code>来表示，其中对应的参数可以在文中用引用的方式来加索引。</p>
 

@@ -517,9 +517,8 @@
 <h3 id="安装">安装</h3>
 <p>采用gem来安装是最方便不过了，一条命令即可：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>gem install --remote rake
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem install <span class="nt">--remote</span> rake
+</code></pre></div></div>
 
 <h3 id="rake规则">Rake规则</h3>
 
@@ -527,25 +526,23 @@
 
 <p>采用hash描述，例如</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">file</span> <span class="s2">"main.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.c"</span><span class="p">,</span> <span class="s2">"test.c"</span><span class="p">]</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">file</span> <span class="s2">"main.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.c"</span><span class="p">,</span> <span class="s2">"test.c"</span><span class="p">]</span>
 <span class="n">file</span> <span class="s2">"test.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"test.c"</span><span class="p">]</span>
 <span class="n">file</span> <span class="s2">"progrm"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.o"</span><span class="p">,</span> <span class="s2">"test.o"</span><span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的三条规则指定了常见的一个测试程序的文件依赖关系，对应的make规则如下(这里省略了build规则，实际make中可能需要指定)：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>main.o : main.c test.c
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main.o : main.c test.c
 test.o : test.c
 porgrm : main.o test.o
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="build">build</h4>
 
 <p>和Make比较类似，只需要在dependency之后加上一个do/end块，描述实际动作就可。例如：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">file</span> <span class="s2">"main.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.c"</span><span class="p">,</span> <span class="s2">"test.c"</span><span class="p">]</span> <span class="k">do</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">file</span> <span class="s2">"main.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.c"</span><span class="p">,</span> <span class="s2">"test.c"</span><span class="p">]</span> <span class="k">do</span>
     <span class="n">sh</span> <span class="s2">"cc -c -o main.o main.c"</span>
 <span class="k">end</span>
 <span class="n">file</span> <span class="s2">"test.o"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"test.c"</span><span class="p">]</span> <span class="k">do</span>
@@ -554,8 +551,7 @@ porgrm : main.o test.o
 <span class="n">file</span> <span class="s2">"progrm"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"main.o"</span><span class="p">,</span> <span class="s2">"test.o"</span><span class="p">]</span> <span class="k">do</span>
     <span class="n">sh</span> <span class="s2">"cc -o progrm main.o test.o"</span>
 <span class="k">end</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>实际执行build任务的时候，只要执行<code class="highlighter-rouge">rake program</code>即可。</p>
 
@@ -567,9 +563,8 @@ porgrm : main.o test.o
 
 <p>在Make中，第一个规则对应的目标对象为默认的生成对象（即不指定参数时的生成对象）；rake指定默认目标的方法如下：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"program"</span><span class="p">]</span>
-</code></pre>
-</div>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"program"</span><span class="p">]</span>
+</code></pre></div></div>
 
 <p>这里指定了默认生成program.</p>
 
@@ -591,9 +586,8 @@ porgrm : main.o test.o
 
 <p>一个Filelist用于列出一堆的文件，rake允许灵活的语法来指定filelist，比如：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="no">SRC</span> <span class="o">=</span> <span class="no">Filelist</span><span class="p">[</span><span class="s1">'*.cpp'</span><span class="p">]</span>
-</code></pre>
-</div>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SRC</span> <span class="o">=</span> <span class="no">Filelist</span><span class="p">[</span><span class="s1">'*.cpp'</span><span class="p">]</span>
+</code></pre></div></div>
 
 <p>这里的SRC包含了所有的.cpp为后缀的文件。</p>
 
@@ -607,15 +601,14 @@ porgrm : main.o test.o
 
 <p>通过灵活的ruby语法，rake可以支持动态创建规则 - ruby自身的循环等总是可以用的：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="no">SRC</span> <span class="o">=</span> <span class="no">FileList</span><span class="p">[</span><span class="s1">'*.c'</span><span class="p">]</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SRC</span> <span class="o">=</span> <span class="no">FileList</span><span class="p">[</span><span class="s1">'*.c'</span><span class="p">]</span>
 <span class="no">SRC</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">fn</span><span class="o">|</span>
   <span class="n">obj</span> <span class="o">=</span> <span class="n">fn</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="sr">/\.[^.]*$/</span><span class="p">,</span> <span class="s1">'.o'</span><span class="p">)</span>
   <span class="n">file</span> <span class="n">obj</span>  <span class="k">do</span>
     <span class="n">sh</span> <span class="s2">"cc -c -o </span><span class="si">#{</span><span class="n">obj</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">fn</span><span class="si">}</span><span class="s2">"</span>
   <span class="k">end</span>
 <span class="k">end</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>上边的这个例子中，对所有的”.c”文件，创建了一个对应的file规则用于自动生存”.o”文件。</p>
 

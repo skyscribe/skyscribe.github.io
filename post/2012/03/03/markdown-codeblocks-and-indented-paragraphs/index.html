@@ -502,23 +502,21 @@
 
 <p><strong>Markdown</strong>是一种很简单灵活的标记工具，其语法在<a href="http://daringfireball.net/projects/markdown/syntax">官方文档</a>里边有很详细的描述。不过我在使用其语法进行markup的时候发现段落缩进和<strong>codeblock</strong>同时使用的时候，有些奇怪的行为。如果希望下一个子段落保持缩进并且同时放置一个代码块，则格式可能就变混乱起来。譬如：</p>
 
-<div class="language-markdown highlighter-rouge"><pre class="highlight"><code><span class="p">-</span> Test title
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">-</span> Test title
     test indented paragraph, with some ruby code
         
         puts "hello"
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>将产生如下的输出:</p>
 
 <hr />
 <p>Test title</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>test indented paragraph, with some ruby code
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test indented paragraph, with some ruby code
     
     puts "hello" ------------------
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <!--more-->
 <p>上述输出中，子段落部分显然不是我们希望的codeblock。</p>

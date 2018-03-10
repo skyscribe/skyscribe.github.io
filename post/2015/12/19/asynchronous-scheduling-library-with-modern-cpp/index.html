@@ -525,19 +525,18 @@
 
 <h3 id="调用属性结构">调用属性结构</h3>
 <p>可以用一个结构来描述这些基本参数组合。</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">Callable</span><span class="p">;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">Callable</span><span class="p">;</span>
 <span class="k">struct</span> <span class="n">CallProperty</span><span class="p">{</span>
     <span class="kt">bool</span> <span class="n">async</span><span class="p">;</span> <span class="c1">//will the job be scheduled asynchronously (under same context)
 </span>    <span class="kt">bool</span> <span class="n">waitForDone</span><span class="p">;</span> <span class="c1">//if interfaceCall will be blocked (for done) or not, will be ignored for async call
 </span>    <span class="n">Callable</span> <span class="n">onCallDone</span><span class="p">;</span>
     <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">strand</span><span class="p">;</span> <span class="c1">//calls with same strand will be scheduled by same thread, async only
 </span><span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="可变参数">可变参数</h3>
 <p>由于注册的任务可能需要一些运行期的参数在真正调用的点才知道，我们需要支持预先定义好这些参数签名，仅仅在实际调用端才传入具体的参数；即如下的使用方式</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//registration
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//registration
 </span><span class="n">InterfaceScheduler</span> <span class="n">sched</span><span class="p">;</span>
 <span class="n">sched</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span> <span class="c1">//starting a pool of 4 threads
 </span>
@@ -547,11 +546,10 @@
 <span class="c1">//calling site
 </span><span class="n">CallProperty</span> <span class="n">prop</span><span class="p">{</span><span class="nb">true</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">Callable</span><span class="p">(),</span> <span class="s">""</span><span class="p">};</span> <span class="c1">//asynchronous call, non-blocking, no strand
 </span><span class="n">sched</span><span class="p">.</span><span class="n">interfaceCall</span><span class="p">(</span><span class="s">"serviceName"</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">CallProperty</span><span class="o">&gt;</span><span class="p">(</span><span class="n">prop</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"actualParam"</span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>参数的定义可以使用<code class="highlighter-rouge">tuple</code>结合closure来实现灵活的绑定</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">struct</span> <span class="n">ParaArgsBase</span><span class="p">{};</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">ParaArgsBase</span><span class="p">{};</span>
 
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="o">&gt;</span>
 <span class="k">struct</span> <span class="n">ParamArgs</span> <span class="o">:</span> <span class="k">public</span> <span class="n">ParaArgsBase</span><span class="p">{</span>
@@ -565,8 +563,7 @@
 <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple_element</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Types</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&gt;::</span><span class="n">type</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="k">const</span> <span class="n">ParamArgs</span><span class="o">&lt;</span><span class="n">Types</span> <span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">args</span><span class="p">){</span>
     <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">parameters</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="设计">设计</h2>
 <p>设计起来比较简单，可以通过几个核心类和典型场景来描述。</p>
@@ -640,7 +637,7 @@
 <p>服务注册的时候需要编码进类型信息，方便后续调用的时候进行类型签名检查，防止参数不匹配。
 这些检查都是通过一些全局的工具类函数来实现的</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="p">,</span> <span class="k">class</span> <span class="nc">ActionType</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="p">,</span> <span class="k">class</span> <span class="nc">ActionType</span><span class="o">&gt;</span>
 <span class="kr">inline</span> <span class="kt">void</span> <span class="n">registerInterfaceFor</span><span class="p">(</span><span class="n">InterfaceScheduler</span><span class="o">&amp;</span> <span class="n">sched</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">ActionType</span> <span class="n">action</span><span class="p">){</span>
     <span class="c1">//Check templateype-safety as possible, lambdas/binds shall have targets, while functions may not
 </span>    <span class="k">typedef</span> <span class="n">ParamArgs</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;</span> <span class="n">ActualType</span><span class="p">;</span>
@@ -656,8 +653,7 @@
             <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ActualType</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">));</span>
     <span class="p">},</span> <span class="n">ActualType</span><span class="o">::</span><span class="n">getType</span><span class="p">());</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>由于实际注册的<code class="highlighter-rouge">action</code>可以是任何合法的函数对象，这个wrapper里做了一些额外的判断</p>
 <ul>
   <li>类型签名是否匹配，用<code class="highlighter-rouge">is_convertible</code>和<code class="highlighter-rouge">static_assert</code>做编译器检查即可</li>
@@ -667,7 +663,7 @@
 <h3 id="调用类型检查">调用类型检查</h3>
 <p>调用通过一个内部带类型比对和匿名函数封装的实现函数和一个公有的可变长参数模板函数来实现。</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//Schedule a previously registered interface cally by CallProperty (see its definition)
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Schedule a previously registered interface cally by CallProperty (see its definition)
 </span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="o">&gt;</span>
 <span class="kt">bool</span> <span class="n">interfaceCallfaceCall</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">CallProperty</span><span class="o">&amp;&amp;</span> <span class="n">prop</span><span class="p">,</span> <span class="k">const</span> <span class="n">Args</span><span class="o">&amp;</span> <span class="p">...</span><span class="n">args</span><span class="p">){</span>
     <span class="k">return</span> <span class="n">checkAndInvokeCall</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;</span><span class="p">(</span><span class="n">idStr</span><span class="p">,</span> <span class="n">prop</span><span class="p">.</span><span class="n">async</span><span class="p">,</span> <span class="n">prop</span><span class="p">.</span><span class="n">waitForDone</span><span class="p">,</span> 
@@ -690,8 +686,7 @@
             <span class="k">return</span> <span class="n">action</span><span class="p">(</span><span class="n">param</span><span class="p">);</span>
         <span class="p">},</span> <span class="n">async</span><span class="p">,</span> <span class="n">waitForDone</span><span class="p">,</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Callable</span><span class="o">&gt;</span><span class="p">(</span><span class="n">onCallDone</span><span class="p">));</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>我们很喜欢C++作为强类型语言的特性，希望编译器能多帮程序员检查一些类型不匹配错误，就先用传入的参数类型和注册时候提供的类型做一比较。
 注意这里实际发生调用的时候已经是程序运行过程中了，所以模板元技术要用的话需要多费一些功夫，通过构造一个具体的<code class="highlighter-rouge">ActualType</code>和内部存储的类型做逐一比对。
 如果比对没错误，就可以构造出来一个可调用的函数传给具体的<code class="highlighter-rouge">invokeCall</code>了。底层调度任务的时候<strong>已经不知道外层传入的参数</strong>了（除非我们用可以放异构类型的容器 - 可惜variant）
@@ -705,7 +700,7 @@
 对于阻塞方式，调用需要在内部实现同步机制，保证阻塞调用者线程直到异步任务实际被调度完毕 - <strong>简单直接的思路是利用已有的API</strong>，内部就地构造一个完成调用做显示同步。
 简单优雅的实现如下</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="kt">bool</span> <span class="n">AsyncWorker</span><span class="o">::</span><span class="n">doSyncJob</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">name</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">call</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">onDone</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">bool</span> <span class="n">AsyncWorker</span><span class="o">::</span><span class="n">doSyncJob</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">name</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">call</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">onDone</span><span class="p">){</span>
     <span class="kt">bool</span> <span class="n">finished</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
     <span class="n">mutex</span> <span class="n">flagMutex</span><span class="p">;</span>
     <span class="n">condition_variable</span> <span class="n">cond</span><span class="p">;</span>
@@ -725,8 +720,7 @@
     <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>由于代码上下文很清晰，我们甚至不需要写任何子函数，直接通过lambda表达式构造完成调用，通过捕获的上下午获取（注意<code class="highlighter-rouge">[&amp;]</code>指示）条件变量和同步标记变量的引用,在内部唤醒环境变量；
 外部线程执行完异步调用之后，就守候环境变量保护的标记变量知道更新完毕。</p>

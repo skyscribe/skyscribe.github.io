@@ -513,28 +513,26 @@
 
 <p>可以用如下这些命令获取帮助：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cmake --help-commands
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-commands</span>
+</code></pre></div></div>
 
 <p>这个命令将给出所有cmake内置的命令的详细帮助，一般不知道自己要找什么或者想随机翻翻得时候，可以用这个。我一般更常用的方法是将其重定向到less里边，然后在里边搜索关键字。</p>
 
 <p>另外也可以用如下的办法层层缩小搜索范围：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cmake --help-command-list
-cmake --help-command-list | grep find
-<span class="gp">skyscribe@skyscribe:~/program/bld$ </span>cmake --help-command-list | grep find
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-command-list</span>
+cmake <span class="nt">--help-command-list</span> | <span class="nb">grep </span>find
+skyscribe@skyscribe:~/program/bld<span class="nv">$ </span>cmake <span class="nt">--help-command-list</span> | <span class="nb">grep </span>find
 find_file
 find_library
 find_package
 find_path
 find_program
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里找到了一些find相关的命令，可以具体查看某一个命令的manual了。</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cmake version 2.8.5
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake version 2.8.5
     find_library
         Find a library.
 
@@ -576,8 +574,7 @@ find_program
     variable.  The argument after DOC will be used <span class="k">for </span>the documentation
 
     ......
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>variable</li>
@@ -586,7 +583,7 @@ find_program
 <p>和command的帮助比较类似，只不过这里可以查找cmake自己定义了那些变量你可以直接使用，譬如OSName，是否是Windows，Unix等。
 我最常用的一个例子：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cmake --help-variable-list  | grep CMAKE | grep HOST
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-variable-list</span>  | <span class="nb">grep </span>CMAKE | <span class="nb">grep </span>HOST
 
 CMAKE_HOST_APPLE
 CMAKE_HOST_SYSTEM
@@ -595,20 +592,18 @@ CMAKE_HOST_SYSTEM_PROCESSOR
 CMAKE_HOST_SYSTEM_VERSION
 CMAKE_HOST_UNIX
 CMAKE_HOST_WIN32
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里查找所有CMake自己定义的builtin变量；一般和系统平台相关。</p>
 
 <p>如果希望将所有生成的可执行文件、库放在同一的目录下，可以如此做：</p>
 
-<div class="language-cmake highlighter-rouge"><pre class="highlight"><code><span class="c1"># Targets directory</span>
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Targets directory</span>
 
 <span class="nb">set</span><span class="p">(</span>CMAKE_ARCHIVE_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/lib<span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span>CMAKE_LIBRARY_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/lib<span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span>CMAKE_RUNTIME_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/bin<span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的target_dir是一个实现设置好的绝对路径。（CMake里边<strong>绝对路径比相对路径更少出问题</strong>，如果可能尽量用绝对路径）</p>
 
@@ -622,7 +617,7 @@ CMAKE_HOST_WIN32
 
 <p>这时候，就可以通过修改taget对应的文件名，从而达到既生成动态库也产生静态库的目的。譬如:</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>make --help-property-list | grep NAME
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make <span class="nt">--help-property-list</span> | <span class="nb">grep </span>NAME
 
 GENERATOR_FILE_NAME
 IMPORTED_SONAME
@@ -631,7 +626,7 @@ INSTALL_NAME_DIR
 OUTPUT_NAME
 VS_SCC_PROJECTNAME
 
-<span class="gp">skyscribe@skyscribe:~$ </span>cmake --help-property OUTPUT_NAME
+skyscribe@skyscribe:~<span class="nv">$ </span>cmake <span class="nt">--help-property</span> OUTPUT_NAME
 cmake version 2.8.5
     OUTPUT_NAME
         Output name <span class="k">for </span>target files.
@@ -640,8 +635,7 @@ cmake version 2.8.5
         library target.  If not <span class="nb">set</span>, the logical target name is used by
         default.
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>module</li>
@@ -651,17 +645,16 @@ cmake version 2.8.5
 
 <p>譬如常用的boost库，可以通过如下方式：</p>
 
-<div class="language-cmake highlighter-rouge"><pre class="highlight"><code><span class="c1"># Find boost 1.40</span>
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Find boost 1.40</span>
 <span class="nf">INCLUDE</span><span class="p">(</span>FindBoost<span class="p">)</span>
 <span class="nb">find_package</span><span class="p">(</span>Boost 1.40.0 COMPONENTS thread unit_test_framework<span class="p">)</span>
 <span class="nb">if</span><span class="p">(</span>NOT Boost_FOUND<span class="p">)</span>
     <span class="nb">message</span><span class="p">(</span>STATUS <span class="s2">"BOOST not found, test will not succeed!"</span><span class="p">)</span>
 <span class="nb">endif</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>一般开头部分的解释都相当有用，可满足80%需求,这里是_FindBoost_的文档：</p>
-<div class="language-cmake highlighter-rouge"><pre class="highlight"><code>cmake version 2.8.5
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake version 2.8.5
     FindBoost
         Try to find Boost include dirs and libraries
 
@@ -698,8 +691,7 @@ cmake version 2.8.5
                 <span class="nb">target_link_libraries</span><span class="p">(</span>foo <span class="si">${</span><span class="nv">Boost_LIBRARIES</span><span class="si">}</span><span class="p">)</span>
             <span class="nb">endif</span><span class="p">()</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="如何根据其生成的中间文件查看一些关键信息">如何根据其生成的中间文件查看一些关键信息</h2>
 <p>CMake相比较于autotools的一个优势就在于其生成的中间文件组织的很有序，并且清晰易懂，不像autotools会生成天书一样的庞然大物（10000+的不鲜见）。</p>
@@ -708,18 +700,17 @@ cmake version 2.8.5
 
 <p>譬如对于某一个target，一般binary tree下可以找到一个文件夹:  __CMakeFiles/<targentName>.dir/__,比如：</targentName></p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>ls -l
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ls</span> <span class="nt">-l</span>
 total 84
--rw-r--r-- 1 skyscribe skyscribe 52533 2009-12-12 12:20 build.make
--rw-r--r-- 1 skyscribe skyscribe  1190 2009-12-12 12:20 cmake_clean.cmake
--rw-r--r-- 1 skyscribe skyscribe  4519 2009-12-12 12:20 DependInfo.cmake
--rw-r--r-- 1 skyscribe skyscribe    94 2009-12-12 12:20 depend.make
--rw-r--r-- 1 skyscribe skyscribe   573 2009-12-12 12:20 flags.make
--rw-r--r-- 1 skyscribe skyscribe  1310 2009-12-12 12:20 link.txt
--rw-r--r-- 1 skyscribe skyscribe   406 2009-12-12 12:20 progress.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe 52533 2009-12-12 12:20 build.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  1190 2009-12-12 12:20 cmake_clean.cmake
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  4519 2009-12-12 12:20 DependInfo.cmake
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe    94 2009-12-12 12:20 depend.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe   573 2009-12-12 12:20 flags.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  1310 2009-12-12 12:20 link.txt
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe   406 2009-12-12 12:20 progress.make
 drwxr-xr-x 2 skyscribe skyscribe  4096 2009-12-12 12:20 src
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里，每一个文件都是个很短小的文本文件，内容相当清晰明了。build.make一般包含中间生成文件的依赖规则，DependInfo.cmake一般包含源代码文件自身的依赖规则。</p>
 
 <p>比较重要的是flags.make和link.txt，前者一般包含了类似于GCC的-I的相关信息，如搜索路径，宏定义等；后者则包含了最终生成target时候的linkage信息，库搜索路径等。</p>
@@ -748,12 +739,11 @@ drwxr-xr-x 2 skyscribe skyscribe  4096 2009-12-12 12:20 src
 所谓的rpath是和动态库的加载运行相关的。我一般采用如下的方式取代默认添加的rpath：</li>
 </ul>
 
-<div class="language-cmake highlighter-rouge"><pre class="highlight"><code><span class="nf">SET</span><span class="p">(</span>CMAKE_SKIP_BUILD_RPATH  FALSE<span class="p">)</span>
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">SET</span><span class="p">(</span>CMAKE_SKIP_BUILD_RPATH  FALSE<span class="p">)</span>
 <span class="nf">SET</span><span class="p">(</span>CMAKE_BUILD_WITH_INSTALL_RPATH FALSE<span class="p">)</span> 
 <span class="nf">SET</span><span class="p">(</span>CMAKE_INSTALL_RPATH <span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_INSTALL_PREFIX</span><span class="si">}</span><span class="s2">/lib"</span><span class="p">)</span>
 <span class="nf">SET</span><span class="p">(</span>CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE<span class="p">)</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="参考">参考</h2>
 <p>CMake Home: <a href="http://www.cmake.org/">link</a></p>

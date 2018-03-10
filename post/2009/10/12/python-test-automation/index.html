@@ -517,7 +517,7 @@
 
 <p>最后的代码就有了：</p>
 
-<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">unittest</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">unittest</span>
 <span class="kn">from</span> <span class="nn">test</span> <span class="kn">import</span> <span class="n">test_support</span>
 
 <span class="k">def</span> <span class="nf">MyTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
@@ -547,8 +547,7 @@
       
 <span class="k">def</span> <span class="nf">test_main</span><span class="p">():</span>
     <span class="n">test_support</span><span class="o">.</span><span class="n">run_unittest</span><span class="p">(</span><span class="n">MyTestCase</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>如此，添加一个新的可变参数组合，就会新生成一个test case， 只需要将参数组合添加到arglist中就可以了。</p>
 

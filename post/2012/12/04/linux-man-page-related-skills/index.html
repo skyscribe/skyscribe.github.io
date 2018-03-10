@@ -542,15 +542,14 @@
 <h2 id="color相关的环境变量设置">color相关的环境变量设置</h2>
 <p>如果希望man的输出是带有不同颜色标记色块的格式，可以通过修改一些环境变量来控制终端输出显示(放在.bashrc）:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>export LESS_TERMCAP_mb=$'\E[01;31m'
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export LESS_TERMCAP_mb=$'\E[01;31m'
 export LESS_TERMCAP_md=$'\E[01;37m'
 export LESS_TERMCAP_me=$'\E[0m'
 export LESS_TERMCAP_se=$'\E[0m'
 export LESS_TERMCAP_so=$'\E[01;44;33m'
 export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="most">most</h2>
 <p>most是一个漂亮的page工具，可以通过系统的包管理器安装(<code class="highlighter-rouge">apt-get install most</code>)。需要注意的是，其操作方式中的某些快捷键采用了Emacs风格，但是也可以用空格来翻页。</p>
@@ -558,28 +557,26 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 <h2 id="update-alternatives">update-alternatives</h2>
 <p>如果需要修改默认的page工具，在Debian以及衍生发行版上，可以使用 <code class="highlighter-rouge">update-alternatives</code> 工具来修改默认的系统工具程序：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>update-alternatives --list pager
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>update-alternatives <span class="nt">--list</span> pager
 <span class="c">#/bin/less</span>
 <span class="c">#/bin/more</span>
 <span class="c">#/bin/bin/most</span>
 <span class="c">#/bin/bin/pg</span>
-update-alternatives --config pager
-</code></pre>
-</div>
+update-alternatives <span class="nt">--config</span> pager
+</code></pre></div></div>
 
 <p>第二个命令会给出当前的系统可用工具，并用 * 表示当前的选择，如：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>There are 4 choices <span class="k">for </span>the alternative pager <span class="o">(</span>providing /usr/bin/pager<span class="o">)</span>.
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>There are 4 choices <span class="k">for </span>the alternative pager <span class="o">(</span>providing /usr/bin/pager<span class="o">)</span><span class="nb">.</span>
 
   Selection    Path            Priority   Status
-  ------------------------------------------------------------
+  <span class="nt">------------------------------------------------------------</span>
     0            /bin/less        77        auto mode
     1            /bin/less        77        manual mode
     2            /bin/more        50        manual mode
   <span class="k">*</span> 3            /usr/bin/most    60        manual mode
     4            /usr/bin/pg      10        manual mode
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>然后会交互提示用户去选择一个，默认则是仅保留当前的选项。</p>
 
 <h1 id="window管理器">Window管理器</h1>

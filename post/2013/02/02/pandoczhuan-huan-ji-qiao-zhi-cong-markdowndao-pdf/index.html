@@ -506,10 +506,9 @@
 
 <p>通过指定<code class="highlighter-rouge">-o xx.pdf</code>选项指定输出后缀为<code class="highlighter-rouge">.pdf</code>之后，pandoc就可以<strong>自动</strong>完成到PDF格式的转换，譬如：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#generte pdf from markdown</span>
-pandoc test.markdown -o test.pdf
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#generte pdf from markdown</span>
+pandoc test.markdown <span class="nt">-o</span> test.pdf
+</code></pre></div></div>
 
 <p>PDF输出可以用以下格式来控制：</p>
 <ul>
@@ -517,26 +516,23 @@ pandoc test.markdown -o test.pdf
   <li>控制生成的目录标题，使其自动编号。默认情况，<strong>标题是不自动编号的</strong>。</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>pandoc --toc --number-sections test.markdown -o test.pdf
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pandoc <span class="nt">--toc</span> <span class="nt">--number-sections</span> test.markdown <span class="nt">-o</span> test.pdf
+</code></pre></div></div>
 <ul>
   <li>生存beamer格式的幻灯片：</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#--slide-level specifies the maximum title level</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#--slide-level specifies the maximum title level</span>
 <span class="c"># -t beamer specifies beamer format for slide show</span>
-pandoc --slide-level<span class="o">=</span>2 -t beamer test.markdown -o test.pdf
-</code></pre>
-</div>
+pandoc <span class="nt">--slide-level</span><span class="o">=</span>2 <span class="nt">-t</span> beamer test.markdown <span class="nt">-o</span> test.pdf
+</code></pre></div></div>
 <ul>
   <li>禁用pandoc的markdown扩展(采用标准markdown语法)：</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#-f markdown_strcit[+feature]</span>
-pandoc -f markdown_strict test.markdown -o test.pdf
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#-f markdown_strcit[+feature]</span>
+pandoc <span class="nt">-f</span> markdown_strict test.markdown <span class="nt">-o</span> test.pdf
+</code></pre></div></div>
 
 <h2 id="latex-模板定制">latex 模板定制</h2>
 

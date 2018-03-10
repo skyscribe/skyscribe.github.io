@@ -524,7 +524,7 @@
 <p>kotlin通过关键字 <code class="highlighter-rouge">val</code> 来声明<strong>只读</strong>的变量，用 <code class="highlighter-rouge">var</code> 来声明可变量。任何函数只要引入对可变量的使用，则其本身就是有明显的副作用的。然而一个变量声明为只读，仅仅表示在其对应的作用域中，不允许修改此变量的值，并<strong>不意味着实际指向的数据对象本身是不可变</strong>的， 因为在可能有其他的地方使用 <code class="highlighter-rouge">var</code> 的方式来操作此变量，或者有显示的方式将一个 <code class="highlighter-rouge">val</code> 的变量转换回可变的 <code class="highlighter-rouge">var</code>。</p>
 
 <p>考虑下边的例子：</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="c1">// field1 是只读的，在本class中不允许修改它
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// field1 是只读的，在本class中不允许修改它
 </span><span class="kd">class</span> <span class="nc">SomeClass</span><span class="p">(</span><span class="kd">val</span> <span class="py">field1</span> <span class="p">:</span> <span class="n">SomeType</span><span class="p">,</span> <span class="kd">var</span> <span class="py">field2</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
    <span class="k">fun</span> <span class="nf">doSth</span><span class="p">()</span> <span class="p">{</span>
        <span class="c1">// can only modify field2, but not field1
@@ -536,8 +536,7 @@
 <span class="kd">val</span> <span class="py">obj</span> <span class="p">=</span> <span class="n">SomeClass</span><span class="p">(</span><span class="n">someTypeInst</span><span class="p">,</span> <span class="m">112</span><span class="p">)</span>
 <span class="c1">// someTypeInst can still be changed by others! Not recommended!
 </span><span class="n">obj</span><span class="p">.</span><span class="n">doSth</span><span class="p">()</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>虽然<code class="highlighter-rouge">someTypeInst</code>是以只读方式传入<code class="highlighter-rouge">obj</code> 的，然而并不能保证没有其它的线程并发地修改实际的对象，如果发生这种情况，<strong>程序员仍然需要保证数据的一致性和安全</strong>。</p>
 
 <h3 id="只读变量的初始化">只读变量的初始化</h3>
@@ -549,7 +548,7 @@
 
 <h3 id="接口定义">接口定义</h3>
 <p>常用的集合类接口在<code class="highlighter-rouge">kotlin,collections</code> 包中被重新定义 ( 源码中位于 <code class="highlighter-rouge">Collections.kt</code> )</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span> 
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span> 
 <span class="c1">//...
 // by default not mutable
 </span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">Iterable</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//... }
@@ -562,32 +561,29 @@
 </span>
 <span class="c1">// Supports read/write operations
 </span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">MutableCollection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Collection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;,</span> <span class="n">MutableIterable</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <p>具体的集合类接口则选择从以上接口中<strong>选择对应的</strong>来扩展实现，因而对同一个类型有两种实现，分别是只读的 (没有前缀) 的和可变类型 (<strong>用 Mutable 做前缀区分</strong>) 。譬如 <code class="highlighter-rouge">List</code> 类就定义为</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="c1">// Read only list interface
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Read only list interface
 </span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">List</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Collection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
 // Mutable list
 </span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">MutableList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;,</span> <span class="n">MutableCollection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <p>需要注意的是，实际的具体实现类是复用Java中的定义，可参考collection包中的 <code class="highlighter-rouge">TypeAliases.kt</code> 文件</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span>
 <span class="c1">//...
 </span><span class="n">@SinceKotlin</span><span class="p">(</span><span class="s">"1.1"</span><span class="p">)</span> <span class="k">public</span> <span class="k">typealias</span> <span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>默认的集合操作以及Streams API返回的大部分是不可变接口对象。</p>
 
 <h3 id="集合类扩展工具函数">集合类扩展/工具函数</h3>
 <p>除了使用默认的JDK实现来生成具体集合类对象，Kotlin标准库中同时提供了大量的封装函数方便程序员使用，某些来源于对JDK的直接封装，有一些则是直接inline实现。</p>
 
 <p>譬如返回空list的包装和初始化形形色色的list</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="cm">/** Returns an empty read-only list. */</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Returns an empty read-only list. */</span>
 <span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">emptyList</span><span class="p">():</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">EmptyList</span>
 
 <span class="cm">/** Returns a new read-only list of given elements.  */</span>
@@ -603,12 +599,11 @@
  */</span>
 <span class="n">@JvmVersion</span>
 <span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">listOf</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Collections</span><span class="p">.</span><span class="n">singletonList</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>生成可变List的函数封装大多也是清晰明了 , 并且有很多种类的封装，使得就地生成 List 的工作大大简化；大部分情况仅仅需要<strong>使用已有的函数</strong>即可，不需要发明新的轮子</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="cm">/** Returns an empty new [MutableList]. */</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Returns an empty new [MutableList]. */</span>
 <span class="n">@SinceKotlin</span><span class="p">(</span><span class="s">"1.1"</span><span class="p">)</span>
 <span class="n">@kotlin</span><span class="p">.</span><span class="k">internal</span><span class="p">.</span><span class="n">InlineOnly</span>
 <span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">mutableListOf</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">ArrayList</span><span class="p">()</span>
@@ -621,8 +616,7 @@
 <span class="cm">/** Returns a new [MutableList] with the given elements. */</span>
 <span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">mutableListOf</span><span class="p">(</span><span class="k">vararg</span> <span class="n">elements</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
         <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">elements</span><span class="p">.</span><span class="n">size</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span> <span class="n">ArrayList</span><span class="p">()</span> <span class="k">else</span> <span class="n">ArrayList</span><span class="p">(</span><span class="n">ArrayAsCollection</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">isVarargs</span> <span class="p">=</span> <span class="k">true</span><span class="p">))</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>其它集合类  (set/map等) 的实现原理<strong>大概类似</strong>，可以通过查看对应源码。</p>
 
@@ -631,7 +625,7 @@
 
 <p>如果想要将一个只读的 <code class="highlighter-rouge">Array</code> 对象变为一个可变的 <code class="highlighter-rouge">MutableList</code>，那么其实现是通过重新初始化一个新对象实现的：</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="c1">// Below code is copied from generated standlib as _Arrays.kt
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Below code is copied from generated standlib as _Arrays.kt
 //  see https://github.com/JetBrains/kotlin/tree/master/libraries/stdlib
 </span>
 <span class="cm">/**
@@ -640,11 +634,10 @@
 <span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">Array</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;.</span><span class="n">toMutableList</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">ArrayList</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">asCollection</span><span class="p">())</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>对于具体的Array类，有不同的实现，如 <code class="highlighter-rouge">ByteArray</code> 的初始化方法则有所不同，直接调用其构造函数，然后注意添加现有的各个元素</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="cm">/**
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Returns a [MutableList] filled with all elements of this array.
  */</span>
 <span class="k">public</span> <span class="k">fun</span> <span class="nf">ByteArray</span><span class="p">.</span><span class="n">toMutableList</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">Byte</span><span class="p">&gt;</span> <span class="p">{</span>
@@ -652,8 +645,7 @@
     <span class="k">for</span> <span class="p">(</span><span class="n">item</span> <span class="k">in</span> <span class="k">this</span><span class="p">)</span> <span class="n">list</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">list</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>之所以如此，是因为具体这些子类是被映射到具体的 JVM 对象上的。如ByteArray的文档如是说</p>
 <blockquote>
   <p>public final class ByteArray defined in kotlin

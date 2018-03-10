@@ -524,20 +524,20 @@
   <li>另外一个用于每次更新内容，调用 <code class="highlighter-rouge">jekyll build</code> 完成编译后，将生成的内容全部copy到deploy目录下，然后再同步到github的repository</li>
 </ol>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
 <span class="nv">deployDir</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/_deploy
 <span class="nv">siteDir</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/_site
 <span class="nv">siteUrl</span><span class="o">=</span>https://github.com/skyscribe/skyscribe.github.io.git
 
 <span class="k">function </span>setup<span class="o">()</span> <span class="o">{</span>
-    rm -fr <span class="nv">$deployDir</span>
-    mkdir -p <span class="nv">$deployDir</span>
+    rm <span class="nt">-fr</span> <span class="nv">$deployDir</span>
+    mkdir <span class="nt">-p</span> <span class="nv">$deployDir</span>
     <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">"</span>
     git init
-    <span class="nb">echo</span> <span class="s2">"dummy content"</span> &gt; index.html
-    git add .
-    git commit -m <span class="s2">"dummy script init"</span>
-    git branch -m master
+    <span class="nb">echo</span> <span class="s2">"dummy content"</span> <span class="o">&gt;</span> index.html
+    git add <span class="nb">.</span>
+    git commit <span class="nt">-m</span> <span class="s2">"dummy script init"</span>
+    git branch <span class="nt">-m</span> master
     git remote add origin <span class="s2">"</span><span class="nv">$siteUrl</span><span class="s2">"</span>
     <span class="nb">echo</span> <span class="s2">"Setup complete for </span><span class="nv">$deployDir</span><span class="s2">"</span>
 <span class="o">}</span>
@@ -545,12 +545,12 @@
 <span class="k">function </span>deploy<span class="o">()</span> <span class="o">{</span>
     bundle <span class="nb">exec </span>jekyll build
     <span class="nb">cd</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">"</span>
-    cp -r <span class="s2">"</span><span class="nv">$siteDir</span><span class="s2">"</span>/<span class="k">*</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">/"</span>
+    cp <span class="nt">-r</span> <span class="s2">"</span><span class="nv">$siteDir</span><span class="s2">"</span>/<span class="k">*</span> <span class="s2">"</span><span class="nv">$deployDir</span><span class="s2">/"</span>
     git pull origin master
-    git add -A
+    git add <span class="nt">-A</span>
     <span class="nv">now</span><span class="o">=</span><span class="k">$(</span>date <span class="s2">"+%Y-%m-%d_%H:%M:%S"</span><span class="k">)</span>
-    git commit -m <span class="s2">"site updated at </span><span class="nv">$now</span><span class="s2">"</span>
-    git push origin master --force
+    git commit <span class="nt">-m</span> <span class="s2">"site updated at </span><span class="nv">$now</span><span class="s2">"</span>
+    git push origin master <span class="nt">--force</span>
     <span class="nb">echo</span> <span class="s2">"deploy completed"</span>
 <span class="o">}</span>
 
@@ -563,18 +563,16 @@
         deploy
         <span class="p">;;</span>
 <span class="k">esac</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="数据搬运">数据搬运</h2>
 
 <p>相对来说数据搬运不是很困难就是比较繁琐，原来很多Octopress支持的插件，在这里都得自己检验是否不工作或者是否有合适的插件可以替代。期间的过程就是不断的<strong>测试驱动</strong>搬运，发现编译出错后，打开<code class="highlighter-rouge">--trace</code>开关，看问题出在什么地方然后一一修改之。最麻烦的一个问题是 gist 插件貌似产生了不兼容，原来的 <code class="highlighter-rouge">include_file</code> 插件也没法再用，只好将文件内容copy过来，用Liquid的 <code class="highlighter-rouge">highlight</code> 和 <code class="highlighter-rouge">include</code> 标签，套用如下的模板</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">highlight</span><span class="w"> </span><span class="err">html</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-    </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">include</span><span class="w"> </span><span class="err">code/include.html</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-</span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endhighlight</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-</span></code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% highlight html %}
+    {% include code/include.html %}
+{% endhighlight %}
+</code></pre></div></div>
 
 <h2 id="插件和定制">插件和定制</h2>
 
@@ -589,26 +587,25 @@
 <h3 id="tag-cloud">Tag cloud</h3>
 <p>Octopress的tagcloud插件，找了一圈也没找到好的，仿照别人家的，写了个简单的 tagcloud.html</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">all_tags</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">site.tags</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">size</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-</span><span class="err">&lt;h</span><span class="mi">3</span><span class="err">&gt;</span><span class="w">
-  </span><span class="err">&lt;a</span><span class="w"> </span><span class="err">href=</span><span class="s2">"{{absolute_url}}/categories/index.html"</span><span class="err">&gt;Categories&lt;/a&gt;</span><span class="w">
-</span><span class="err">&lt;/h</span><span class="mi">3</span><span class="err">&gt;</span><span class="w">
-</span><span class="err">&lt;div</span><span class="w"> </span><span class="err">class=</span><span class="s2">"tagCloud"</span><span class="err">&gt;</span><span class="w">
-  </span><span class="err">&lt;ul&gt;</span><span class="w">
-  </span><span class="p">{</span><span class="err">%for</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">site.categories</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">category_name</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">first</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">tag</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">last</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">size</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">assign</span><span class="w"> </span><span class="err">cat_avg</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">div:</span><span class="w"> </span><span class="err">all_tags</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-  </span><span class="err">&lt;li&gt;</span><span class="w">
-  </span><span class="err">&lt;span</span><span class="w"> </span><span class="err">class=</span><span class="s2">"tag"</span><span class="err">&gt;</span><span class="w">
-      </span><span class="err">&lt;a</span><span class="w"> </span><span class="err">href=</span><span class="s2">"{{absolute_url}}/categories/{{ category_name | downcase}}/index.html"</span><span class="err">&gt;</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">category_name</span><span class="w"> </span><span class="p">}</span><span class="err">}(</span><span class="p">{</span><span class="err">{</span><span class="w"> </span><span class="err">cat_count</span><span class="w"> </span><span class="p">}</span><span class="err">})&lt;/a&gt;</span><span class="w">
-  </span><span class="err">&lt;/span&gt;</span><span class="w">
-  </span><span class="err">&lt;/li&gt;</span><span class="w">
-  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
-  </span><span class="err">&lt;/ul&gt;</span><span class="w">
-</span><span class="err">&lt;/div&gt;</span><span class="w">
-</span></code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% assign all_tags = site.tags | size %}
+&lt;h3&gt;
+  &lt;a href="{{absolute_url}}/categories/index.html"&gt;Categories&lt;/a&gt;
+&lt;/h3&gt;
+&lt;div class="tagCloud"&gt;
+  &lt;ul&gt;
+  {%for tag in site.categories %}
+  {% assign category_name = tag | first %}
+  {% assign cat_count = tag | last | size %}
+  {% assign cat_avg = cat_count | div: all_tags %}
+  &lt;li&gt;
+  &lt;span class="tag"&gt;
+      &lt;a href="{{absolute_url}}/categories/{{ category_name | downcase}}/index.html"&gt;{{ category_name }}({{ cat_count }})&lt;/a&gt;
+  &lt;/span&gt;
+  &lt;/li&gt;
+  {% endfor %}
+  &lt;/ul&gt;
+&lt;/div&gt;
+</code></pre></div></div>
 
 <p>稍微定制下需要显示的地方，将上述html给include进去即可。</p>
 

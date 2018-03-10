@@ -506,14 +506,13 @@
 
 <p>awk自身支持类似于C语言数组的数据结构，称之为<strong>array</strong>，但是其下标却不仅仅限于数字，可以是字符串等其它类型；行为上来说更似于一个关联容器，从某个变量关联到另外一个变量：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
     arr['</span>aa<span class="s1">'] = 1
     arr[4] = 2
     print arr['</span>aa<span class="s1">']
 }'</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>基本的array操作：</p>
 
@@ -521,7 +520,7 @@
   <li>遍历元素</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
     arr[1] = "cc"
     arr[2] = "ddd"
     arr['</span>ccd<span class="s1">'] = "demo"
@@ -529,36 +528,35 @@
         print arr[i]
     }
 }'</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>多维数组 - 多个下表操作内部会被转换为<strong>SUBSEP</strong>连接的字符串为索引的array:</li>
 </ul>
 
-<figure class="highlight"><pre><code class="language-awk" data-lang="awk">    #!/usr/bin/awk -f
-BEGIN{
-    for(i = 0; i &lt; 10; i++){
-        for(j = 0; j &lt; 8; j++){
-            grid[i, j] = i * j;
-        }
-    }
-    grid[1,2,7] = 14;
-    grid[4,2,7] = 56;
+<figure class="highlight"><pre><code class="language-awk" data-lang="awk">    <span class="c1">#!/usr/bin/awk -f</span>
+<span class="kr">BEGIN</span><span class="p">{</span>
+    <span class="k">for</span><span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">){</span>
+            <span class="nx">grid</span><span class="p">[</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">i</span> <span class="o">*</span> <span class="nx">j</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nx">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">;</span>
+    <span class="nx">grid</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="mi">56</span><span class="p">;</span>
 
-    if ( (1,2) in grid){
-        printf("grid[1][2]=%d\n", grid[1,2]);
-    }
+    <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">in</span> <span class="nx">grid</span><span class="p">){</span>
+        <span class="k">printf</span><span class="p">(</span><span class="s2">"grid[1][2]=%d\n"</span><span class="p">,</span> <span class="nx">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]);</span>
+    <span class="p">}</span>
 
-    for(idx in grid){
-        fmt = "grid[";
-        n = split(idx, indices, SUBSEP);
-        for (sub_idx = 1; sub_idx &lt;= n; sub_idx++){
-            fmt = fmt indices[sub_idx] "]["
-        }
-        printf("%s = %d\n", substr(fmt, 1, length(fmt) - 1), grid[idx])
-    }
-}</code></pre></figure>
+    <span class="k">for</span><span class="p">(</span><span class="nx">idx</span> <span class="o">in</span> <span class="nx">grid</span><span class="p">){</span>
+        <span class="nx">fmt</span> <span class="o">=</span> <span class="s2">"grid["</span><span class="p">;</span>
+        <span class="nx">n</span> <span class="o">=</span> <span class="nb">split</span><span class="p">(</span><span class="nx">idx</span><span class="p">,</span> <span class="nx">indices</span><span class="p">,</span> <span class="kc">SUBSEP</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nx">sub_idx</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">sub_idx</span> <span class="o">&lt;=</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">sub_idx</span><span class="o">++</span><span class="p">){</span>
+            <span class="nx">fmt</span> <span class="o">=</span> <span class="nx">fmt</span> <span class="nx">indices</span><span class="p">[</span><span class="nx">sub_idx</span><span class="p">]</span> <span class="s2">"]["</span>
+        <span class="p">}</span>
+        <span class="k">printf</span><span class="p">(</span><span class="s2">"%s = %d\n"</span><span class="p">,</span> <span class="nb">substr</span><span class="p">(</span><span class="nx">fmt</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">length</span><span class="p">(</span><span class="nx">fmt</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="nx">grid</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
 
 <p>需要获取具体下标的时候，可以使用<code class="highlighter-rouge">split</code>函数，传入<strong>SUBSEP</strong>作为分隔符，依次取得每一个下标。用于数据统计的时候，这一技巧相当顺手好用。</p>
 
@@ -570,13 +568,12 @@ BEGIN{
   <li><code class="highlighter-rouge">substr</code> 取得子串，和很多脚本语言类似，传入一个源字串，初始下标和长度，例如：</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk <span class="s1">'BEGIN{
     teststr = "this is a test string..."
     printf("&lt;%s&gt;\n", substr(teststr, 1, length(teststr) - 1));
     printf("&lt;%s&gt;\n", substr(teststr, 0, length(teststr) - 1));
 }'</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里的第二个<code class="highlighter-rouge">printf</code>传入的下标从0开始，那么实际上得到的字串从末尾处被截去了2个字符。</p>
 
 <ul>
@@ -590,46 +587,42 @@ BEGIN{
   <li><code class="highlighter-rouge">sub</code> 用于正则替换左数起第一个匹配</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{sub(/[ey] /, "lagggg&gt; ");print}'</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{sub(/[ey] /, "lagggg&gt; ");print}'</span>
 <span class="c">#Thlagggg&gt; lazy dog</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li><code class="highlighter-rouge">gsub</code> 用于全局替换,所有满足条件的部分都被替换</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{gsub(/[ey] /, "lagggg&gt; ");print}'</span>
-<span class="gp">Thlagggg&gt; </span>lazlagggg&gt; dog
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | awk <span class="s1">'{gsub(/[ey] /, "lagggg&gt; ");print}'</span>
+Thlagggg&gt; lazlagggg&gt; dog
+</code></pre></div></div>
 
 <ul>
   <li><code class="highlighter-rouge">gensub</code> 是一个更通用形式的正则替换操作,它保持源字符串不动，将修改后的串返回</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | gawk <span class="s1">'{new = gensub(/[ey] /, "lagggg&gt; ", "g");print; print new}'</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog"</span> | gawk <span class="s1">'{new = gensub(/[ey] /, "lagggg&gt; ", "g");print; print new}'</span>
 <span class="c">#The lazy dog</span>
 <span class="c">#Thlagggg&gt; lazlagggg&gt; dog</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li><code class="highlighter-rouge">match</code> 可用于模式匹配并返回匹结果的开始下标，并设置<strong>RSTART</strong>为匹配到的下标，<strong>RLENGTH</strong>为匹配字串的长度</li>
 </ul>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog jump over the brown fox"</span> | awk <span class="s1">'{
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"The lazy dog jump over the brown fox"</span> | awk <span class="s1">'{
 result = match($0, /(dog)(.*)(fox)/)
 print result, RSTART, RLENGTH
 print substr($0, RSTART, RLENGTH)
 &gt; }'</span>
 <span class="c">#10 10 27</span>
 <span class="c">#dog jump over the brown fox</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h1 id="脚本内嵌和独立awk文件">脚本内嵌和独立awk文件</h1>
-<p>一般可以将不太长的awk脚本处理放入管道操作中，让后用<code class="highlighter-rouge">'</code>来包含实际的awk处理脚本。当awk脚本过长的时候或者为了便于维护，也可以用一个独立的脚本来存放awk脚本内容，但是其shebang部分应该设置为： <code class="highlighter-rouge">#!/usr/bin/awk -f</code>, 这里的 <code class="highlighter-rouge">-f</code>表示后边的内容是awk脚本文件。</p>
+<p>一般可以将不太长的awk脚本处理放入管道操作中，让后用<code class="highlighter-rouge">'</code>来包含实际的awk处理脚本。当awk脚本过长的时候或者为了便于维护，也可以用一个独立的脚本来存放awk脚本内容，但是其shebang部分应该设置为： <code class="highlighter-rouge"><span class="c1">#!/usr/bin/awk -f</span></code>, 这里的 <code class="highlighter-rouge">-f</code>表示后边的内容是awk脚本文件。</p>
 
 
         

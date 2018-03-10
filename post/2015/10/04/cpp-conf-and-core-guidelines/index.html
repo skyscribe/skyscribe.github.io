@@ -570,7 +570,7 @@ Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核�
  将管道的思想和函数式编程的类Monad操作发挥到了一个令人瞠目结舌的境界，可以用简洁的代码更清晰的描述业务逻辑。
 示例代码是一个优雅地打印一个字符界面的日历的例子，可以简洁地写为</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span>
     <span class="n">dates_in_year</span><span class="p">(</span><span class="mi">2015</span><span class="p">)</span>                         <span class="c1">//0. Raw range data (Date objects)
 </span>        <span class="o">|</span> <span class="n">by_month</span><span class="p">()</span>                            <span class="c1">//1. Group the dates by month
 </span>        <span class="o">|</span> <span class="n">layout_months</span><span class="p">()</span>                       <span class="c1">//2. format the months as a range of strings 
@@ -580,8 +580,7 @@ Stroustroup和Herb Sutter一起宣布他们正工作与一个基于现代C++核�
 </span>        <span class="o">|</span> <span class="n">join_months</span><span class="p">(),</span>                        <span class="c1">//6. Join the string of transposed months
 </span>    <span class="n">std</span><span class="o">::</span><span class="n">ostream_iterator</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
 <span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>函数式编程的可组合、高度可重用、不需要循环而仅仅关注意图的编程风格带来更容易维护、更简洁清晰的代码。 
 声明式编程风格对C++而言不再遥远。期望它能早日进入新的语言标准库中造福广大程序员。</p>
 

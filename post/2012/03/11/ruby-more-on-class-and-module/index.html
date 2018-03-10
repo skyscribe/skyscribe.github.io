@@ -510,20 +510,19 @@
   <li>类内define法，需要在 method name 之前显示加上 self 指明这是个属于 class 的方法：</li>
 </ol>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span>
     <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">foo</span>
         <span class="nb">puts</span> <span class="s2">"class method called"</span>
     <span class="k">end</span>
 <span class="k">end</span>
 <span class="c1"># call</span>
 <span class="no">Test</span><span class="p">.</span><span class="nf">foo</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <ol>
   <li>Append 法，通过 « 添加到 self，如下：</li>
 </ol>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span>
     <span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nb">self</span>
         <span class="k">def</span> <span class="nf">foo</span>
             <span class="nb">puts</span> <span class="s2">"class method called"</span>
@@ -533,20 +532,18 @@
 
 <span class="c1"># call</span>
 <span class="no">Test</span><span class="p">.</span><span class="nf">foo</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <ol>
   <li>类外定义，和定义一个普通函数的方法类似，但是指明了 class name， 可以用于方便的向已定义好的类中添加 class method:</li>
 </ol>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span><span class="p">;</span> <span class="k">end</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Test</span><span class="p">;</span> <span class="k">end</span>
 <span class="k">def</span> <span class="nc">Test</span><span class="o">.</span><span class="nf">bar</span>
     <span class="nb">puts</span> <span class="s2">"class method called"</span>
 <span class="k">end</span>
 <span class="c1">#call</span>
 <span class="no">Test</span><span class="p">.</span><span class="nf">bar</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="includeextend">include/extend</h2>
 
@@ -582,11 +579,10 @@
 
 <p>运行结果如下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>undefined method <span class="sb">`</span>foo<span class="sb">`</span> <span class="k">for </span>NewClsIncludeModule:Class
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>undefined method <span class="sb">`</span>foo<span class="sb">`</span> <span class="k">for </span>NewClsIncludeModule:Class
 foo
 undefined method <span class="sb">`</span>foo<span class="sb">`</span> <span class="k">for</span> <span class="c">#&lt;NewClsExtendModule:0x9c4436c&gt;</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的输出表明:</p>
 

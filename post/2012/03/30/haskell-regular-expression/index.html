@@ -506,9 +506,8 @@
 
 <p>Haskell的正则表达式库位于Text.Regex中 , Ubuntu默认的GHC中并没有提供正则表达式库，实际使用的时候可以根据需要选择一个版本，也可以通过<code class="highlighter-rouge">apt-get</code>来安装，如果使用<code class="highlighter-rouge">posix</code>版本的正则表达式库，可以下载安装<strong>libghc-regex-posix-dev</strong>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    apt-get install libghc-regex-posix-dev
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    apt-get install libghc-regex-posix-dev
+</code></pre></div></div>
 
 <h2 id="用法">用法</h2>
 
@@ -516,47 +515,42 @@
 
 <ol>
   <li>基本匹配 - 可以指定返回类型为Bool来判断是否匹配:
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
 <span class="s">"A match with foodiabar after"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="kt">Bool</span>  <span class="c1">--True</span>
 <span class="s">"no match"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="kt">Bool</span> <span class="c1">-- False</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>返回第一个匹配的子串或者空串：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
 <span class="s">"A match with foodiabar after"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="kt">String</span>  <span class="c1">--get "foodiabar"</span>
 <span class="s">"no match"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="kt">String</span> <span class="c1">-- get empty string</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
   <li>返回匹配的上下文信息：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
 <span class="s">"A match with foodiabar after"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">)</span>
 <span class="c1">-- get ("A match with ", "foodiabar", " after")</span>
 <span class="s">"no match"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="kt">String</span> 
 <span class="c1">-- get ("no match", "", "")</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <p>这里可以区分出是否有空串匹配。</p>
   </li>
   <li>返回更多信息：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
 <span class="s">"A match with foodiabar quxx after"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">,</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span>
 <span class="c1">-- get ("A match with ", "foodiabar", " quxx  after", ["foodiabar"])</span>
 <span class="s">"no match"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="p">,</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span>
 <span class="c1">-- get ("no match", "", "", [])</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <p>这里最后的一个String list可以用于返回子分组信息。</p>
   </li>
   <li>获取匹配字符的index信息和长度：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">let</span> <span class="n">pat</span> <span class="o">=</span> <span class="s">"(foo[a-z]*bar|quxx)"</span>
 <span class="s">"A match with foodiabar after"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
 <span class="c1">-- get (13, 9)</span>
 <span class="s">"no match"</span> <span class="o">=~</span> <span class="n">pat</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
 <span class="c1">-- get (-1,0) for no match</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
 </ol>
 

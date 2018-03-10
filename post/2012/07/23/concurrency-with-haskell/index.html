@@ -516,7 +516,7 @@
 
 <p>Haskell的Thread方式和传统的变成语言或者库有显著的不同；其定义在<code class="highlighter-rouge">Control.Concurrent</code>中提供。由于Thread本身是有副作用的，hanskell通过封装<strong>IO Monad</strong>的方式来提供Thread,即一个thread为一个<strong>IO action</strong>,要使用thread则可以调用<code class="highlighter-rouge">forkIO</code>来执行一些任务。</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span>
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">forkIO</span>
 <span class="n">forkIO</span> <span class="o">::</span> <span class="kt">IO</span> <span class="nb">()</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="kt">ThreadId</span> <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
 
@@ -529,12 +529,11 @@
 <span class="kt">Loading</span> <span class="n">package</span> <span class="n">filepath</span><span class="o">-</span><span class="mf">1.3</span><span class="o">.</span><span class="mf">0.0</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
 <span class="kt">Loading</span> <span class="n">package</span> <span class="n">directory</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mf">0.2</span> <span class="o">...</span> <span class="n">linking</span> <span class="o">...</span> <span class="n">done</span><span class="o">.</span>
 <span class="kt">True</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>需要注意的是，由于新线程的执行顺序是不确定的，因此上述例子中的程序返回结果可能不同。因为haskell中的变量全部是不可变的，因此在forkIO中传递变量是安全的，这个可以作为传递参数的一种很方便的形式，譬如下边的例子：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Concurrent</span><span class="p">(</span><span class="n">forkIO</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Concurrent</span><span class="p">(</span><span class="n">forkIO</span><span class="p">)</span>
 <span class="kr">import</span> <span class="nn">Control.Monad</span><span class="p">(</span><span class="n">forever</span><span class="p">)</span>
 
 <span class="n">acceptConnections</span> <span class="o">::</span> <span class="kt">Config</span> <span class="o">-&gt;</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
@@ -546,15 +545,14 @@
 
 <span class="n">accept</span> <span class="o">::</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="kt">Connection</span>
 <span class="kr">type</span> <span class="kt">Connection</span> <span class="o">=</span> <span class="p">(</span><span class="kt">Handle</span><span class="p">,</span> <span class="kt">SockAddr</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里的<code class="highlighter-rouge">serviceConn</code>的两个参数都是从当前线程传递到新创建的线程。</p>
 
 <h3 id="线程通信和基本交互">线程通信和基本交互</h3>
 
 <p>GHC中定义了MVar来方便不同线程之间的通信，并定义有<code class="highlighter-rouge">putMVar</code>和<code class="highlighter-rouge">takeMVar</code>, 同样它们都是<strong>IO action</strong>:</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">MVar</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">MVar</span> 
 <span class="kr">data</span> <span class="kt">MVar</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">MVar</span><span class="o">.</span><span class="kt">MVar</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">MVar</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span> <span class="n">a</span><span class="p">)</span>
 <span class="c1">-- Defined in `GHC.MVar'</span>
 <span class="kr">instance</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">MVar</span> <span class="n">a</span><span class="p">)</span> <span class="c1">-- Defined in `GHCC.MVar'</span>
@@ -567,8 +565,7 @@
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">newMVar</span> 
 <span class="n">newMVar</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">MVar</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span><span class="kt">MVar</span><span class="o">-</span> <span class="kt">Defined</span> <span class="kr">in</span> <span class="p">`</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">MVar'</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的<strong>MVar</strong>变量状态可能为空或者满。<code class="highlighter-rouge">takeMVar</code>动作会先检查MVar状态是否为空，为空则阻塞当前的线程知道满为止；<code class="highlighter-rouge">putMVar</code>则是空就写入新的状态量，满则等待挂起当前线程。</p>
 
@@ -582,7 +579,7 @@
 
 <p>下边是一个更复杂的例子，用于webserver统计所有的子连接个数 - 控制线程可以做更多有意义的控制，比如在负载满的时候停止创建新的线程等：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">cceptConnections</span> <span class="o">::</span> <span class="kt">Config</span> <span class="o">-&gt;</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cceptConnections</span> <span class="o">::</span> <span class="kt">Config</span> <span class="o">-&gt;</span> <span class="kt">Socket</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
 <span class="n">acceptConnections</span> <span class="n">config</span> <span class="n">socket</span>
 <span class="o">=</span> <span class="kr">do</span> <span class="p">{</span>  <span class="n">count</span> <span class="o">&lt;-</span> <span class="n">newEmptyMVar</span> <span class="p">;</span>
         <span class="n">putMVar</span> <span class="n">count</span> <span class="mi">0</span> <span class="p">;</span>
@@ -595,14 +592,13 @@
 <span class="n">inc</span><span class="p">,</span><span class="n">dec</span> <span class="o">::</span> <span class="kt">MVar</span> <span class="kt">Int</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
 <span class="n">inc</span> <span class="n">count</span> <span class="o">=</span> <span class="kr">do</span> <span class="p">{</span> <span class="n">v</span> <span class="o">&lt;-</span> <span class="n">takeMVar</span> <span class="n">count</span><span class="p">;</span> <span class="n">putMVar</span> <span class="n">count</span> <span class="p">(</span><span class="n">v</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
 <span class="n">dec</span> <span class="n">count</span> <span class="o">=</span> <span class="kr">do</span> <span class="p">{</span> <span class="n">v</span> <span class="o">&lt;-</span> <span class="n">takeMVar</span> <span class="n">count</span><span class="p">;</span> <span class="n">putMVar</span> <span class="n">count</span> <span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="channel">Channel</h3>
 
 <p>对于简单的线程通信和交互,MVar就可以满足大部分需求；对于复杂的通信，Haskell还提供了<strong>Channel</strong>支持：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">c</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">Chan</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">Chan</span> 
 <span class="kr">data</span> <span class="kt">Chan</span> <span class="n">a</span>
 <span class="o">=</span> <span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span><span class="o">.</span><span class="kt">Chan</span><span class="o">.</span><span class="kt">Chan</span> <span class="p">(</span><span class="kt">MVar</span>
                                   <span class="p">(</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Concurrent</span><span class="o">.</span><span class="kt">Chan</span><span class="o">.</span><span class="kt">Stream</span> <span class="n">a</span><span class="p">))</span>
@@ -616,8 +612,7 @@
 <span class="n">writeChan</span> <span class="o">::</span> <span class="kt">Chan</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="kr">type</span> <span class="n">newChan</span> 
 <span class="n">newChan</span> <span class="o">::</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">Chan</span> <span class="n">a</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Channel提供了一种单向的线程通信通路，可以实现CSP编程。<code class="highlighter-rouge">readChan</code>在没有数据的时候，将一直阻塞直到有新的数据到Channel中，而<code class="highlighter-rouge">writeChan</code>则永不阻塞，写入一个新的值并且立即返回。这一特性也表明，如果写的速度快于读取的速度，则Channel可以会一直占用更多的资源。</p>
 
@@ -631,7 +626,7 @@
 
 <p>STM的定义在<code class="highlighter-rouge">Control.Concurrent.STM</code>中：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">STM</span> <span class="n">a</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">newtype</span> <span class="kt">STM</span> <span class="n">a</span>
   <span class="o">=</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Conc</span><span class="o">.</span><span class="kt">Sync</span><span class="o">.</span><span class="kt">STM</span> <span class="p">(</span><span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span>
                          <span class="o">-&gt;</span> <span class="p">(</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">State</span><span class="o">#</span> <span class="kt">GHC</span><span class="o">.</span><span class="kt">Prim</span><span class="o">.</span><span class="kt">RealWorld</span><span class="p">,</span> <span class="n">a</span> <span class="o">#</span><span class="p">))</span>
                <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
@@ -646,19 +641,17 @@
     <span class="c1">-- Defined in `GHC.Conc.Sync'</span>
 
 <span class="kr">instance</span> <span class="kt">Eq</span> <span class="p">(</span><span class="kt">TVar</span> <span class="n">a</span><span class="p">)</span> <span class="c1">-- Definedned in `GHC.Conc.Sync'</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>对应的TVar操作：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">newTVar</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">newTVar</span>
 <span class="n">newTVar</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="p">(</span><span class="kt">TVar</span> <span class="n">a</span><span class="p">)</span>
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">readTVar</span>
 <span class="n">readTVar</span> <span class="o">::</span> <span class="kt">TVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="n">a</span>
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">writeTVar</span> 
 <span class="n">writeTVar</span> <span class="o">::</span> <span class="kt">TVar</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的STM是一个Monad，用于约束所有的操作必须在STM的保护之内，任何操作不能逃离STM之外。任何基于STM的operation可以通过»=, », return等方式组合为新的monad actions，即transaction；整个transaction对于TVar的访问是原子的。</p>
 
@@ -666,7 +659,7 @@
 
 <p>下边这个例子来自于<a href="http://en.wikipedia.org/wiki/Concurrent_Haskell">wikipedia</a>:</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">type</span> <span class="kt">Account</span> <span class="o">=</span> <span class="kt">TVar</span> <span class="kt">Integer</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">type</span> <span class="kt">Account</span> <span class="o">=</span> <span class="kt">TVar</span> <span class="kt">Integer</span>
 
 <span class="n">transfer</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">Account</span> <span class="o">-&gt;</span> <span class="kt">STM</span> <span class="nb">()</span>
 <span class="n">transfer</span> <span class="n">amount</span> <span class="n">from</span> <span class="n">to</span> <span class="o">=</span> <span class="kr">do</span>
@@ -686,25 +679,22 @@
 <span class="n">debit</span> <span class="n">amount</span> <span class="n">account</span> <span class="o">=</span> <span class="kr">do</span>
     <span class="n">current</span> <span class="o">&lt;-</span> <span class="n">readTVar</span> <span class="n">account</span>
     <span class="n">writeTVar</span> <span class="n">account</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">amount</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>在<code class="highlighter-rouge">transfer</code>函数中，我们先检查了对应的余额是否重组，如果是则继续完成转账，否则就<code class="highlighter-rouge">retry</code>，retry的实现保证只有对应的变量发生变化时候才重试，从而大大提高了效率。</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">retry</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">retry</span>
 <span class="n">retry</span><span class="o">::</span><span class="kt">STM</span> <span class="n">a</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的每一个操作返回类型都是<strong>STM</strong>,从而保证这些操作都是原子性的。一个特殊的函数<code class="highlighter-rouge">atomically</code>则用于从STM返回一个IO：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">atomically</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">t</span> <span class="n">atomically</span> 
 <span class="n">atomically</span> <span class="o">::</span> <span class="kt">STM</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>下边是一个调用上述实现的例子：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Main</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Main</span> <span class="kr">where</span>
  
 <span class="kr">import</span> <span class="nn">Control.Concurrent</span> <span class="p">(</span><span class="nf">forkIO</span><span class="p">)</span>
 <span class="kr">import</span> <span class="nn">Control.Concurrent.STM</span>
@@ -731,8 +721,7 @@
 <span class="n">newAccount</span> <span class="n">amount</span> <span class="o">=</span> <span class="n">newTVarIO</span> <span class="n">amount</span>
 
 <span class="c1">--other definitions in above code snippets</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="参考资料">参考资料</h2>
 <ol>

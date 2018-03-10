@@ -521,27 +521,24 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
 
 <h4 id="嵌套的命名空间声明">嵌套的命名空间声明</h4>
 <p>这是一个小小的改进，但足以节省大家很多敲击键盘和格式化缩进的烦恼。因为在比较大的项目中，经常用嵌套的命名空间来隔离API和类，之前我们不得不这样写</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="p">{</span>
     <span class="k">namespace</span> <span class="n">inner</span> <span class="p">{</span>
         <span class="n">namesapce</span> <span class="n">module</span> <span class="p">{</span>
             <span class="c1">//my module definitions...
 </span>        <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>或者为了节省空间（采用微软的换行风格有强迫症的更要哭了），直接缩略为</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="p">{</span> <span class="k">namespace</span> <span class="n">inner</span><span class="p">{</span> <span class="k">namespace</span> <span class="n">module</span> <span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="p">{</span> <span class="k">namespace</span> <span class="n">inner</span><span class="p">{</span> <span class="k">namespace</span> <span class="n">module</span> <span class="p">{</span>
     <span class="c1">//my module definitions...
 </span><span class="p">}}}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>新标准直接允许我们写为</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="o">::</span><span class="n">inner</span><span class="o">::</span><span class="n">module</span> <span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="n">outer</span><span class="o">::</span><span class="n">inner</span><span class="o">::</span><span class="n">module</span> <span class="p">{</span>
     <span class="c1">//my module definitions...
 </span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>是否清爽了很多，或者有本来就应该如此的感觉？为什么没有更早支持啊。</p>
 
 <h4 id="static_assert的消息提醒参数变为可选"><code class="highlighter-rouge">static_assert</code>的消息提醒参数变为可选</h4>
@@ -552,12 +549,11 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
 <h4 id="auto可以用于初始化列表的类型推导"><code class="highlighter-rouge">auto</code>可以用于初始化列表的类型推导</h4>
 <p>C++11通过重用<code class="highlighter-rouge">auto</code>关键字来做自动类型推断，而C++17将其扩充到了初始化列表类型，并要求它符合特定的规则。即</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span> <span class="c1">//decltype(x) = initializer_list&lt;int&gt;:
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span> <span class="c1">//decltype(x) = initializer_list&lt;int&gt;:
 </span><span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span> <span class="c1">//declytpe(y) = initializer_list&lt;int, int&gt;;
 </span><span class="k">auto</span> <span class="n">x1</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span> <span class="c1">//same as x
 </span><span class="k">auto</span> <span class="n">y1</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span> <span class="c1">//ill-formed! Not a single element!
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 <h4 id="字面量类型扩展">字面量类型扩展</h4>
 <p>字面量类型具有很好的声明式风格和良好的可读性，之前的语言标准支持的类型比较有限（比如字符常量、整数、浮点常量），而C++17引入了对其他字符集的支持</p>
 <ul>
@@ -567,7 +563,7 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
 </ul>
 
 <p>浮点类型的常量声明支持了更多可读性更好的格式，下边的例子</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
 </span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
   <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="mf">123.456e-67</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span>
@@ -575,21 +571,19 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
             <span class="o">&lt;&lt;</span> <span class="mf">58.</span>         <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span>
             <span class="o">&lt;&lt;</span> <span class="mf">4e2</span>         <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>会输出四种方式所生命的浮点数字</p>
-<div class="highlighter-rouge"><pre class="highlight"><code>1.23456e-65
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1.23456e-65
 1000
 58
 400
-</code></pre>
-</div>
+</code></pre></div></div>
 <h4 id="可变长模板参数中的折叠表达式">可变长模板参数中的折叠表达式</h4>
 <p>C++11引入了可变长的模板参数，大大简化了模板元编程，而C++17则支持在变长模板参数中使用折叠或归约(函数式编程中的基本范式),
 可以支持从一堆模板参数中，指明第一个而省略其他，也可以指明最后一个省略前边的。这些参数中间可以用操作符来连接，编译器需要自己负责将他们按照既定的规则串联起来。</p>
 
 <p>比如这个例子</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
 <span class="kt">bool</span> <span class="n">all</span><span class="p">(</span><span class="n">Args</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span> 
     <span class="c1">//op is &amp;&amp;, pack parameters as ..., specified last parameter
 </span>    <span class="k">return</span> <span class="p">(...</span> <span class="o">&amp;&amp;</span> <span class="n">args</span><span class="p">);</span> 
@@ -598,19 +592,17 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
 <span class="c1">//expanded as left fold, as 
 // ((true &amp;&amp; true) &amp;&amp; true) &amp;&amp; false = false
 </span><span class="kt">bool</span> <span class="n">b</span> <span class="o">=</span> <span class="n">all</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>详细的定义如下</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="p">(</span><span class="n">pack</span> <span class="n">op</span> <span class="p">...)</span> <span class="c1">//unary right fold
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="n">pack</span> <span class="n">op</span> <span class="p">...)</span> <span class="c1">//unary right fold
 </span><span class="p">(...</span> <span class="n">op</span> <span class="n">pack</span><span class="p">)</span> <span class="c1">//unary left fold
 </span><span class="p">(</span><span class="n">pack</span> <span class="n">op</span> <span class="p">...</span> <span class="n">op</span> <span class="n">init</span><span class="p">)</span> <span class="c1">//binary right fold
 </span><span class="p">(</span><span class="n">init</span> <span class="n">op</span> <span class="p">...</span> <span class="n">op</span> <span class="n">pack</span><span class="p">)</span> <span class="c1">//binary left fold 
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <p>一个更复杂一点的例子</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">printer</span><span class="p">(</span><span class="n">Args</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">//left fold print
 </span>    <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">...</span> <span class="o">&lt;&lt;</span> <span class="n">args</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
@@ -646,8 +638,7 @@ Herb Sutter第一时间在<a href="https://herbsutter.com/2017/09/06/c17-is-form
     <span class="k">static_assert</span><span class="p">(</span><span class="n">bswap</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mh">0x1234u</span><span class="p">)</span><span class="o">==</span><span class="mh">0x3412u</span><span class="p">);</span>
     <span class="k">static_assert</span><span class="p">(</span><span class="n">bswap</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">uint64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mh">0x0123456789abcdefULL</span><span class="p">)</span><span class="o">==</span><span class="mh">0xefcdab8967452301ULL</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3>#</h3>
 <p><strong>TBD</strong></p>

@@ -524,10 +524,9 @@
 
 <h3 id="函数声明">函数声明</h3>
 <p>基本的函数声明是这样的</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">thisIsAFunction</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">:</span> <span class="n">Int</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">thisIsAFunction</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">:</span> <span class="n">Int</span> <span class="p">{</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>当然这里的类型后置语法和传统的C家族语言有些不同，但是适应起来倒也不是难事儿。</p>
 
 <h3 id="类型推导">类型推导</h3>
@@ -536,7 +535,7 @@
 <h3 id="特殊的返回类型-unit">特殊的返回类型 <code class="highlighter-rouge">Unit</code></h3>
 <p><code class="highlighter-rouge">Unit</code>是一个特殊的类型，用于指定某个函数返回的值可以被省略，类似于Java8的<code class="highlighter-rouge">Void</code>类型。如果一个函数没有返回值，那么可以指定其返回<code class="highlighter-rouge">Unit</code>或者直接省略其返回</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">someFunc</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">)</span> <span class="p">:</span> <span class="n">Unit</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">someFunc</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">)</span> <span class="p">:</span> <span class="n">Unit</span> <span class="p">{</span>
     <span class="c1">// do something with arg
 </span>    <span class="c1">// no return needed
 </span><span class="p">}</span>
@@ -545,8 +544,7 @@
 </span><span class="k">fun</span> <span class="nf">someFunc</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// do something
 </span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="中缀表达式">中缀表达式</h3>
 <p>中缀表达式写法更替进人的思维习惯，在定义某些操作符的时候是非常有用的。此用法往往用于扩展已有类型的操作，定义的时候需要满足以下条件</p>
@@ -558,36 +556,33 @@
 
 <p>譬如</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">infix</span> <span class="k">fun</span> <span class="nf">Int</span><span class="p">.</span><span class="n">shl</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">infix</span> <span class="k">fun</span> <span class="nf">Int</span><span class="p">.</span><span class="n">shl</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
   <span class="c1">/// implementation of shl operation
 </span><span class="p">}</span>
 
 <span class="c1">// call site
 </span><span class="m">1</span> <span class="n">shl</span> <span class="m">2</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="命名参数和默认值">命名参数和默认值</h3>
 <p>这点和Python很像在多个参数的复杂函数的使用上有很大帮助，能极大提高可读性减少维护成本。调用方可以在调用点指定需要传入的参数的名字；也可以省略掉不需要指定的参数。</p>
 
 <p>譬如有如下的<code class="highlighter-rouge">reformat</code>函数用于格式化</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span>
     <span class="n">normalizeCase</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
     <span class="n">upperCaseFirstLetter</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
     <span class="n">divideByCamelHumps</span> <span class="p">=</span> <span class="k">false</span><span class="p">,</span>
     <span class="n">wordSeparator</span> <span class="p">=</span> <span class="sc">'_'</span>
 <span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>调用点可以简单写作</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">wordSeparator</span> <span class="p">=</span> <span class="sc">'_'</span><span class="p">)</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">wordSeparator</span> <span class="p">=</span> <span class="sc">'_'</span><span class="p">)</span>
 <span class="c1">// equals to
 </span><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="sc">'_'</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这个功能在传统的C++/Java里边没有提供，但是IDEA提供了只能提示可以弥补Java的不足；而Kotlin则将其内置在语言中了；本身没多少复杂性在里边。</p>
 
@@ -595,40 +590,36 @@
 
 <h3 id="高阶函数">高阶函数</h3>
 <p>函数的参数可以是一个函数，这个在Kotlin的库里已经有大量的例子，譬如基本的<code class="highlighter-rouge">Sequence</code>的filter函数携带一个谓词函数，其针对给定的参数返回一个<code class="highlighter-rouge"> Boolean</code></p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Boolean</span><span class="p">):</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Boolean</span><span class="p">):</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">FilteringSequence</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="n">predicate</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="单参数函数的表达式形式">单参数函数的表达式形式</h3>
 <p>当函数只有一行实现的时候，可以省略其函数体，直接用<code class="highlighter-rouge">=</code>来书写，就像复制给一个变量一样</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">add2Numbers</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Int</span> <span class="p">=</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span>
-</code></pre>
-</div>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">add2Numbers</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Int</span> <span class="p">=</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span>
+</code></pre></div></div>
 
 <h3 id="lambda和匿名函数">Lambda和匿名函数</h3>
 <p>匿名函数用大括号括起来，上面的例子也可以写作</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="kd">val</span> <span class="py">add2Numbers2</span> <span class="p">=</span> <span class="p">{</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span> <span class="p">-&gt;</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span><span class="p">}</span>
-</code></pre>
-</div>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">add2Numbers2</span> <span class="p">=</span> <span class="p">{</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span> <span class="p">-&gt;</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span><span class="p">}</span>
+</code></pre></div></div>
 
 <h3 id="函数调用的形式省略">函数调用的形式省略</h3>
 <p>当函数仅仅有一个参数的时候，其参数名字默认为<code class="highlighter-rouge">it</code>保留关键字可以不用显示指定。</p>
 
-<p>当函数的最后一个参数是一个函数的时候，其函数体可以用<code class="highlighter-rouge"><span class="p">{}</span></code>块的方式来书写，获得更好的可读性。</p>
+<p>当函数的最后一个参数是一个函数的时候，其函数体可以用<code class="highlighter-rouge">{}</code>块的方式来书写，获得更好的可读性。</p>
 
 <p>譬如如下的例子用于打印指定数目个偶数</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="kd">val</span> <span class="py">printEvens</span> <span class="p">=</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="n">Long</span> <span class="p">-&gt;</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">printEvens</span> <span class="p">=</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="n">Long</span> <span class="p">-&gt;</span>
     <span class="n">IntStream</span><span class="p">.</span><span class="n">range</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">10000000</span><span class="p">)</span>
             <span class="p">.</span><span class="n">filter</span> <span class="p">{</span> <span class="n">it</span><span class="p">%</span><span class="m">2</span> <span class="p">==</span> <span class="m">0</span> <span class="p">}.</span><span class="n">limit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
             <span class="p">.</span><span class="n">forEach</span> <span class="p">{</span> <span class="n">println</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="一个具体一点的例子">一个具体一点的例子</h3>
 
@@ -641,7 +632,7 @@
 </ol>
 
 <p>可以通过如下几个函数完成</p>
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">File</span><span class="p">(</span><span class="n">dirName</span><span class="p">).</span><span class="n">walkTopDown</span><span class="p">().</span><span class="n">filter</span> <span class="p">{</span> <span class="n">isDocDir</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
             <span class="p">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">it</span><span class="p">.</span><span class="n">absolutePath</span> <span class="p">}.</span><span class="n">toList</span><span class="p">()</span>
 <span class="p">}</span>
@@ -653,11 +644,10 @@
 <span class="k">private</span> <span class="k">fun</span> <span class="nf">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">):</span> <span class="n">Boolean</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">)[</span><span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">).</span><span class="n">size</span> <span class="p">-</span> <span class="m">1</span><span class="p">]</span> <span class="p">==</span> <span class="s">"doc"</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里每个函数的含义都是比较清楚易懂的。如果利用上述的省略规则，那么可以更简略的写为</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="n">File</span><span class="p">(</span><span class="n">dirName</span><span class="p">).</span><span class="n">walkTopDown</span><span class="p">()</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="n">File</span><span class="p">(</span><span class="n">dirName</span><span class="p">).</span><span class="n">walkTopDown</span><span class="p">()</span>
         <span class="p">.</span><span class="n">filter</span> <span class="p">{</span> <span class="n">isDocDir</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
         <span class="p">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">it</span><span class="p">.</span><span class="n">absolutePath</span> <span class="p">}.</span><span class="n">toList</span><span class="p">()</span>
 
@@ -665,15 +655,14 @@
 
 <span class="k">private</span> <span class="k">fun</span> <span class="nf">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">)</span> <span class="p">=</span> <span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span>
         <span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">)[</span><span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">).</span><span class="n">size</span> <span class="p">-</span> <span class="m">1</span><span class="p">]</span> <span class="p">==</span> <span class="s">"doc"</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="类型扩展函数">类型扩展函数</h2>
 <p>Kotlin 支持对已有的类型添加扩展，值需要在任何想要的地方添加想要的功能，则原有的类型即可像被增强了一样具有新的功能，该机制提供了OO之外新的灵活的扩展方式。</p>
 
 <p>譬如默认的Kotlin的<code class="highlighter-rouge">Iterable</code>类没有提供并发的<code class="highlighter-rouge">foreach</code>操作，可以通过扩展机制很容易的写出来一个使用<code class="highlighter-rouge">ExecutorService</code>来并发循环的版本</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="c1">// parallel for each, see also https://stackoverflow.com/questions/34697828/parallel-operations-on-kotlin-collections
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// parallel for each, see also https://stackoverflow.com/questions/34697828/parallel-operations-on-kotlin-collections
 </span><span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">,</span> <span class="n">R</span><span class="p">&gt;</span> <span class="n">Iterable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">parallelForEach</span><span class="p">(</span>
         <span class="n">numThreads</span><span class="p">:</span> <span class="n">Int</span> <span class="p">=</span> <span class="n">Runtime</span><span class="p">.</span><span class="n">getRuntime</span><span class="p">().</span><span class="n">availableProcessors</span><span class="p">(),</span>
         <span class="n">exec</span><span class="p">:</span> <span class="n">ExecutorService</span> <span class="p">=</span> <span class="n">Executors</span><span class="p">.</span><span class="n">newFixedThreadPool</span><span class="p">(</span><span class="n">numThreads</span><span class="p">),</span>
@@ -690,21 +679,19 @@
     <span class="n">exec</span><span class="p">.</span><span class="n">shutdown</span><span class="p">()</span>
     <span class="n">exec</span><span class="p">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="n">DAYS</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里在函数体中，<code class="highlighter-rouge">this</code>自动会绑定于被扩展的对象。</p>
 
 <p>如果我们想实现一个自动将一大堆plantuml文件转换为png格式并copy到指定目录，因为默认的plantuml的API是单线程的，我们可以基于上述的parallelForEach实现来并发调度UML的生成过程，对应的代码可以写为</p>
 
-<div class="language-kotlin highlighter-rouge"><pre class="highlight"><code><span class="n">markDownFileLists</span><span class="p">.</span><span class="n">parallelForEach</span> <span class="p">{</span>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">markDownFileLists</span><span class="p">.</span><span class="n">parallelForEach</span> <span class="p">{</span>
     <span class="n">SourceFileReader</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">it</span><span class="p">)).</span><span class="n">generatedImages</span><span class="p">.</span><span class="n">firstOrNull</span><span class="p">()</span><span class="o">?.</span><span class="n">apply</span> <span class="p">{</span>
         <span class="n">copyFileToDirWith</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">pngFile</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">,</span> <span class="n">getCopyTarget</span><span class="p">)</span>
         <span class="n">println</span><span class="p">(</span><span class="s">"${System.currentTimeMillis()} - Created png for $it"</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
         
       </section>

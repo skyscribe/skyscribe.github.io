@@ -530,10 +530,9 @@
 
 <p>作为一门<strong>强类型的语言</strong>，任何变量或者表达式必须有唯一的类型，否则编译的时候就会报错。当然Rust支持一种特殊的变量隐藏机制(Shadow),即同一个名字的变量可以重新使用，并设置为一个完全不同的类型；这个时候<strong>原来的变量就不能被访问</strong>了。如</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">var</span> <span class="o">=</span> <span class="s">"something"</span><span class="p">;</span> <span class="c">//string literal</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">var</span> <span class="o">=</span> <span class="s">"something"</span><span class="p">;</span> <span class="c">//string literal</span>
 <span class="k">let</span> <span class="n">var</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c">//changed to int</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这种机制从某种程度上来说，反而会使代码变得不太容易理解，如果程序员习惯了C/C++的编程方式的话；同时<strong>也会给IDE等工具的解析</strong>带来一些挑战；当然这个是仁者见仁智者见智的事情。</p>
 
@@ -565,11 +564,10 @@
 <p>比较新一点的语言都支持一些复杂一点的基本组合类型。</p>
 
 <p><code class="highlighter-rouge">tuple</code>和其它语言的比较类似，用括号语法来声明，基本用法可以看下边这个简单的例子</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s">"something"</span><span class="p">)</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s">"something"</span><span class="p">)</span>
 <span class="k">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">=</span> <span class="n">tup</span>
 <span class="k">let</span> <span class="n">secondElem</span> <span class="o">=</span> <span class="n">tup</span><span class="err">.</span><span class="mi">1</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>第一行代码声明一个含有三个不同类型的元素的元组；第二行代码则将元组中的元素逐一取出，和Python的用法比较类似。
 除了这种提取方式，元组元素<strong>也可以用点语法</strong>来访问元素，如上边的第三行代码则用<code class="highlighter-rouge">tup.1</code>则取出第二个元素；
 比<a href="http://en.cppreference.com/w/cpp/utility/tuple/get">C++11的模板元语法</a>简单多了。</p>
@@ -596,21 +594,19 @@
 <h3 id="函数">函数</h3>
 
 <p>作为基本编程要素的函数在Rust中的定义没有什么特别特殊的地方，除了其类型声明是后置风格之外，其返回类型（如果不能被自动推断）用<code class="highlighter-rouge">-&gt;</code>来声明，比如</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="c">//一个返回int类型的函数</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//一个返回int类型的函数</span>
 <span class="k">fn</span> <span class="nf">thisIsAFunction</span><span class="p">(</span><span class="n">parA</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span> <span class="n">parB</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">int</span> <span class="p">{</span>
     <span class="c">//some implementation</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>函数的实现体本质上是一个<code class="highlighter-rouge">block</code>，由一系列的表达式组成（当然表达式也是用分号分隔的)，同时它<strong>还支持Ruby风格的自动返回最后一个表达式</strong>的写法，
 仅仅需要最后一个表达式省略分号即可；比如这个简单的函数</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">five</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">five</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
     <span class="mi">5</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>懒惰是伟大程序员的优良品质嘛。由于我们有内置的<code class="highlighter-rouge">tuple</code>类型，因此Rust是可以允许有多个返回值的；
 比较典型的一个场景是用户错误处理的情况，可以返回一个<code class="highlighter-rouge">Result</code>，同时携带错误码和可能的原因;稍后会仔细看一下异常处理的部分。</p>
 
@@ -639,23 +635,21 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
 如果需要打印<code class="highlighter-rouge">backtrace</code>信息，则可以在程序运行前设置环境变量<code class="highlighter-rouge">RUST_BACKTRACE</code>。如果忘记设置的话，默认的打印输出会给出温馨的提示。</p>
 
 <p>如果不希望展开栈帧而直接暴力终止程序，可以在Cargo.toml中指定</p>
-<div class="language-ini highlighter-rouge"><pre class="highlight"><code><span class="nn">[profile.release]</span>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[profile.release]</span>
 <span class="py">panic</span><span class="p">=</span><span class="s">'abort'</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="可恢复异常">可恢复异常</h4>
 <p>可恢复异常用一个泛型类<code class="highlighter-rouge">Result</code>来传递结果，其定义是</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="nf">Ok</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
     <span class="nf">Err</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>可以使用枚举类型的<strong>模式匹配</strong>（见后述) 来优雅的解决，譬如这个操作文件的例子</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="n">File</span><span class="p">;</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="n">File</span><span class="p">;</span>
 
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">);</span>
@@ -667,21 +661,19 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
         <span class="p">},</span>
     <span class="p">};</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Rust支持一种<strong>更简洁的方法</strong>来简化上述的样板代码<code class="highlighter-rouge">let f = File::open("hello.txt").unwrap()</code>则返回正常情况下的返回值，如果有异常则直接调用<code class="highlighter-rouge">panic!</code>来终止程序。
 还有一种更”偷懒/简洁”的做法是，加上额外的描述字符串 - 大部分情况下出错了我们总想额外打印一些信息,可以用</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.text"</span><span class="p">)</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Unable to open file..."</span><span class="p">)</span>
-</code></pre>
-</div>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.text"</span><span class="p">)</span><span class="nf">.expect</span><span class="p">(</span><span class="s">"Unable to open file..."</span><span class="p">)</span>
+</code></pre></div></div>
 
 <h4 id="异常的传递和扩散">异常的传递和扩散</h4>
 <p>这是一个常见的场景，某个API的使用者不想自己去处理异常场景，仅仅想将其传递给自己的调用者去处理，或者程序中有个统一的地方处理异常(通常来说可能不是一个好的主意！)。
 最基本的思路是，直接将异常返回的类型签名写出来，显示让调用者处理。</p>
 
 <p>下边这段代码实现读入一个文件，从里边读取某个字符串，如果成功则返回该字符串，期间有任何错误，则传递给调用者。</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">);</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">f</span> <span class="o">=</span> <span class="k">match</span> <span class="n">f</span> <span class="p">{</span>
         <span class="nf">Ok</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="n">file</span><span class="p">,</span>
@@ -694,26 +686,23 @@ Rust采用的设计思路是，尽早强迫程序员去显示处理并以编译�
         <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Rust提供了一种更<strong>简洁的方式(惯用法)</strong> - 用<code class="highlighter-rouge">"?"操作符</code>来传递错误，类似的代码可以重写为</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">read_username_from_file</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span> <span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
     <span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-    <span class="n">f</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+    <span class="n">f</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
     <span class="nf">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>需要注意到上边的代码使用了<code class="highlighter-rouge">block</code>的写法省略<code class="highlighter-rouge">return</code>关键字。</p>
 
 <p>如果追求更精简的代码，我们甚至可以用一行代码来完成上述的函数体</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-<span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="err">?</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="err">?</span><span class="p">;</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="s">"hello.txt"</span><span class="p">)</span><span class="o">?</span><span class="nf">.read_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
 <span class="nf">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>是否有种熟悉的函数式编程的链式写法的味道？</p>
 
@@ -743,7 +732,7 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 <h3 id="函数调用中的所有权转移">函数调用中的所有权转移</h3>
 <p>和C/C++中不一样的是，函数调用的时候，<strong>参数传递会造成所有权转移</strong>即调用者失去了对原来参数的所有权！考虑下边的例子</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
     <span class="nf">do_something</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="c">//s失去对字符串的所有权！</span>
     <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
@@ -757,8 +746,7 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 <span class="k">fn</span> <span class="nf">do_somethingElse</span><span class="p">(</span><span class="n">par</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="p">{</span>
     <span class="c">// play with par</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>上述例子中，当调用了<code class="highlighter-rouge">do_something(s)</code>之后，虽然<code class="highlighter-rouge">s</code>还可以访问但已经失去了对应对象的所有权，其行为和<a href="http://www.gotw.ca/publications/c_family_interview.htm">C++11/14中的Move</a>很像。第二个例子中<code class="highlighter-rouge">x</code>对象却依然可以访问，这里的不同是，Rust对象对<strong>分配在栈上的对象默认采用copy方式</strong>处理，
 所以仅分配在内存堆上的对象被Move，栈上的对象（编译期必须知道大小）默认是被复制过去的。</p>
@@ -773,15 +761,14 @@ Rust采用的策略是让程序员提供一定的指示给编译器，然后由�
 
 <p>引用类型在语法上用<code class="highlighter-rouge">&amp;</code>符号来表示，可以用于修饰标志符，熟悉C/C++的应该不陌生；唯一有点麻烦的是，调用者和函数声明都必须显示声明引用类型，
 如下边的例子</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">calculate_lenght</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">calculate_lenght</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">usize</span> <span class="p">{</span>
     <span class="n">s</span><span class="nf">.len</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="k">let</span> <span class="n">s1</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
 <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="nf">calculate_length</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
 <span class="nd">println!</span><span class="p">(</span><span class="s">"The length of '{}' is {}"</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>默认的引用类型是只读的，因为这个<strong>对象是借来的</strong>，被调用函数没有所有权；尝试去修改的话，则会被编译器报错拦住。
 又是一个精妙的设计，多少粗心的错误可以被精明的编译器拦住。</p>
@@ -800,7 +787,7 @@ Rust定义了如下规则来<strong>保证对象的访问总是安全的</strong
 
 <p>上述最后一条规则其实意味着我们可以有意利用它，通过大括号来创建不同的作用域，写出更简洁的代码，比如</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">aStr</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">aStr</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">let</span> <span class="n">r1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">;</span>
     <span class="c">//do sth with r1</span>
@@ -808,13 +795,12 @@ Rust定义了如下规则来<strong>保证对象的访问总是安全的</strong
 
 <span class="k">let</span> <span class="n">r2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">s</span><span class="p">;</span>
 <span class="c">//基于r2的修改操作</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>另外一种常见的指针错误是”悬挂指针”,在传统的C++程序中，当一个指针指向一个不存在的对象的时候，紧接着所有对指针的操作会<strong>导致未定义的行为</strong>；
 由于实际出现错误的地方和真正“制造出悬挂指针”的地方可能相距万里，这类运行期的错误往往会耗费程序员大量宝贵的时间。考虑下边的例子</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">let</span> <span class="n">reference_to_nothing</span> <span class="o">=</span> <span class="nf">dangle</span><span class="p">();</span>
 <span class="p">}</span>
 
@@ -822,11 +808,10 @@ Rust定义了如下规则来<strong>保证对象的访问总是安全的</strong
     <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
     <span class="o">&amp;</span><span class="n">s</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>如果尝试编译上述代码，rust编译器会清晰的报告一个<strong>对象生存期</strong>错误</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>error[E0106]: missing lifetime specifier
- --&gt; dangle.rs:5:16
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error[E0106]: missing lifetime specifier
+ <span class="nt">--</span><span class="o">&gt;</span> dangle.rs:5:16
    |
  5 | fn dangle<span class="o">()</span> -&gt; &amp;String <span class="o">{</span>
    |                ^^^^^^^
@@ -836,8 +821,7 @@ Rust定义了如下规则来<strong>保证对象的访问总是安全的</strong
    = help: consider giving it a '</span>static lifetime
 
 error: aborting due to previous error
-</code></pre>
-</div>
+</code></pre></div></div>
 <h4 id="对象生存期">对象生存期</h4>
 <p>在Rust的内部实现中，一个隐含的逻辑是，<strong>任何一个引用都关联着一个对于的生存期</strong>，大部分情况下生存期都可以由编译器自动推导得到而不需要使用者格外留意。
 当具体的实现中期望引用的生存期可以根据某些条件呈现不同的行为的时候，程序员必须提供一些辅助措施告诉编译器这些额外的判断信息。</p>
@@ -846,26 +830,24 @@ error: aborting due to previous error
 当它无法判断引用的生存期的时候，程序员需要在定义的地方传入一些类似于检查点的生存期指示帮助编译器正常检查。</p>
 
 <p>考虑一个取2个字符串slice长度最大者并将其返回的一个函数</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">longest</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">longest</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span>
     <span class="k">if</span> <span class="n">x</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">y</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
         <span class="n">x</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
         <span class="n">y</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>编译这段程序的时候，编译器就会报错说，不知道如何决定返回的引用的生存期，因为它要么是<code class="highlighter-rouge">x</code>，要么是<code class="highlighter-rouge">y</code>，
 却是由程序的<strong>运行期的行为来动态决定</strong>的，编译器没有办法在编译的过程中做决定。修补这个错误则需要在函数签名中加入生存期标记</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="n">longest</span><span class="o">&lt;</span><span class="err">'</span><span class="n">a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="err">'</span><span class="n">a</span> <span class="nb">str</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">longest</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span> <span class="p">{</span>
     <span class="k">if</span> <span class="n">x</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">y</span><span class="nf">.len</span><span class="p">()</span> <span class="p">{</span>
         <span class="n">x</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
         <span class="n">y</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这样编译器就可以知道其实参数和返回值的生存期是一致的，不会产生意外的非法访问或者Race Condition。这里采用的语法是泛型的语法，后边会详细考察一下Rust的泛型支持。</p>
 
 <p>生存期检查的概念是Rust独有的，其采用的类泛型的语法学习起来也显得不是很清晰易懂；这也许是最迷人也最晦涩的特性，从设计的角度来说，
@@ -915,7 +897,7 @@ error: aborting due to previous error
 
 <p>考虑一个简答的例子，定义个矩形以及对应的<code class="highlighter-rouge">area</code>方法来计算其面积</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Rectangle</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Rectangle</span> <span class="p">{</span>
     <span class="n">length</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
 <span class="p">}</span>
@@ -925,8 +907,7 @@ error: aborting due to previous error
         <span class="k">self</span><span class="py">.length</span> <span class="o">*</span> <span class="k">self</span><span class="py">.width</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的<code class="highlighter-rouge">area</code>方法绑定于该<code class="highlighter-rouge">Rectangle</code>上，第一个参数总是<code class="highlighter-rouge">&amp;self</code>这样编译器可以自动推导出其类型是所绑定的<code class="highlighter-rouge">struct</code>对象；因为这里的参数仍然是一个引用，
 默认是不能修改结构体的参数，当需要修改时候，可以指定<code class="highlighter-rouge">&amp;mut self</code>从而获取一个可修改的引用。这里引用的生存周期模型仍然是适用的。</p>
@@ -934,10 +915,9 @@ error: aborting due to previous error
 <p>调用的时候，只需要构造一个结构然后，采用<code class="highlighter-rouge">structObj.callMethod(...)</code>语法即可;大概是出于简化语言的考虑，Rust只支持简单的<code class="highlighter-rouge">.</code>语法而丢弃了古老的<code class="highlighter-rouge">-&gt;</code>操作符；
 <code class="highlighter-rouge">-&gt;</code>的使用仅仅限于指定函数的返回类型上，干净清爽了许多。</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span> <span class="p">{</span> <span class="n">length</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="mi">30</span> <span class="p">};</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span> <span class="p">{</span> <span class="n">length</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="mi">30</span> <span class="p">};</span>
 <span class="nd">println!</span><span class="p">(</span><span class="s">"The area of rectangle is {}"</span><span class="p">,</span> <span class="n">rect</span><span class="nf">.area</span><span class="p">())</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Rust也支持类似C++中的静态函数的概念，对应的机制Rust称为<strong>关联函数</strong>，这样的机制对大型代码的组织是很有意义的,可以方便地解决名字冲突的问题。
 当定义在<code class="highlighter-rouge">impl</code>块里的函数其参数中没有<code class="highlighter-rouge">self</code>的时候，Rust会认为其实一个和某个具体的数据结构无关的函数，它和该结构体类<strong>在同一个命名空间</strong>中。
@@ -967,16 +947,15 @@ error: aborting due to previous error
 </blockquote>
 
 <p>一个描述Hash函数的<code class="highlighter-rouge">Traits</code>定义如下</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Hash</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="n">Hash</span> <span class="p">{</span>
     <span class="k">fn</span> <span class="nf">hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u64</span><span class="p">;</span>
 
     <span class="c">//can have more functions</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>两个实现了该<code class="highlighter-rouge">Traits</code>的结构可以定于如下(不一定必须放在同一个源代码文件中)</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">impl</span> <span class="n">Hash</span> <span class="k">for</span> <span class="nb">bool</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">impl</span> <span class="n">Hash</span> <span class="k">for</span> <span class="nb">bool</span> <span class="p">{</span>
     <span class="k">fn</span> <span class="nf">hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u64</span> <span class="p">{</span>
         <span class="k">if</span> <span class="o">*</span><span class="k">self</span> <span class="p">{</span> <span class="mi">0</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="mi">1</span> <span class="p">}</span>
     <span class="p">}</span>
@@ -987,8 +966,7 @@ error: aborting due to previous error
         <span class="k">self</span> <span class="k">as</span> <span class="nb">u64</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>和传统的C++中的抽象类或Java中的接口不同的时候，<code class="highlighter-rouge">Traits</code>是半开放的，这意味着我们可以<strong>打开某个定义好的结构</strong>，为其添加新的实现；有点类似Ruby的模块扩展方式。
 当然Rust 仍然是静态语言并且是强类型的。C++的模板元虽然可以达到类似的效果，但只支持编译器多态，并且其<a href="http://www.infoworld.com/article/3044727/application-development/qa-bjarne-stroustrup-previews-c-17.html">Concept的支持虽然千呼万唤却一直没有进入语言标准</a>。</p>
@@ -996,14 +974,13 @@ error: aborting due to previous error
 <h4 id="基于泛型的编译器多态">基于泛型的编译器多态</h4>
 
 <p>考虑一个适用上述<code class="highlighter-rouge">Traits</code>的例子</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="n">print_hash</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Hash</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">print_hash</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">Hash</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span>
     <span class="nd">println!</span><span class="p">(</span><span class="s">"The hash is {}"</span><span class="p">,</span> <span class="n">t</span><span class="nf">.hash</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="nf">print_hash</span><span class="p">(</span><span class="o">&amp;</span><span class="k">true</span><span class="p">);</span> <span class="c">// calls with T=bool</span>
 <span class="nf">print_hash</span><span class="p">(</span><span class="o">&amp;</span><span class="mi">12</span><span class="n">_i64</span><span class="p">);</span> <span class="c">//calls with T=i64</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里定义了一个打印Hash的泛型函数<code class="highlighter-rouge">print_hash</code>，要求对应的类型必须实现了<code class="highlighter-rouge">Hash</code>；实际调用的时候，编译器可以做类型检查来判断对应的实际类型是否满足<code class="highlighter-rouge">Traits</code>约束；
 和C++的Concept非常相像。</p>
@@ -1016,15 +993,14 @@ error: aborting due to previous error
 <p>当多态行为依赖于具体运行期才精确得知的条件的时候，泛型就无能为力了。Rust的解决方式是，采用<strong>额外的中间层</strong>-指针来达到。
 比如在GUI编程中，我们经常需要处理界面元素的点击事件，传统的面向对象思路是定义一个<code class="highlighter-rouge">Traits</code>,然后在具体的界面元素上添加一个事件监听者列表</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>trait ClickCallback {
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trait ClickCallback {
     fn on_click(&amp;self, x: i64, y: i64);
 }
 
 struct Button&lt;T: ClickCallback&gt; {
     listeners: Vec&lt;Box&lt;ClickCallback&gt;&gt;;
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>由于结构体的大小必须在编译期确定，因而直接放一个大小不确定的<code class="highlighter-rouge">ClickCallback</code>就不能编译通过了；标准库中提供了智能指针来帮我们很优雅地解决了这个问题；因为指针的大小总是确定的。具体到实现上，其<strong>原理和C++中的虚函数表</strong>非常类似，一个封装了<code class="highlighter-rouge">Traits</code>的智能指针（这里是<code class="highlighter-rouge">Box</code>）内部结构上类似于一个<code class="highlighter-rouge">vtable</code>，其指向一个在运行期动态构造的函数表。在调用的地方，编译器可以自动查找具体实现了对应<code class="highlighter-rouge">Traits</code>的结构的函数表，转到正确的调用地址。</p>
 
 <h3 id="函数式编程">函数式编程</h3>
@@ -1037,24 +1013,22 @@ Rust的函数式编程具有明显的<strong>Haskell痕迹</strong>。</p>
 通过与泛型的结合，<code class="highlighter-rouge">Enum</code>还拥有和Haskell的抽象数据类型ADT相同的扩展能力。</p>
 
 <p>最简单的枚举类型定义可以是如下的样子</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="n">IpAddrKind</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">IpAddrKind</span> <span class="p">{</span>
     <span class="n">V4</span><span class="p">,</span>
     <span class="n">V6</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里每个具体的枚举值都是一个不同的具体值，同时他们的类型是一样的。更复杂一点的情况是，<code class="highlighter-rouge">Enum</code>支持<strong>每个枚举的值可以有不同的类型构造</strong>，如</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="n">IpAddr</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">IpAddr</span> <span class="p">{</span>
     <span class="nf">V4</span><span class="p">(</span><span class="nb">u8</span><span class="p">,</span> <span class="nb">u8</span><span class="p">,</span> <span class="nb">u8</span><span class="p">,</span> <span class="nb">u8</span><span class="p">),</span>
     <span class="nf">V6</span><span class="p">(</span><span class="nb">String</span><span class="p">),</span>
 <span class="p">}</span>
 
 <span class="k">let</span> <span class="n">home</span> <span class="o">=</span> <span class="nn">IpAddr</span><span class="p">::</span><span class="nf">V4</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="k">let</span> <span class="n">lo</span> <span class="o">=</span> <span class="nn">IpAddr</span><span class="p">::</span><span class="nf">V6</span><span class="p">(</span><span class="nn">String</span><span class="p">::</span><span class="nf">from</span><span class="p">(</span><span class="s">"::1"</span><span class="p">))</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>更一般地，具体的枚举值可以用不同的类型来构造出来;从而我们由此将<strong>不同类型的数据聚合在一起形成一个抽象的定义</strong>。</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">struct</span> <span class="n">IpAddr4</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">IpAddr4</span> <span class="p">{</span>
     <span class="c">// 细节省略</span>
 <span class="p">}</span>
 
@@ -1066,39 +1040,35 @@ Rust的函数式编程具有明显的<strong>Haskell痕迹</strong>。</p>
     <span class="nf">V4</span><span class="p">(</span><span class="n">IpAddr4</span><span class="p">),</span>
     <span class="nf">V6</span><span class="p">(</span><span class="n">IpAddr6</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="模式匹配">模式匹配</h4>
 <p>一个<code class="highlighter-rouge">Enum</code>中可能封装了不同的数据，当需要对不同的可能的数据做不同的处理的时候，Rust采用模式匹配的方式来提高代码的可读性。
 模式匹配是一种<strong>特殊的表达式</strong>，采用<code class="highlighter-rouge">match</code>关键字和一个包含<strong>枚举了所有可能的取值以及其处理代码</strong>的代码块组成。譬如考虑上面的地址定义，如果需要对不同的地址类型有不同的处理，可以用模式匹配的方式写为</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">handle_address</span><span class="p">(</span><span class="n">addr</span> <span class="p">:</span> <span class="n">IpAddr</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">handle_address</span><span class="p">(</span><span class="n">addr</span> <span class="p">:</span> <span class="n">IpAddr</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span>
     <span class="k">match</span> <span class="n">addr</span> <span class="p">{</span>
         <span class="nn">IpAddr</span><span class="p">::</span><span class="n">V4</span> <span class="k">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
         <span class="nn">IpAddr</span><span class="p">::</span><span class="n">V6</span> <span class="k">=&gt;</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里每一个<code class="highlighter-rouge">=&gt;</code>对用<code class="highlighter-rouge">,</code>分隔开，其左边的部分是某个具体的枚举变量值，右边是对应的处理表达式。当表达式不止一条语句的时候，可以用大括号隔开。</p>
 
 <p>模式匹配必须保证<strong>所有的枚举值</strong>都必须被处理过；并且处理表达式的类型必须是一样的；否则编译器会报错。
 当枚举的可能取值有很多个而处理代码只对其中部分可能值感兴趣，可以用<code class="highlighter-rouge">_</code>来表示可以匹配所有之前未匹配到的值。</p>
 
 <p>另外一种特殊的情况是，我们仅仅关心某个枚举值中的一个的时候，<code class="highlighter-rouge">match</code>语法依然显得比较啰嗦；Rust提供了特殊的语法来简化代码，如</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">some_u8_value</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">0u8</span><span class="p">);</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">some_u8_value</span> <span class="o">=</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">0u8</span><span class="p">);</span>
 <span class="k">match</span> <span class="n">some_u8_value</span> <span class="p">{</span>
     <span class="nf">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nd">println!</span><span class="p">(</span><span class="s">"three!"</span><span class="p">)</span>
     <span class="n">_</span> <span class="k">=&gt;</span> <span class="p">(),</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>可以改写为</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">some_u8_value</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">some_u8_value</span> <span class="p">{</span>
     <span class="nd">println!</span><span class="p">(</span><span class="s">"three!"</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>类似的我们也可以像常规的处理一样加上一个<code class="highlighter-rouge">else</code>分支来处理其它不匹配的情况。</p>
 
@@ -1114,12 +1084,11 @@ Rust的函数式编程具有明显的<strong>Haskell痕迹</strong>。</p>
 </blockquote>
 
 <p>Rust中的Option是一种<strong>构建于泛型技术上的特殊的enum</strong>类型</p>
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">pub</span> <span class="k">enum</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">enum</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="nb">None</span><span class="p">,</span>
     <span class="nf">Some</span><span class="p">(</span><span class="n">T</span><span class="p">),</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p><a href="https://doc.rust-lang.org/std/option/enum.Option.html">标准库</a>提供了一些成员函数来实现常见的绑定/链式操作范式</p>
 <ul>
   <li><code class="highlighter-rouge">fn is_some(&amp;self) -&gt; bool</code> 判断是否有值</li>
@@ -1156,12 +1125,11 @@ assert_eq!(13, calculate(4, 5)); // 4 * 2 + 5 == 13
 <p>闭包的<strong>类型注解约束要比函数定义的要求宽松</strong>一些，即不需要指定返回类型也可以;和现代C++的<a href="https://isocpp.org/wiki/faq/cpp14-language#generic-lambdas"><code class="highlighter-rouge">generic lambda</code>特性</a>比较类似；
 都是为了方便程序员写出更简洁、干净的代码。如下的代码是完全等价的</p>
 
-<div class="language-rust highlighter-rouge"><pre class="highlight"><code><span class="k">fn</span>  <span class="nf">add_one_v1</span>   <span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">}</span>  <span class="c">// a function</span>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span>  <span class="nf">add_one_v1</span>   <span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">}</span>  <span class="c">// a function</span>
 <span class="k">let</span> <span class="n">add_one_v2</span> <span class="o">=</span> <span class="p">|</span><span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">|</span> <span class="k">-&gt;</span> <span class="nb">i32</span> <span class="p">{</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span> <span class="c">// the full syntax for a closure</span>
 <span class="k">let</span> <span class="n">add_one_v3</span> <span class="o">=</span> <span class="p">|</span><span class="n">x</span><span class="p">|</span>             <span class="p">{</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">};</span> <span class="c">// a closure eliding types</span>
 <span class="k">let</span> <span class="n">add_one_v4</span> <span class="o">=</span> <span class="p">|</span><span class="n">x</span><span class="p">|</span>               <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>  <span class="p">;</span> <span class="c">// without braces</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>从代码可读性和可维护性的角度来看，最好<strong>不用闭包来写太长/太复杂的代码块</strong>，
 因为随着匿名代码块中逻辑的增加，上下文逻辑变得更加模糊；这个时候，用一个命名良好的子函数反而更清晰便于维护。</p>
 

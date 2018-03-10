@@ -508,27 +508,24 @@
 <p>GHC采用运行时指定的方式来引导运行时系统将程序分布在多个物理核心上执行。GHC在启动程序代码的时候，会先扫描命令行传入参数中关于运行期控制的参数，解析其选项值，然后将其从arglist中删除，即这些控制参数对程序本身而言是透明不可见的。</p>
 
 <p>GHC运行时通过识别<code class="highlighter-rouge">+RTS</code>和<code class="highlighter-rouge">-RTS</code>来解析运行时参数，其中间的部分会被认为是控制GHC运行时的选项。对于并发而言，我们需要关注的是<code class="highlighter-rouge">-Nx</code>参数，而这里的<strong>x</strong>需要设置为CPU的核心数目。在Linux系统上，可以用如下命令获取CPU线程数目：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>cat /proc/cpuinfo  | grep <span class="s2">"^processor"</span> | wc -l
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat</span> /proc/cpuinfo  | <span class="nb">grep</span> <span class="s2">"^processor"</span> | wc <span class="nt">-l</span>
+</code></pre></div></div>
 
 <p>当然也可以用如下的Haskell工具函数：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">GHC.Conc</span> <span class="p">(</span><span class="nf">numCapabilities</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">GHC.Conc</span> <span class="p">(</span><span class="nf">numCapabilities</span><span class="p">)</span>
 <span class="kr">import</span> <span class="nn">System.Environment</span> <span class="p">(</span><span class="nf">getArgs</span><span class="p">)</span>
 
 <span class="n">main</span> <span class="o">=</span> <span class="kr">do</span>
     <span class="n">args</span> <span class="o">&lt;-</span> <span class="n">getArgs</span>
     <span class="n">putStrLn</span> <span class="o">$</span> <span class="s">"command line arguments: "</span> <span class="o">++</span> <span class="n">show</span> <span class="n">args</span>
     <span class="n">putStrLn</span> <span class="o">$</span> <span class="s">"number of cores: "</span> <span class="o">++</span> <span class="n">show</span> <span class="n">numCapabilities</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>首先编译代码的时候需要加入<code class="highlighter-rouge">-threaded</code>的选项告知编译器支持并发,然后需要在程序运行的时候传入<code class="highlighter-rouge">-N</code>:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>ghc -c NumCapabilities.hs
-ghc -threaded -o NumCapabilities NumCapabilities.o 
-./NumCapabilites +RTS -N4 -RTS
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ghc <span class="nt">-c</span> NumCapabilities.hs
+ghc <span class="nt">-threaded</span> <span class="nt">-o</span> NumCapabilities NumCapabilities.o 
+./NumCapabilites +RTS <span class="nt">-N4</span> <span class="nt">-RTS</span>
+</code></pre></div></div>
 
 <p>这个例子还可以表明RTS参数不会传入程序的getArgs中;此无如果传入的N个数超出物理核心数，GHC会提示需要打开<code class="highlighter-rouge">-rtsopts</code>编译选项，否则运行时拒绝执行程序代码。</p>
 
@@ -543,16 +540,15 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
 <h3 id="分治法的例子---quicksort">分治法的例子 - QuickSort</h3>
 
 <p>下边是一个简单的分治法例子 - 快速排序：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">sort</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sort</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
 <span class="n">sort</span> <span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="n">lesser</span> <span class="o">++</span> <span class="n">x</span><span class="o">:</span><span class="n">greater</span>
     <span class="kr">where</span> <span class="n">lesser</span>  <span class="o">=</span> <span class="n">sort</span> <span class="p">[</span><span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">&lt;-</span> <span class="n">xs</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;</span>  <span class="n">x</span><span class="p">]</span>
               <span class="n">greater</span> <span class="o">=</span> <span class="n">sort</span> <span class="p">[</span><span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">&lt;-</span> <span class="n">xs</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">]</span>
               <span class="n">sort</span> <span class="kr">_</span> <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>对于这个朴素的例子，可以通过一些细微的变化使其并行起来：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Parallel</span> <span class="p">(</span><span class="nf">par</span><span class="p">,</span> <span class="nf">pseq</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Parallel</span> <span class="p">(</span><span class="nf">par</span><span class="p">,</span> <span class="nf">pseq</span><span class="p">)</span>
 
 <span class="n">parSort</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
 <span class="n">parSort</span> <span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span>    <span class="o">=</span> <span class="n">force</span> <span class="n">greater</span> <span class="p">`</span><span class="n">par</span><span class="p">`</span> <span class="p">(</span><span class="n">force</span> <span class="n">lesser</span> <span class="p">`</span><span class="n">pseq</span><span class="p">`</span>
@@ -560,8 +556,7 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
              <span class="kr">where</span> <span class="n">lesser</span>  <span class="o">=</span> <span class="n">parSort</span> <span class="p">[</span><span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">&lt;-</span> <span class="n">xs</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;</span>  <span class="n">x</span><span class="p">]</span>
                    <span class="n">greater</span> <span class="o">=</span> <span class="n">parSort</span> <span class="p">[</span><span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">&lt;-</span> <span class="n">xs</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">]</span>
 <span class="n">parSort</span> <span class="kr">_</span>         <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="新函数">新函数</h4>
 
@@ -570,12 +565,11 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
   <li><code class="highlighter-rouge">par</code>函数会先赋值其左边表达式到WHNF，然后返回其右侧的部分。对于<code class="highlighter-rouge">par</code>而言，其操作可以和其它正在进行的赋值并行进行。</li>
   <li><code class="highlighter-rouge">pseq</code>函数会保证其左侧的表达式必定先于右侧表达式被赋值，并且默认规则是按照WHNF</li>
   <li><code class="highlighter-rouge">force</code>函数的定义如下：
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">force</span> <span class="o">::</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="nb">()</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">force</span> <span class="o">::</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="nb">()</span>
 <span class="n">force</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">go</span> <span class="n">xs</span> <span class="p">`</span><span class="n">pseq</span><span class="p">`</span> <span class="nb">()</span>
   <span class="kr">where</span> <span class="n">go</span> <span class="p">(</span><span class="kr">_</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="n">go</span> <span class="n">xs</span>
             <span class="n">go</span> <span class="kt">[]</span> <span class="o">=</span> <span class="mi">1</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
     <p>这里的force函数确保list类型的每一个元素都被赋值。如果去掉这里的force,那么算法本身会和顺序的方案一样，因为<code class="highlighter-rouge">pseq</code>仅仅要求左侧表达式按照WHNF来赋值，而对于list类型而言，只要第一个元素（HEAD）被赋值，那么这个左侧的赋值操作即算完毕，加入<code class="highlighter-rouge">force</code>就保证了做最后返回的部分，<code class="highlighter-rouge">greater</code>和<code class="highlighter-rouge">lesser</code>部分均已赋值完毕。</p>
   </li>
 </ul>
@@ -584,7 +578,7 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
 
 <p>Haskell的线程代价比大部分其它语言的线程代价都要小，但是并发意味着对共享内存的访问和控制，这些开销并不是任何时候都可以忽略的。对上述程序的性能做剖析会发现，其实上述算法对每一个运算都尽量来并发直到list本身只剩下一个元素，那么多线程带来的并发开销会大于带来的好处。一种这种的方案是检测递归的深度，然后到某种程度停止并发处理，转回线性处理：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">parSort2</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kt">Int</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">parSort2</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Ord</span> <span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kt">Int</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
 <span class="n">parSort2</span> <span class="n">d</span> <span class="n">list</span><span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span>
   <span class="o">|</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="mi">0</span>     <span class="o">=</span> <span class="n">sort</span> <span class="n">list</span>
   <span class="o">|</span> <span class="n">otherwise</span> <span class="o">=</span> <span class="n">force</span> <span class="n">greater</span> <span class="p">`</span><span class="n">par</span><span class="p">`</span> <span class="p">(</span><span class="n">force</span> <span class="n">lesser</span> <span class="p">`</span><span class="n">pseq</span><span class="p">`</span>
@@ -594,8 +588,7 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
             <span class="n">d'</span> <span class="o">=</span> <span class="n">d</span> <span class="o">-</span> <span class="mi">1</span>          
             
 <span class="n">parSort2</span> <span class="kr">_</span> <span class="kr">_</span>              <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="gc的问题">GC的问题</h4>
 
@@ -613,30 +606,28 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
 
 <p>回到上边的例子，为了将传统的顺序程序改为并行，我们必须在代码中小心的插入<code class="highlighter-rouge">pseq</code>/<code class="highlighter-rouge">par</code>/<code class="highlighter-rouge">force</code>来指明整个并行方式需要如何赋值运算，甚至对于<code class="highlighter-rouge">list</code>类型，还需通过自定义的<code class="highlighter-rouge">force</code>函数来强制赋值每一个元素以保证算法的正确性,这一方式看起来无疑是非常繁琐甚至重复的。再考虑<code class="highlighter-rouge">map</code>这一很重要的函数，对于并发控制，同样需要定义一个<code class="highlighter-rouge">paralleMap</code>才能放在代码里边用:</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Parallel</span> <span class="p">(</span><span class="nf">par</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">import</span> <span class="nn">Control.Parallel</span> <span class="p">(</span><span class="nf">par</span><span class="p">)</span>
 
 <span class="n">parallelMap</span> <span class="o">::</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span>
 <span class="n">parallelMap</span> <span class="n">f</span> <span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="kr">let</span> <span class="n">r</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x</span>
                        <span class="kr">in</span> <span class="n">r</span> <span class="p">`</span><span class="n">par</span><span class="p">`</span> <span class="n">r</span> <span class="o">:</span> <span class="n">parallelMap</span> <span class="n">f</span> <span class="n">xs</span>
 <span class="n">parallelMap</span> <span class="kr">_</span> <span class="kr">_</span>      <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>即使对于这个版本的实现，如果b类型本身是一个list，那么这个算法很可能还是不能真正并行起来，因为<code class="highlighter-rouge">list</code>类型的WHNF仅仅运算第一个元素；我们可能不得不新实现一个针对特殊类型的（<code class="highlighter-rouge">list</code>)的版本，甚至于对很多不同类型的<code class="highlighter-rouge">b</code>都可能需要一些特殊的处理。</p>
 
 <p>一种想法是，我们可以引入一个指定某个类型的赋值规则的<strong>函数参数</strong>来确定某个类型的赋值方式，譬如：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">forceListAndElts</span> <span class="o">::</span> <span class="p">((</span><span class="n">a</span><span class="o">-&gt;</span><span class="nb">()</span><span class="p">)</span><span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="nb">()</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">forceListAndElts</span> <span class="o">::</span> <span class="p">((</span><span class="n">a</span><span class="o">-&gt;</span><span class="nb">()</span><span class="p">)</span><span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="nb">()</span>
 <span class="n">forceListAndElts</span> <span class="n">forceElt</span> <span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="n">forceElt</span> <span class="n">x</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">forceListAndElts</span> <span class="n">forceElt</span> <span class="n">xs</span>
 <span class="n">forceListAndElts</span> <span class="kr">_</span> <span class="kr">_</span> <span class="o">=</span> <span class="nb">()</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的函数强制list的每一个元素都按照对应元素类型的<code class="highlighter-rouge">forceElt</code>函数赋值到对应的形式（WHNF等）。将上述想法扩展泛化就回得到<strong>Strategies</strong>：</p>
 
 <h3 id="strategies">Strategies</h3>
 
 <p>Haskell通过库的方式提供Strategies的支持：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Parallel</span><span class="o">.</span><span class="kt">Strategies</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">m</span> <span class="o">+</span><span class="kt">Control</span><span class="o">.</span><span class="kt">Parallel</span><span class="o">.</span><span class="kt">Strategies</span>
 <span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="kt">Strategy</span> 
 <span class="kr">type</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Eval</span> <span class="n">a</span>
   <span class="c1">-- Defined in `Control.Parallel.Strategies'</span>
@@ -648,10 +639,9 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
             <span class="c1">-- Defined in `Control.Parallel.Strategiestegies'</span>
 <span class="kr">instance</span> <span class="kt">Monad</span> <span class="kt">Eval</span> <span class="c1">-- Defined in `Control.Parallel.Strategies'</span>
 <span class="kr">instance</span> <span class="kt">Functor</span> <span class="kt">Eval</span> <span class="c1">-- Defined in `Control.Parallel.Strategies'</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p><code class="highlighter-rouge">Strategy</code>是一个<code class="highlighter-rouge">typeclass</code>,对每一个类型a, <code class="highlighter-rouge">Eval</code>构造出一个具体的Strategy，而<code class="highlighter-rouge">Eval</code>本身则是个<code class="highlighter-rouge">newtype</code>,并且是个Monad/Functor实例。此外，Strategy库还定义了如下Strategy:</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">rwhnf</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ghc</span><span class="o">&gt;:</span><span class="n">info</span> <span class="n">rwhnf</span> 
 <span class="n">rwhnf</span> <span class="o">::</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="c1">-- Defined in   `Control.Parallel.Strategies'</span>
 
 <span class="kr">class</span> <span class="kt">NFData</span> <span class="n">a</span> <span class="kr">where</span>
@@ -671,40 +661,36 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
              <span class="kt">NFData</span> <span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">,</span> <span class="n">a6</span><span class="p">,</span> <span class="n">a7</span><span class="p">,</span> <span class="n">a8</span><span class="p">)</span>
 
 <span class="c1">-- more follows ....</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>Typeclass<code class="highlighter-rouge">NFData</code>抽象了所有的Strategy并且提供了<code class="highlighter-rouge">rnf</code>和<code class="highlighter-rouge">rwhnf</code>并且提供了大部分基本类型的实现，譬如常见的<code class="highlighter-rouge">Maybe</code>类型：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">NFData</span> <span class="n">a</span> <span class="o">=&gt;</span> <span class="kt">NFData</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">instance</span> <span class="kt">NFData</span> <span class="n">a</span> <span class="o">=&gt;</span> <span class="kt">NFData</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="n">a</span><span class="p">)</span> <span class="kr">where</span>
     <span class="n">rnf</span> <span class="p">(</span><span class="kt">Nothing</span><span class="p">)</span> <span class="o">=</span> <span class="nb">()</span>
     <span class="n">rnf</span> <span class="p">(</span><span class="kt">Just</span> <span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="n">rnf</span> <span class="n">x</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>对于自定义类型，我们就可以自己依照实现自己的<code class="highlighter-rouge">rnf</code>方法。对于自定义类型，<code class="highlighter-rouge">rnf</code>必须赋值到每一个构造函数的每一个字段。</p>
 
 <h2 id="策略和算法的解耦合">策略和算法的解耦合</h2>
 
 <p>根据基本的Strategy,我们可以组合出更丰富的赋值方式，比如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">parList</span> <span class="o">::</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Strategy</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">parList</span> <span class="o">::</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Strategy</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
 <span class="n">parList</span> <span class="n">strat</span> <span class="kt">[]</span>     <span class="o">=</span> <span class="nb">()</span>
 <span class="n">parList</span> <span class="n">strat</span> <span class="p">(</span><span class="n">x</span><span class="o">:</span><span class="n">xs</span><span class="p">)</span> <span class="o">=</span> <span class="n">strat</span> <span class="n">x</span> <span class="p">`</span><span class="n">par</span><span class="p">`</span> <span class="p">(</span><span class="n">parList</span> <span class="n">strat</span> <span class="n">xs</span><span class="p">)</span>
 
 <span class="n">parMap</span> <span class="o">::</span> <span class="kt">Strategy</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span>
 <span class="n">parMap</span> <span class="n">strat</span> <span class="n">f</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">map</span> <span class="n">f</span> <span class="n">xs</span> <span class="p">`</span><span class="n">using</span><span class="p">`</span> <span class="n">parList</span> <span class="n">strat</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>上述<code class="highlighter-rouge">parMap</code>的实现中，左边的算法部分仍然是相同的<code class="highlighter-rouge">map f xs</code>实现，而<code class="highlighter-rouge">using</code>函数则将左侧的实际算法和右侧的<code class="highlighter-rouge">Strategy</code>结合起来了：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">using</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">using</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Strategy</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span>
 <span class="n">using</span> <span class="n">x</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="n">x</span> <span class="p">`</span><span class="n">pseq</span><span class="p">`</span> <span class="n">x</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="mapreduce-的例子">MapReduce 的例子</h3>
 <p>一个简化版本的MapReduce例子如下：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">mapReduce</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mapReduce</span>
     <span class="o">::</span> <span class="kt">Strategy</span> <span class="n">b</span>    <span class="c1">-- evaluation strategy for mapping</span>
     <span class="o">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">)</span>      <span class="c1">-- map function</span>
     <span class="o">-&gt;</span> <span class="kt">Strategy</span> <span class="n">c</span>    <span class="c1">-- evaluation strategy for reduction</span>
@@ -716,8 +702,7 @@ ghc -threaded -o NumCapabilities NumCapabilities.o
     <span class="n">mapResult</span> <span class="p">`</span><span class="n">pseq</span><span class="p">`</span> <span class="n">reduceResult</span>
       <span class="kr">where</span> <span class="n">mapResult</span>  <span class="o">=</span> <span class="n">parMap</span> <span class="n">mapStrat</span> <span class="n">mapFunc</span> <span class="n">input</span>
           <span class="n">reduceResult</span> <span class="o">=</span> <span class="n">reduceFunc</span> <span class="n">mapResult</span> <span class="p">`</span><span class="n">using</span><span class="p">`</span> <span class="n">reduceStrat</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Haskell通过引入Strategy的方式分离算法和并发控制，从而比较优雅的部分解决了这个问题（当然更好的解决需要STM的参与）。</p>
 

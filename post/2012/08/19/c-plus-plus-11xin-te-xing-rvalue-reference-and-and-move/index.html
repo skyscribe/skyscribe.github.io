@@ -539,7 +539,7 @@
 <h3 id="rvalue定义">Rvalue定义</h3>
 
 <p>C++03中，不允许定义引用的引用，即<code class="highlighter-rouge">X&amp;&amp; b = x</code>;而C++11正好借用这个符号来表述Rvalue reference, 即：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">X</span><span class="p">;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">X</span><span class="p">;</span>
 <span class="kt">void</span> <span class="n">func</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">obj</span><span class="p">){</span>
 <span class="p">}</span>
 
@@ -551,8 +551,7 @@
     
     <span class="n">func</span><span class="p">(</span><span class="n">getX</span><span class="p">());</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的X对象在<code class="highlighter-rouge">func</code>中会被转化为一个Rvalue,传入<code class="highlighter-rouge">func</code>中调用。</p>
 
@@ -562,7 +561,7 @@
 <h3 id="move-语义">Move 语义</h3>
 
 <p>考虑如下的例子：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;</span> <span class="n">X</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">X</span><span class="o">&amp;</span> <span class="n">rhs</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;</span> <span class="n">X</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">X</span><span class="o">&amp;</span> <span class="n">rhs</span><span class="p">){</span>
     <span class="c1">// check if rhs equas to this and then
 </span>    <span class="c1">//  detach rhs's resource and make a clone of its resouce
 </span>    <span class="c1">//  and then attach to this
@@ -571,22 +570,20 @@
 <span class="n">X</span> <span class="n">foo</span><span class="p">();</span>
 <span class="n">X</span> <span class="n">x</span><span class="p">;</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">foo</span><span class="p">();</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里最后一行语句会析构<code class="highlighter-rouge">foo</code>所返回的临时对象，并将对应的对象拷贝至<code class="highlighter-rouge">x</code>，而实际上我们完全可以直接将<code class="highlighter-rouge">foo()</code>返回的对象直接<strong>Move</strong>到<code class="highlighter-rouge">x</code>中来。这里我们就可以通过定义重载<code class="highlighter-rouge">move</code>语义的<code class="highlighter-rouge">operator =</code>:</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;</span> <span class="n">X</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">rhs</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;</span> <span class="n">X</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">rhs</span><span class="p">){</span>
     <span class="c1">//swap resource
 </span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="强制move">强制Move</h3>
 
 <p>某些情况下，编译器不会自动为我们选择<code class="highlighter-rouge">rvalue</code>版本的函数，譬如：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">swap</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> 
 <span class="p">{</span> 
     <span class="n">T</span> <span class="n">tmp</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
@@ -597,20 +594,18 @@
 <span class="c1">//Define move assignment and move copy constructors for X
 </span><span class="n">X</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
 <span class="n">swap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里因为传入的变量a/b并不会按照<code class="highlighter-rouge">move</code>方式传递，而是继续调用旧有的方式去构造。问题在于这里的a/b在编译器看来可能后续会被继续引用修改，因此他们自身并不是rvalue；C++11引入了<code class="highlighter-rouge">std::move</code>函数来强制move:</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">swap</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> 
 <span class="p">{</span> 
     <span class="n">T</span> <span class="n">tmp</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">));</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">b</span><span class="p">);</span> 
     <span class="n">b</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span> 
 <span class="p">}</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="swap来实现对象move的问题">swap来实现对象move的问题</h3>
 
@@ -619,44 +614,39 @@
 <h3 id="确定rvalue版本被正确调用">确定Rvalue版本被正确调用</h3>
 
 <p>考虑下边的例子：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">foo</span><span class="p">(</span><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">){</span>
     <span class="n">X</span> <span class="n">anotherX</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里我们虽然传入了一个<code class="highlighter-rouge">Rvalue</code>引用，但是函数体中的对象拷贝赋值却不会调用对应的<code class="highlighter-rouge">move</code>版本；因为这里的<code class="highlighter-rouge">x</code>本身有名字，因此它会被编译器认为是一个<code class="highlighter-rouge">lvalue</code>，因此旧的拷贝构造会被调用。反之，如下的例子却能正确调用<code class="highlighter-rouge">move</code>版本：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">bar</span><span class="p">();</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="o">&amp;&amp;</span> <span class="n">bar</span><span class="p">();</span>
 <span class="n">X</span> <span class="n">x</span> <span class="o">=</span> <span class="n">bar</span><span class="p">();</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>如果我们想要显式调用<code class="highlighter-rouge">move</code>版本，那么可以用<code class="highlighter-rouge">std::move</code>来强制，但是我们就要注意后边不能在引用这个变量了，因为其持有的资源已经被<code class="highlighter-rouge">move</code>了。</p>
 
 <p>这个问题对于类继承的情况就更明显：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//Base class provides move implementation for construction
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Base class provides move implementation for construction
 </span><span class="k">class</span> <span class="nc">Derived</span><span class="p">(</span><span class="n">Derived</span> <span class="o">&amp;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">:</span> <span class="n">Base</span> <span class="p">(</span><span class="n">rhs</span><span class="p">){</span>
     <span class="c1">//Derived initialization....
 </span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里的基类部分的构造<strong>不会调用move版本</strong>仅仅是因为我们传入了一个有名字的变量给它，解决的办法仍然是<code class="highlighter-rouge">std::move</code>:</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//Base class provides move implementation for construction
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Base class provides move implementation for construction
 </span><span class="k">class</span> <span class="nc">Derived</span><span class="p">(</span><span class="n">Derived</span> <span class="o">&amp;&amp;</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">:</span> <span class="n">Base</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">rhs</span><span class="p">)){</span>
     <span class="c1">//Derived initialization....
 </span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="move与返回值优化rvo">move与返回值优化（RVO）</h3>
 
 <p>现代的编译器大多实现了返回值优化来减少临时对象的构造，然而这一优化可能会对我们的<code class="highlighter-rouge">move</code>产生影响：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">X</span> <span class="n">foo</span><span class="p">(){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span> <span class="n">foo</span><span class="p">(){</span>
     <span class="n">X</span> <span class="n">x</span><span class="p">;</span>
     <span class="c1">//do something with x
 </span>    <span class="k">return</span> <span class="n">x</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>乍一看可能以为我们可以用move来避免函数内对象到返回值中的对象的拷贝，然而“聪明”的编译器可能已经优化了这一临时对象，即使用<code class="highlighter-rouge">std::move</code>也会是多次一举。</p>
 
 <h2 id="perfect-forwarding">Perfect forwarding</h2>
@@ -664,27 +654,25 @@
 
 <p>在模板编程中，<code class="highlighter-rouge">perfect forwarding</code>是一个麻烦的问题，譬如如下的forward函数用于构造一个给定类型的对象：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
 <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">factory</span><span class="p">(</span><span class="n">Arg</span> <span class="n">arg</span><span class="p">)</span>
 <span class="p">{</span> 
   <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">T</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span>
 <span class="p">}</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的目地是用给定的参数返回一个新的对象指针；问题是这里的参数是用copy传递的，如果参数对象比较昂贵，就有不必要的开销被引入；加入我们换做引用传递：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
 <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">factory</span><span class="p">(</span><span class="n">Arg</span><span class="o">&amp;</span> <span class="n">arg</span><span class="p">)</span>
 <span class="p">{</span> 
   <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">T</span><span class="p">(</span><span class="n">arg</span><span class="p">));</span>
 <span class="p">}</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>问题虽然得到部分好转，但是不完美，譬如我们就无法传入一个rvalue: <code class="highlighter-rouge">factor&lt;X&gt;(41)</code>就会报错。一种解决的办法是，对这个模板函数再加上一个const引用版本的；虽然问题可以得到解决，但是随着函数参数个数的增加，需要重载的版本也就成倍增加了。解决这一问题的方法为:</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Arg</span><span class="o">&gt;</span> 
 <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">factory</span><span class="p">(</span><span class="n">Arg</span><span class="o">&amp;&amp;</span> <span class="n">arg</span><span class="p">)</span>
 <span class="p">{</span> 
   <span class="k">return</span> <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">T</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Arg</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">)));</span>
@@ -695,8 +683,7 @@
 <span class="p">{</span>
   <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
 <span class="p">}</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的奥秘在于<code class="highlighter-rouge">Arg</code>参数的解析，在C++11中，<code class="highlighter-rouge">&amp;</code>的解析遵循如下规则：</p>
 

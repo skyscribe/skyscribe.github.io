@@ -506,23 +506,21 @@
 
 <p>由于 Haskell 是一个纯函数式语言，所有的操作都是用函数方式实现的（递归和模式匹配）；同时作为一个强类型语言，所以函数的参数必须绑定于特定的类型，而不同的数据类型之间是不能直接转换的 ( 需要转的也必须通过某些函数来实现 ), 那么对于同样一个类似的函数，可能就需要对不同的类型有不同的实现，因为操作的类型可能不同，这样就会带来很繁琐的代码，例如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="n">someOpOnInt</span><span class="o">::</span><span class="kt">Int</span> <span class="o">-&gt;</span> <span class="kt">Int</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">someOpOnInt</span><span class="o">::</span><span class="kt">Int</span> <span class="o">-&gt;</span> <span class="kt">Int</span>
 <span class="n">someOpOnDouble</span><span class="o">::</span><span class="kt">Double</span><span class="o">-&gt;</span><span class="kt">Int</span>
 <span class="n">someOpOnFractional</span><span class="o">::</span><span class="kt">Fractional</span><span class="o">-&gt;</span> <span class="kt">Int</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>由于他们所做的操作本质上相同，但是由于强类型系统的制约，编写者必须给出不同的函数名来对应于不同的类型，后果就是重复的代码乃至糟糕的代码质量。另一个可能的问题则是对于每一个新定义的类型，必须定义一个新的函数。其它的模块想要调用此功能也必须针对不同的类型做不同的处理，导致代码不能重用。</p>
 
 <p>Typeclass则可以很好的解决这个问题：</p>
 <ul>
   <li>一个 typeclass 来定义所支持的操作，例如
-    <div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">SomeOp</span> <span class="n">a</span> <span class="kr">where</span>
+    <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">SomeOp</span> <span class="n">a</span> <span class="kr">where</span>
   <span class="n">someOp</span> <span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">Int</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
-  <li>每一个可以支持该操作的类型可以实现对应的操作，如：
+  <li>每一个可以支持该操作的类型可以实现对应的操作，如：<br />
 ```haskell
 instance SomeOp Int where
   – implementition for Int type
@@ -536,7 +534,7 @@ instance SomeOp Int where
 <p>instance SomeOp Fractional where
     – implementation for Fractional
     someOp x = undefined</p>
-<div class="highlighter-rouge"><pre class="highlight"><code>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 - typeclass是开放的，这意味着你可以在不同的模块里边实现其它模块中定义的 typeclass   
 ```haskell
 data BrandNewType = BrandNewType String Int
@@ -545,8 +543,7 @@ data BrandNewType = BrandNewType String Int
 instance SomeOp BrandNewType where
     -- imp for new type
     someOp x = undefined
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>由于 typeclass 实现的是对于 type 的抽象，如果熟悉 C++ 的模板系统和被 C++ 被拖出新标准的 <a href="http://en.wikipedia.org/wiki/Concepts_%28C%2B%2B%29"><strong>concept</strong></a> 概念，那么我们就容易发现 typeclass 和模板系统有很多的相似基因。而 typeclass 能够更优雅的抽象类型接口，则得益于 Haskell 的强类型系统了。想想 C++ 中隐式类型转换给模板实现带来的困扰，Haskell 的 typeclass 是一种更优雅的抽象。</p>
 
@@ -554,7 +551,7 @@ instance SomeOp BrandNewType where
 
 <p>这是两个系统预定义的 typeclass, Show 用于将某个类型转换为 string， 而 Read 则用于从一个字符串表述中构造一个指定类型的数据。二者结合可以完成数据的序列化和反序列化。系统提供的 putStrLn 操作于某个数据类型的时候，如果其类型继承了 Show，那么它的字符串表示就会被打印出来。当然<code class="highlighter-rouge">show</code> 函数也可以用于打印其字符串表述，而 Read 则用构造出一个指定类型的对象，比如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">Color</span> <span class="o">=</span> <span class="kt">Read</span> <span class="o">|</span> <span class="kt">Green</span> <span class="o">|</span> <span class="kt">Blue</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">Color</span> <span class="o">=</span> <span class="kt">Read</span> <span class="o">|</span> <span class="kt">Green</span> <span class="o">|</span> <span class="kt">Blue</span>
 <span class="kr">instance</span> <span class="kt">Show</span> <span class="kt">Color</span> <span class="kr">where</span>
     <span class="n">show</span> <span class="kt">Red</span> <span class="o">=</span> <span class="s">"Red"</span>
     <span class="n">show</span> <span class="kt">Green</span> <span class="o">=</span> <span class="s">"Green"</span>
@@ -580,8 +577,7 @@ instance SomeOp BrandNewType where
 <span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="kr">let</span> <span class="n">inst'</span> <span class="o">=</span> <span class="n">read</span> <span class="p">(</span><span class="n">show</span> <span class="n">inst</span><span class="p">)</span> <span class="o">::</span> <span class="p">[</span><span class="kt">Color</span><span class="p">]</span>
 <span class="o">*</span><span class="kt">Main</span><span class="o">&gt;</span> <span class="n">inst'</span>
 <span class="p">[</span><span class="kt">Red</span><span class="p">,</span><span class="kt">Blue</span><span class="p">,</span><span class="kt">Green</span><span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里对于 list 类型的处理可以被系统自动推倒出来。</p>
 
@@ -599,7 +595,7 @@ instance SomeOp BrandNewType where
 <p>对于自己定义的 ADT， 这些 typeclass  可以用 deriving 的方式交给Haskell编译器来自动推导，省却了诸多麻烦。限制条件是，我们自己用<code class="highlighter-rouge">data</code>声明的ADT类型必须满足： <strong>其中引用的类型必须也满足需要derive的typeclass</strong>，这些类型可以是手动声明的方式满足typeclass.</p>
 
 <p>如下的例子就是一个例外情况：</p>
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">CannotShow</span> <span class="o">=</span> <span class="kt">CannotShow</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">CannotShow</span> <span class="o">=</span> <span class="kt">CannotShow</span>
     <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
 
 <span class="kr">data</span> <span class="kt">CannotDeriveShow</span> <span class="o">=</span> <span class="kt">CannotDeriveShow</span> <span class="kt">CannotShow</span>
@@ -610,15 +606,14 @@ instance SomeOp BrandNewType where
 <span class="kr">instance</span> <span class="kt">Show</span> <span class="kt">OK</span> <span class="kr">where</span> <span class="n">show</span> <span class="kr">_</span> <span class="o">=</span> <span class="s">"OK"</span>
 <span class="kr">data</span> <span class="kt">ThisWorks</span> <span class="o">=</span> <span class="kt">ThisWorks</span> <span class="kt">OK</span>
     <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里的第一个例子中，引用的类型没有去指明继承 typeclass 因而会导致编译失败，而第二个类型则可以。</p>
 
 <h2 id="问题---overlapping">问题 - overlapping</h2>
 
 <p>由于 typeclass 是开放的， 不同的模块可能对不同的类型提供不同的 typeclass instance实现，二者就可能出现冲突，例如：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Borked</span> <span class="n">a</span> <span class="kr">where</span> 
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">class</span> <span class="kt">Borked</span> <span class="n">a</span> <span class="kr">where</span> 
     <span class="n">bork</span><span class="o">::</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">String</span>
 
 <span class="kr">instance</span> <span class="kt">Borked</span> <span class="kt">Int</span> <span class="kr">where</span>
@@ -629,8 +624,7 @@ instance SomeOp BrandNewType where
 
 <span class="kr">instance</span> <span class="p">(</span><span class="kt">Borked</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Borked</span> <span class="n">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kt">Borked</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="kr">where</span>
     <span class="n">bork</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="s">"&gt;&gt;"</span> <span class="o">++</span> <span class="n">bork</span> <span class="n">a</span> <span class="o">++</span> <span class="s">", "</span> <span class="o">++</span> <span class="n">bork</span> <span class="n">b</span> <span class="o">++</span> <span class="s">"&lt;&lt;"</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>如果我们需要调用<code class="highlighter-rouge">bork (1,2)</code>, 这里 haskell 编译器没法自动判断该选择那一个实现，因为最后两个都同样满足instance条件。GHC 中可以通过扩展 <code class="highlighter-rouge">OverlappingInstance</code> 来解除这一限制，引导编译器选择最具体的类型实现。</p>
 

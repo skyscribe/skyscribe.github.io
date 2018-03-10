@@ -508,35 +508,32 @@
 <h2 id="启动方法">启动方法</h2>
 
 <p>可以参看其manpage，主要是几个环境变量：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="nb">export </span><span class="nv">UMEM_DEBUG</span><span class="o">=</span>default
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">UMEM_DEBUG</span><span class="o">=</span>default
 <span class="nb">export </span><span class="nv">UMEM_LOGGING</span><span class="o">=</span>transaction
 <span class="nv">LD_PRELOAD</span><span class="o">=</span>/lib/libumem.so
 <span class="nb">export </span>LD_PRELOAD
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>然后在此shell中启动程序，新打开一个终端，同样设置好LD_PRELOAD（否则会提示错误），查找正运行的程序的进程号（调试的程序），生成一个core文件：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>ps -ef | grep &lt;appname&gt;
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps <span class="nt">-ef</span> | <span class="nb">grep</span> &lt;appname&gt;
 gcore &lt;pid&gt;
-ls core.&lt;pid&gt;
-</code></pre>
-</div>
+<span class="nb">ls </span>core.&lt;pid&gt;
+</code></pre></div></div>
 
 <p>用mdb打开新生成的core文件，第一行应该提示加载了libumem.so.
 接下来，用libumem.so提供的walker和dcmds就可以查询程序运行以来到产生core文件的那一时间点丰富的内存信息了.</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>mdb core.pid
-&gt;::findleaks
-&gt;::umalog
-&gt;::umem_log
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mdb core.pid
+<span class="o">&gt;</span>::findleaks
+<span class="o">&gt;</span>::umalog
+<span class="o">&gt;</span>::umem_log
+</code></pre></div></div>
 
 <p>更多可用的命令，可以用<code class="highlighter-rouge">::dmods -l</code>查看。</p>
 
 <p>整个过程非常繁杂，因为应用程序比较大，分配内存的log实在是太多了，但是突然发现运行目录下边多了不少core文件，一下子奇怪了，之前可是花费了很多时间在提高代码质量上，按道理不应该会有core产生了。打开这些core，用pstack，居然发现某个模块启动的子进程在调用free的地方abort了，按图索骥查看代码，在某个旮旯里边，几年没人动的小角落里，发现分配内存的地方：</p>
 
-<div class="language-c highlighter-rouge"><pre class="highlight"><code><span class="kt">char</span><span class="o">*</span> <span class="n">path1</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s">"MYENV"</span><span class="p">);</span>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">char</span><span class="o">*</span> <span class="n">path1</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s">"MYENV"</span><span class="p">);</span>
 <span class="kt">char</span> <span class="n">path2</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"bin/logDir/log.xxx"</span>
 <span class="kt">char</span><span class="o">*</span> <span class="n">path</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">path1</span><span class="p">)</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">path2</span><span class="p">));</span>
 <span class="n">strcpy</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">path1</span><span class="p">);</span>
@@ -548,8 +545,7 @@ ls core.&lt;pid&gt;
 <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 
 <span class="p">.</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>原来最初写这块纯C代码的人打了马虎眼，分配的内存有问题，导致free的时候出问题，但正常情况下，这里的exit之后，进程也就退出了，居然没有core文件出来，导致这个Bug居然被隐藏了数年。</p>
 
 <p>libumem和LD_PRELOAD居然把它挖了出来，马上修改之。</p>

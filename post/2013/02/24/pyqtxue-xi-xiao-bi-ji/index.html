@@ -513,10 +513,9 @@
 <p>生成的代码主要集中于控件显示的部分，事件处理的部分虽然也可以产生，但是仅适用于自定义子类的对象，因为在slot里边没法很方便的为已有的某个UI对象添加新的方法，只能靠子类化的办法来修改类的预定义slot，远不如在代码中自己写来的快捷方便。</p>
 
 <p>每个界面的设计最终会生成一个<strong>.ui</strong>后缀的XML文件，使用如下的Makefile规则可以做方便的转换：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>%.py : %.ui
-    pyuic4 <span class="nv">$^</span> &gt; <span class="nv">$@</span>
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%.py : %.ui
+    pyuic4 <span class="nv">$^</span> <span class="o">&gt;</span> <span class="nv">$@</span>
+</code></pre></div></div>
 
 <h3 id="尽量少混杂动态控制逻辑到ui设计中">尽量少混杂动态控制逻辑到UI设计中</h3>
 
@@ -528,12 +527,11 @@
 
 <p>简单的控件使用，有过MFC开发经验的自然容易照搬来做，基本都很像。唯一有些不同的是，在python里边，绑定事件处理的方式灵活了很多，不但可以用<code class="highlighter-rouge">QObject</code>类的<code class="highlighter-rouge">connect</code>方法来做，也可以直接在signal对象上来直接绑，而且绑定的参数可以是任何的<code class="highlighter-rouge">callable</code>，譬如：</p>
 
-<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="c">#Option 1</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#Option 1</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">btnAdd</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_addRecord</span><span class="p">)</span>
 <span class="c">#Option 2</span>
 <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btnOk</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s">"clicked()"</span><span class="p">)),</span> <span class="n">EditDlg</span><span class="o">.</span><span class="n">accept</span><span class="p">))</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>对于显示空间，QT支持对它的显示特性做CSS定制，但是在Designer里边必须指定允许扩展stylesheet，然后可以在对于的stylesheet里边设置样式；对应的编辑框里边还提供颜色选择和渐变选择等图形工具。如果需要实现动态的样式变化，则需要在代码逻辑中完成。</p>
 
@@ -572,9 +570,8 @@
 <h4 id="qmodelindex">QModelIndex</h4>
 
 <p>大部分的数据操作都携带一个Index参数，该参数负责定位对应的具体数据，并且精确定位到某一个单元格，可以用切<code class="highlighter-rouge">row()</code>和<code class="highlighter-rouge">column()</code>方法得到其行/列编号。也可以通过给定的行/列号构造一个Index；但是该参数并不能直接定位行数据。在跟踪用户选择的时候，选择的是一整行数据的话，返回的选择列表包含所有的单元格；如果想获取行，则需要对行号做如下变换：</p>
-<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">selected</span><span class="o">.</span><span class="n">indexes</span><span class="p">()]))</span>
-</code></pre>
-</div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">selected</span><span class="o">.</span><span class="n">indexes</span><span class="p">()]))</span>
+</code></pre></div></div>
 <p>上述的代码利用set的特性将多余的行自动删除，并且再转换回list的时候已经是排序过的。</p>
 
 <h4 id="selection-model">Selection Model</h4>

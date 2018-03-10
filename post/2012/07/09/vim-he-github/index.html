@@ -512,10 +512,9 @@
 <p>上边的办法虽然好用，但是没有顾及到上游（插件作者）的更新，所以好处并不是特别明显。那么如果插件作者肯自己更新到<strong>github</strong>上（或者其它的git server）上，我们只需要引用它们就可以了？其实已经有大神这样干了，譬如<a href="http://blog.eddie.com.tw/">高见龙</a>就做了很好的分享；只要在github上搜索一把，其实可以看到很多有名的github插件的镜像。当然采用这种方式管理，需要用到git中的<strong>submodule</strong>,通过方比的<a href="http://www.vim.org/scripts/script.php?script_id=2332">panthogen</a>,只需要在<code class="highlighter-rouge">.vim/bundle/</code>下建立子目录，然后将插件的代码往里边添加就可以了。</p>
 
 <p>更新插件的时候，只需要：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>git submodule init
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git submodule init
 git submodule update
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>就可以跟插件的最新版本保持一致了。</p>
 
 <h2 id="我的插件">我的插件</h2>

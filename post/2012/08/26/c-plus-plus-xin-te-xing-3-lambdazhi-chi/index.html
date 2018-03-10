@@ -506,49 +506,45 @@
 
 <p>考虑下边的例子(很简单常见的例子，但很容易说明问题)：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AddressBook</span><span class="p">;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AddressBook</span><span class="p">;</span>
 <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AddressBook</span><span class="o">&gt;</span> <span class="n">AddressList</span><span class="p">;</span>
 <span class="kt">void</span> <span class="n">getPeopleWithAge</span><span class="p">(</span><span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="k">const</span> <span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">list</span><span class="p">,</span> <span class="kt">int</span> <span class="n">age</span><span class="p">){</span>
     <span class="n">std</span><span class="o">::</span><span class="n">transform</span><span class="p">(</span><span class="n">list</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">list</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">std</span><span class="o">::</span><span class="n">back_inserter</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">ageEqualsTo</span><span class="p">(</span><span class="n">age</span><span class="p">));</span>
 <span class="p">}</span>
 <span class="c1">//Define a Functor for ageEqualsTo(int)
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 <p>这里我们想从一个地址本里边找出所有的年龄等于给定年龄的项并将结果返回，然而为了使用STL标准算法<em>transform</em>，我们不得不构造一个Functor出来填入最后的一个参数，麻烦不说，真正想表达的逻辑还被迫分隔到另外一个Functor去了；既然如此，还不如直接拿一个<strong>for</strong>循环来得快些：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="kt">void</span> <span class="n">getPeopleWithAge</span><span class="p">(</span><span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="k">const</span> <span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">list</span><span class="p">,</span> <span class="kt">int</span> <span class="n">age</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">getPeopleWithAge</span><span class="p">(</span><span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="k">const</span> <span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">list</span><span class="p">,</span> <span class="kt">int</span> <span class="n">age</span><span class="p">){</span>
     <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">list</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">itEnd</span> <span class="o">=</span> <span class="n">list</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="n">it</span> <span class="o">!=</span> <span class="n">itEnd</span><span class="p">;</span> <span class="o">++</span><span class="n">it</span><span class="p">){</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">age</span> <span class="o">==</span> <span class="n">age</span><span class="p">){</span>
             <span class="n">result</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>然而利用lambda，代码可以变得更加简洁优雅：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="kt">void</span> <span class="n">getPeopleWithAge</span><span class="p">(</span><span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="k">const</span> <span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">list</span><span class="p">,</span> <span class="kt">int</span> <span class="n">age</span><span class="p">){</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">getPeopleWithAge</span><span class="p">(</span><span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">result</span><span class="p">,</span> <span class="k">const</span> <span class="n">AddressList</span><span class="o">&amp;</span> <span class="n">list</span><span class="p">,</span> <span class="kt">int</span> <span class="n">age</span><span class="p">){</span>
     <span class="n">std</span><span class="o">::</span><span class="n">for_each</span><span class="p">(</span><span class="n">list</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">list</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[</span><span class="o">=</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">result</span><span class="p">](</span><span class="k">const</span> <span class="n">AddressBook</span><span class="o">&amp;</span> <span class="n">item</span><span class="p">){</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="p">.</span><span class="n">age</span> <span class="o">==</span> <span class="n">age</span><span class="p">){</span>
             <span class="n">result</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">});</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里我们既可以利用现有的STL抽象来操作，有不失程序的局部行，视线的逻辑也变得更清晰 - 直接遍历所有的元素，找出满足条件的部分并添加到目的列表中。判断条件的部分也直接嵌入在代码中，可谓性和可读性都大大提高；基本上操作STL容器的遍历操作就再也不需要手工写for循环了。</p>
 
 <h2 id="lmabda语法">Lmabda语法</h2>
 
 <p>C++11中的lambda语法定义如下：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//context variables ....
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//context variables ....
 </span><span class="p">[</span><span class="n">variable</span> <span class="n">capture</span><span class="p">](</span><span class="n">param1</span><span class="p">,</span> <span class="n">parm2</span><span class="p">,</span> <span class="p">...)</span> <span class="o">-&gt;</span> <span class="n">returnType</span> <span class="p">{</span>
     <span class="c1">//implementation body
 </span>    <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的<code class="highlighter-rouge">[]</code>里边的部分，可以用来包含上下文数据，可以用以下方式传入：</p>
 
@@ -562,23 +558,22 @@
 
 <p><code class="highlighter-rouge">()</code>中间的部分是参数列表，如果套用到STL算法中去，需要注意对应的参数必须对应，否则编译会出错。</p>
 
-<p><code class="highlighter-rouge">-&gt;</code>的部分用于指定该lambda的返回类型，大部分情况下，编译器可以帮助推导出返回类型，我们就不需要显式指定返回类型。<code class="highlighter-rouge"><span class="p">{}</span></code>里边的部分是具体实现代码，可以像写普通函数一样写入代码，并且可以引用<code class="highlighter-rouge">[]</code>里边的变量（或者所有上下文变量，如果指定了默认capture类型）和函数参数变量。</p>
+<p><code class="highlighter-rouge">-&gt;</code>的部分用于指定该lambda的返回类型，大部分情况下，编译器可以帮助推导出返回类型，我们就不需要显式指定返回类型。<code class="highlighter-rouge">{}</code>里边的部分是具体实现代码，可以像写普通函数一样写入代码，并且可以引用<code class="highlighter-rouge">[]</code>里边的变量（或者所有上下文变量，如果指定了默认capture类型）和函数参数变量。</p>
 
 <h2 id="lambda的本质">lambda的本质</h2>
 
 <p>lambda的本质其实是一个函数，编译器会在编译的时候帮助我们推导合适的类型，并且生成对应的函数，我们也可以将lambda赋值给一个变量，来实现延迟调用：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span>
     <span class="n">a</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">b</span> <span class="o">*=</span> <span class="mi">2</span><span class="p">;</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
     <span class="p">};</span>
 
 <span class="n">f</span><span class="p">();</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>甚至可以将lambda函数传入模板参数：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">// Lambda as template parameters
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Lambda as template parameters
 </span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">F</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">Eval</span><span class="p">(</span><span class="k">const</span> <span class="n">F</span><span class="o">&amp;</span> <span class="n">f</span><span class="p">){</span>
     <span class="n">f</span><span class="p">();</span>
@@ -587,8 +582,7 @@
 <span class="kt">void</span> <span class="n">foo</span><span class="p">(){</span>
     <span class="n">Eval</span><span class="p">([]{</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Hello lambdas</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;});</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>需要格外小心的是，如果使用lambda来实现延迟调用，那么所应用的上下文里边的指针或者引用必须在调用点还是有效的，否则就会产生莫名其妙的对象生存期错误导致的crash等问题。</p>
 

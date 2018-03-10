@@ -650,20 +650,17 @@
 <h2 id="trailing-return-type">Trailing return type</h2>
 <hr />
 <p>这个特性用于简化模板代码的书写，譬如如下的代码在C++03中是非法的：</p>
-<div class="language-c++ highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
   <span class="n">Ret</span> <span class="n">adding_func</span><span class="p">(</span><span class="k">const</span> <span class="n">Lhs</span> <span class="o">&amp;</span><span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rhs</span> <span class="o">&amp;</span><span class="n">rhs</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">lhs</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">;}</span> <span class="c1">//Ret must be the type of lhs+rhs
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 <p>为了模板函数的灵活性，<code class="highlighter-rouge">Ret</code>类型必须被指定为一个合理的动态类型-即根据实际传入的LHS/RHS来确定，当然人工指定的办法很不灵活，我们自然希望编译器能够自动推倒，一种自然的想法是尝试用<code class="highlighter-rouge">auto</code>:</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
   <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="o">+</span><span class="n">rhs</span><span class="p">)</span> <span class="n">adding_func</span><span class="p">(</span><span class="k">const</span> <span class="n">Lhs</span> <span class="o">&amp;</span><span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rhs</span> <span class="o">&amp;</span><span class="n">rhs</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">lhs</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">;}</span> <span class="c1">//Not legal C++11
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 <p>可惜这仍然是非法的，因为decltype需要编译扫描的时候必须知道对应参数的类型，而这些信息只有在模板函数实例化的时候才有。为了解决这一个问题，C++11引入了<em>Trailing return type</em>:</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Lhs</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Rhs</span><span class="o">&gt;</span>
   <span class="k">auto</span> <span class="n">adding_func</span><span class="p">(</span><span class="k">const</span> <span class="n">Lhs</span> <span class="o">&amp;</span><span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rhs</span> <span class="o">&amp;</span><span class="n">rhs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="o">+</span><span class="n">rhs</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">lhs</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">;}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="构造函数委托">构造函数委托</h2>
 <p>C++03标准中，一个类的构造函数是不允许调用另外一个构造函数的，这就导致很多共同的初始化代码不得不放置在一个共有的<strong>非虚</strong>函数中，然后在所有的构造函数版本中都得调用这一初始化代码。新的C++11中放开了这一限制，使得一个构造函数可以调用另外一个更通用的构造函数.对于类的继承构造中，子类的构造函数只有在基类的所有委托构造全部完成之后才会开始构造子类的部分：</p>
@@ -678,15 +675,14 @@
 <hr />
 <p>C++03标准中，某个子类可能会默默覆盖了基类的虚函数 - 譬如子类定义了一个和基类虚函数同名但是签名有微小差异的函数，结果就是产生预料之外的结果。C++11中引入了<code class="highlighter-rouge">override</code>和<code class="highlighter-rouge">final</code>来解决这个问题：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Base</span> <span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Base</span> <span class="p">{</span>
     <span class="k">virtual</span> <span class="kt">void</span> <span class="n">some_func</span><span class="p">(</span><span class="kt">float</span><span class="p">);</span>
     <span class="p">};</span>
      
 <span class="k">struct</span> <span class="n">Derived</span> <span class="o">:</span> <span class="n">Base</span> <span class="p">{</span>
-    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">some_func</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">override</span><span class="p">;</span> <span class="c1">// ill-formed because it doesn't override a base class method
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">some_func</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="k">override</span><span class="p">;</span> <span class="c1">// ill-formed because it doesn't override a base class method
 </span>    <span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里加入<code class="highlighter-rouge">override</code>关键字，编译器就会检查是否是和基类中的虚函数签名完全相同，否则就报错。</p>
 
@@ -701,48 +697,44 @@
 <hr />
 
 <p>C++03中的枚举类型并不是类型安全的，你可以拿两个类型不同的枚举类型值来做比较而编译器不会给出任何错误。C++11中通过<code class="highlighter-rouge">enum</code>后边加入<code class="highlighter-rouge">class</code>来引入类型安全的枚举类型：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">Enumeration</span> <span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">Enumeration</span> <span class="p">{</span>
     <span class="n">Val1</span><span class="p">,</span>
     <span class="n">Val2</span><span class="p">,</span>
     <span class="n">Val3</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
     <span class="n">Val4</span> <span class="c1">// = 101
 </span><span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这样就不能直接拿枚举类型值和普通数值类型做比较了。此外，新的枚举类型可以指定所使用的整形具体类型：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">Enumeration</span> <span class="o">:</span> <span class="kt">unsigned</span> <span class="kt">int</span><span class="p">{</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">Enumeration</span> <span class="o">:</span> <span class="kt">unsigned</span> <span class="kt">int</span><span class="p">{</span>
     <span class="n">Val1</span><span class="p">,</span>
     <span class="n">Val2</span><span class="p">,</span>
     <span class="n">Val3</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
     <span class="n">Val4</span> <span class="c1">// = 101
 </span><span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这样也使得枚举类型可以前向声明了。</p>
 
 <h2 id="右扩号的问题修正">右扩号的问题修正</h2>
 <hr />
 <p>这是一个bug fix，使得这样的代码变得合法：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">vec</span><span class="p">;</span>
-</code></pre>
-</div>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">vec</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h2 id="模板typedef">模板typedef</h2>
 <hr />
 <p>C++11中允许typedef一个部分参数指定的模板，譬如：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">First</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Second</span><span class="p">,</span> <span class="kt">int</span> <span class="n">Third</span><span class="o">&gt;</span>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">First</span><span class="p">,</span> <span class="k">typename</span> <span class="n">Second</span><span class="p">,</span> <span class="kt">int</span> <span class="n">Third</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">SomeType</span><span class="p">;</span>
  
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Second</span><span class="o">&gt;</span>
 <span class="k">using</span> <span class="n">TypedefName</span> <span class="o">=</span> <span class="n">SomeType</span><span class="o">&lt;</span><span class="n">OtherType</span><span class="p">,</span> <span class="n">Second</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span><span class="p">;</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这一小便利大大简化了模板代码的书写和使用。</p>
 
 <h2 id="union类型可以放置non-pod">Union类型可以放置non-POD</h2>
 <hr />
 <p>C++03中，Union中不可放置POD类型意外的东西，而C++11中，我们可以放置任何类型到Union中了：</p>
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="c1">//for placement new
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//for placement new
 </span><span class="cp">#include &lt;new&gt;
 </span> 
 <span class="k">struct</span> <span class="n">Point</span>  <span class="p">{</span>
@@ -758,8 +750,7 @@
 </span>    <span class="n">U</span><span class="p">()</span> <span class="p">{</span> <span class="k">new</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">p</span> <span class="p">)</span> <span class="n">Point</span><span class="p">();</span> <span class="p">}</span> <span class="c1">// No nontrivial member functions are implicitly defined for a union;
 </span>    <span class="c1">// if required they are instead deleted to force a manual definition.
 </span><span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="参考">参考</h2>
 <hr />

@@ -509,7 +509,7 @@
 <h3 id="函数依然是对象">函数依然是对象</h3>
 <p>在新的<code class="highlighter-rouge">java.util.function</code>包里，预定义了形形色色的函数接口，譬如带2个参数的函数的定义如下</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
 <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">R</span><span class="o">&gt;{</span>
   <span class="c1">//all functions implements apply that takes t of type T and u of type U, and returns R</span>
   <span class="n">R</span> <span class="nf">apply</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">,</span> <span class="n">U</span> <span class="n">u</span><span class="o">);</span>
@@ -521,12 +521,11 @@
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>从定义来看，它是一个接口，任何实现了该接口的对象都是一个二元函数。从纯粹的面向对象思路来看，只要让所有实现类似调用的类也实现新的接口就行。
 仔细考虑则发现该思路有个不足 - 很可能我们已经有一个已有的接口</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyInterface</span><span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyInterface</span><span class="o">{</span>
   <span class="n">ReturnType</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">);</span>
 <span class="o">}</span>
 
@@ -536,11 +535,10 @@
     <span class="c1">//detailed implementation</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>考虑用户代码想要使用上述的接口，同时希望采用函数式编程的思路，接受一个函数参数</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">//client code</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//client code</span>
 <span class="kt">void</span> <span class="nf">myMethod</span><span class="o">(</span><span class="n">BiFunction</span><span class="o">&lt;</span><span class="n">ArgType1</span><span class="o">,</span> <span class="n">ArgType2</span><span class="o">,</span> <span class="n">ReturnType</span><span class="o">&gt;</span> <span class="n">certainProcessing</span><span class="o">)</span> <span class="o">{</span>
   <span class="c1">//calls certainProcessing.apply(arg1, arg2);</span>
 <span class="o">}</span>
@@ -549,8 +547,7 @@
 <span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
 <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
 <span class="n">myMethod</span><span class="o">(</span><span class="cm">/*use existing business classes?*/</span><span class="o">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>如果仅仅是因为需要采用函数式编程风格来编写代码，就必须要求我们修改原来的接口或者class定义破坏性就太大了。Java8采用了变通机制，
 当<strong>某个接口有且仅有一个方法定义</strong>的时候，该接口可以被编译器隐式地转换为一个函数式接口的一个扩展；实现了此业务接口的类则被视为函数式接口的一个具体实现。
 对应的这个方法(<code class="highlighter-rouge">doSomething</code>)会被认为是默认的<code class="highlighter-rouge">apply</code>方法，即使这个方法的名字是别的，
@@ -584,12 +581,11 @@
 <p>匿名函数其实是被Java8给封装成具体的函数对象（实现某个预定义的接口)。语法上没什么奇特的地方，和C++/Haskell的都比较类似。
 在任何一个可以传入函数调用的地方，都可以传入lambda表达式或者代码块，并且类型信息可以省略,如上边代码的例子</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
 <span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
 <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
 <span class="n">myMethod</span><span class="o">((</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">businessClass</span><span class="o">.</span><span class="na">doSomething</span><span class="o">(</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">));</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>lambda表达式中引用上下文变量的情况下，该lambda表达式自然形成了一个闭包。
 当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。</p>
@@ -628,12 +624,11 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 <code class="highlighter-rouge">Optional</code>则不同，即使没有正确的初始化某个对象，它<strong>本身依然是一个合法的对象</strong>。它用一套统一的接口来操作内部封装的对象。</p>
 
 <p>具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Optional</span><span class="o">&lt;?&gt;</span> <span class="n">EMPTY</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Optional</span><span class="o">&lt;&gt;();</span>
   <span class="kd">private</span> <span class="kd">final</span> <span class="n">T</span> <span class="n">value</span><span class="o">;</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>从容器封装的角度来看，<code class="highlighter-rouge">Optional</code>可以<strong>看作是集合类的一个特殊的退化情况</strong> - 它要么保护一个对象，要么什么也没有；但是不能包含超过两个或更多个对象。
 <code class="highlighter-rouge">Optional</code>提供了很多API供我们使用</p>
@@ -664,7 +659,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 <p><code class="highlighter-rouge">flatMap</code> 和上边的<code class="highlighter-rouge">map</code>类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的<code class="highlighter-rouge">Optional</code>类型作为返回；
 为避免<code class="highlighter-rouge">Optional&lt;Optional&lt;T&gt;&gt;</code>的麻烦，<code class="highlighter-rouge">flatMap</code>会将这个二层封装给解开，生成一个单一的封装。
 其实现代码非常简单</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="nf">map</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">T</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">U</span><span class="o">&gt;</span> <span class="n">mapper</span><span class="o">)</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="nf">map</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">T</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">U</span><span class="o">&gt;</span> <span class="n">mapper</span><span class="o">)</span> <span class="o">{</span>
   <span class="n">Objects</span><span class="o">.</span><span class="na">requireNonNull</span><span class="o">(</span><span class="n">mapper</span><span class="o">);</span>
   <span class="k">if</span> <span class="o">(!</span><span class="n">isPresent</span><span class="o">())</span>
     <span class="k">return</span> <span class="nf">empty</span><span class="o">();</span>
@@ -672,8 +667,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
     <span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">value</span><span class="o">));</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="数据提取相关的模式">数据提取相关的模式</h4>
 <p><code class="highlighter-rouge">orElse</code> 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
@@ -687,7 +681,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 <p>上述的模式提供了丰富的组合功能使我们对一个<code class="highlighter-rouge">Optional</code>对象做函数式编程变得简单明了；甚至不需要一个<code class="highlighter-rouge">if</code>/<code class="highlighter-rouge">else</code>分支判断就可以做一些复杂的操作。
 比如下面的一段代码</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">AnotherResult</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">(</span><span class="n">parX</span><span class="o">))</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">AnotherResult</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">(</span><span class="n">parX</span><span class="o">))</span>
   <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">someResult</span> <span class="o">-&gt;</span> <span class="n">someResult</span><span class="o">.</span><span class="na">meetSomeCondition</span><span class="o">())</span>
   <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">conditionalResult</span> <span class="o">-&gt;</span> <span class="n">transformAsAnotherResult</span><span class="o">(</span><span class="n">conditionalResult</span><span class="o">))</span>
   <span class="c1">//.flatMap(conditionalResult -&gt; transformAsAnotherResult(conditionalResult)) if transformAsAnotherResult returns optional</span>
@@ -695,8 +689,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
   <span class="c1">//.orElseThrow(() -&gt; new SomeRunTimeException()); //if we want to throw</span>
 
 <span class="c1">//Now result wouldn't be null at all!</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="反模式">反模式</h4>
 <p><code class="highlighter-rouge">Optional</code>可以帮助我们大大简化代码，然而也有一些<strong>反模式需要小心留意</strong>；比如以下这些</p>
@@ -720,7 +713,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 <p>譬如下边的实现纯粹是画蛇添足</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSth</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSth</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
 
 <span class="kd">private</span> <span class="n">SomeType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">ValueType</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">if</span> <span class="o">(</span><span class="n">v</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
@@ -729,8 +722,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
     <span class="c1">//This won't be ran!</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h5 id="冗余的判断">冗余的判断</h5>
 <p>还有一些典型的误用和<strong>不熟悉函数式编程的惯用法</strong>有关，可以通过简单的重构解决</p>
@@ -755,24 +747,22 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 </ol>
 
 <p>比如如下的例子</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
 <span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">doSth</span><span class="o">(</span><span class="n">anOptional</span><span class="o">);</span>
 
 <span class="kd">private</span> <span class="n">RetType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">opt</span><span class="o">){</span>
   <span class="k">return</span> <span class="n">opt</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">obj</span> <span class="o">-&gt;</span> <span class="n">obj</span><span class="o">.</span><span class="na">transform</span><span class="o">()).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>可以重构为更符合<a href="https://en.wikipedia.org/wiki/Locality_of_reference">局部性原理</a>的形式,避免<code class="highlighter-rouge">Optional</code>类型的蔓延</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
 <span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSthn</span><span class="o">(</span><span class="n">v</span><span class="o">)).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
 
 <span class="kd">private</span> <span class="n">RetType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">SomeType</span> <span class="n">obj</span><span class="o">){</span>
   <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="na">transform</span><span class="o">();</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <h2 id="streams-api">Streams API</h2>
 <p>Java8新提供了<code class="highlighter-rouge">Streams</code> API来实现更类似于Haskell的<a href="http://learnyouahaskell.com/a-fistful-of-monads">List Monad</a>风格的函数式编程设施；
 值得注意的是，在老版本的Java库里边，<code class="highlighter-rouge">List</code>这个接口已经用来描述传统的基于共享内存模型的数据结构了（和C++的类似）；
@@ -806,7 +796,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 <h3 id="基本的stream类型">基本的Stream类型</h3>
 <p>所有的<code class="highlighter-rouge">Stream</code>接口都继承自一个公共的<strong>泛型接口</strong></p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;&gt;</span> <span class="kd">extends</span> <span class="n">AutoClosurable</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;&gt;</span> <span class="kd">extends</span> <span class="n">AutoClosurable</span> <span class="o">{</span>
   <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">();</span>
   <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">spliterator</span><span class="o">();</span>
 
@@ -816,8 +806,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
   <span class="c1">//...other common interfaces...</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>其中<code class="highlighter-rouge">T</code>用于声明其初始输入的元素的类型，<code class="highlighter-rouge">S</code>则用于将子类的类型带上来，和C++的<a href="https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern">CRTP</a>技巧类似。
 从接口声明上看，一个Stream类也</p>
 <ul>
@@ -833,7 +822,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 <p>最平凡的Stream是名为<code class="highlighter-rouge">Stream&lt;T&gt;</code>的泛型接口</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
   <span class="c1">//operations...</span>
   <span class="c1">//terminators...</span>
   <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Builder</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">Consumer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
@@ -848,8 +837,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
     <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">build</span><span class="o">();</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>该接口包含一些<strong>转换操作和终止操作</strong>组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
 终止操作则直接终止流水线，返回某些汇聚之后的结果出来。</p>
@@ -921,12 +909,11 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 <p>当我们提供一个无限长的输入提供给Stream的时候，真正参与具体操作的元素个数仅仅以满足终止条件为准。</p>
 
 <p>譬如下边的代码</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">int</span> <span class="n">first5PrimeSum</span> <span class="o">=</span> <span class="n">IntStream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">first5PrimeSum</span> <span class="o">=</span> <span class="n">IntStream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span>
     <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="n">isPrime</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
     <span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">5</span><span class="o">)</span>
     <span class="o">.</span><span class="na">sum</span><span class="o">();</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>初始构造的Stream包含无穷多个元素（受限于int类型的长度），但是经过<code class="highlighter-rouge">filter</code>操作之后，由用<code class="highlighter-rouge">limit</code>取出前5个，并最终求和；
 那么实际参与运算的初始输入元素只有1到11而已。</p>
@@ -946,14 +933,13 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
   <li><code class="highlighter-rouge">filter</code>用来过滤流中满足给定谓词逻辑判断的数据</li>
   <li><code class="highlighter-rouge">distinct</code>会删除重复的元素</li>
   <li><code class="highlighter-rouge">peek</code>用于在产生输出数据的同时，做一些参数指定的函数操作；该操作大部分时候可以用于方便debug，比如
-    <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">)</span>
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">)</span>
 <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="o">.</span><span class="na">lenth</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="o">)</span>
 <span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Filtered value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
 <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">String:</span><span class="o">:</span><span class="n">toUpperCase</span><span class="o">())</span>
 <span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Mapped value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
 <span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
-</code></pre>
-    </div>
+</code></pre></div>    </div>
   </li>
 </ul>
 
@@ -964,15 +950,14 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 结果就会显得不确定。</p>
 
 <p>比如这个例子</p>
-<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">Set</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">seen</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="n">synchronizedSet</span><span class="p">(</span><span class="n">new</span> <span class="n">HashSet</span><span class="o">&lt;&gt;</span><span class="p">());</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">seen</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="n">synchronizedSet</span><span class="p">(</span><span class="n">new</span> <span class="n">HashSet</span><span class="o">&lt;&gt;</span><span class="p">());</span>
 <span class="n">stream</span><span class="o">.</span><span class="n">parallel</span><span class="p">()</span><span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="p">(</span><span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="p">{</span>
       <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
       <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
     <span class="p">})</span>
   <span class="o">.</span><span class="n">reduction</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>第一个<code class="highlighter-rouge">map</code>操作时间的执行体中会根据给定的元素是否已经处理过来决定返回0或元素本身；这个lambda操作本身依赖于之前的运算所以是有状态的。</p>
 
 <p>显然有状态的操作在用<code class="highlighter-rouge">parallelStream</code>调度计算的时候<strong>会产生不确定结果</strong>；而无状态的操作则没有这样的副作用。</p>
@@ -984,12 +969,11 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 <p>传给Stream的数据在Stream运算的过程中被视为静态的；如果这些数据可能被同时修改，则操作的正确性就难以保证了。
 考虑一个用Java的ArrayList产生的Stream做运算的情况</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">);</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">);</span>
 <span class="n">Stream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strm</span> <span class="o">=</span> <span class="n">strList</span><span class="o">.</span><span class="na">stream</span><span class="o">();</span>
 <span class="n">strList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"four"</span><span class="o">);</span> <span class="c1">//WoW!</span>
 <span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">strm</span><span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">" "</span><span class="o">));</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>有状态的函数操作或者互相干扰的函数操作会<strong>破坏并发安全性并带来出乎意料的行为</strong>（因为多线程、同步、调度的细节被隐藏了）；应该不建议使用。</p>
 
 <h4 id="常用的终止操作">常用的终止操作</h4>
@@ -1020,28 +1004,26 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
 
 <p>调用的效果类似于</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">U</span> <span class="n">result</span> <span class="o">=</span> <span class="n">identity</span><span class="o">;</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">U</span> <span class="n">result</span> <span class="o">=</span> <span class="n">identity</span><span class="o">;</span>
 <span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="n">combiner</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">accumulator</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">identity</span><span class="o">,</span> <span class="n">t</span><span class="o">))</span>
 <span class="k">return</span> <span class="n">result</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="省略combiner的版本-t-reducet-identity-binaryoperatort-accumulator">省略<code class="highlighter-rouge">combiner</code>的版本: <code class="highlighter-rouge">T reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></h4>
 <p>该形式下，accumulator的类型是<code class="highlighter-rouge">BinaryOperator&lt;T&gt;</code>,同时<code class="highlighter-rouge">identity</code>的类型必须和Stream中的元素类型相同。</p>
 
 <p><code class="highlighter-rouge">sum</code>/<code class="highlighter-rouge">max</code>/<code class="highlighter-rouge">min</code>等都可视作是该版本的特化实现；即</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
 <span class="c1">//same as</span>
 <span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">sum</span><span class="o">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="只有accumulator的版本">只有<code class="highlighter-rouge">accumulator</code>的版本</h4>
 <p>这种情况下，返回的类型是<code class="highlighter-rouge">Optional&lt;T&gt;</code>;由于没有默认值，因此返回合适的结果必须至少有2个元素可以参与累加器运算；如果少于2个则返回空的Optional。
 等价的代码为</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kt">boolean</span> <span class="n">found</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">boolean</span> <span class="n">found</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
 <span class="n">T</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
 <span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">if</span> <span class="o">(!</span><span class="n">found</span><span class="o">)</span> <span class="o">{</span>
@@ -1052,8 +1034,7 @@ This has led to innumerable errors, vulnerabilities, and system crashes, which h
   <span class="o">}</span>
 <span class="o">}</span>
 <span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>该种形式的操作将Stream和Optional结合了起来。</p>
 
 <h2 id="总结">总结</h2>

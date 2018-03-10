@@ -508,12 +508,11 @@
 
 <p>Linux的manpage提供了如下的API原型：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;execinfo.h&gt;
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;execinfo.h&gt;
 </span><span class="kt">int</span> <span class="n">backtrace</span><span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="n">buffer</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">);</span>
 <span class="kt">char</span> <span class="o">**</span><span class="n">backtrace_symbols</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="k">const</span> <span class="o">*</span><span class="n">buffer</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">);</span>
 <span class="kt">void</span> <span class="n">backtrace_symbols_fd</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="k">const</span> <span class="o">*</span><span class="n">buffer</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>第一个API根据用户传入的<code class="highlighter-rouge">buffer</code>数组（长度为<code class="highlighter-rouge">size</code>)将当前的调用栈返回，数组中每一个元素为一个函数调用地址，如果数组长度小于当前的栈帧数，那么只返回最近的调用</li>
@@ -581,7 +580,7 @@
 
 <p>程序的输出如下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>Signal caught:11
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Signal caught:11
 <span class="o">===[</span>1]:./bld/test_bt<span class="o">(</span>_Z10handleCorei+0x41<span class="o">)</span> <span class="o">[</span>0x8048a2e]
 <span class="o">===[</span>2]:[0xaf0400]
 <span class="o">===[</span>3]:./bld/test_bt<span class="o">(</span>_Z7faultOpv+0x10<span class="o">)</span> <span class="o">[</span>0x80489a4]
@@ -594,8 +593,7 @@
 <span class="o">===[</span>10]:/lib/i386-linux-gnu/libc.so.6<span class="o">(</span>__libc_start_main+0xf3<span class="o">)</span> <span class="o">[</span>0x2b34d3]
 <span class="o">===[</span>11]:./bld/test_bt<span class="o">()</span> <span class="o">[</span>0x8048901]
 Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里通过<code class="highlighter-rouge">sigaction</code>注册针对非法内存访问Signal的处理，并通过设置<strong>sa_flag</strong>的once标志位，确保下一次的singal处理产生真正的coredump；这样我们既获取了backtrace的打印，同时又产生了调试用的coredump信息。</p>
 
 <h1 id="多线程的backtrace">多线程的backtrace</h1>
@@ -687,7 +685,7 @@ Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
 
 <p>上述例子的输出如下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>Threads started!
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Threads started!
 THREAD-3061271360: normal operation begin...
 THREAD-3069664064: normal operation begin...
 THREAD-3078056768:bad operation follows...
@@ -712,8 +710,7 @@ Signal caught:11, dumping backtrace...
 THREAD-3061271360: normal operation end...
 THREAD-3069664064: normal operation end...
 Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h1 id="mangling">mangling</h1>
 <p>上述程序打印的backtrace中，函数名字的部分是已经被编译器mangle处理过的字符串，所以可读性并不是很好。不过GNU工具链提供了<strong>demangle</strong>工具<strong>c++filt</strong>来还原出可读性更好的函数名字，不过该工具必须通过shell来做处理，GNU似乎并<a href="http://gcc.gnu.org/ml/gcc/2002-03/msg00076.html">没有打算公开这些API</a>.</p>
@@ -722,23 +719,21 @@ Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
 
 <h1 id="打印行号和函数名">打印行号和函数名</h1>
 <p><strong>binutils</strong>工具库中的<strong>addr2line</strong>可以很方便的将地址信息翻译为函数名字和行号的形势，当然前提是可执行程序文件必须是用<em>debug</em>模式编译的。如下的shell管道链可以很方便的给出每个地址的代码行信息：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>./test_bt_mt | grep <span class="s2">"==="</span> | cut -d<span class="s2">"["</span> -f3 | tr -d <span class="s2">"]"</span> | addr2line -e test_bt_mt
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./test_bt_mt | <span class="nb">grep</span> <span class="s2">"==="</span> | cut <span class="nt">-d</span><span class="s2">"["</span> <span class="nt">-f3</span> | tr <span class="nt">-d</span> <span class="s2">"]"</span> | addr2line <span class="nt">-e</span> test_bt_mt
+</code></pre></div></div>
 
 <h1 id="google-coredump-library">Google coredump library</h1>
 <p>如果要在程序的运行期产生一个coredump但不影响程序的正常执行，一般的做法是通过<code class="highlighter-rouge">gcore</code>工具在shell中即时产生一个core文件；这种方法的不足是，产生core的时刻预知程序运行到那一个点；如果我们想在某个运行路径处产生一个coredump，这种方法则无能为力。Google开源了一个coredump库，使得应用程序可以再给定的点上产生一个coredump而不必退出程序的运行。</p>
 
 <p>链接在<a href="http://code.google.com/p/google-coredumper/">google code</a>, 用法如下：</p>
 
-<div class="language-cpp highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;google/coredumper.h&gt;
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;google/coredumper.h&gt;
 </span><span class="p">...</span>
 <span class="n">WriteCoreDump</span><span class="p">(</span><span class="err">'</span><span class="n">core</span><span class="p">.</span><span class="n">myprogram</span><span class="err">'</span><span class="p">);</span>
 <span class="cm">/* Keep going, we generated a core file,
  * but we didn't crash.
   */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
         

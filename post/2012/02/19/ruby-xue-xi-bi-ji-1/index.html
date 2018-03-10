@@ -504,14 +504,13 @@
 
 <p>第一个想到的是apt-get来下载了，得到的是一个交互式解析器和编译器。和python的比较类似，不过ruby的交互程序是个单独的程序叫做irb。</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    skyscribe:~$ ruby --version
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    skyscribe:~$ ruby --version
     ruby 1.8.7 (2011-06-30 patchlevel 352) [i686-linux]
     skyscribe:~$ irb
     irb(main):001:0&gt; puts "hello"
     hello
     =&gt; nil
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>可惜得到的不是比较新的版本。</p>
 
@@ -521,7 +520,7 @@
 
 <p>安装好之后，所有的东西都在$HOME/.rvm下边，比较干脆。</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    skyscribe:~$ rvm install 1.9.3
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    skyscribe:~$ rvm install 1.9.3
     skyscribe:~$ rvm list
 
     rvm rubies
@@ -538,12 +537,11 @@
        Creating alias default for ruby-1.9.3-p125.
        Recording alias default for ruby-1.9.3-p125.
        Creating default links/files
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>自动加入shell启动脚本更方便：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    skyscribe:~$ cat &gt;&gt; ~/.bashrc
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    skyscribe:~$ cat &gt;&gt; ~/.bashrc
     [[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.
     ^C
     skyscribe:~$ bash
@@ -552,16 +550,14 @@
 
     skyscribe:~$ ruby -v
     ruby 1.9.3p125 (2012-02-16 revision 34643) [i686-linux]
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="熟悉和上手">熟悉和上手</h2>
 
 <p>官方的文档是最好的参考，推荐<a href="http://rubykoans.com/">ruby koans</a>,下载下来，解压后，是个典型的TDD学习材料，不断运行</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>     ruby path_to_enlightenment.rb
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     ruby path_to_enlightenment.rb
+</code></pre></div></div>
 
 <p>koans 会遍历每一个test case直到全部完毕，大概需要2个小时以上的时间方可全部完工。中间的注释和THINK ABOUT的部分比较有意思，做testcase的时候停下来仔细看看注释也大有裨益。每一个testcase本身的名字也清晰的列举了其关注的知识点，用来了解语法是最好不过了。</p>
 

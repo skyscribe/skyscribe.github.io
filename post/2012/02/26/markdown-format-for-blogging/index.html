@@ -534,9 +534,8 @@ New lines can ommit the leading “&gt;” while Markdown is smart enough to be 
 
   <p>Here is some example code:</p>
 
-  <div class="highlighter-rouge"><pre class="highlight"><code>    return shell_exec("echo $input| $markdown_script")
-</code></pre>
-  </div>
+  <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    return shell_exec("echo $input| $markdown_script")
+</code></pre></div>  </div>
 </blockquote>
 
 <!--more-->
@@ -607,10 +606,9 @@ Contents continue</p>
 
 <p>Code blocks can be formatted with a new line and an extra 8 spaces or 2 TABs. Exmple:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    #Some shell scripts
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    #Some shell scripts
     cat log.txt | awk -F":" '{print $2}' | sort -n | wc -l
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Span of code like the following function call as <code class="highlighter-rouge">sprintf()</code></p>
 
@@ -657,19 +655,17 @@ Contents continue</p>
   <li>
     <p>Inline syntax, like</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  ![Alt text](/path/to/img.jpg)
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ![Alt text](/path/to/img.jpg)
   ![Alt text](/path/to/img.jpg "Optional title") 
-</code></pre>
-    </div>
+</code></pre></div>    </div>
 
     <p>This is an image for my workspace <img src="/images/octopress-ws.png" alt="Octopress workspace" /></p>
   </li>
   <li>
     <p>Preference style, using</p>
 
-    <div class="highlighter-rouge"><pre class="highlight"><code>  ![Alt text][id]
-</code></pre>
-    </div>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ![Alt text][id]
+</code></pre></div>    </div>
 
     <p>Here id is the name of a defined image index, the same example: <img src="/images/octopress-ws.png" alt="my ws" title="my terminator workspace" /></p>
   </li>

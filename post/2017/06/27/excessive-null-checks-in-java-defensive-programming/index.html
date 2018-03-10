@@ -504,15 +504,13 @@
 
 <p>按照最偷懒的做法 (毕竟<a href="http://threevirtues.com/">懒惰是伟大程序员的美德</a>之一)，可以对使用的对象不做检查，那么万一该指针为空，则运行期抛出的空指针异常<strong>默认行为就会将程序给crash掉</strong>，你的用户会很不高兴，你公司的客户会不高兴乃至投诉你的研发老板，你的老板会更加不高兴甚至于愤怒以至于半夜将你叫起来加班解决问题；试想当你拖着睡眼惺忪的躯壳爬到办公室查看日志，迷迷糊糊一看，原来是有个地方的对象引用是null指针，没有做判断导致JVM退出了。那么最自然的方案是添加个判断了，原来的代码可能是</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">()</span>
-</code></pre>
-</div>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">()</span>
+</code></pre></div></div>
 <p>现在被改成了</p>
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">someObj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">someObj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
     <span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">()</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>后边可能出现了新的问题，那么你可能依法炮制，继续加上更多的分支判断。对于简单的代码片段而言这样做没什么问题，足够清晰易懂；只是实际的业务逻辑代码可能布满了各种各样的业务判断，再掺入这类判断代码，<strong>可维护性立刻直线下降</strong>。这时候可能有个聪明的程序员跳出来说，我们不是有<a href="https://en.wikipedia.org/wiki/Defensive_programming">防御性编程</a>大法吗，可以来的更彻底一些，<strong>干脆对所有的传入对象做空指针检查</strong>不就可以了吗？</p>
 
 <p>乍看起来似乎很有道理，转而仔细想一下就会发现这里<strong>有很大的隐患</strong>。上述的检查其实对每一次对象的调用其<a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity">复杂度</a>就会增加1，实际的业务代码里，一个类往往<strong>引用了很多对象</strong>，每次都要去做判断很快使代码变得难以维护，尤其是考虑到一些稍微复杂一些的方法可能有多个出口的情况，条件判断的增多会直接导致内部状态变得难以分析。本质上对某个方法的实现上下文来说，当前<strong>所有的成员对象和传入的上下文参数对象</strong>是否为null的状态都需要按照这个策略去来判断，在没有明确的前置条件约束的情况下，具体实现的业务逻辑会被埋藏在各种繁杂的空指针检查中难以理清。</p>
@@ -558,7 +556,7 @@
 <h5 id="一个具体的例子">一个具体的例子</h5>
 <p>譬如某个类有如下的实现方法</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">SomeClass</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">SomeClass</span> <span class="o">{</span>
   <span class="c1">//....</span>
   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSomeThing</span><span class="o">(</span><span class="n">SomeParam</span> <span class="n">param</span><span class="o">)</span> <span class="o">{</span>
     <span class="c1">//do something but not check param!</span>
@@ -585,11 +583,10 @@
     <span class="o">}</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里的公有方法没有检查其传入的参数就直接将其传入了一个更底层的实现，并且显示的传入了另外一个null指针作为某个特殊的条件逻辑;这里的空指针用于决定底层实现逻辑的分支选择其实引入了不必要的跨逻辑层次依赖，属于比较明显的代码坏味道，可以将其重写如下</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code>  <span class="c1">//...</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">//...</span>
   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">SomeParam</span> <span class="n">param</span><span class="o">)</span> <span class="o">{</span>
     <span class="k">if</span> <span class="o">(</span><span class="n">param</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
       <span class="c1">//do something special</span>
@@ -607,8 +604,7 @@
       <span class="n">AnotherParam</span> <span class="n">anotherParam</span> <span class="o">=</span> <span class="n">constructAnotherParam</span><span class="o">();</span>
       <span class="c1">//do something else with another param, no null objects!</span>
   <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>重构后的版本将外部传入参数的判断放在公有方法的顶层处理，来确保相对底层的私有实现中不引入额外的空指针，取而代之的是具体的业务逻辑条件判断；代码的可读性显然有了良性的变化。</p>
 
 <h5 id="例外情况">例外情况</h5>
@@ -617,7 +613,7 @@
 
 <p>譬如在一个抽象类中定义了模板方法操作</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractBehavior</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractBehavior</span> <span class="o">{</span>
   
   <span class="c1">//both firstParam and secondParam can be null, but not checked in below public API</span>
   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSth</span><span class="o">(</span><span class="n">Param</span> <span class="n">firstParam</span><span class="o">,</span> <span class="n">AnotherParam</span> <span class="n">secondParam</span><span class="o">)</span> <span class="o">{</span>
@@ -629,12 +625,11 @@
   <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">doStep1</span><span class="o">(</span><span class="n">Param</span> <span class="n">firstParam</span><span class="o">);</span>
   <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">doStep2</span><span class="o">(</span><span class="n">AnotherParam</span> <span class="n">secondParam</span><span class="o">);</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>在一个具体的实现类中，因为抽象类未做检查，子类实现必须检查父类传入的参数</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConcreteBehavior</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConcreteBehavior</span> <span class="o">{</span>
   <span class="nd">@Override</span>
   <span class="kt">void</span> <span class="nf">doStep1</span><span class="o">(</span><span class="n">Param</span> <span class="n">firstParm</span><span class="o">)</span> <span class="o">{</span>
     <span class="c1">//have to check if firstParam is null or not!</span>
@@ -645,8 +640,7 @@
     <span class="c1">//have to check if secondParam is null or not!</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>话说回来，继承一个无法修改代码的基类可能往往不是一个很好的注意，这种情况下，<a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">使用组合而不是继承</a>可能是一种更好的方法，如果可以的话；因为从代码的耦合上来说，<strong>继承关系是一种很强的耦合</strong>以至于所有父类中的不良设计会被所有的子类所继承，形成无形的约束。这也许是我们需要始终对以高复用为目标的框架保持谨慎的原因。</p>
 
@@ -669,23 +663,21 @@
 
 <p>譬如同样一个可能为空的对象上的一个多步骤操作，传统的方式可以写为</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">ResultType</span> <span class="n">result</span> <span class="o">=</span> <span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">();</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ResultType</span> <span class="n">result</span> <span class="o">=</span> <span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">();</span>
 <span class="k">if</span> <span class="o">(</span><span class="n">result</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">return</span> <span class="nf">doSomethingWith</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
 <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
   <span class="c1">//exceptional handling code, other return</span>
   <span class="k">return</span> <span class="nf">doExceptionalHandling</span><span class="o">();</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>如果换用Optional封装则可以写为</p>
 
-<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">())</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">())</span>
     <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">result</span> <span class="o">-&gt;</span> <span class="n">doSomethingWith</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
     <span class="o">.</span><span class="na">orElseGet</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="n">doExceptionalHandling</span><span class="o">());</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>传统的空指针或者返回值方式返回的对象是不同的类型，程序员必须<strong>对返回值做类型相关的处理</strong>，从这种意义上说，返回值方式(包括空指针)提供的相对低层次的封装，毕竟对于C++/Java这类强类型语言而言，不同的变量类型相关处理意味着底层语言基础设施和应用业务逻辑这两个不同层次的抽象被混杂在同一个层级的代码范围内</li>

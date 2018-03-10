@@ -506,7 +506,7 @@
 
 <p>ruby中存在一些基础的类（或者是MetaClass)，包括: <code class="highlighter-rouge">[Class, Module, Kernel, Object, BasicObject]</code>, 且看如下测试：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="n">tests</span> <span class="o">=</span> <span class="p">[</span><span class="no">Class</span><span class="p">,</span> <span class="no">Module</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">Object</span><span class="p">,</span> <span class="no">BasicObject</span><span class="p">]</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tests</span> <span class="o">=</span> <span class="p">[</span><span class="no">Class</span><span class="p">,</span> <span class="no">Module</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">Object</span><span class="p">,</span> <span class="no">BasicObject</span><span class="p">]</span>
 
 <span class="nb">puts</span> <span class="s2">"checking class and ancestors for </span><span class="si">#{</span><span class="n">tests</span><span class="si">}</span><span class="s2">"</span>
 <span class="n">tests</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
@@ -527,12 +527,11 @@
     <span class="n">check_is_a</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
   <span class="k">end</span>
 <span class="k">end</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>输出结果如下：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>checking class and ancestors for [Class, Module, Kernel, Object, BasicObject]
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>checking class and ancestors for [Class, Module, Kernel, Object, BasicObject]
 Ancestors of Class is [Class, Module, Object, Kernel, BasicObject]
 The class of Class is Class
 Ancestors of Module is [Module, Object, Kernel, BasicObject]
@@ -546,8 +545,7 @@ The class of BasicObject is Class
 
 checking is_a relation for [Class, Module, Kernel, Object, BasicObject]
 Kernel is not a Class
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>可见，Kernel本身是个Module，但不是一个Class，其它的都互相满足is-a关系。其它任何一个class都是一个module（但是并不意味着可以include class）。</p>
 
@@ -555,7 +553,7 @@ Kernel is not a Class
 
 <p>Module不能用new来生成一个对象，譬如：</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">module</span> <span class="nn">TestModule</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">TestModule</span>
   <span class="k">def</span> <span class="nf">func</span><span class="p">()</span>
     <span class="nb">puts</span> <span class="s2">"value is @value"</span>
   <span class="k">end</span>
@@ -567,8 +565,7 @@ Kernel is not a Class
 <span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
   <span class="nb">puts</span> <span class="s2">"Module new got an exception: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">class</span><span class="si">}</span><span class="s2">"</span>
 <span class="k">end</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里会抛出<code class="highlighter-rouge">NoMethodError</code>异常。</p>
 
 <h2 id="mixin">MIXIN</h2>
@@ -577,7 +574,7 @@ Kernel is not a Class
 
 <p>下边的这段代码是一个简单的MIXIN例子:</p>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BaseClass</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BaseClass</span>
   <span class="k">def</span> <span class="nf">call_func</span><span class="p">()</span>
     <span class="nb">puts</span> <span class="s2">"base called"</span>
   <span class="k">end</span>
@@ -605,8 +602,7 @@ Kernel is not a Class
 <span class="c1"># module method called</span>
 <span class="n">obj</span><span class="p">.</span><span class="nf">call_func</span><span class="p">()</span>
 <span class="c1"># virtual method called which will call it's ancestor by super</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>上述代码中，<code class="highlighter-rouge">super</code>用于调用<code class="highlighter-rouge">BaseClass</code>或者对应Module中的方法。</p>
 
@@ -652,11 +648,10 @@ Kernel is not a Class
 
 <p>运行结果如下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>called <span class="k">in </span>BaseModule2
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>called <span class="k">in </span>BaseModule2
 unique func <span class="k">in </span>module1
 unique func <span class="k">in </span>module2
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>从而可得如下结论:</p>
 
@@ -715,13 +710,12 @@ unique func <span class="k">in </span>module2
 
 <p>运行结果如下：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>called with value = test1
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>called with value = test1
 called with value = test2
 my value is: test2
 called with value = 
 called with myvalue = test3
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>这里有三种处理情况：</p>
 
 <ul>
@@ -765,10 +759,9 @@ called with myvalue = test3
 
 <p>结果如下:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>called with value = test1
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>called with value = test1
 my basevalue=
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里，module的<code class="highlighter-rouge">initialize</code>方法有较高的优先级，即<code class="highlighter-rouge">super</code>调用会首先调用module的同名函数。</p>
 

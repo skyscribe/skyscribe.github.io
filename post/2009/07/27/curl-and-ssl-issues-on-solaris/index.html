@@ -502,12 +502,11 @@
 根据其源码里边的说明，只需要在./configure 后边加上 –with-ssl=<path>即可。</path></p>
 
 <p>开始的时候，没留意这个，因为粗略扫描了一下 –help, 后边这么说了：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>--with-libssh2<span class="o">=</span>PATH   Where to look <span class="k">for </span>libssh2, PATH points to the
-                      LIBSSH2 installation <span class="o">(</span>default: /usr/local/lib<span class="o">)</span>; when
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">--with-libssh2</span><span class="o">=</span>PATH   Where to look <span class="k">for </span>libssh2, PATH points to the
+                      LIBSSH2 installation <span class="o">(</span>default: /usr/local/lib<span class="o">)</span><span class="p">;</span> when
                       possible, <span class="nb">set </span>the PKG_CONFIG_PATH environment
                       variable instead of using this option
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>我的目标库的确就是在/usr/local/ssl下边了，当时编译之后，链接起来总是提示找不到对应版本的libssl.so.0.9.7.
 后来才发现(将环境变量做小幅调整、改动来探测)，这个default在Solaris上边并不是真的default,必须显示指定为/usr/local/ssl,否则找到的居然是/usr/sfw/。</p>

@@ -515,7 +515,7 @@
   <li>隐式传入，内部用yield调用</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">thrice</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">thrice</span>
   <span class="k">yield</span>
   <span class="k">yield</span>
   <span class="k">yield</span>
@@ -523,8 +523,7 @@
 
 <span class="n">x</span><span class="o">=</span><span class="mi">1</span>
 <span class="n">thrice</span> <span class="p">{</span><span class="n">x</span><span class="o">+=</span><span class="mi">2</span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的block代码在内部调用的时候实际被执行。每个yield调用执行一次所传入的block代码,_x_的实际值以引用方式加2.</p>
 
@@ -534,15 +533,14 @@
   <li>&amp;block 参数传递</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">six_times</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">six_times</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
   <span class="n">thrice</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
   <span class="n">thrice</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
 <span class="k">end</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">six_times</span> <span class="p">{</span><span class="n">x</span><span class="o">+=</span><span class="mi">2</span><span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>和前一方式很类似。</p>
 
@@ -550,7 +548,7 @@
   <li>&amp;block传入，保存block为变量，然后调用block.call</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">save_for_later</span><span class="p">(</span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">save_for_later</span><span class="p">(</span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
   <span class="vi">@saved</span> <span class="o">=</span> <span class="n">b</span>  <span class="c1"># Note: no ampersand! This turns a block into a closure of sorts.</span>
 <span class="k">end</span>
    
@@ -558,8 +556,7 @@
 <span class="nb">puts</span> <span class="s2">"Deferred execution of a block:"</span>
 <span class="vi">@saved</span><span class="p">.</span><span class="nf">call</span>
 <span class="vi">@saved</span><span class="p">.</span><span class="nf">call</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里的block被显式的保存到一个instance variable中（这里是__main__对象）, 后续在调用点的可以之间使用变量的call方法来延迟调用。</p>
 
@@ -567,12 +564,11 @@
   <li>proc.new/proc</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="vi">@saved_proc_new</span> <span class="o">=</span> <span class="no">Proc</span><span class="p">.</span><span class="nf">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"I'm declared with Proc.new."</span> <span class="p">}</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vi">@saved_proc_new</span> <span class="o">=</span> <span class="no">Proc</span><span class="p">.</span><span class="nf">new</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"I'm declared with Proc.new."</span> <span class="p">}</span>
 <span class="vi">@saved_proc</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"I'm declared with proc."</span> <span class="p">}</span>
 <span class="vi">@saved_proc_new</span><span class="p">.</span><span class="nf">call</span>
 <span class="vi">@saved_proc</span><span class="p">.</span><span class="nf">call</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这两种方式的效果实际差不多,直接将block对象生成的closure保存在变量中，并且可以后续调用。</p>
 
@@ -580,10 +576,9 @@
   <li>lambda</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="vi">@saved_lambda</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"I'm declared with lambda."</span> <span class="p">}</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vi">@saved_lambda</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"I'm declared with lambda."</span> <span class="p">}</span>
 <span class="vi">@saved_lambda</span><span class="p">.</span><span class="nf">call</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>此法采用显式的lambda函数生成closure，然后保存于变量并可延迟调用。</p>
 
@@ -591,12 +586,11 @@
   <li>method</li>
 </ul>
 
-<div class="language-ruby highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">some_method</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">some_method</span>
   <span class="nb">puts</span> <span class="s2">"I'm declared as a method."</span>
 <span class="k">end</span>
 <span class="vi">@method_as_closure</span> <span class="o">=</span> <span class="nb">method</span><span class="p">(</span><span class="ss">:some_method</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>这里用一个symobl传入method，生成一个closure。</p>
 
@@ -647,7 +641,7 @@
 
 <p>运行结果如下：</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">skyscribe:~/program/octopress/source/downloads/code$ </span>ruby closure_return.rb 
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>skyscribe:~/program/octopress/source/downloads/code<span class="nv">$ </span>ruby closure_return.rb 
 before yield
 failure: LocalJumpError: unexpected <span class="k">return
 </span>before calling <span class="c">#&lt;Proc:0x8ad05f4@closure_return.rb:31&gt;...</span>
@@ -658,13 +652,11 @@ before calling <span class="c">#&lt;Proc:0x8ad0310@closure_return.rb:35 (lambda)
 called <span class="c">#&lt;Proc:0x8ad0310@closure_return.rb:35 (lambda)&gt; result:value from proc</span>
 before calling <span class="c">#&lt;Method: Object#test_method&gt;...</span>
 called <span class="c">#&lt;Method: Object#test_method&gt; result:test method</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>- lambda/method表现出真正的closure行为，仅仅返回closure本身；外部调用控制流不受影响，继续yield或者call的下一语句执行
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- lambda/method表现出真正的closure行为，仅仅返回closure本身；外部调用控制流不受影响，继续yield或者call的下一语句执行
 - 其它几种会跳出外部调用者的控制流，即return出调用者，yield/call之后的也不会再执行，直接跳出到最近的end外
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>arity - 参数个数校验</li>
@@ -704,9 +696,8 @@ called <span class="c">#&lt;Method: Object#test_method&gt; result:test method</s
 <span class="n">call_with_more_args</span><span class="p">(</span><span class="nb">lambda</span> <span class="p">{</span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">|</span><span class="p">})</span>
 <span class="n">call_with_more_args</span><span class="p">(</span><span class="nb">method</span><span class="p">(</span><span class="ss">:test_method</span><span class="p">))</span></code></pre></figure>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>运行结果如下：
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>运行结果如下：
+</code></pre></div></div>
 
 <p>```bash</p>
 

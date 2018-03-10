@@ -506,9 +506,8 @@
 
 <p>Maybe类型是有一种基于已有类型的二次封装类型，用于表述可能为空的抽象类型，用于支持类似于 C++/Java 中的模板机制，不过Haskell的类型系统表达能力比一般语言中的模板强大很多。</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kt">Maybe</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Just</span> <span class="n">a</span> <span class="o">|</span> <span class="kt">Nothing</span>
-</code></pre>
-</div>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">Maybe</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Just</span> <span class="n">a</span> <span class="o">|</span> <span class="kt">Nothing</span>
+</code></pre></div></div>
 
 <h2 id="新类型定义">新类型定义</h2>
 
@@ -528,7 +527,7 @@
 
 <h3 id="tolist-的实现">toList 的实现：</h3>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">List</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Cons</span> <span class="n">a</span> <span class="p">(</span><span class="kt">List</span> <span class="n">a</span><span class="p">)</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">List</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Cons</span> <span class="n">a</span> <span class="p">(</span><span class="kt">List</span> <span class="n">a</span><span class="p">)</span>
             <span class="o">|</span> <span class="kt">Nil</span>
               <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
 
@@ -538,12 +537,11 @@
 <span class="c1">-- my solution --</span>
 <span class="n">toList</span> <span class="p">(</span><span class="kt">Cons</span> <span class="n">x</span> <span class="p">(</span><span class="n">xs</span><span class="p">))</span> <span class="o">=</span> <span class="n">x</span> <span class="o">:</span> <span class="n">toList</span> <span class="n">xs</span>
 <span class="n">toList</span> <span class="kt">Nil</span> <span class="o">=</span> <span class="kt">[]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>运行结果：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Prelude&gt; :load ListADT.hs 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prelude&gt; :load ListADT.hs 
 [1 of 1] Compiling Main             ( ListADT.hs, interpreted )
 Ok, modules loaded: Main.
 *Main&gt; let alist = fromList [1..12]
@@ -551,40 +549,37 @@ Ok, modules loaded: Main.
 Cons 1 (Cons 2 (Cons 3 (Cons 4 (Cons 5 (Cons 6 (Cons 7 (Cons 8 (Cons 9 (Cons 10 (Cons 11 (Cons 12 Nil)))))))))))
 *Main&gt; toList alist
 [1,2,3,4,5,6,7,8,9,10,11,12]
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="用maybe类型实现的模板树">用Maybe类型实现的模板树</h3>
 
 <p>已经给出的实现代码：</p>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Tree</span> <span class="kr">where</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Tree</span> <span class="kr">where</span>
 <span class="kr">data</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">Node</span> <span class="n">a</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span>
             <span class="o">|</span> <span class="kt">Empty</span>
               <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
 
 <span class="n">simpleTree</span> <span class="o">=</span> <span class="kt">Node</span> <span class="s">"parent"</span> <span class="p">(</span><span class="kt">Node</span> <span class="s">"left child"</span> <span class="kt">Empty</span> <span class="kt">Empty</span><span class="p">)</span>
                            <span class="p">(</span><span class="kt">Node</span> <span class="s">"right child"</span> <span class="kt">Empty</span> <span class="kt">Empty</span><span class="p">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>采用Maybe的实现一：</li>
 </ul>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MyTree</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">MyNode</span> <span class="n">a</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTree</span> <span class="n">a</span><span class="p">))</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTree</span> <span class="n">a</span><span class="p">))</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MyTree</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">MyNode</span> <span class="n">a</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTree</span> <span class="n">a</span><span class="p">))</span> <span class="p">(</span><span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTree</span> <span class="n">a</span><span class="p">))</span>
                 <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">)</span>
 
 <span class="n">mySimpleTree</span> <span class="o">=</span> <span class="kt">MyNode</span> <span class="p">(</span><span class="kt">Just</span> <span class="s">"parent"</span><span class="p">)</span> <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="kt">MyNode</span> <span class="p">(</span><span class="kt">Just</span> <span class="s">"left child"</span><span class="p">)</span> <span class="kt">Nothing</span> <span class="kt">Nothing</span><span class="p">))</span>
                                 <span class="p">(</span><span class="kt">Just</span> <span class="p">(</span><span class="kt">MyNode</span> <span class="p">(</span><span class="kt">Just</span> <span class="s">"right child"</span><span class="p">)</span> <span class="kt">Nothing</span> <span class="kt">Nothing</span><span class="p">))</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>采用Record语法提高可读性:</li>
 </ul>
 
-<div class="language-haskell highlighter-rouge"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MyTreeRecord</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">MyTreeRecord</span> <span class="p">{</span>
+<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">data</span> <span class="kt">MyTreeRecord</span> <span class="n">a</span> <span class="o">=</span> <span class="kt">MyTreeRecord</span> <span class="p">{</span>
           <span class="n">parentNode</span>  <span class="o">::</span> <span class="n">a</span>
         <span class="p">,</span> <span class="n">leftChild</span>   <span class="o">::</span> <span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTreeRecord</span> <span class="n">a</span><span class="p">)</span>
         <span class="p">,</span> <span class="n">rightChild</span>  <span class="o">::</span> <span class="kt">Maybe</span> <span class="p">(</span><span class="kt">MyTreeRecord</span> <span class="n">a</span><span class="p">)</span>
@@ -603,11 +598,10 @@ Cons 1 (Cons 2 (Cons 3 (Cons 4 (Cons 5 (Cons 6 (Cons 7 (Cons 8 (Cons 9 (Cons 10 
             <span class="n">rightChild</span>  <span class="o">=</span> <span class="kt">Nothing</span>
         <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>运行结果：</p>
-<div class="highlighter-rouge"><pre class="highlight"><code>Prelude&gt; :load Tree.hs 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prelude&gt; :load Tree.hs 
 [1 of 1] Compiling Tree             ( Tree.hs, interpreted )
 Ok, modules loaded: Tree.
 *Tree&gt; simpleTree 
@@ -617,8 +611,7 @@ MyNode (Just "parent") (Just (MyNode (Just "left child") Nothing Nothing)) (Just
 *Tree&gt; anotherSimpleTree 
 MyTreeRecord {parentNode = "parent", leftChild = Just (MyTreeRecord {parentNode = "left child", leftChild = Nothing, rightChild = Nothing}), rightChild = Just (MyTreeRecord {parentNode = "right child", leftChild = Nothing, rightChild = Nothing})}
 *Tree&gt; 
-</code></pre>
-</div>
+</code></pre></div></div>
 
         
       </section>

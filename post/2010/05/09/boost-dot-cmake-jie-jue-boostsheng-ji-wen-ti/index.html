@@ -512,14 +512,13 @@
 <p>CMake + GIT +Spinx 确实够酷了。</p>
 
 <p>编译起来可以充分利用强大的CMake了：</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>git clone git://gitorious.org/boost/cmake.git src
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git://gitorious.org/boost/cmake.git src
 <span class="nb">cd </span>src
 git checkout &lt;TAG&gt;    //TAG<span class="o">==</span>1.41.0.cmake0
 mkdir bld
 <span class="nb">cd </span>bld/
 cmake ../
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>如果需要按需编译某些库，只需用<code class="highlighter-rouge">make edit_cache</code>修改cache即可。</p>
 
