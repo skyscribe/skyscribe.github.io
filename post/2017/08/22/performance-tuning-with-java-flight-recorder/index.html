@@ -313,7 +313,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/cpp/index.html">cpp(10)</a>
+      <a href="/categories/cpp/index.html">cpp(11)</a>
   </span>
   </li>
   
@@ -394,7 +394,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/programming/index.html">programming(34)</a>
+      <a href="/categories/programming/index.html">programming(35)</a>
   </span>
   </li>
   
@@ -403,7 +403,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/language/index.html">language(12)</a>
+      <a href="/categories/language/index.html">language(13)</a>
   </span>
   </li>
   
@@ -448,7 +448,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/design/index.html">design(13)</a>
+      <a href="/categories/design/index.html">design(14)</a>
   </span>
   </li>
   
@@ -488,7 +488,7 @@
 
 
 
-本文有 5057 字，大约需要 12 分钟可以读完
+本文有 6486 字，大约需要 16 分钟可以读完
 
 
 
@@ -602,9 +602,11 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 就要怀疑是否是部分关键逻辑运行时间过长，导致经过数次新生代回收之后，仍然没有被释放出去，从而导致进入老生代被老生代的回收活动处理。</p>
 
 <h3 id="代码面板">代码面板</h3>
+
 <p>代码面板则是基于采样得到的信息的代码执行情况给出统计分析结果。
-需要注意的是，所有的数据都是依据具体的采样点，具体的<strong>线程当时正在运行的的函数调用栈的具体状态来计数</strong>并累加的。
-比如某个调用栈有10次被捕获到，那么相应的栈上的所有的函数的计数都会被记为10；这样得到的结果和<strong>实际代码的CPU占用率比较类似</strong>，但是并不完全精确。
+需要注意的是，所有的数据都是依据具体的采样点，具体的<strong>线程当时正在运行的的函数调用栈的具体状态来计数</strong>并累加的。</p>
+
+<p>比如某个调用栈有10次被捕获到，那么相应的栈上的所有的函数的计数都会被记为10；这样得到的结果和<strong>实际代码的CPU占用率比较类似</strong>，但是并不完全精确。
 所有的百分比数值都是相对百分比，其计算方法是用当前函数的采样数和整体（线程或全局CPU采样数）的采样数相除。</p>
 
 <h4 id="代码概览">代码概览</h4>
@@ -629,12 +631,12 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 这里的Stream操作会在运行的时候被多个上层函数所调用，则每个调用栈极其采样个数都被显示出来，可以顺势点开查看详情。</p>
 
 <p><strong>基于80/20原则</strong>，一般收效最大的是仅仅对占比最大的函数栈进行针对性优化；同时如果上一级函数的调用和字函数的采样个数不一致，说明函数内部的其它代码也需要仔细查看。
-最麻烦的情况是80/20原则不太明显的地方；此时我们必须对多个可能的热点方法做优化，耗费的精力和时间就会更多。</p>
+最麻烦的情况是80/20原则不太明显的时候；此时我们<strong>必须对多个可能的热点方法</strong>做优化，耗费的精力和时间就会更多。</p>
 
-<p>这个具体的例子中，排行第一和第二的两个栈的采样数基本差不多，是因为对应的采样是已经优化了一部分之后的中间结果。
+<p>回头看这个具体的例子，排行第一和第二的两个栈的采样数基本差不多，CPU时间耗费在哪里看起来似乎不是很明显;这是因为对应的采样是已经优化了一部分之后的中间结果。
 令人惊讶的是，Guava的Interner API也占用了相当多的CPU时间；在CPU已经满的情况下，针对性的优化就要麻烦一些。</p>
 
-<h4 id="热点的调用栈">热点的调用栈、</h4>
+<h4 id="热点的调用栈">热点的调用栈</h4>
 
 <p>调用栈试图提供了和上述热点方法类似的信息，所不同的是其调用栈情况聚合了所有的API情况，譬如多个线程的同一个底层方法调用会被聚合在一起；
 这样更容易从一个系统性的视角去理解程序实际运行时候的概况。</p>
@@ -664,19 +666,48 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 <p>具体的热点线程数据和其调用栈情况，可以依据采样计数排序后详细查看。这个例子中，String的<code class="highlighter-rouge">append</code>操作消耗了大量的CPU，这个也算是大规模应用程序常见的情况。</p>
 
 <h4 id="线程竞争">线程竞争</h4>
+<p>同样是上边的运行其采样，线程的竞争情况视图为我们提供了更多关于CPU繁忙时候各个线程抢占CPU时间片的大概情况：</p>
 
-<p><img src="/assets/images/jfr/jfr_threads_contention.jpg" alt="contention" />
-<strong>TBD</strong></p>
+<p><img src="/assets/images/jfr/jfr_threads_contention.jpg" alt="contention" /></p>
+
+<p>这里依据具体的CPU事件，JFR为我们提供了三个子视图来呈现多线程运行期的细节信心</p>
+<ul>
+  <li>竞争锁情况，按照其阻塞CPU运行的时间排序，分别显示了各个锁在给定的时间周期内等待的次数，最长、平均、总共的时间。一般时间越长需要优化的空间会越大，因为很多CPU时间被浪费在频繁等待和获取锁上边。具体的运行其堆栈可以在下方的细节视图中具体查看</li>
+  <li>被阻塞的线程信息，列举了这些等待获取锁的线程的信息，时间、堆栈等</li>
+  <li>阻塞其他线程的线程信息，和上一个类似，只是显示的是占有共享锁而阻塞了别人的线程的相关信息</li>
+</ul>
 
 <h4 id="时延和锁竞争情况">时延和锁竞争情况</h4>
+<p>线程的时延信息则从运行期所采样到的操作等待时间长短的维度呈现一些排序和统计信息，同样可以依据其数目、平均等待时间以及最长时间等因素来排序查看对应的运行其堆栈情况，如下图
+<img src="/assets/images/jfr/jfr_threads_latency.jpg" alt="threads latency" /></p>
 
-<p><img src="/assets/images/jfr/jfr_threads_latency.jpg" alt="threads latency" /></p>
+<p>线程锁信息则反馈一些基于Java锁对象为中心的时间信息，对于同一个锁对象指针（底层地址空间的指针）其关联的所有线程的追踪信息，并显示出多个关联线程被采样到的次数信息。</p>
 
-<p><img src="/assets/images/jfr/jfr_threads_lock.jpg" alt="threads locks" /></p>
+<p>由于这些统计信息是基于操作系统内存地址的，<strong>垃圾收集算法可能在运行清理操作的时候拷贝对象从而使得指针被重写，因此该信息不是非常可靠</strong>,尤其是GC比较活跃的时候，某些应该被计数在内的线程活动会被计数到不同的实例上。幸运的是，JFR同样对给定的时间段内GC的活动情况给了个概要视图呈现在最下方。
+<img src="/assets/images/jfr/jfr_threads_lock.jpg" alt="threads locks" /></p>
 
 <h4 id="线程dump情况">线程Dump情况</h4>
+<p>JFR会依据采样配置情况，定期保留当前所有线程的调用栈信息;由于堆栈保存对实际运行程序的影响比较大，JFR的默认策略是很长时间才会取样一次调用栈信息。</p>
+
+<p>对于时间比较短的采样，这个页面的信息很可能是空的。如果确定有必要（比如怀疑某些线程僵死的情况，可以通过设置采样参数让JFR提取更多的信息。</p>
 
 <h3 id="io情况">IO情况</h3>
+<p>对于后端应用程序来说，系统性能的提升和IO活动密切相关因为大部分的程序运行瓶颈在IO上，
+即<strong>快速的CPU处理速度和缓慢的IO活动之间的不可调和的矛盾</strong>往往导致应用程序性能的下降;然而大部分的后端应用的<strong>目标是追求更高的吞吐率</strong>。</p>
+
+<p>当吞吐量上不去，而CPU的运行曲线又不太平稳（譬如有很多锯齿）的情况下，往往是IO的处理浪费了宝贵的运行时间;
+此时只要查看IO的情况，减少对程序逻辑的阻塞即可快速提升性能。
+如果CPU已经用满，而吞吐率又不太理想，则优化起来就困难重重了;当然这种情况下IO的行为还是值得查看的，
+因为不恰当的IO锁或者过多的IO操作仍然可能有潜力去挖掘，只是更加困难一些。</p>
+
+<p>IO事件按照其访问速度的差异一可以大概分为如下几类</p>
+<ul>
+  <li>本地磁盘文件读写操作：其速度和物理磁盘的特性、文件系统以及程序所使用的API、框架等密切相关。典型地如频繁的log操作可能引起额外的小量的IO操作，如果这些操作是阻塞的，则程序的性能会下降比较厉害</li>
+  <li>网络文件系统操作:这类场景往往对应用程序的逻辑是做了隔离的，但是在复杂多变的网络环境下很容易引起性能的急剧恶化;遇到这种情况尽快分析出原因是很关键的。</li>
+  <li>网络通信读写（通过基于TCP/IP的各类协议的程序逻辑信息交换)：和网络文件操作类似，不同的是和应用层协议的设计和模式密切相关，对于大的系统而言，定位和分隔问题的边界是必不可少的。</li>
+</ul>
+
+<p>JFR对这些时间都分类列出其操作的时间信息，方便我们进一步定位和分析IO方面的问题。大部分情况下，IO里给出的信息都要结合线程乃至内存的情况综合判断。</p>
 
 <h3 id="系统信息和事件">系统信息和事件</h3>
 
@@ -707,6 +738,32 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 
         
 
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/08/29/thinking-on-service-architecture/">架构服务化的一点思考</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/08/22/performance-tuning-with-java-flight-recorder/">用Java Flight Recorder来调优JVM性能</a>
+            </li>
+            
+            
         
 
     
@@ -756,32 +813,6 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
         
             <li>
                 <a href="/post/2017/06/05/kotlin-variable-invariants/">Kotlin语言之变量约束设计</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2017/06/04/kotlin-language-functional-programming/">Kotlin语言之函数式编程</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2016/12/24/software-design-in-agile-development-context/">Software Design in Agile Development Context</a>
             </li>
             
             
@@ -880,8 +911,57 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
       <div class="page__comments">
   
   
-    <h4 class="page__comments-title">Leave a Comment</h4>
-    <section id="disqus_thread"></section>
+    <section id="static-comments">
+      
+        <!-- Start static comments -->
+        <div class="js-comments">
+          
+        </div>
+        <!-- End static comments -->
+
+        <!-- Start new comment form -->
+        <h4 class="page__comments-title">Leave a Comment</h4>
+        <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+        <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v1/entry/skyscribe/skyscribe/master">
+          <div class="form__spinner">
+            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+          </div>
+
+          <fieldset>
+            <label for="comment-form-message">Comment <small class="required">*</small></label>
+            <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+            <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+          </fieldset>
+          <fieldset>
+            <label for="comment-form-name">Name <small class="required">*</small></label>
+            <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+          </fieldset>
+          <fieldset>
+            <label for="comment-form-email">Email address <small class="required">*</small></label>
+            <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+          </fieldset>
+          <fieldset>
+            <label for="comment-form-url">Website (optional)</label>
+            <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+          </fieldset>
+          <fieldset class="hidden" style="display: none;">
+            <input type="hidden" name="options[slug]" value="performance-tuning-with-java-flight-recorder">
+            <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+            <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+          </fieldset>
+          <!-- Start comment form alert messaging -->
+          <p class="hidden js-notice">
+            <strong class="js-notice-text"></strong>
+          </p>
+          <!-- End comment form alert messaging -->
+          <fieldset>
+            <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--large">Submit Comment</button>
+          </fieldset>
+        </form>
+        <!-- End new comment form -->
+      
+    </section>
   
 </div>
 
@@ -915,7 +995,7 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
   </ul>
 </div>
 
-<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2017 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
 
       </footer>
     </div>
@@ -943,26 +1023,46 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 
 
   
-  <script type="text/javascript">
-  	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-  	var disqus_shortname = 'skyscribe';
+  <script>
+    (function ($) {
+    var $comments = $('.js-comments');
 
-  	/* * * DON'T EDIT BELOW THIS LINE * * */
-  	(function() {
-  		var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-  		dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-  		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  	})();
+    $('#new_comment').submit(function () {
+      var form = this;
 
-  	/* * * DON'T EDIT BELOW THIS LINE * * */
-  	(function () {
-  		var s = document.createElement('script'); s.async = true;
-  		s.type = 'text/javascript';
-  		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-  		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-  	}());
+      $(form).addClass('disabled');
+      $('#comment-form-submit').html('<i class="fa fa-spinner fa-spin fa-fw"></i> Loading...');
+
+      $.ajax({
+        type: $(this).attr('method'),
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        contentType: 'application/x-www-form-urlencoded',
+        success: function (data) {
+          $('#comment-form-submit').html('Submitted');
+          $('.page__comments-form .js-notice').removeClass('notice--danger');
+          $('.page__comments-form .js-notice').addClass('notice--success');
+          showAlert('Thanks for your comment! It will show on the site once it has been approved.');
+        },
+        error: function (err) {
+          console.log(err);
+          $('#comment-form-submit').html('Submit Comment');
+          $('.page__comments-form .js-notice').removeClass('notice--success');
+          $('.page__comments-form .js-notice').addClass('notice--danger');
+          showAlert('Sorry, there was an error with your submission. Please make sure all required fields have been completed and try again.');
+          $(form).removeClass('disabled');
+        }
+      });
+
+      return false;
+    });
+
+    function showAlert(message) {
+      $('.page__comments-form .js-notice').removeClass('hidden');
+      $('.page__comments-form .js-notice-text').html(message);
+    }
+  })(jQuery);
   </script>
-  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 
 

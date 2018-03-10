@@ -281,6 +281,14 @@
 <lastmod>2017-08-29T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>http://www.skyscribe.me/post/2017/09/24/data-management-evolution/</loc>
+<lastmod>2017-09-24T00:00:00+08:00</lastmod>
+</url>
+<url>
+<loc>http://www.skyscribe.me/post/2017/10/04/cpp-17-updates/</loc>
+<lastmod>2017-10-04T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://www.skyscribe.me/about/</loc>
 </url>
 <url>
@@ -461,6 +469,9 @@
 <loc>http://www.skyscribe.me/tags/monolith/</loc>
 </url>
 <url>
+<loc>http://www.skyscribe.me/tags/database/</loc>
+</url>
+<url>
 <loc>http://www.skyscribe.me/categories/cpp/</loc>
 </url>
 <url>
@@ -549,5 +560,8 @@
 </url>
 <url>
 <loc>http://www.skyscribe.me/page14/</loc>
+</url>
+<url>
+<loc>http://www.skyscribe.me/page15/</loc>
 </url>
 </urlset>

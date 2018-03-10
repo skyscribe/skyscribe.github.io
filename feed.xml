@@ -1,24 +1,576 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2017-09-11T22:37:25+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">架构服务化的一点思考</title><link href="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/" rel="alternate" type="text/html" title="架构服务化的一点思考" /><published>2017-08-29T00:00:00+08:00</published><updated>2017-08-29T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/">&lt;p&gt;微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；
-似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在铺开，Amazon又挑起了无服务器架构的大旗，引来无数人的关注。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.4.3">Jekyll</generator><link href="http://www.skyscribe.me/feed.xml" rel="self" type="application/atom+xml" /><link href="http://www.skyscribe.me/" rel="alternate" type="text/html" /><updated>2018-03-10T14:21:00+08:00</updated><id>http://www.skyscribe.me/</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">C++17整装待发</title><link href="http://www.skyscribe.me/post/2017/10/04/cpp-17-updates/" rel="alternate" type="text/html" title="C++17整装待发" /><published>2017-10-04T00:00:00+08:00</published><updated>2017-10-04T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/10/04/cpp-17-updates</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/10/04/cpp-17-updates/">&lt;p&gt;9月份对于C++社区而言绝对是个令人振奋的收获季节。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;先是在９月上旬的时候，语言标准化委员会完成了新的语言标准的&lt;strong&gt;草案投票并取得了全票&lt;/strong&gt;通过（虽然有一些小的语法、修辞上的评论待修改）；
+Herb Sutter第一时间在&lt;a href=&quot;https://herbsutter.com/2017/09/06/c17-is-formally-approved/&quot;&gt;其博客上发布了这一激动人心的消息&lt;/a&gt;：C++2017已经获得了实质性的通过静待最终发布。
+值得注意的是，这是C++这门大象一般行动缓慢的语言在变更为&lt;a href=&quot;https://en.wikipedia.org/wiki/Software_release_train&quot;&gt;更敏捷的火车发布模型&lt;/a&gt;之后，第一次按照时间点准时发布大的语言版本。
+之前可是有10多年才发布一个版本（说好的C++0x最终变成了十六进制年份的玩笑）导致开发者等到心凉自己造轮子的事情；而C++14是一个修复设计问题的小版本。&lt;/p&gt;
+
+&lt;p&gt;另外一个大事件则是CppCon2017社区大会的成功举办，与往常一样有一大堆的新料演讲(已经放在&lt;a href=&quot;https://github.com/CppCon/CppCon2017&quot;&gt;这里&lt;/a&gt;)放了出来供社区消化、学习。&lt;/p&gt;
+
+&lt;h2 id=&quot;c17&quot;&gt;C++17&lt;/h2&gt;
+&lt;p&gt;作为一个按照敏捷发布模型出来的第一个大的语言版本，由于需要照顾到质量、时间节点（毕竟需要按时发布）和参考实现成熟度等因素，本来新特性不会很多。
+然而作为一个语言的大版本来说，没有一定的新料自然也有滥竽充数的嫌疑；在敏捷的大背景下，谁也不愿意多等都希望马上出来一些质量够好、实现就绪马上可用的新特性；而且要不止一个，因为可供选择的编程语言实在是太多了。&lt;/p&gt;
+
+&lt;p&gt;值得庆幸的是，WG21标准化小组早在３月份就完成了新语言特性的草稿准备工作。&lt;/p&gt;
+
+&lt;h3 id=&quot;语言特性&quot;&gt;语言特性&lt;/h3&gt;
+
+&lt;p&gt;很多语法糖方面的更新，可以让程序员生产率更高，包括以下这些主要的更新&lt;/p&gt;
+
+&lt;h4 id=&quot;嵌套的命名空间声明&quot;&gt;嵌套的命名空间声明&lt;/h4&gt;
+&lt;p&gt;这是一个小小的改进，但足以节省大家很多敲击键盘和格式化缩进的烦恼。因为在比较大的项目中，经常用嵌套的命名空间来隔离API和类，之前我们不得不这样写&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inner&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;namesapce&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;//my module definitions...
+&lt;/span&gt;        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;或者为了节省空间（采用微软的换行风格有强迫症的更要哭了），直接缩略为&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inner&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//my module definitions...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;新标准直接允许我们写为&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inner&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//my module definitions...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;是否清爽了很多，或者有本来就应该如此的感觉？为什么没有更早支持啊。&lt;/p&gt;
+
+&lt;h4 id=&quot;static_assert的消息提醒参数变为可选&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;static_assert&lt;/code&gt;的消息提醒参数变为可选&lt;/h4&gt;
+&lt;p&gt;这个是针对之前引入的用于与编译期间静态检查机制&lt;code class=&quot;highlighter-rouge&quot;&gt;static_assert&lt;/code&gt;的一点小修正，允许其携带的消息提醒参数被忽略，以减少编译噪音。
+本来这个静态断言机制可以很好地服务于编译器多态检查，如果没问题就一路继续编译下去，如果出错，则会打印一条错误信息包含在错误诊断中，并终止编译。
+新的改动允许不提供该诊断信息。&lt;/p&gt;
+
+&lt;h4 id=&quot;auto可以用于初始化列表的类型推导&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;可以用于初始化列表的类型推导&lt;/h4&gt;
+&lt;p&gt;C++11通过重用&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;关键字来做自动类型推断，而C++17将其扩充到了初始化列表类型，并要求它符合特定的规则。即&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//decltype(x) = initializer_list&amp;lt;int&amp;gt;:
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//declytpe(y) = initializer_list&amp;lt;int, int&amp;gt;;
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//same as x
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//ill-formed! Not a single element!
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h4 id=&quot;字面量类型扩展&quot;&gt;字面量类型扩展&lt;/h4&gt;
+&lt;p&gt;字面量类型具有很好的声明式风格和良好的可读性，之前的语言标准支持的类型比较有限（比如字符常量、整数、浮点常量），而C++17引入了对其他字符集的支持&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;u8'c-char'&lt;/code&gt;用以支持UTF-8编码的字符常量，其类型依然是&lt;code class=&quot;highlighter-rouge&quot;&gt;char&lt;/code&gt;类型，而其值则是用ISO10646编码的单个字符。&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;u'c-char'&lt;/code&gt;用以支持UCS2编码可以支持２个字节，内部类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;char16_t&lt;/code&gt;,如 &lt;code class=&quot;highlighter-rouge&quot;&gt;u'\U0001f34c'&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;U'c-char'&lt;/code&gt;支持４个字节的UCS4,内部类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;char32_t&lt;/code&gt;,内部用Unicode编码，比如&lt;code class=&quot;highlighter-rouge&quot;&gt;U'猫'&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;浮点类型的常量声明支持了更多可读性更好的格式，下边的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;iostream&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;123.456e-67&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;.1E4&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;       &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;58.&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;4e2&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;会输出四种方式所生命的浮点数字&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.23456e-65
+1000
+58
+400
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;h4 id=&quot;可变长模板参数中的折叠表达式&quot;&gt;可变长模板参数中的折叠表达式&lt;/h4&gt;
+&lt;p&gt;C++11引入了可变长的模板参数，大大简化了模板元编程，而C++17则支持在变长模板参数中使用折叠或归约(函数式编程中的基本范式),
+可以支持从一堆模板参数中，指明第一个而省略其他，也可以指明最后一个省略前边的。这些参数中间可以用操作符来连接，编译器需要自己负责将他们按照既定的规则串联起来。&lt;/p&gt;
+
+&lt;p&gt;比如这个例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+    &lt;span class=&quot;c1&quot;&gt;//op is &amp;amp;&amp;amp;, pack parameters as ..., specified last parameter
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(...&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//expanded as left fold, as 
+// ((true &amp;amp;&amp;amp; true) &amp;amp;&amp;amp; true) &amp;amp;&amp;amp; false = false
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;详细的定义如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pack&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//unary right fold
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//unary left fold
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pack&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//binary right fold
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;init&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;op&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//binary left fold 
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;一个更复杂一点的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;printer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//left fold print
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ 
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;push_back_vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//binary left fold, push back from left to right, init=v
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ 
+&lt;span class=&quot;c1&quot;&gt;// compile-time endianness swap based on http://stackoverflow.com/a/36937049 
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bswap_impl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CHAR_BIT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CHAR_BIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make_unsigned_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bswap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bswap_impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make_index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+ 
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;printer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;abc&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+ 
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;push_back_vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;push_back_vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;' '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+ 
+    &lt;span class=&quot;k&quot;&gt;static_assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bswap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint16_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x1234u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x3412u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static_assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bswap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x0123456789abcdefULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xefcdab8967452301ULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3&gt;#&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;标准程序库&quot;&gt;标准程序库&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id=&quot;stdoptionalt&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::optional&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+
+&lt;h4 id=&quot;stdvarianttypes&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::variant&amp;lt;...Types&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+
+&lt;h2 id=&quot;cppcon2017&quot;&gt;CppCon2017&lt;/h2&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="cpp" /><category term="language" /><category term="fp" /><summary type="html">9月份对于C++社区而言绝对是个令人振奋的收获季节。</summary></entry><entry><title type="html">数据访问与管理技术的演进</title><link href="http://www.skyscribe.me/post/2017/09/24/data-management-evolution/" rel="alternate" type="text/html" title="数据访问与管理技术的演进" /><published>2017-09-24T00:00:00+08:00</published><updated>2017-09-24T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/09/24/data-management-evolution</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/09/24/data-management-evolution/">&lt;p&gt;数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，
+乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，
+无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。&lt;/p&gt;
+
+&lt;!--more--&gt;
+&lt;h2 id=&quot;数据访问管理技术的关键要素&quot;&gt;数据访问、管理技术的关键要素&lt;/h2&gt;
+&lt;p&gt;到目前为止，几乎所有的软件依然是工作在冯诺依曼设定的计算机架构之上,因而从&lt;strong&gt;最微观的粒度看,运算器、控制器、存储设备互相配合&lt;/strong&gt;完成形形色色的任务。
+各色复杂的软件都要在此基础上做更高层次的抽象和封装，才能完成复杂度更高的任务。程序语言、编译器和各种各样的库函数、中间件等则都围绕着该基本模型来处理高层次的领域相关问题。&lt;/p&gt;
+
+&lt;p&gt;由于最底层的硬件要么具有访问速度快但易失性的特点，要么是访问速度慢但可以持续保存很长时间；同时硬件在长时间工作的情况下总会面临各种各样的失败。
+面向业务问题的计算机&lt;strong&gt;软件必须要被仔细设计以隔离上述问题，使得用户觉得失败永远不可能发生&lt;/strong&gt;（或者至少是现实意义上的不会失败）。
+这对数据的访问和管理技术提出了很高的挑战&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;数据容量在需要的情况下能尽可能地大，甚至是可以&lt;strong&gt;按需动态扩展&lt;/strong&gt;；传统上基于单机的数据存储模型被扩展到可以被存储在地理上分散的网络节点&lt;/li&gt;
+  &lt;li&gt;数据访问的延时需要满足特定的场景需求；由于数据可能被存放在不同的设备上，不同的存储设备有不同的访问性能和时延特性&lt;/li&gt;
+  &lt;li&gt;多用户同时访问的一致性：复杂的应用总会允许有逻辑上同时访问数据的需求，如果是访问同样的数据或者相互有逻辑关联的数据，用户不应该得到不一致的数据状态&lt;/li&gt;
+  &lt;li&gt;数据的可靠性：在任何硬件失效的情况下，数据的丢失总是应该被尽量杜绝的&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这些目标、挑战有些是互相矛盾的，因此在现有的技术条件下并没有出现过一种一招通吃的方案，各色各样的技术方案都会在某些方面有所取舍。
+只是在同样的取舍考虑下，优秀的技术能比它的竞争对手们做的更为出色。&lt;/p&gt;
+
+&lt;h2 id=&quot;前关系数据库时期的数据结构和文件方案&quot;&gt;前“关系数据库”时期的数据结构和文件方案&lt;/h2&gt;
+&lt;p&gt;在20世纪70年代关系数据库理论出现之前，软件已经被用于解决很多形形色色的问题了， 这个时期其实并没有专门针对数据管理的特定技术。&lt;/p&gt;
+
+&lt;h3 id=&quot;基于操作系统和基本库的思路&quot;&gt;基于操作系统和基本库的思路&lt;/h3&gt;
+&lt;p&gt;需要管理和访问数据的时候，最基本的方案就是依赖操作系统和编程语言提供的基础设施了。
+这种场景下数据的访问&lt;strong&gt;基本是没有很强的结构化特性&lt;/strong&gt;的，软件的规模也不是太大，因而直接依赖于底层的机制也算够用了。&lt;/p&gt;
+
+&lt;p&gt;数据组织上基本以常用的数据结构为主，从最简单的顺序数组，到稍微复杂一点的链表结构，乃至树形结构、跳表、哈希表等依赖于计算机内部存储（处理器寄存器乃至内存）的高效数据机构。这些数据组织方式特别适合于规模不大的数据管理；
+其优点是数据的访问和存取都比较高效，然而其限制也比较明显，数据量比较大的时候，就必须找数据持久化存储的方法。&lt;/p&gt;
+
+&lt;p&gt;一种最简单的方式是将数据用文件的方式写入到外部存储设备中；然后在需要的时候在从外部设备加载回来。
+数据量超过内部存储容量（或者超出预先分配的空间）的时候，可以用选择性的方式将某些数据换回到外部设备中。&lt;/p&gt;
+
+&lt;h3 id=&quot;问题和挑战&quot;&gt;问题和挑战&lt;/h3&gt;
+&lt;p&gt;带来的挑战是如何选择合适的算法来确定什么时候需要将数据保存到外部存储设备，或者何时需要将数据加载到内存中。
+另外一个难题是如果&lt;strong&gt;存储设备出错了，应该怎样应对这些错误&lt;/strong&gt;?对操作系统和通用的库函数来说，这可是应用程序自己的责任。
+由于应用程序的处理逻辑和数据管理、控制逻辑是放在一起的，这些异常处理和策略选择会使软件的逻辑复杂度大大提高。&lt;/p&gt;
+
+&lt;h4 id=&quot;数据抽象能力和校验&quot;&gt;数据抽象能力和校验&lt;/h4&gt;
+&lt;p&gt;因为操作系统和函数库提供了非常基本的抽象，数据结构之上所承载的数据格式定义，以及数据内容之间的相互关联关系都需要应用程序自己负责维护。
+当有大量类似关系的数据需要在多个地方处理和保存的时候，就会出现明显的代码重复并引入额外的维护想难题。&lt;/p&gt;
+
+&lt;p&gt;一个可行的方案是当程序的规模变得比较大的时候，提供统一的应用层封装库最为基础设施给开发人员使用；
+不足之处是维护这样的&lt;strong&gt;通用基础设施的技术复杂度比一般的上层程序逻辑要复杂&lt;/strong&gt;，需要考虑到很多负责的异常情况并有很强的适应性以匹配各种期望的场景。
+还有一种考虑是可以购买第三方成熟的中间件系统以减小维护成本；不利之处是系统出了问题的时候，仍然需要对所使用的软件有很深入的了解才能快速解决复杂问题；
+尤其当实际场景对安全性或者法律合规方面有比较打顾虑的时候，第三方软件的成熟度可能成为一个极大的问题，
+有时候如果这些第三方软件的设计缺陷没有被及早发现的话，后果可能更加难以承受。&lt;/p&gt;
+
+&lt;h4 id=&quot;存储设备特性和性能考量&quot;&gt;存储设备特性和性能考量&lt;/h4&gt;
+&lt;p&gt;另外一个挑战是当数据容量变得特别巨大的时候，不可避免的需要将存储设备放在不同的物理机器上，
+然后通过网络通信协议的方式（比如NFS）将远端机器上的文件系统挂载在本地机器上；使本地机器以为它是在控制“本地”的文件;
+而微观上所有的操作都是通过一个网络通信通道（socket）加上对应的控制协议和数据搬运协议来完成。&lt;/p&gt;
+
+&lt;p&gt;从寄存器到内存到磁盘再到网络磁盘，数据的容量是越来越大，然而其性能和延迟也急速下降；对CPU寄存器的访问可能几个时钟周期就可以完成（虽然其容量很小），
+对内存的一次读写需要的时间就会达到几十乃至数百倍，访问本地磁盘的延时往往是毫秒级甚至几十毫秒；当文件被用NFS的方式映射到本地的时候，
+一次访问的时间可能在数十毫秒乃至数秒；因为&lt;strong&gt;网络层的封装可能是很厚重的，往往一个简单的操作可能后台需要好几次消息的来回&lt;/strong&gt;才能完成。
+如果网络出现拥堵或者中间设备出现故障，系统行为将变得更加难以预料。&lt;/p&gt;
+
+&lt;p&gt;这些时间上的开销给软件开发带来了诸多挑战 - 长时间的延时（要么是库函数调用要么是系统调用）导致同步调用变得效率底下，甚至抵消了多线程编程带来的便利。
+由于太多阻塞的操作导致处理器使用率底下，更高的吞吐率难以达到，我们不得不借助于异步编程技术来分割应用程序的逻辑。&lt;/p&gt;
+
+&lt;h4 id=&quot;编程模型和协作的挑战&quot;&gt;编程模型和协作的挑战&lt;/h4&gt;
+&lt;p&gt;可惜的是，因为IO行为的差异引发的编程模型的转化是的软件的可维护行大大降低。
+试想一个简单的业务逻辑因为需要访问外部存储设备而被分割成２个任务，丢在２个不同的线程调度器里，通过IO完成的callback事件关联在一起；
+这比基于内存数据的顺序处理逻辑复杂多了。&lt;/p&gt;
+
+&lt;p&gt;虽然函数式编程模型或者Reactor模型可以应对这一设计挑战，但是仅仅因为数据访问的原因而变更熟悉的编程模型并不是在很多场景下都可以被轻易接受；
+毕竟软件开发是依赖于人的集体智力活动。&lt;/p&gt;
+
+&lt;h3 id=&quot;对软件设计和架构的影响&quot;&gt;对软件设计和架构的影响&lt;/h3&gt;
+&lt;p&gt;这些&lt;strong&gt;非功能的属性会极大影响到应用程序的逻辑设计&lt;/strong&gt;；软件设计人员不得不在开发的早期阶段谨慎选择，以免掉入性能不足的漩涡最后不得不重写代码。
+本来软件的抽象是为了解决应用领域的复杂问题，隔离底层的细节，不幸的是&lt;strong&gt;当底层细节的不同影响到了程序整体的行为的时候，这种关注点分离的方式就很难凑效&lt;/strong&gt;。
+尽管有各种各样的限制，在很多复杂度不是很高的场景下，基于操作系统和基础设施的数据管理方案仍然是最直观且最优的选择。
+只要切记在合适的时机依据需求的变化切换到更合适的方案上来即可；要么是变更的成本不大可以直接修改代码完成之，要么是一开始的时候设计好数据访问的隔离，
+才与适配器的模式隔离数据访问部分。&lt;/p&gt;
+
+&lt;h2 id=&quot;基于严格结构化的关系数据库技术sql&quot;&gt;基于严格结构化的关系数据库技术(SQL)&lt;/h2&gt;
+
+&lt;p&gt;关系数据库技术自从上个世纪７０～８０年代诞生以来便得到了业界的青睐；其&lt;strong&gt;清晰的模型和严格的数学理论论证&lt;/strong&gt;深刻地征服了各个主要的IT厂商，
+其采用专门的属于来规范数据的定义和各种功能、非功能属性，学院式的精心设计预先考虑到了各种各样可能出现的问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本机制和思路&quot;&gt;基本机制和思路&lt;/h3&gt;
+&lt;p&gt;关系数据库理论采用结构化的方式定义数据，严格的区分数据定义、处理的范围和边界。
+数据库管理系统作为专门的软件系统隔离了数据的定义、操作；应用程序通过预先定义的接口JDBC/ODBC等接口访问数据库系统。&lt;/p&gt;
+
+&lt;h4 id=&quot;数据定义&quot;&gt;数据定义&lt;/h4&gt;
+&lt;p&gt;数据的&lt;strong&gt;结构抽象用schema来表述，逻辑上所有的数据都是满足给定schema的二维表&lt;/strong&gt;，每一行是一条记录；所有的记录都具有相同的列。
+每一行数据的相同列具有相同的定义和约束；每一行数据中的某些列作为访问的关键列（称为键）。这些列有些可以为空有些则必须不能为空。
+对数据的访问则以行为单位，可以进行增加、删除、修改等变更性操作和根据某些条件进行查询。
+&lt;strong&gt;数据的完整性校验可以通过在数据发生变更的时候依靠数据库系统软件的自动检查&lt;/strong&gt;来完成。&lt;/p&gt;
+
+&lt;p&gt;数据表之间可以有丰富多样的相互关联(通过主键、外键设置)，从而支持在查询的时候跨越多个表进行复杂的检索。
+为了便于应用逻辑处理，关系数据库系统还提供了虚拟的表（称之为视图），这些虚拟的表结构可以基于底层实际的”物理记录表”信息的变化而自动更新；
+触发器则支持设置类似于应用程序指定的“自动操作”，当对应的数据被更新的时候，触发器会被自动运行。&lt;/p&gt;
+
+&lt;p&gt;通常情况下，复杂的业务数据&lt;strong&gt;可以依据不同的范围来隔离&lt;/strong&gt;，可以放在不同的数据库中，也可以放在同一个数据库的不同数据表中。
+多个数据表之间的逻辑关联关系用关系代数来描述，一般不同的数据表之间有相对的关联，
+比如某个表的某一列也出现在另外一个表中作为另外一个表的主键，这样查询的时候，可以将两个表联合起来提供单个表不能提供的丰富信息。&lt;/p&gt;
+
+&lt;p&gt;数据表之间的关系用数据库范式来描述，严格的关系数据库理论定义了多种关系范式，用以描述信息的冗余度、结构化程度；不同的范式可以大概表征数据一致性的维护难度。
+&lt;strong&gt;复杂的范式往往也会带来性能开销和处理复杂度&lt;/strong&gt;，因此商业的应用程序中一般出于性能考虑不会采用很高的范式。&lt;/p&gt;
+
+&lt;h4 id=&quot;数据查询和sql语言&quot;&gt;数据查询和SQL语言&lt;/h4&gt;
+&lt;p&gt;关系数据库系统一个最引人注目的特性是提供了一个关于数据定义的结构化模型和&lt;strong&gt;接近于自然语言的领域特定语言SQL&lt;/strong&gt;，并将其和关系代数理论紧密结合在一起。
+SQL语言采用了类似于英语的语法，以数据查询为中心同时兼顾增加、删除和修改操作，
+并支持对数据集的聚集、归并、分类、排序等常见的操作，实现了对数据管理和访问的细节隔离，使得&lt;strong&gt;应用程序仅仅需要关注于数据操作的意图&lt;/strong&gt;即可。&lt;/p&gt;
+
+&lt;p&gt;SQL是面向数据操纵和访问用户的接口语言，数据库管理系统可以优化用户提供的SQL查询，转换成性能最好的内部实现。
+这也是DSL的好处，整个数据库管理系统&lt;strong&gt;通过精心定义的查询语言将接口和实现分离&lt;/strong&gt;开；应用程序可以专注于业务逻辑的实现，而数据库关系系统可以专注于数据的管理和维护。
+这也是计算机科学一直采用的基本的分而治之的思路－分割问题领域，然后在各个击破之。
+从这个意义上来说，关系数据库系统提供了&lt;strong&gt;良好的抽象和职责分离&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;查询优化和索引&quot;&gt;查询优化和索引&lt;/h4&gt;
+&lt;p&gt;由于商业数据库的数据往往数据量非常大，可能被保存很长时间，因此大部分时候，绝大部分数据都是被保存在磁盘中（甚至是网络磁盘）并在需要的时候读取进来加载进内存中给用户使用。大部分时候，用户的查询操作比修改操作要多得多，因此查询的性能是至关重要的。&lt;/p&gt;
+
+&lt;p&gt;虽然数据很多，但是&lt;strong&gt;某个时候用户需要访问的可能只是一小部分数据，怎样快速地检索&lt;/strong&gt;到对应的数据并提供给用户就变得至关重要。
+关系数据库系统一般是通过在数据表上建立索引表来实现的，同时基于成熟的B+数数据结构，保证经过少数几次的磁盘IO读写操作就可以定位到具体的数据记录存储快，然后将对应的块读出操作系统内存中去。
+这也潜在的要求数据库系统组织&lt;strong&gt;数据存储的时候，需要按照记录块的方式&lt;/strong&gt;将其存储在外部设备中；并最好和操作系统的虚拟内存所支持的页面大小保持对齐，尽可能减少磁盘的读写次数和寻道时间。&lt;/p&gt;
+
+&lt;p&gt;当数据量特别大以至于简单的索引表也无法加载进内存的时候，可能需要建立多级索引结构，用一个新的结构指向某一部分数据的索引表在磁盘上存储的位置；而只是将最顶层的索引表放在内存中。
+查询的时候，则需要先通过一级索引找到对应小范围数据记录对应的索引的存储位置，通过一次额外的磁盘操作加载二级索引，然后通过二级索引的数检索操作，找到对应的数据块的物理位置。&lt;/p&gt;
+
+&lt;p&gt;实际情况下，往往通过少数几次的IO操作（通过B+树的算法保证）便可定位到实际的数据并将其加载入内存中，减少慢速IO对性能的不利影响。&lt;/p&gt;
+
+&lt;h4 id=&quot;事务及acid属性&quot;&gt;事务及ACID属性&lt;/h4&gt;
+&lt;p&gt;作为数据的访问接口，SQL定义了复杂的查询接口以适应复杂的数据访问、管理需求；然而深入到最底层，细粒度的数据访问仍然要落实到二维数据表的某一个行记录上。
+由于这些单一的行是操作的最小粒度，数据库处理系统必须要保证对记录的访问在外部用户看来总是处于合理的状态。&lt;/p&gt;
+
+&lt;p&gt;譬如一个用户打算修改某记录的一个列值，而另外一个用户可能同时打算删除该记录，那么&lt;strong&gt;两个用户可能是并行在使用数据库&lt;/strong&gt;，数据库系统必须保证两者的操作返回之后，数据库系统人然处于一个自然的状态；
+要么某个用户操作成功返回修改生效，另外一个用户得到失败的反馈，要么２者都失败需要某一方尝试重试，要么数据库系统在内部实现某种机制保证至少一个成功一个失败。
+当实际操作的SQL语句牵扯到多个数据表操作的时候，一致性保证将变得更为困难。因为从并发控制的角度来看，只要牵扯到同一个数据的读写，既要保证读到的数据不能是中间状态，也要保证写入之后数据库中的状态需要恰好是刚刚写入的值。&lt;/p&gt;
+
+&lt;p&gt;关系数据库系统&lt;strong&gt;用事务作为数据操作的基本单元的抽象&lt;/strong&gt;，一个事务用来封装一次对数据库的操作；关系数据库系统用内部机制保证事物操作满足四个基本的属性&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;原子性(Atomicy)：事务操作必须像是在一个最基本的操作中完成的，执行过程中不会被另外一个打断&lt;/li&gt;
+  &lt;li&gt;一致性(Consistency)：一个事务被提交执行前后，数据库系统中所有的相关数据仍然处于一致性的状态，要么数据被按照事务期望的方式被修改（事务被执行），要么完全保持原样（事务撤销）&lt;/li&gt;
+  &lt;li&gt;隔离性(Isolation)：各个事务的执行和调度对应用程序是不可见的；从事务提交者的角度来看，好像就他自己在使用数据库系统&lt;/li&gt;
+  &lt;li&gt;持久性(Durablility)：事务操作的结果是持久有效的，即使是发生了故障或者重启，已经发生的修改必须被永久保存下去；不允许数据丢失情况的发生。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;ACID是关系数据库系统的基本特征，甚至于不支持ACID特性的数据库软件都不被认为是关系数据库软件；它被各大数据库厂商广泛地支持和实现。&lt;/p&gt;
+
+&lt;h3 id=&quot;问题和挑战-1&quot;&gt;问题和挑战&lt;/h3&gt;
+
+&lt;p&gt;ACID里边&lt;strong&gt;最为关键和复杂的就是一致性和持久性&lt;/strong&gt;，尤其是当数据库系统的访问可能来自与网络的时候，由于延时的增加以及不可预期的复杂事务可能被远程调度执行，如何&lt;strong&gt;高效、公平地实现事务的一致性控制&lt;/strong&gt;，又不引起性能的急剧恶化是个巨大的挑战。
+从数据持久性角度来看，数据库系统作为一个应用软件本身是运行在操作系统的用户空间，而真正将数据的更新落地到非易失性存储设备需要经历上层的IO调度到操作系统内核空间的控制和数据搬运，操作系统内核的实现和磁盘驱动的读写等等一系列异步操作，
+数据库系统需要始终保证&lt;strong&gt;任何一个环节出错，数据总是能恢复到正确的状态&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;为了实现这些复杂特性，很多数据库厂商（譬如Oracle）会通过修改操作系统驱动甚至内核等方式在可用性和性能之间进行折中。
+同时为了提高可用性并兼顾性能，某些数据库系统会&lt;strong&gt;要求有非常好的单机性能&lt;/strong&gt;，使用具有高级特性的磁盘存储设备等。&lt;/p&gt;
+
+&lt;h4 id=&quot;和面行对象软件系统的集成难题&quot;&gt;和面行对象软件系统的集成难题&lt;/h4&gt;
+&lt;p&gt;关系数据库理论早于面向对象技术出现，然而软件开发领域内面向对象技术则在80~90年代迅速席卷了行业的大部分角落。
+应用程序上层用面向对象技术写成的特点注定了当它需要去访问数据的时候，&lt;strong&gt;中间提供隔离的层次需要协调两者模型上的不一致&lt;/strong&gt;：
+面向对象技术组织数据操作的方式是通过继承、封装和多态来提供抽象能力，而数据库技术的组合方式是基于SQL查询。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Object-relational_mapping&quot;&gt;ORM技术&lt;/a&gt;被发明出来用以实现传统的&lt;a href=&quot;https://www.martinfowler.com/books/eaa.html&quot;&gt;企业应用架构&lt;/a&gt;中的对象和关系模型的映射，虽然&lt;strong&gt;有一些复杂的框架技术来缓解这一难题&lt;/strong&gt;，总归是显得复杂而臃肿。
+好在Java语言用类型注解的方式提供了相对优雅的解决方案，从而通过少数几行代码就可以注入约束和检查，大大减小了数据访问层的负担。&lt;/p&gt;
+
+&lt;h4 id=&quot;扩展性的挑战&quot;&gt;扩展性的挑战&lt;/h4&gt;
+&lt;p&gt;由于商业数据库有很大的数据需要存储和使用，当系统需要动态扩展以支持更多的业务量的时候，&lt;strong&gt;单实例、中心化的数据库系统往往能为扩展性的瓶颈&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;维护数据一致性的代价越来越大，因为分布式数据库系统的扩展和优化需要面对&lt;a href=&quot;http://robertgreiner.com/2014/08/cap-theorem-revisited/&quot;&gt;CAP理论&lt;/a&gt;的限制：要么保证可用性牺牲一致性，要么保证一致性牺牲可用性。
+当有２个并发的用户访问数据库系统的时候，既保证数据的一致性，又保存高度的可用性会成为巨大的挑战,即如下的情况，在没有异常发生的时候N1的更新很容易通过网络同步、复制的方式被N2看到&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-1.png&quot; alt=&quot;normal case&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;当网络发生异常的时候，就会出现不一致&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-2.png&quot; alt=&quot;network failure&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;网络分割是无法妥协的，因为没有足够强大的机器来维持足够好的单机器性能;分布式应用基本无法在实际中妥协了。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;No set of failures less than total network failure is allowed to cause the system to respond incorrectly.&lt;/p&gt;
+
+  &lt;p&gt;— &lt;a href=&quot;http://www.julianbrowne.com/article/viewer/brewers-cap-theorem&quot;&gt;Partition Tolerance as defined by Gilbert &amp;amp; Lynn&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;类似于两阶段提交算法等分布式事务(2PC)处理机制从理论的角度看起来很美好，实际应用中却因为性能过于低下而被束之高阁。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;成本和投入产出比&lt;/strong&gt;也是需要考虑的显示因素，因为传统的关系数据库系统需要强大的专有硬件（如磁盘RAID、EMC专业存储方案）来保证较高的可靠性和可用性。
+在互联网技术日益发展深入的背景下，企业需要尽量控制IT支撑环境的成本，并快速部署给用户，并&lt;strong&gt;需要技术架构和实现能随着业务量的增加而快速演进&lt;/strong&gt;，传统的将数据库作为独立中间件部署的方式因为太厚重而慢慢被边缘化了。&lt;/p&gt;
+
+&lt;h2 id=&quot;非结构化数据和nosql技术&quot;&gt;非结构化数据和NoSQL技术&lt;/h2&gt;
+&lt;p&gt;21世纪头十年互联网技术的严谨为提非结构化数据(即键值数据库系统)蓬勃发展的土壤。从关系数据库理论的角度来看，没有提供ACID支持的数据库甚至都不叫数据库系统；
+然而新世纪IT技术对越来越多行业的深入改造带来了数量巨大的数据；而很多数据并不是天然具有很强的结构化特性；将他们强赛进关系数据库系统中会带来臃肿的设计、复杂的模型以及地下的性能。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本思路&quot;&gt;基本思路&lt;/h3&gt;
+&lt;p&gt;NoSQL技术从简化数据管理的角度来解决这一难题：一方面我们有大量的数据需要存储，这些数据之间没有非常强的相互关联；另外一方面对这些数据的访问可能有很高的并发需求和扩展性需求。
+&lt;strong&gt;既然关系数据库提供的东西远远多于实际需要的，何不将这些复杂的功能向上移动到应用程序问题域&lt;/strong&gt;内？
+这样数据库系统仅仅需要管理没太多逻辑结构的数据，并提供足够好的并发访问性能、可扩展性、可靠性；而将怎样使用数据交给应用程序去处理？
+毕竟最了解数据使用场景的还是上层应用程序。&lt;/p&gt;
+
+&lt;h3 id=&quot;数据管理特性和元数据&quot;&gt;数据管理特性和元数据&lt;/h3&gt;
+&lt;p&gt;NoSQL其实不是一类技术的统称，而是不采用强结构化形式管理数据的一大堆数据管理技术的集合。
+不同的方案提供不同的技术实现，并呈现出不同的特性；从简单的基于纯粹Key-Value对的大数据集合到能够提供一些稍微复杂一点的如关联映射、集合类型的多类型数据管理系统3（典型如Redis），
+乃至提供一些比较复杂的&lt;a href=&quot;https://en.wikipedia.org/wiki/Document-oriented_database&quot;&gt;面向文档&lt;/a&gt;的数据结构（相比SQL可以认为是半结构化）以及较强检索能力的中间型数据库（典型的如MongoDB提供了复杂的json互操作特性);总体上可谓是&lt;a href=&quot;https://en.wikipedia.org/wiki/NoSQL#Types_and_examples_of_NoSQL_databases&quot;&gt;百花齐放&lt;/a&gt;，各有千秋。&lt;/p&gt;
+
+&lt;h3 id=&quot;亮点&quot;&gt;亮点&lt;/h3&gt;
+&lt;p&gt;大部分NoSQL技术都提供了很高的性能和强大的集群管理能力，其处理能力想对于传统的关系数据库有很大的提升。
+之所以如此，是因为它从技术上打破了传统SQL要求的复杂限制，专注于自身特定的数据定义模型和特点，有针对性地最大化使用计算机硬件。&lt;/p&gt;
+
+&lt;p&gt;同时大部分NoSQL技术设计的时候就考虑到了可能出错的情况，不再假设底层的硬件本身具有很高的性能，而是通过自身软件的设计达到较高的可用性和可靠度。譬如Redis本身常常被作为缓存系统使用，而其自身的持久化机制在合理配置的情况下，可以保证数据在１秒内内一定会被写入磁盘，从而尽可能减少数据丢失。&lt;/p&gt;
+
+&lt;h3 id=&quot;nosql的折中&quot;&gt;NoSQL的折中&lt;/h3&gt;
+&lt;p&gt;基于纯粹的KV关系的数据库系统对数据的具体结构接近与一无所知；从应用程序的角度看，它似乎仅仅是提供了数据操作层面的虚拟关联表。
+其好处是很容易达到很高的性能，但不足之处是，应用程序&lt;strong&gt;如何合理地管理键的模式&lt;/strong&gt;是一个比较打的挑战。&lt;/p&gt;
+
+&lt;p&gt;提供复杂结构的NoSQL的好处是应用层程序的负担比较小，因为一些常见的结构化操作已经有了不错的支持，可以直接调用即可。
+美中不足的是，这样的方案的性能往往也不是那么好，优化起来也会比较困难，因为数据的存储管理也相对比较复杂，如MongoDB采用树结构来保存数据，不深入其底层实现做针对性的优化就比较困难一些。&lt;/p&gt;
+
+&lt;h3 id=&quot;挑战&quot;&gt;挑战&lt;/h3&gt;
+&lt;p&gt;NoSQL自然也不是银弹，它也有它自己的问题需要应对；尤其是当它的用户企图将具有很强结构化特征的数据塞进去的时候：应用程序用来维护这些数据之间的关联关系就会变得异常复杂。&lt;/p&gt;
+
+&lt;p&gt;另外一个比较麻烦的事情&lt;strong&gt;是NoSQL的不同提供者具有不同的特性&lt;/strong&gt;，应用程序想从一种切换到另外一种就远远没有传统的SQL来的方便;很可能你需要某个数据库的高级特性在另外一个数据库中就不存在了。
+这也是&lt;strong&gt;缺乏类似于SQL语言这类DSL的不足&lt;/strong&gt;;比如Redis定义了类似通配符的模糊查询键值的方式，并提供了类似于一个Key关联多个属性的数据控制原语；换到MongoDB上我们就需要不同的方式来解决类似的问题。&lt;/p&gt;
+
+&lt;p&gt;这些复杂的数据操作可能在应用程序层面来看又比较常见和繁琐，以至于使用&lt;strong&gt;纯粹的NoSQL会让人产生退回到SQL出现之前的混沌时代的错觉&lt;/strong&gt;！这当然也不是NoSQL的错，因为从来就没有银弹；合适的方案才是最好的；而怎样决定什么样的方案才是最好的？
+当然是需要一句具体的业务场景来确定了。&lt;/p&gt;
+
+&lt;h3 id=&quot;base理论&quot;&gt;BASE理论&lt;/h3&gt;
+&lt;p&gt;NoSQL解决&lt;a href=&quot;https://www.cs.cornell.edu/Projects/mrc/IEEE-CAP.16.pdf&quot;&gt;数据一致性和高可用的CAP矛盾&lt;/a&gt;的方案是所谓的&lt;a href=&quot;http://www.dataversity.net/acid-vs-base-the-shifting-ph-of-database-transaction-processing/&quot;&gt;BASE方法&lt;/a&gt;，它常常被错误的想象为是ACID的对立面&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;基本可用而不是高可用(Base Availability) 强调数据库系统并不总是返回高度可用的数据，某些情况下可能出错或者不返回，或者返回不一致的数据；应用程序比系显式地处理这些情况&lt;/li&gt;
+  &lt;li&gt;弱状态或不稳定状态（Soft state)表明数据的状态可能在不断发生变化，以至于传统关系数据库的这种事务回滚或者提交的状态则不复存在。这些都是为了应对最终一致性的目标。&lt;/li&gt;
+  &lt;li&gt;最终一致性约束(Evenutal consistency)保证数据的更新经过一段时间的处理在没有后续输入的情况下可以达到一致状态；但是中间的不一致性状态仍然对应用程序是可见的。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;基本上&lt;strong&gt;这些特性都是为最终一致性服务的&lt;/strong&gt;；数据库系统不再强制保证很强的一致性，而是由应用程序本身负责中间不一致状态的处理。
+好处是性能可以得到极大提高，因为数据库系统不需要采用很复杂的策略来保证每一项数据的高度可靠和一致，没有复杂的同步、锁策略，开销自然少；
+不利之处是应用程序需要仔细处理失败的情况，这在很多时候也是一个公平的折中，因为最了解数据特性的毕竟是上层程序本身。&lt;/p&gt;
+
+&lt;h2 id=&quot;微服务架构下的数据演进和newsql&quot;&gt;微服务架构下的数据演进和NewSQL&lt;/h2&gt;
+&lt;p&gt;随着云计算技术的深入发展和容器技术的广泛应用，微服务风格的架构技术变得愈发流行起来。
+按照微服务设计的思路，传统的分层、单体、集中式的架构方式被&lt;strong&gt;分布式去中心化、按照业务领域分隔&lt;/strong&gt;以及轻量级的接口为特征的架构方式所取代。
+同时鉴于以上这些NoSQL技术的种种不足并不能一招通吃，&lt;strong&gt;传统的SQL技术又被人们重新重视起来使用在合适的场景&lt;/strong&gt;中；
+在一个一个具体的服务内部，SQL所定义的查询语言作为完美的数据操作接口仍然有极大的魅力，我们依然可以继续享用它而不需要因为复杂的数据操作而增加应用程序的逻辑复杂度。&lt;/p&gt;
+
+&lt;p&gt;最显著的不同在于，服务是较为细粒度的、以业务逻辑功能为核心的一个一个小的独立的进程。&lt;strong&gt;数据也会根据此思路进行分割管理&lt;/strong&gt;，而不再统一的放在一个大的数据库中。
+从整个系统的角度看，数据的交换和同步是通过服务之间的协议接口进行的，因而这些协议要求必须是轻量级的，以减少数据序列化、反序列化的开销。
+因为&lt;strong&gt;微服务的高可用是通过同时运行多个副本外加负载均衡等分布式技术&lt;/strong&gt;来实现的，服务之间的耦合必须是很松散的；分布式一致性的问题采用的依然是最终一致性的思路。&lt;/p&gt;
+
+&lt;p&gt;这种新的结合了传统SQL接口来管理本地数据，用部分NoSQL思路来处理系统一致性的方式又被成为NewSQL,甚至于NoSQL又被重新宣称为是Not Only SQL的缩略词。
+显然在计算机科学领域，从来就没有一招打遍天下的技术，数据管理领域也不外如是。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;There is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.&lt;/p&gt;
+
+  &lt;p&gt;– Fred Books, 1986&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;业界因为商业、宣传等各种原因，会在某个技术刚刚崭露头角的时候宣称可以包治百病(否则也不会引人注意得到发展)；
+经过比较长时间的洗礼&lt;strong&gt;最终会回到其本源应用到其最合适的场合&lt;/strong&gt;，而怎样鉴别什么样的场合使用什么样的技术，依然是软件开发者、架构师最大的挑战之一。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="database" /><category term="microservice" /><summary type="html">数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用， 乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题， 无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。</summary></entry><entry><title type="html">架构服务化的一点思考</title><link href="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/" rel="alternate" type="text/html" title="架构服务化的一点思考" /><published>2017-08-29T00:00:00+08:00</published><updated>2017-08-29T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/29/thinking-on-service-architecture/">&lt;p&gt;微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；
+似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。
 本文试图对这些概念和架构思想做一简单的分析和梳理。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;T.B.D.&lt;/p&gt;
+&lt;h2 id=&quot;服务架构的前世今生&quot;&gt;服务架构的前世今生&lt;/h2&gt;
+&lt;p&gt;考虑到微服务其实仍然是基于服务的架构方式，既然有“微”则必然有“宏”与之对应;只是之前大家都是直接叫基于服务的架构而已。&lt;/p&gt;
 
-&lt;h2 id=&quot;微服务之前有什么&quot;&gt;微服务之前有什么&lt;/h2&gt;
+&lt;h3 id=&quot;没有服务的架构&quot;&gt;没有服务的架构&lt;/h3&gt;
+&lt;p&gt;在软件工程的早期洪荒时代，所有的软件都是按照最原始的模块化思路组织和开发的;那时候编程语言基本是C/C++的，各个子部分之间采用头文件的方式来模拟相互之间的接口，源代码文件作为实现之间的隔离。
+这种情况下，各个逻辑&lt;strong&gt;子部分的约束基本是比较弱的&lt;/strong&gt;，要么是依赖于组织内部的约定，要么是依赖于一些比较hack的方式。
+这种方式可以认为是基于内部API和调用约定的无服务的架构方式。应用程序要么是独立组织的，要么是通过API定义好接口，然后各个模块分别开发，再统一连接起来形成最终的可执行程序。&lt;/p&gt;
 
-&lt;h2 id=&quot;微服务和soa是什么关系&quot;&gt;微服务和SOA是什么关系&lt;/h2&gt;
+&lt;p&gt;这么做的弊端非常明显，因为接口的定义极大地影响系统集成的效率，以至于各个模块独立开发的时候没什么问题，一旦到了集成阶段则困难重重，迟迟不能发布出来。
+个人觉得这个问题的本质在于，&lt;strong&gt;完美的API定义是非常困难的&lt;/strong&gt;，需要极高的技术能力和对问题业务领域的深刻分析。&lt;/p&gt;
+
+&lt;h3 id=&quot;unix编程哲学&quot;&gt;Unix编程哲学&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_philosophy&quot;&gt;Unix哲学&lt;/a&gt;倡导如下的核心实践如下&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Write programs that do one thing and do it well.&lt;/li&gt;
+    &lt;li&gt;Write programs to work together.&lt;/li&gt;
+    &lt;li&gt;Write programs to handle text streams, because that is a universal interface.&lt;/li&gt;
+  &lt;/ol&gt;
+
+  &lt;p&gt;–Mcllory, inventor of Unix pipe&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;它推崇用多进程和管道的方式开发复杂应用，每个小程序负责一件事儿，进程之间采用管道链接输入和输出。
+由于程序之间的输入和输出缺乏统一的规范化，&lt;strong&gt;Unix哲学推荐用基于文本的进程间接口&lt;/strong&gt;来组织程序，以便调试和分析、诊断等。&lt;/p&gt;
+
+&lt;p&gt;美中不足的是，它对于&lt;strong&gt;具体怎么实践这些基于文本的接口&lt;/strong&gt;却没有统一的建议或规定，文本格式却是需要被程序去理解的，其中应该包含这负责的业务逻辑而不是简单的计算机字符串，简单按照这种设计哲学去开发应用程序依然是困难重重。&lt;/p&gt;
+
+&lt;p&gt;另外一个难题是，Unix程序都假设是基于单个物理机器的运行环境，因为早期的Unix都是大型机，它无法预料到后期廉价PC的崛起。
+各种围绕本地IPC机制设计的管道、系统信号等通信方式和TCP/IP的网络环境有很大的差异，导致代码并不能很好的复用。&lt;/p&gt;
+
+&lt;p&gt;然而Unix设计哲学所推荐的这种&lt;strong&gt;系统职责分割方式和基于文本的协议交互对后来的微服务有巨大的影响&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;分布式对象技术&quot;&gt;分布式对象技术&lt;/h3&gt;
+&lt;p&gt;90年代后期，微软提出了组件化开发的COM以及DCOM开发模型，使用接口来达到软件复用，最终程序通过接口定义和动态链接和查找实现分布式开发。
+而Java社区则走向了分布式对象的模式，提出了JavaEE并和C++社区的CORBA对象代理技术兼容。
+这种情况下，对象分布式技术的着眼点是基于OOA分析的划分。&lt;/p&gt;
+
+&lt;h3 id=&quot;soa架构&quot;&gt;SOA架构&lt;/h3&gt;
+
+&lt;p&gt;JavaEE提出也提出了基于服务的架构方式，它在很多场合也往往被成为&lt;strong&gt;Big Web Service&lt;/strong&gt;,其典型特征如下&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;复杂的系统被分割为一个一个相互通信的接口&lt;/li&gt;
+  &lt;li&gt;使用WSDL来定义服务和服务之间的接口的通信&lt;/li&gt;
+  &lt;li&gt;该&lt;strong&gt;通信方式是基于HTTP+XML+SOAP封装&lt;/strong&gt;，消息模型为&lt;strong&gt;基于请求/响应&lt;/strong&gt;的RPC模型，其中定义了消息通信的消息结构和通信端点抽象;
+支持通过工具将WSDL转换为对应的代码，简化接口编码、解码的工作量&lt;/li&gt;
+  &lt;li&gt;高级特性支持安全、服务注册和发现，以及多版本向后兼容等&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;SOA极大地提高了企业应用开发的效率，采用SOA架构的软件曾被认为是面向未来的，当时的业界对SOA的期望一如今天对微服务的期许。&lt;/p&gt;
+
+&lt;p&gt;它的&lt;strong&gt;缺陷在于过于笨重&lt;/strong&gt;，部分原因在于XML本身的臃肿和复杂;实际场景中可能用于XML/SOAP解析和校验的开销变得过于巨大以至于性能很糟糕。
+XML过于臃肿的特性导致大家追求通过压缩消息来节省网络带宽以优化性能，然而压缩和解压反而需要消耗额外的CPU资源。
+另一部分则是因为JAX-WS规范的一些高级特性是可选的，而&lt;strong&gt;某些特性是由跳过了HTTP协议直接在SOAP中实现&lt;/strong&gt;的;然而HTTP协议本身也提供了丰富的特性，弃之不用自然会导致资源的浪费。&lt;/p&gt;
+
+&lt;p&gt;此外基于RPC的通信方式并不是在所有方式下都适合，因为其隐含的模型是同步的请求、响应;实际的业务逻辑都直接定义在这些接口中，造成&lt;strong&gt;业务逻辑和接口直接产生了依赖&lt;/strong&gt;。如果频繁的因为需求变动导致WSDL接口定义变更，后向兼容又会变成一个沉重的负担。当然这个也是基于服务的方式必须要面对的问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;web技术的发展和restful架构风格&quot;&gt;WEB技术的发展和RESTful架构风格&lt;/h3&gt;
+&lt;p&gt;WEB技术在最近20年也经历了深刻的发展，从基于B/S模型的厚后端模型为起点，到基于Ajax（XML）技术的风靡一时，再到REST风格的以资源为中心的厚客户端模型，越来越多的业务逻辑被搬到了前端处理，MVC模型最终占据了大部分应用场景。&lt;/p&gt;
+
+&lt;p&gt;RESTful风格的架构强调使用HTTP协议本身的语义模型，用HTTP的方法来描述资源的CRUD操作，用URL来规范操作的资源，
+接口定义上&lt;strong&gt;采用资源为中心的方式有效地减小了和业务流处理的耦合&lt;/strong&gt;，相比传统的RPC方式相比，前后段的交互方式与业务流程的耦合更小，更有利于前后段独立发展。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域驱动开发&quot;&gt;领域驱动开发&lt;/h3&gt;
+&lt;p&gt;Eric Evans通过他划时代的《领域驱动设计》一书将面向对象技术推向了新的深度;通过提倡业务统一语言，领域对象的识别和绑定上下文的分析等技术，
+实现了&lt;strong&gt;软件架构能更好地随着业务的的变更而低成本的演进&lt;/strong&gt;这一需求。
+恰当的领域职责划分，以及领域专家和软件技术专家的通力合作和互相理解更容易生产出可维护、易扩展、更容易拥抱实际商业环境变化的系统。&lt;/p&gt;
+
+&lt;h3 id=&quot;软件开发方法学和云计算基础设施革命&quot;&gt;软件开发方法学和云计算基础设施革命&lt;/h3&gt;
+&lt;p&gt;敏捷软件开发和持续集成等实践在过去的近20年几乎席卷了软件开发领域的大部分角落。
+&lt;strong&gt;持续发布以及DevOps运动&lt;/strong&gt;则进一步减小了软件开发的反馈周期，深刻地改变了大部分传统软件测试人员的工作方式和线上运维的成本结构。&lt;/p&gt;
+
+&lt;p&gt;传统的先设计，再编码内部测试，最后再搞一个旷日持久的大集成及系统测试的开发模式再也不能适应追求快速响应的企业软件市场。
+&lt;strong&gt;更快的设计、测试、发布上线速度&lt;/strong&gt;，成为影响企业成败的一个关键因素之一。&lt;/p&gt;
+
+&lt;p&gt;云计算技术的日趋成熟将企业开发从传统厚重的基础设施维护工作中解放了出来。
+以往那种设计实现一个企业应用系统需要考虑诸多服务器部署、存储、安全、运营维护等一系列复杂的底层细节被少数提供云服务的大公司统一按需提供和管理;
+商业公司可以将研发精力聚焦在业务逻辑的部分更快地将产品推向市场，这也是&lt;strong&gt;社会分工更加深化&lt;/strong&gt;的结果。
+容器技术（docker为代表）的飞速发展和原生云应用软件概念在不损失性能的情况下标准化了基础设施的管理和编排，极大地简化了中间件以及第三方组件的复用过程。&lt;/p&gt;
+
+&lt;h2 id=&quot;站在巨人肩上的微服务&quot;&gt;站在巨人肩上的微服务&lt;/h2&gt;
+&lt;p&gt;从某些方面看，微服务架构可谓是站在巨人的肩上诞生的新的弄潮儿;
+它是在面向对象深入发展到领域驱动设计的基础上，随着WEB技术的深度发展和RESTful的日益流行而自然产生的。其特点和要求如下&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;采用&lt;strong&gt;业务领域特点来划分服务边界&lt;/strong&gt;，其基本思路是DDD的&lt;/li&gt;
+  &lt;li&gt;服务的&lt;strong&gt;粒度要尽量的小&lt;/strong&gt;，符合Unix的编程哲学，每个服务只做一件事并将其做好;有的建议是一个服务最好能被一个小的开发团队（比如Scrum的5～7人模型）负责分析、设计、开发、测试、发布等所有工作。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;每个服务是一个进程&lt;/strong&gt;，对外提供基于RESTful风格的HTTP服务（也有基于Protobuf的gRPC微服务框架）&lt;/li&gt;
+  &lt;li&gt;服务接口提供多个版本，每个服务负责自己的向后兼容性，方便&lt;strong&gt;独立开发和部署&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;服务的&lt;strong&gt;设计本身需要预先考虑到可能的错误&lt;/strong&gt;情况，从设计的角度需要预料到错误发生是一种正常情况&lt;/li&gt;
+  &lt;li&gt;服务本身需要&lt;strong&gt;无状态，便于扩展&lt;/strong&gt;;需要预料到服务示例可能有多个副本同时在运行&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一些隐含的假设还有&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;添加新服务的代价很低&lt;/strong&gt;，往往数小时之多数天就可以添加一个新的服务并能和现有系统集成在一起&lt;/li&gt;
+  &lt;li&gt;服务的拆分需要和业务模型、领域划分想匹配;软件技术专家和业务领域专家能够紧密合作，快速变更;这是领域驱动开发的预设条件之一&lt;/li&gt;
+  &lt;li&gt;采用敏捷开发技术和&lt;strong&gt;团队最熟悉的编程语言、框架及技术栈&lt;/strong&gt;，但是也不宜过多;否则团队的合作又会变得难以掌控&lt;/li&gt;
+  &lt;li&gt;组织开发结构和服务的拆分能互相匹配，减小组织沟通成本，最好是组建跨职能的团队;这也是由康威定律所决定的&lt;/li&gt;
+  &lt;li&gt;采用服务发现和监控机制，以及负载均衡设施便于处理分布式应用场景，业务流的追踪和监控也会是新的挑战（想对于传统架构）&lt;/li&gt;
+  &lt;li&gt;基于容器技术&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h2 id=&quot;微服务是银弹吗&quot;&gt;微服务是“银弹”吗&lt;/h2&gt;
+&lt;p&gt;正如Fred Brooks在1986年所语言的那样，软件开发从来没有出现一个满盘通吃的银弹;
+虽然Brooks只是比较保守地估计了其后十年的情况，然而最近30年的行业发展依然没有见证银弹的出现。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;there is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.&lt;/p&gt;
 
-&lt;h2 id=&quot;微服务适合那些人组织&quot;&gt;微服务适合那些人、组织&lt;/h2&gt;
+  &lt;p&gt;– Fred Brooks, 1986&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;h2 id=&quot;微服务与云计算&quot;&gt;微服务与云计算&lt;/h2&gt;
+&lt;p&gt;不少人满怀希望的认为微服务会打破常规，变成大家梦寐以求的神器，然而我们也见证了太多类似这种预言的屡次落空。
+目前业内主流的观点依然是，微服务不是银弹;企业仍然需要谨慎地依据实际场景谨慎选择使用。&lt;/p&gt;
 
-&lt;h2 id=&quot;未来的方向&quot;&gt;未来的方向&lt;/h2&gt;
+&lt;h3 id=&quot;先决条件&quot;&gt;先决条件&lt;/h3&gt;
+&lt;p&gt;微服务的实施有很多先决条件，需要技术决策者仔细考虑。&lt;/p&gt;
 
-&lt;p&gt;T.B.D.&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="architecture" /><category term="SOA" /><category term="microservice" /><category term="monolith" /><summary type="html">微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务； 似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在铺开，Amazon又挑起了无服务器架构的大旗，引来无数人的关注。 本文试图对这些概念和架构思想做一简单的分析和梳理。</summary></entry><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身早已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；
+&lt;p&gt;首当其冲的是企业的组织结构是否和微服务的拆分和设计想匹配。
+如果团队之间的沟通结构存在很多的层级和结构，微服务的设计和演进的速度就会严重受到影响。
+团队之间有明显的层级汇报或者审批关系会使情况变得更复杂，因为服务的自治性受到巨大的威胁。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;“organizations which design systems … are constrained to produce designs which are copies of the communication structures of these organizations.”&lt;/p&gt;
+
+  &lt;p&gt;— M. Conway&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;另外一个不得不考虑的因素是&lt;strong&gt;企业的敏捷开发、持续集成以及发布的能力&lt;/strong&gt;。
+如果企业的基础设施不够完善，不能尽快地对开发过程给予反馈，快速迭代难以为继，开发人员很快就会陷入困境，因为整个系统的测试和集成难度相比传统架构更高了。
+没有足够的持续交付能力，微服务落地自然很容易变成无缘之水。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;开发人员的技术能力，以及选用的技术框架、编程语言&lt;/strong&gt;是否适合成员的技术背景也会成为一个巨大的挑战。
+最好的情况是，能够开发微服务的团队至少也能够应付中对规模的单体应用。
+目前的开发生态更加倡导多语言的混合团队，使得每个团队可以选用自己擅长、喜欢的技术更快的开发自己的微服务，然而这样做也是好坏参半。
+&lt;strong&gt;软件开发活动归根结底是人的活动&lt;/strong&gt;，人员的能力不能匹配技术的需求，或者有过多的技术栈以至于超出大部分成员的能力等情况，都需要慎重对待。&lt;/p&gt;
+
+&lt;p&gt;正如Martin Fowler在他的&lt;a href=&quot;https://www.martinfowler.com/bliki/MicroservicePrerequisites.html&quot;&gt;《微服务架构的先决条件》&lt;/a&gt;一文中所指出的那样，能力因素是个至关重要的决定因素。
+&lt;img src=&quot;https://www.martinfowler.com/bliki/images/microservicePrerequisites/sketch.png&quot; alt=&quot;microservice_competence&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;如何实施&quot;&gt;如何实施&lt;/h3&gt;
+&lt;p&gt;鉴于以上讨论到的这些“坑”，微服务并不是任何时候、任何组织都可以开展;应用微服务同样需要讲究天时、地利、人和。组织的敏捷程度和自动化能力，沟通结构，人员的技术配备能力都缺一不可。&lt;/p&gt;
+
+&lt;p&gt;Martin Fower建议的方式是我们总是&lt;strong&gt;可以从传统的单体架构&lt;/strong&gt;开始，采用演进式设计的思路逐步过度到微服务架构。
+等到我们&lt;strong&gt;对系统对应的问题域有更深刻的理解&lt;/strong&gt;之后，可以自然地按照领域驱动设计的思路仔细地划分服务粒度和范围，将服务拆分出来。&lt;/p&gt;
+
+&lt;p&gt;毕竟微服务是基于分布式环境的设计风格，而分布式的设计总是会有各种各样的复杂挑战需要仔细解决。
+如果需要解决的业务领域有很高的实时性要求或者大规模、高并发的需求，拆分和设计的时候更需要小心分析，大胆假设加上仔细的设计和验证。正如Martin在企业应用架构模式中所说的&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;First Law of Distributed Object Design: “don’t distribute your objects”&lt;/p&gt;
+
+  &lt;p&gt;– Martin Fower, &lt;a href=&quot;https://www.martinfowler.com/books/eaa.html&quot;&gt;Patterns of Enterprise Application Architecture&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="architecture" /><category term="SOA" /><category term="microservice" /><category term="monolith" /><summary type="html">微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务； 似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。 本文试图对这些概念和架构思想做一简单的分析和梳理。</summary></entry><entry><title type="html">用Java Flight Recorder来调优JVM性能</title><link href="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/" rel="alternate" type="text/html" title="用Java Flight Recorder来调优JVM性能" /><published>2017-08-22T00:00:00+08:00</published><updated>2017-08-22T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder</id><content type="html" xml:base="http://www.skyscribe.me/post/2017/08/22/performance-tuning-with-java-flight-recorder/">&lt;p&gt;随着Java程序在后端压倒性的普及，其性能本身早已经无人质疑；然而一个经常不为人道的事实是，Java平台上的程序不是天然就具有很高的性能；
 因为Java语言显著降低了程序员的准入门槛，真正到系统性能这一块，仍然需要大量的调试和优化，即所谓的JVM性能调优。&lt;/p&gt;
 
 &lt;p&gt;Java Flight Recorder（后文简称JFR）是Oracle官方推出的商业环境的性能调优利器；其本身对运行期系统的侵入性很小，同时又能提供相对准确和丰富的运行期信息；
@@ -122,9 +674,11 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 就要怀疑是否是部分关键逻辑运行时间过长，导致经过数次新生代回收之后，仍然没有被释放出去，从而导致进入老生代被老生代的回收活动处理。&lt;/p&gt;
 
 &lt;h3 id=&quot;代码面板&quot;&gt;代码面板&lt;/h3&gt;
+
 &lt;p&gt;代码面板则是基于采样得到的信息的代码执行情况给出统计分析结果。
-需要注意的是，所有的数据都是依据具体的采样点，具体的&lt;strong&gt;线程当时正在运行的的函数调用栈的具体状态来计数&lt;/strong&gt;并累加的。
-比如某个调用栈有10次被捕获到，那么相应的栈上的所有的函数的计数都会被记为10；这样得到的结果和&lt;strong&gt;实际代码的CPU占用率比较类似&lt;/strong&gt;，但是并不完全精确。
+需要注意的是，所有的数据都是依据具体的采样点，具体的&lt;strong&gt;线程当时正在运行的的函数调用栈的具体状态来计数&lt;/strong&gt;并累加的。&lt;/p&gt;
+
+&lt;p&gt;比如某个调用栈有10次被捕获到，那么相应的栈上的所有的函数的计数都会被记为10；这样得到的结果和&lt;strong&gt;实际代码的CPU占用率比较类似&lt;/strong&gt;，但是并不完全精确。
 所有的百分比数值都是相对百分比，其计算方法是用当前函数的采样数和整体（线程或全局CPU采样数）的采样数相除。&lt;/p&gt;
 
 &lt;h4 id=&quot;代码概览&quot;&gt;代码概览&lt;/h4&gt;
@@ -149,12 +703,12 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 这里的Stream操作会在运行的时候被多个上层函数所调用，则每个调用栈极其采样个数都被显示出来，可以顺势点开查看详情。&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;基于80/20原则&lt;/strong&gt;，一般收效最大的是仅仅对占比最大的函数栈进行针对性优化；同时如果上一级函数的调用和字函数的采样个数不一致，说明函数内部的其它代码也需要仔细查看。
-最麻烦的情况是80/20原则不太明显的地方；此时我们必须对多个可能的热点方法做优化，耗费的精力和时间就会更多。&lt;/p&gt;
+最麻烦的情况是80/20原则不太明显的时候；此时我们&lt;strong&gt;必须对多个可能的热点方法&lt;/strong&gt;做优化，耗费的精力和时间就会更多。&lt;/p&gt;
 
-&lt;p&gt;这个具体的例子中，排行第一和第二的两个栈的采样数基本差不多，是因为对应的采样是已经优化了一部分之后的中间结果。
+&lt;p&gt;回头看这个具体的例子，排行第一和第二的两个栈的采样数基本差不多，CPU时间耗费在哪里看起来似乎不是很明显;这是因为对应的采样是已经优化了一部分之后的中间结果。
 令人惊讶的是，Guava的Interner API也占用了相当多的CPU时间；在CPU已经满的情况下，针对性的优化就要麻烦一些。&lt;/p&gt;
 
-&lt;h4 id=&quot;热点的调用栈&quot;&gt;热点的调用栈、&lt;/h4&gt;
+&lt;h4 id=&quot;热点的调用栈&quot;&gt;热点的调用栈&lt;/h4&gt;
 
 &lt;p&gt;调用栈试图提供了和上述热点方法类似的信息，所不同的是其调用栈情况聚合了所有的API情况，譬如多个线程的同一个底层方法调用会被聚合在一起；
 这样更容易从一个系统性的视角去理解程序实际运行时候的概况。&lt;/p&gt;
@@ -184,19 +738,48 @@ JRE环境的属性和变量，采样记录信息如线程上下文切换计数�
 &lt;p&gt;具体的热点线程数据和其调用栈情况，可以依据采样计数排序后详细查看。这个例子中，String的&lt;code class=&quot;highlighter-rouge&quot;&gt;append&lt;/code&gt;操作消耗了大量的CPU，这个也算是大规模应用程序常见的情况。&lt;/p&gt;
 
 &lt;h4 id=&quot;线程竞争&quot;&gt;线程竞争&lt;/h4&gt;
+&lt;p&gt;同样是上边的运行其采样，线程的竞争情况视图为我们提供了更多关于CPU繁忙时候各个线程抢占CPU时间片的大概情况：&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_contention.jpg&quot; alt=&quot;contention&quot; /&gt;
-&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_contention.jpg&quot; alt=&quot;contention&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这里依据具体的CPU事件，JFR为我们提供了三个子视图来呈现多线程运行期的细节信心&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;竞争锁情况，按照其阻塞CPU运行的时间排序，分别显示了各个锁在给定的时间周期内等待的次数，最长、平均、总共的时间。一般时间越长需要优化的空间会越大，因为很多CPU时间被浪费在频繁等待和获取锁上边。具体的运行其堆栈可以在下方的细节视图中具体查看&lt;/li&gt;
+  &lt;li&gt;被阻塞的线程信息，列举了这些等待获取锁的线程的信息，时间、堆栈等&lt;/li&gt;
+  &lt;li&gt;阻塞其他线程的线程信息，和上一个类似，只是显示的是占有共享锁而阻塞了别人的线程的相关信息&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h4 id=&quot;时延和锁竞争情况&quot;&gt;时延和锁竞争情况&lt;/h4&gt;
+&lt;p&gt;线程的时延信息则从运行期所采样到的操作等待时间长短的维度呈现一些排序和统计信息，同样可以依据其数目、平均等待时间以及最长时间等因素来排序查看对应的运行其堆栈情况，如下图
+&lt;img src=&quot;/assets/images/jfr/jfr_threads_latency.jpg&quot; alt=&quot;threads latency&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_latency.jpg&quot; alt=&quot;threads latency&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;线程锁信息则反馈一些基于Java锁对象为中心的时间信息，对于同一个锁对象指针（底层地址空间的指针）其关联的所有线程的追踪信息，并显示出多个关联线程被采样到的次数信息。&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/images/jfr/jfr_threads_lock.jpg&quot; alt=&quot;threads locks&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;由于这些统计信息是基于操作系统内存地址的，&lt;strong&gt;垃圾收集算法可能在运行清理操作的时候拷贝对象从而使得指针被重写，因此该信息不是非常可靠&lt;/strong&gt;,尤其是GC比较活跃的时候，某些应该被计数在内的线程活动会被计数到不同的实例上。幸运的是，JFR同样对给定的时间段内GC的活动情况给了个概要视图呈现在最下方。
+&lt;img src=&quot;/assets/images/jfr/jfr_threads_lock.jpg&quot; alt=&quot;threads locks&quot; /&gt;&lt;/p&gt;
 
 &lt;h4 id=&quot;线程dump情况&quot;&gt;线程Dump情况&lt;/h4&gt;
+&lt;p&gt;JFR会依据采样配置情况，定期保留当前所有线程的调用栈信息;由于堆栈保存对实际运行程序的影响比较大，JFR的默认策略是很长时间才会取样一次调用栈信息。&lt;/p&gt;
+
+&lt;p&gt;对于时间比较短的采样，这个页面的信息很可能是空的。如果确定有必要（比如怀疑某些线程僵死的情况，可以通过设置采样参数让JFR提取更多的信息。&lt;/p&gt;
 
 &lt;h3 id=&quot;io情况&quot;&gt;IO情况&lt;/h3&gt;
+&lt;p&gt;对于后端应用程序来说，系统性能的提升和IO活动密切相关因为大部分的程序运行瓶颈在IO上，
+即&lt;strong&gt;快速的CPU处理速度和缓慢的IO活动之间的不可调和的矛盾&lt;/strong&gt;往往导致应用程序性能的下降;然而大部分的后端应用的&lt;strong&gt;目标是追求更高的吞吐率&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;当吞吐量上不去，而CPU的运行曲线又不太平稳（譬如有很多锯齿）的情况下，往往是IO的处理浪费了宝贵的运行时间;
+此时只要查看IO的情况，减少对程序逻辑的阻塞即可快速提升性能。
+如果CPU已经用满，而吞吐率又不太理想，则优化起来就困难重重了;当然这种情况下IO的行为还是值得查看的，
+因为不恰当的IO锁或者过多的IO操作仍然可能有潜力去挖掘，只是更加困难一些。&lt;/p&gt;
+
+&lt;p&gt;IO事件按照其访问速度的差异一可以大概分为如下几类&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;本地磁盘文件读写操作：其速度和物理磁盘的特性、文件系统以及程序所使用的API、框架等密切相关。典型地如频繁的log操作可能引起额外的小量的IO操作，如果这些操作是阻塞的，则程序的性能会下降比较厉害&lt;/li&gt;
+  &lt;li&gt;网络文件系统操作:这类场景往往对应用程序的逻辑是做了隔离的，但是在复杂多变的网络环境下很容易引起性能的急剧恶化;遇到这种情况尽快分析出原因是很关键的。&lt;/li&gt;
+  &lt;li&gt;网络通信读写（通过基于TCP/IP的各类协议的程序逻辑信息交换)：和网络文件操作类似，不同的是和应用层协议的设计和模式密切相关，对于大的系统而言，定位和分隔问题的边界是必不可少的。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;JFR对这些时间都分类列出其操作的时间信息，方便我们进一步定位和分析IO方面的问题。大部分情况下，IO里给出的信息都要结合线程乃至内存的情况综合判断。&lt;/p&gt;
 
 &lt;h3 id=&quot;系统信息和事件&quot;&gt;系统信息和事件&lt;/h3&gt;
 
@@ -1102,657 +1685,4 @@ When targeting the JVM, instances of this class are represented as &lt;code clas
 
 &lt;p&gt;软件工程的一个关键要素就是工具。软件设计自然也离不开合适的工具，尤其是软件设计又是对需求进行抽象的结晶；选择合适的工具可以增进协作和沟通，使得设计输出是有实际指导作用的而不仅仅是纯粹的文档工作。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry><entry><title type="html">Java8中的函数式编程</title><link href="http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/" rel="alternate" type="text/html" title="Java8中的函数式编程" /><published>2016-10-14T00:00:00+08:00</published><updated>2016-10-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/10/14/fp-support-in-java8/">&lt;p&gt;Java8是日益臃肿、略显老态的老牌程序语言对日益流行的&lt;strong&gt;新的函数式编程范式&lt;/strong&gt;的反击；
-它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;fp的基本要素函数&quot;&gt;FP的基本要素：函数&lt;/h2&gt;
-&lt;p&gt;Java并不打算放弃其面向对象的内核 - 所以的东西必须都是对象，那么函数也不例外，它依然是对象。具体而言，是一个特殊的函数式接口的实现。&lt;/p&gt;
-
-&lt;h3 id=&quot;函数依然是对象&quot;&gt;函数依然是对象&lt;/h3&gt;
-&lt;p&gt;在新的&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.function&lt;/code&gt;包里，预定义了形形色色的函数接口，譬如带2个参数的函数的定义如下&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@FunctionalInterface&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;BiFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;{&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//all functions implements apply that takes t of type T and u of type U, and returns R&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-  &lt;span class=&quot;c1&quot;&gt;//compose function&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;V&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BiFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;V&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;andThen&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;V&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;after&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Objects&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requrieNotNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;after&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;after&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;从定义来看，它是一个接口，任何实现了该接口的对象都是一个二元函数。从纯粹的面向对象思路来看，只要让所有实现类似调用的类也实现新的接口就行。
-仔细考虑则发现该思路有个不足 - 很可能我们已经有一个已有的接口&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyInterface&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;ReturnType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSomething&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgType1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgType2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyBusinessClassA&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyInterface&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;ReturnType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSomething&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgType1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgType2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//detailed implementation&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;考虑用户代码想要使用上述的接口，同时希望采用函数式编程的思路，接受一个函数参数&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//client code&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;myMethod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BiFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ArgType1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArgType2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ReturnType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;certainProcessing&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//calls certainProcessing.apply(arg1, arg2);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;MyBusinessClassA&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;businessClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// = ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ArgType1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//= ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ArgType2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//= ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;myMethod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*use existing business classes?*/&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;如果仅仅是因为需要采用函数式编程风格来编写代码，就必须要求我们修改原来的接口或者class定义破坏性就太大了。Java8采用了变通机制，
-当&lt;strong&gt;某个接口有且仅有一个方法定义&lt;/strong&gt;的时候，该接口可以被编译器隐式地转换为一个函数式接口的一个扩展；实现了此业务接口的类则被视为函数式接口的一个具体实现。
-对应的这个方法(&lt;code class=&quot;highlighter-rouge&quot;&gt;doSomething&lt;/code&gt;)会被认为是默认的&lt;code class=&quot;highlighter-rouge&quot;&gt;apply&lt;/code&gt;方法，即使这个方法的名字是别的，
-只要参数个数、类型、返回类型能匹配到对应的泛型函数接口的对应类型(&lt;code class=&quot;highlighter-rouge&quot;&gt;doSomething(...)&lt;/code&gt;)，它就会被视为是实际实现的方法。
-当用户代码用函数式编程的风格来调用抽象的函数式对象(&lt;code class=&quot;highlighter-rouge&quot;&gt;BiFunction&lt;/code&gt;)的&lt;code class=&quot;highlighter-rouge&quot;&gt;apply&lt;/code&gt;方法时，实际调用会被委托为实际实现方法(&lt;code class=&quot;highlighter-rouge&quot;&gt;doSomething&lt;/code&gt;)的调用。&lt;/p&gt;
-
-&lt;p&gt;为方便代码维护和协助编译器检查的考虑，Java8提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;@FunctionalInterface&lt;/code&gt;注解方便我们清晰的知道某个接口符合函数式接口的要求。
-也许是为了更灵活的配合函数式编程，Java8也允许一个接口中有提供默认实现(用&lt;code class=&quot;highlighter-rouge&quot;&gt;default&lt;/code&gt;关键字标识)，此时这样的方法被认为是具体的而非抽象的；
-这样只要一个接口中&lt;strong&gt;有且只有一个抽象的方法&lt;/strong&gt;，它依然符合函数对象的要求。&lt;/p&gt;
-
-&lt;p&gt;如果接口声明没有加上&lt;code class=&quot;highlighter-rouge&quot;&gt;@FunctionalInterface&lt;/code&gt;注解，调用的地方却使用了lambda表达式语法，编译器会检查对应的类接口中是否满足函数式对象的约束如有违反则报错。
-因而该注解不是必要的；出于代码可读性的考虑，还是建议尽量加上该注解。&lt;/p&gt;
-
-&lt;h3 id=&quot;内置函数&quot;&gt;内置函数&lt;/h3&gt;
-
-&lt;p&gt;Java8的工具库中提供了一些常见的基于泛型的函数式接口&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;返回值为布尔类型的函数 - Predicate&lt;/li&gt;
-  &lt;li&gt;参数类型和返回值类型一样的函数 - &lt;code class=&quot;highlighter-rouge&quot;&gt;Operator&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;没有返回值的函数 - &lt;code class=&quot;highlighter-rouge&quot;&gt;Consumer&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;不带参数而能产生某些返回的函数 - &lt;code class=&quot;highlighter-rouge&quot;&gt;Producer&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;基于非装箱原始类型的特殊函数 - 某些时候希望避免自动装箱和自动解箱的性能开销&lt;/li&gt;
-  &lt;li&gt;添加了参数个数信息的函数，譬如&lt;code class=&quot;highlighter-rouge&quot;&gt;BinaryOperator&amp;lt;T&amp;gt;&lt;/code&gt;用于描述签名为&lt;code class=&quot;highlighter-rouge&quot;&gt;(T a, T b) -&amp;gt; T&lt;/code&gt;的函数;对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;UnaryOperator&amp;lt;T&amp;gt;&lt;/code&gt;用于描述的函数签名为&lt;code class=&quot;highlighter-rouge&quot;&gt;(T a) -&amp;gt; T&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;依据以上的命名风格，&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.function&lt;/code&gt;中定义了几十个泛型的函数接口，可以满足几乎所有的简单场景。查看&lt;a href=&quot;https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html&quot;&gt;JDK文档&lt;/a&gt;可以发现, Java8&lt;strong&gt;没有提供超过2个参数&lt;/strong&gt;的函数接口定义，默认的&lt;code class=&quot;highlighter-rouge&quot;&gt;Function&amp;lt;T, R&amp;gt;&lt;/code&gt;描述的是最普通的单映射函数。&lt;/p&gt;
-
-&lt;h3 id=&quot;匿名函数和lambda&quot;&gt;匿名函数和Lambda&lt;/h3&gt;
-
-&lt;p&gt;匿名函数其实是被Java8给封装成具体的函数对象（实现某个预定义的接口)。语法上没什么奇特的地方，和C++/Haskell的都比较类似。
-在任何一个可以传入函数调用的地方，都可以传入lambda表达式或者代码块，并且类型信息可以省略,如上边代码的例子&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;MyBusinessClassA&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;businessClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// = ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ArgType1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//= ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ArgType2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//= ...;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;myMethod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;businessClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;doSomething&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;lambda表达式中引用上下文变量的情况下，该lambda表达式自然形成了一个闭包。
-当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。&lt;/p&gt;
-
-&lt;h2 id=&quot;optional类型&quot;&gt;Optional类型&lt;/h2&gt;
-&lt;p&gt;Optional类型是个典型的容器类型，用来表示有一个合法值或者空值；其本身是一种简单的&lt;a href=&quot;http://learnyouahaskell.com/a-fistful-of-monads&quot;&gt;Monad类型&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;从错误处理方式说起&quot;&gt;从错误处理方式说起&lt;/h3&gt;
-&lt;p&gt;长久以来，Java都是采用两种方式处理可能的逻辑例外情况，要么是采用返回对象的方式，要么是采用异常传递。
-Java的异常在设计上被分类为检查异常和非检查异常；前者别用来表述一些可以恢复的意外情况，编译器会在编译的时候检查可能抛出该类异常的API的&lt;strong&gt;调用方必须显式的处理&lt;/strong&gt;检查异常；
-非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。&lt;/p&gt;
-
-&lt;p&gt;Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都&lt;strong&gt;主张永远不使用检查异常&lt;/strong&gt;；
-遍布&lt;code class=&quot;highlighter-rouge&quot;&gt;try/catch&lt;/code&gt;块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。&lt;/p&gt;
-
-&lt;p&gt;仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
-于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I call it my billion-dollar mistake. It was the invention of the null reference in 1965. … My goal was to ensure that all use of references should be absolutely safe,
-with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, &lt;strong&gt;simply because it was so easy to implement.&lt;/strong&gt; 
-This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.&lt;/p&gt;
-  &lt;blockquote&gt;
-    &lt;p&gt;– Tony Honare, apology for inventing the null reference&lt;/p&gt;
-  &lt;/blockquote&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;用optional来处理错误&quot;&gt;用Optional来处理错误&lt;/h3&gt;
-
-&lt;p&gt;传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类则提供了&lt;strong&gt;一种新的错误处理方式&lt;/strong&gt;；从概念上来说，这三种方式是不能同时采用的，要么采用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;要么采用异常，但是不应该两者都采用。&lt;/p&gt;
-
-&lt;p&gt;从概念上来说，一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
-看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是种静态语言，&lt;strong&gt;null对象不是一个合法初始化过的对象&lt;/strong&gt;，对它做任何方法调用都会引起引用异常；
-&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;则不同，即使没有正确的初始化某个对象，它&lt;strong&gt;本身依然是一个合法的对象&lt;/strong&gt;。它用一套统一的接口来操作内部封装的对象。&lt;/p&gt;
-
-&lt;p&gt;具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EMPTY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;从容器封装的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;可以&lt;strong&gt;看作是集合类的一个特殊的退化情况&lt;/strong&gt; - 它要么保护一个对象，要么什么也没有；但是不能包含超过两个或更多个对象。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;提供了很多API供我们使用&lt;/p&gt;
-
-&lt;h3 id=&quot;构造出新的optional对象&quot;&gt;构造出新的Optional对象&lt;/h3&gt;
-
-&lt;p&gt;构造的方式有很多种，可以用默认的空构造创建一个空的对象，此时内部的封装对象没有被初始化；另外一种方式是静态方法&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;of&lt;/code&gt;方法传入一个&lt;strong&gt;非null&lt;/strong&gt;的对象，构造出包含给定对象的容器&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;方法传入一个可能为null的对象；构造中会依据是否为null来决定是创建初始化的容器还是空容器&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象一经创建就不允许在修改其内部的状态；但是可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;方法来获取内部存储的对象 - 如果是空则会抛出&lt;code class=&quot;highlighter-rouge&quot;&gt;NoSuchElementException&lt;/code&gt;。
-一般情况下不建议未经检查便直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;方法；因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;本身提供了很多函数式编程的模式。&lt;/p&gt;
-
-&lt;h3 id=&quot;模式&quot;&gt;模式&lt;/h3&gt;
-
-&lt;p&gt;有如下模式可以供我们组合使用&lt;/p&gt;
-
-&lt;h4 id=&quot;对封装数据的修改转换相关的模式&quot;&gt;对封装数据的修改/转换相关的模式&lt;/h4&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt; 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt; 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
-这里&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;保证传给参数函数的输入值一定不会是空对象，即&lt;strong&gt;转换函数不需要做null判断&lt;/strong&gt;因为map实现本身已经帮你判断了。
-从函数式编程的角度来看，&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;是一个高阶函数 - 其参数是另外一个函数&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt; 和上边的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作为返回；
-为避免&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;Optional&amp;lt;T&amp;gt;&amp;gt;&lt;/code&gt;的麻烦，&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;会将这个二层封装给解开，生成一个单一的封装。
-其实现代码非常简单&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;Objects&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requireNonNull&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isPresent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h4 id=&quot;数据提取相关的模式&quot;&gt;数据提取相关的模式&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt; 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
-这里的提取实际上是一个解封装操作；返回的对象同样也抱枕是非null的，&lt;strong&gt;拿到这个对象的调用者不需要做额外的null判断&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseGet&lt;/code&gt; 是一个类似的提取操作，和&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;不同的是对于空容器的处理，返回值由一个传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;来提供；同样&lt;strong&gt;也要保证尽量不要提供nulli&lt;/strong&gt;
-以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;orElseThrow&lt;/code&gt; 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
-没有则调用传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&amp;lt;? extends Throwable&amp;gt;&lt;/code&gt;抛出一个异常。这同样是一个高阶函数&lt;/p&gt;
-
-&lt;p&gt;上述的模式提供了丰富的组合功能使我们对一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象做函数式编程变得简单明了；甚至不需要一个&lt;code class=&quot;highlighter-rouge&quot;&gt;if&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;else&lt;/code&gt;分支判断就可以做一些复杂的操作。
-比如下面的一段代码&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;AnotherResult&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;someObj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;someResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;someResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;meetSomeCondition&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conditionalResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;transformAsAnotherResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conditionalResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//.flatMap(conditionalResult -&amp;gt; transformAsAnotherResult(conditionalResult)) if transformAsAnotherResult returns optional&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElseGet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anotherEmptyResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//.orElseThrow(() -&amp;gt; new SomeRunTimeException()); //if we want to throw&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;//Now result wouldn't be null at all!&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h4 id=&quot;反模式&quot;&gt;反模式&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;可以帮助我们大大简化代码，然而也有一些&lt;strong&gt;反模式需要小心留意&lt;/strong&gt;；比如以下这些&lt;/p&gt;
-
-&lt;h5 id=&quot;违反基本的约束&quot;&gt;违反基本的约束&lt;/h5&gt;
-&lt;p&gt;以下列举了几个常见的基本错误，这些错误只要稍微深入理解下&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;的设计思想就可以避免&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;混用异常和&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型返回 - 显然两种机制是鱼和熊掌的关系，设计方法的时候必须选择其中一个，而不是两者混用。
-如果&lt;strong&gt;选择让方法返回Optional类型，就不要在实现内部再抛出异常&lt;/strong&gt;，否则你的用户将会抓狂。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;在Optional的值中存放&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt; - 这是明显&lt;strong&gt;违背设计契约&lt;/strong&gt;的做法，导致&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;封装完全失去意义。如果想重新构造一个Optional,
-如果不能确保它不是null，请用&lt;code class=&quot;highlighter-rouge&quot;&gt;ofNullable&lt;/code&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;已经给你保证了传给你的参数不会是&lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;譬如下边的实现纯粹是画蛇添足&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ValueType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//do something and generates return type&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//This won't be ran!&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h5 id=&quot;冗余的判断&quot;&gt;冗余的判断&lt;/h5&gt;
-&lt;p&gt;还有一些典型的误用和&lt;strong&gt;不熟悉函数式编程的惯用法&lt;/strong&gt;有关，可以通过简单的重构解决&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;混用&lt;code class=&quot;highlighter-rouge&quot;&gt;if/else&lt;/code&gt;和Optional的&lt;code class=&quot;highlighter-rouge&quot;&gt;isPresent()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;get()&lt;/code&gt; - 这是一种非常常见的误用；往往使得代码变得更加复杂。
-因为&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;如果需要提取出值对象，就用&lt;code class=&quot;highlighter-rouge&quot;&gt;orElse&lt;/code&gt;系列方法；如果不需要产生任何类型的新值，可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;ifPresent&lt;/code&gt;传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;复杂的链式操作，即多个连续的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的&lt;strong&gt;重构技巧抽出新的子函数&lt;/strong&gt;即可。
-逻辑上来说，&lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; transformAsB(a)).map(b -&amp;gt; transformAsC(b))&lt;/code&gt; 等价于 &lt;code class=&quot;highlighter-rouge&quot;&gt;anOptional.map(a -&amp;gt; composeTransformAAndB(a))&lt;/code&gt;；这里的字函数都不需要做null判断&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
-原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
-任何用&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;在函数中传递的写法，都&lt;strong&gt;对应一个更简单的复合Optional模式&lt;/strong&gt;的写法;为什么不采用这些模式而要自己写判断？&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;比如如下的例子&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;opt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;可以重构为更符合&lt;a href=&quot;https://en.wikipedia.org/wiki/Locality_of_reference&quot;&gt;局部性原理&lt;/a&gt;的形式,避免&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型的蔓延&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;///initialize;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anOptional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;orElse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RetType&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doSthn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SomeType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;h2 id=&quot;streams-api&quot;&gt;Streams API&lt;/h2&gt;
-&lt;p&gt;Java8新提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;Streams&lt;/code&gt; API来实现更类似于Haskell的&lt;a href=&quot;http://learnyouahaskell.com/a-fistful-of-monads&quot;&gt;List Monad&lt;/a&gt;风格的函数式编程设施；
-值得注意的是，在老版本的Java库里边，&lt;code class=&quot;highlighter-rouge&quot;&gt;List&lt;/code&gt;这个接口已经用来描述传统的基于共享内存模型的数据结构了（和C++的类似）；
-这也许是Java8另起炉灶新添加新的接口来描述这一概念。&lt;/p&gt;
-
-&lt;p&gt;类似于Functional Interface,Streams API也是包含一系列&lt;strong&gt;新的Java接口&lt;/strong&gt;的包的简称；这些接口都放在&lt;code class=&quot;highlighter-rouge&quot;&gt;java.util.stream&lt;/code&gt;包中。&lt;/p&gt;
-
-&lt;h3 id=&quot;基本概念&quot;&gt;基本概念&lt;/h3&gt;
-&lt;p&gt;Stream是一个函数式编程概念的接口抽象；它和集合类的概念比较类似；比较大的差异在于Stream是&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;关于&lt;strong&gt;操作的抽象&lt;/strong&gt;而不是关于数据的抽象，可以将其看作一个流水线，
-一些数据流入抽象的Stream,经过某些操作变换产生某些输出；这些输出可能成为流的下一步处理的输入&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;无状态的，所有绑定的&lt;strong&gt;操作不能修改数据源&lt;/strong&gt;，即只能决定产生的输出是什么样子，不能回头修改输入的数据；
-这也是纯函数式编程所要求的&lt;strong&gt;无副作用&lt;/strong&gt;；同样的数据经过某个处理操作产生的输出一定要是一样的。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;惰性运算&lt;/strong&gt;赋值的，即Stream上的操作不一定会消耗所有的输入数据，譬如我们在一个Stream上取前3个数据，
-那么即使输入数据有无穷多个，操作也能在取到3个的时候就结束返回给下一步处理。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;可能有无限多个输入，只要后续的操作是有限的&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;同一个Stream的输入&lt;strong&gt;只能被使用一次&lt;/strong&gt;，下一次若想操作必须重新生成Stream；从这点设计约束看，Java的Stream没有Haskell的纯粹;
-也可以认为流水线一旦被处理，最原始的数据就不存在了。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;基本的stream类型&quot;&gt;基本的Stream类型&lt;/h3&gt;
-&lt;p&gt;所有的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口都继承自一个公共的&lt;strong&gt;泛型接口&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AutoClosurable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;spliterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-  &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onClose&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Runnable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;closeHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-  &lt;span class=&quot;c1&quot;&gt;//...other common interfaces...&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;其中&lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;用于声明其初始输入的元素的类型，&lt;code class=&quot;highlighter-rouge&quot;&gt;S&lt;/code&gt;则用于将子类的类型带上来，和C++的&lt;a href=&quot;https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern&quot;&gt;CRTP&lt;/a&gt;技巧类似。
-从接口声明上看，一个Stream类也&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;提供了迭代器访问接口，可以用传统的迭代器访问模式操作&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;AutoClosurable&lt;/code&gt;接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。&lt;/p&gt;
-
-    &lt;p&gt;&lt;strong&gt;大部分的Stream实现并不会管理资源&lt;/strong&gt;，因而不显示关闭Stream往往也不会带来什么问题。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;streamt接口&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;接口&lt;/h4&gt;
-
-&lt;p&gt;最平凡的Stream是名为&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的泛型接口&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BaseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//operations...&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//terminators...&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Consumer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;该接口包含一些&lt;strong&gt;转换操作和终止操作&lt;/strong&gt;组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
-终止操作则直接终止流水线，返回某些汇聚之后的结果出来。&lt;/p&gt;
-
-&lt;h4 id=&quot;以java基本类型为数据元素的特殊stream&quot;&gt;以Java基本类型为数据元素的特殊Stream&lt;/h4&gt;
-&lt;p&gt;Java泛型技术的一个限制是，对基本的数据类型（这些类型不是一个Object）必须用包装类，
-直接用包装类替换基本类型则会带来比较大的&lt;a href=&quot;https://tavianator.com/java-autoboxing-performance/&quot;&gt;性能开销&lt;/a&gt;；
-尤其是Java5之后引入的自动装箱对程序员隐藏了这些实现细节，某种程度上加剧了问题的严重性。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;对所有的基本类型都提供了一个对应的接口，比如&lt;code class=&quot;highlighter-rouge&quot;&gt;IntStream&lt;/code&gt;、&lt;code class=&quot;highlighter-rouge&quot;&gt;LongStream&lt;/code&gt;等等。这些接口都继承自&lt;code class=&quot;highlighter-rouge&quot;&gt;BasicStream&lt;/code&gt;,暴露的方法和&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;比较类似；从接口声明上看，
-很多方法和&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;都是类似的，仅仅是针对类型做了特殊处理，这个也是很老的一个对Java语言设计的槽点了。&lt;/p&gt;
-
-&lt;h3 id=&quot;生成stream&quot;&gt;生成Stream&lt;/h3&gt;
-&lt;p&gt;大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;接口的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream()&lt;/code&gt;方法；还有一个对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;.parallelStream()&lt;/code&gt;返回一个可以并发执行的对象&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Arrays&lt;/code&gt;工具类的&lt;code class=&quot;highlighter-rouge&quot;&gt;.stream(Object[])&lt;/code&gt;从一个数组构造出来&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;本身的一些静态方法产生，包括&lt;/p&gt;
-    &lt;ol&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T t)&lt;/code&gt;产生单个元素的Stream对象&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.of(T... values)&lt;/code&gt;从对象列表中产生&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.generate(Supplier&amp;lt;T&amp;gt; s)&lt;/code&gt; 用给定的&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;函数产生无穷序列(其实受&lt;code class=&quot;highlighter-rouge&quot;&gt;Long&lt;/code&gt;类型的最大可能值限制)&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream.concat(Stream&amp;lt;? extends T&amp;gt; a, Stream&amp;lt;? extends T&amp;gt; b)&lt;/code&gt;连接两个已有的流&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这些方法也有对应的针对基本类型的Stream的版本。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;StreamSupport&lt;/code&gt;辅助类来产生，包括
-    &lt;ol&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream(Spliterator&amp;lt;T&amp;gt; spliterator, boolean parallel)&lt;/code&gt;从一个迭代器产生，可以支持并发的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream(Supplier&amp;lt;? extends Spliterator&amp;lt;T&amp;gt;&amp;gt; supplier, int characteristics, boolean parallel)&lt;/code&gt;支持从给定的迭代器的Supplier中一一调用&lt;code class=&quot;highlighter-rouge&quot;&gt;.get()&lt;/code&gt;方法；支持并发方式迭代&lt;/li&gt;
-      &lt;li&gt;类似功能的针对基本类型的Stream的封装&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-  &lt;li&gt;特定场景的构造方法，比如
-    &lt;ol&gt;
-      &lt;li&gt;随机数产生器流，用&lt;code class=&quot;highlighter-rouge&quot;&gt;Random.ints()&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;缓冲的IO流中产生的流 - &lt;code class=&quot;highlighter-rouge&quot;&gt;BufferedReader.lines()&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;其它形形色色的JDK库提供的封装；以及第三方库提供的封装&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;接口
-该接口是&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&amp;lt;T&amp;gt;&lt;/code&gt;的内部接口，扩展了&lt;code class=&quot;highlighter-rouge&quot;&gt;Consumer&amp;lt;T&amp;gt;&lt;/code&gt;；可以利用&lt;code class=&quot;highlighter-rouge&quot;&gt;add(T t)&lt;/code&gt;方法添加元素到Stream中；该操作支持链式调用，最后用&lt;code class=&quot;highlighter-rouge&quot;&gt;build()&lt;/code&gt;方法生成最终的Stream对象。
-实现在&lt;code class=&quot;highlighter-rouge&quot;&gt;Consumer&lt;/code&gt;的接口则具有和&lt;code class=&quot;highlighter-rouge&quot;&gt;add&lt;/code&gt;类似的语意，只是不支持链式操作。比如&lt;code class=&quot;highlighter-rouge&quot;&gt;IntStream.Builder.add(1).add(2).add(3).build&lt;/code&gt;生成一个包含3个数字为输入的Stream。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;流水线操作和变换&quot;&gt;流水线操作和变换&lt;/h3&gt;
-&lt;p&gt;作为一种函数式编程工具，Stream就天然是为组合而生的；这些组合本身就构成了流水线处理 - 初始化的元素作为流水线的输入，而中间的转换步骤可以有任意多个，
-最终则往往会有一个终止操作来产生期望的输出 - 该输出也是我们从流水线上拿到最终结果的地方。&lt;/p&gt;
-
-&lt;h4 id=&quot;中间操作和终止操作&quot;&gt;中间操作和终止操作&lt;/h4&gt;
-&lt;p&gt;所有这些中间操作每次返回一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;状态，其输入是经过转换的 - 如前所述&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的输入是不可修改的；该新的Stream的输入是对前一次的输入，
-输出则由前一次操作的针对每一个输入做运算之后的输出组成；如果某些运算不产生输出，则这些数据就像筛子一样被过滤下来了。&lt;/p&gt;
-
-&lt;p&gt;所有的终止操作从函数签名上来看，都不会返回新的Stream对象。&lt;/p&gt;
-
-&lt;p&gt;所有的中间操作都符合&lt;strong&gt;延迟计算&lt;/strong&gt;规则；即真正的输出并没有在调用这些转换操作的时候被计算出来；
-只有&lt;strong&gt;当终止操作被调用以取出需要的值的时候&lt;/strong&gt;，这些转换操作才真正被计算出来。&lt;/p&gt;
-
-&lt;p&gt;当我们提供一个无限长的输入提供给Stream的时候，真正参与具体操作的元素个数仅仅以满足终止条件为准。&lt;/p&gt;
-
-&lt;p&gt;譬如下边的代码&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first5PrimeSum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IntStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;iterate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isPrime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;limit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;初始构造的Stream包含无穷多个元素（受限于int类型的长度），但是经过&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;操作之后，由用&lt;code class=&quot;highlighter-rouge&quot;&gt;limit&lt;/code&gt;取出前5个，并最终求和；
-那么实际参与运算的初始输入元素只有1到11而已。&lt;/p&gt;
-
-&lt;p&gt;根据以上的赋值求值规则，我们可以认为终止操作是&lt;strong&gt;贪婪求值&lt;/strong&gt;的并会产生副作用；一旦调用了终止操作，Stream对象即产生了最终的运算结果；
-原始的输入元素遭到了破坏，无法回头重新来过。
-例外的情况隐藏在&lt;code class=&quot;highlighter-rouge&quot;&gt;iterator()&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;splititerator()&lt;/code&gt;操作上，它们虽然是终止操作，却不会破坏流水线的状态，用户可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;iterator&lt;/code&gt;接口来决定流水线的运算时间点。&lt;/p&gt;
-
-&lt;h4 id=&quot;中间操作模式&quot;&gt;中间操作模式&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口提供了很多传统的符合函数式编程风格的方法，一些甚至允许更灵活的高阶函数&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;用于普通的函数变化，其参数是一个转换函数，将数据从一种类型转换为新的类型&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap(Function&amp;lt;? super T, ? extend Stream&amp;lt;? extends R&amp;gt;&amp;gt; mapper)&lt;/code&gt;将Stream的每一个元素应用之转换函数，然后将转换结果流中的数据取出来汇聚为新的Stream。
- 该操作是一种相对高阶的模式，可以避免手工来拼接流&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;skip&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;limit&lt;/code&gt;分别用于截取或者跳过某些元素&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sorted&lt;/code&gt;则产生按照给定排序规则排列为有序输出数据的流&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;用来过滤流中满足给定谓词逻辑判断的数据&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;distinct&lt;/code&gt;会删除重复的元素&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;peek&lt;/code&gt;用于在产生输出数据的同时，做一些参数指定的函数操作；该操作大部分时候可以用于方便debug，比如
-    &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;two&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;lenth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;peek&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Filtered value: &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;String:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toUpperCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;peek&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Mapped value: &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;collect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collectors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-    &lt;/div&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;有状态和无状态的中间操作&quot;&gt;有状态和无状态的中间操作&lt;/h4&gt;
-
-&lt;p&gt;中间操作可以携带lambda表达式，从而可以简单将其分类为有状态的和无状态的操作。
-有状态的操作会&lt;strong&gt;携带额外的上下文信息&lt;/strong&gt;，如果这些操作的运算结果跟操作的中间结果有关，则Stream的行为会变得依赖于流水线的执行顺序 - 如果操作被并发调度，
-结果就会显得不确定。&lt;/p&gt;
-
-&lt;p&gt;比如这个例子&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Set&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Collections&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;synchronizedSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HashSet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parallel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;seen&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reduction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;第一个&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;操作时间的执行体中会根据给定的元素是否已经处理过来决定返回0或元素本身；这个lambda操作本身依赖于之前的运算所以是有状态的。&lt;/p&gt;
-
-&lt;p&gt;显然有状态的操作在用&lt;code class=&quot;highlighter-rouge&quot;&gt;parallelStream&lt;/code&gt;调度计算的时候&lt;strong&gt;会产生不确定结果&lt;/strong&gt;；而无状态的操作则没有这样的副作用。&lt;/p&gt;
-
-&lt;p&gt;Java8引入&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的首要目的就是并行计算和并发，默认串行的操作，仅仅需要在生成&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的地方加上&lt;code class=&quot;highlighter-rouge&quot;&gt;parallel()&lt;/code&gt;就可以自动获得多核并发调度的好处。&lt;/p&gt;
-
-&lt;h4 id=&quot;潜在的操作干扰&quot;&gt;潜在的操作干扰&lt;/h4&gt;
-
-&lt;p&gt;传给Stream的数据在Stream运算的过程中被视为静态的；如果这些数据可能被同时修改，则操作的正确性就难以保证了。
-考虑一个用Java的ArrayList产生的Stream做运算的情况&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Arrays&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;asList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;one&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;two&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;three&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strm&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;strList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;four&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//WoW!&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strm&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;collect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;joining&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;有状态的函数操作或者互相干扰的函数操作会&lt;strong&gt;破坏并发安全性并带来出乎意料的行为&lt;/strong&gt;（因为多线程、同步、调度的细节被隐藏了）；应该不建议使用。&lt;/p&gt;
-
-&lt;h4 id=&quot;常用的终止操作&quot;&gt;常用的终止操作&lt;/h4&gt;
-&lt;p&gt;终止操作的方法很多，基本上&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的API中，除了静态方法以外，所有的返回类型不是&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;的都是终止操作，常用的有&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;allMatch&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;anyMatch/nonMatch&lt;/code&gt;接受一个谓词函数作为参数，返回是否流中的元素都满足给定的条件，或至少有一个满足条件;以及是否没有满足条件的元素&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;collect(Collector&amp;lt;? super T, A, R&amp;gt;)&lt;/code&gt;用于收集流参数到给定的集合中;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collector&lt;/code&gt;是一个可修改的归并操作运算抽象；
- 常用的方式是使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Collectors&lt;/code&gt;这一工具类提供的静态方法传入各种各样的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collector&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;collect(Supplier&amp;lt;R&amp;gt; supplier, BiConsumer&amp;lt;R, ? extends T&amp;gt; accumulator, BiConsumer&amp;lt;R, R&amp;gt; combiner)&lt;/code&gt;是上述接口的一个简化版本，显示提供了归并操作的其中三个函数参数&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;count&lt;/code&gt;返回元素的个数&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;toArray&lt;/code&gt;返回元素为数组形式&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;forEach&lt;/code&gt;则提供遍历操作&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;findFirst&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;findAny&lt;/code&gt;返回第一个/任意一个元素，由于可能不存在希望取的元素（没有元素的情况），返回类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;归并操作，包含几个重载形式&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;归并&quot;&gt;归并&lt;/h3&gt;
-&lt;p&gt;归并操作是map/reduce模式中比较复杂和灵活的终止操作；&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;接口也提供了丰富的支持。其实这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;在其它的函数式语言中也被称为&lt;code class=&quot;highlighter-rouge&quot;&gt;fold&lt;/code&gt;。&lt;/p&gt;
-
-&lt;h4 id=&quot;最灵活的形式&quot;&gt;最灵活的形式&lt;/h4&gt;
-
-&lt;p&gt;一般形式的&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;操作支持如下几个参数&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;U identity&lt;/code&gt;是单位元元素，同时作为输出的默认值&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BiFunction&amp;lt;U, ? super T, U&amp;gt; accumulator&lt;/code&gt; 负责中间的每一次运算的累加&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;BinaryOperator&amp;lt;U&amp;gt; combiner&lt;/code&gt; 约束accumulator 和 identity的函数，需要满足 &lt;code class=&quot;highlighter-rouge&quot;&gt;combiner.apply(u, accumulator.apply(identity, t)) = accumulator.apply(u, t)&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;调用的效果类似于&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;element:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;combiner&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accumulator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h4 id=&quot;省略combiner的版本-t-reducet-identity-binaryoperatort-accumulator&quot;&gt;省略&lt;code class=&quot;highlighter-rouge&quot;&gt;combiner&lt;/code&gt;的版本: &lt;code class=&quot;highlighter-rouge&quot;&gt;T reduce(T identity, BinaryOperator&amp;lt;T&amp;gt; accumulator)&lt;/code&gt;&lt;/h4&gt;
-&lt;p&gt;该形式下，accumulator的类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;BinaryOperator&amp;lt;T&amp;gt;&lt;/code&gt;,同时&lt;code class=&quot;highlighter-rouge&quot;&gt;identity&lt;/code&gt;的类型必须和Stream中的元素类型相同。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sum&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;max&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;min&lt;/code&gt;等都可视作是该版本的特化实现；即&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;//same as&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;integers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;Integer:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;h4 id=&quot;只有accumulator的版本&quot;&gt;只有&lt;code class=&quot;highlighter-rouge&quot;&gt;accumulator&lt;/code&gt;的版本&lt;/h4&gt;
-&lt;p&gt;这种情况下，返回的类型是&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&amp;lt;T&amp;gt;&lt;/code&gt;;由于没有默认值，因此返回合适的结果必须至少有2个元素可以参与累加器运算；如果少于2个则返回空的Optional。
-等价的代码为&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;element:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;found&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;found&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accumulator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;该种形式的操作将Stream和Optional结合了起来。&lt;/p&gt;
-
-&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
-
-&lt;p&gt;在函数式编程变得日益火热、几乎无处不在的今天，传统的基于面向对象范式的Java语言最终也通过&lt;strong&gt;更新语言核心&lt;/strong&gt;的形式&lt;strong&gt;拥抱&lt;/strong&gt;这一新的编程范式。
-其设计从根本上来说，依然是基于围绕着传统的面向对象的抽象、封装、接口形式实现的，处处体现着面向对象编程的影子。
-它对&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;类型的丰富支持和多样的接口抽象能极大地方便程序员的日常使用；强大的&lt;code class=&quot;highlighter-rouge&quot;&gt;Streams API&lt;/code&gt;提供了基于流水线的高层抽象；
-并发流的支持使得仅仅需要加入一个简单的&lt;code class=&quot;highlighter-rouge&quot;&gt;parallel()&lt;/code&gt;调用即可实现无状态运算的并行化。&lt;/p&gt;
-
-&lt;p&gt;同时，一些”历史包袱”也深深地影响着Java的实现方式，包括基本类型不是对象，以及泛型接口的类型设计特性等导致某些接口看起来比较臃肿和罗嗦。
-早期Java的简单性早已经消失殆尽了，因为它同样随着时间的推移加入了面向对象、泛型编程、注解、函数式编程等复杂的特性；
-也许这是作为大规模采纳的程序语言不可避免的老路。&lt;/p&gt;
-
-&lt;p&gt;总体上来看，这些问题依然是瑕不掩瑜，大部分情况下普通程序员不需要被困扰过多。
-随着时间的推移，业界的大规模采纳应该不是什么问题。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="java" /><category term="programming" /><category term="language" /><category term="fp" /><category term="pattern" /><category term="design" /><category term="optional" /><category term="stream" /><summary type="html">Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击； 它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</summary></entry><entry><title type="html">基于风险驱动的恰如其分的软件架构</title><link href="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/" rel="alternate" type="text/html" title="基于风险驱动的恰如其分的软件架构" /><published>2016-05-14T00:00:00+08:00</published><updated>2016-05-14T00:00:00+08:00</updated><id>http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture</id><content type="html" xml:base="http://www.skyscribe.me/post/2016/05/14/risk-driven-software-architecture/">&lt;p&gt;随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了&lt;strong&gt;客户对交付时间和质量&lt;/strong&gt;的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以&lt;strong&gt;借助各种成熟的基础设施和成熟完善的开发工具&lt;/strong&gt;在很短的时间内完成复杂的功能。然而&lt;strong&gt;软件架构和抽象洞察能力&lt;/strong&gt;这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。
-&lt;!--more--&gt;&lt;/p&gt;
-
-&lt;p&gt;可惜任何具体技术上的进展都依然&lt;strong&gt;没有能从根本上轻易解决软件的核心复杂性&lt;/strong&gt;，即所谓&lt;a href=&quot;https://en.wikipedia.org/wiki/No_Silver_Bullet&quot;&gt;没有银弹&lt;/a&gt;；软件架构的演进也是如此，传统的大规模预先设计的方式固然慢慢变得不合时宜，站在较高的系统层次上，合适的软件架构仍然有巨大的现实意义。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;假设教练和新手（初出茅庐的新队员）正在观看同一场比赛，教练所能察觉到的内容远远超过新手。这并非是因为教练火眼金睛，而是因为他掌握了某种无形的武器。通过一整套&lt;strong&gt;思维抽象&lt;/strong&gt;，教练能够投过现象看到本质，把对原始现象的感知转换为对目前局势简明扼要的理解。例如，教练看到传球的一瞬间，就会联想到某种战术的成功。尽管教练与新手观看了同一场比赛，但是教练可以更好的理解比赛。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Gegore Fairbanks博士在其《恰如其分的软件架构》一书的概述中反复采纳了上述的隐喻来阐释&lt;strong&gt;抽象思维和精炼模型&lt;/strong&gt;的重要性；因为这是软件架构最为根本的部分，是复杂软件系统最为本质和核心的部分。计算机科学经过几十年的发展，形成了一些非常基本的解决问题的思路，包括分治，抽象和知识积累；合格的架构师则需要审时度势，深入的理解所要解决的具体问题领域的最本质的问题，适时的选择合理的抽象，对系统做&lt;strong&gt;合理的划分从而能有效的分而治之又不引入过多的边界耦合&lt;/strong&gt;问题，同时还要巧妙地将领域知识映射到具体的软件实现上来。&lt;/p&gt;
-
-&lt;h2 id=&quot;知识的重要性不应被低估&quot;&gt;知识的重要性不应被低估&lt;/h2&gt;
-&lt;p&gt;这里知识的重要性往往容易被忽略，尤其是容易被&lt;strong&gt;一些断章取义的&lt;/strong&gt;对爱因斯坦关于&lt;a href=&quot;http://quoteinvestigator.com/2013/01/01/einstein-imagination/&quot;&gt;想象力比知识更重要&lt;/a&gt;的主张的引用所蒙蔽；因为软件工程问题比较不同于前沿物理理论的探索，实际软件工程需要解决很多关于人的协作的问题，而不仅仅是纯粹探索具体的软件技术本身。现实的工程实践中，有太多的软件工程师将聪明才智花费在编程语言细节的追求和优化上，却对&lt;strong&gt;大的软件系统的职责分割和协作交互方式投入关注太少&lt;/strong&gt;，从这个角度上来说，掌握再多的具体变成语言的细节可能对整体的帮助也不会帮助太多，因为&lt;strong&gt;大部分编程语言在一些细节问题的处理上其实是大同小异&lt;/strong&gt;，而对于粗粒度的业务逻辑的抽象处理能力上，编程语言的支持其实又相当有限。设计模式试图从纯技术的角度来提炼一些公用的范式，然而终究和具体需要解决的领域问题关系甚远 - 我们需要的更多是关于&lt;strong&gt;如何思考整个系统的分割和协同解决整体问题的知识&lt;/strong&gt;，譬如同样是用于解决一个关于日志文件的存储问题，可以有一些不同的解决思路&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;采用本地的日志文件&lt;/li&gt;
-  &lt;li&gt;采用中央数据库的方法来存储&lt;/li&gt;
-  &lt;li&gt;采用分布式文件系统加索引来支持快速检索的技术&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;对于软件架构师而言，不了解这些具体技术及其背后的优缺点和应用场景，自然无法对真实需要解决的领域问题选择合适的解决方法。这里&lt;strong&gt;了解相关的知识是解决问题的重要前提&lt;/strong&gt;条件，如果不具备相关的知识而是仅仅选择一个理论上可能可以解决当前问题的方案，然后寄希望于之后发现问题再行逐步解决不是一种负责任的做法。所谓脱离了具体知识的想象力，只能是纸上谈兵光说不练假把式，将架构师应该负的责任都推给了救火队长。&lt;/p&gt;
-
-&lt;p&gt;起码从知识积累的角度来说，软件架构的选择和维护不是一个容易的工作，需要大量的现有知识和对业务场景的仔细分析，才能从众多可能的解决方法中&lt;strong&gt;找到一个最适合具体场景&lt;/strong&gt;的解决方案出来，将其转化为合理的软件概念和抽象，最终生成可以运行的代码。&lt;/p&gt;
-
-&lt;h2 id=&quot;为什么需要风险驱动的架构&quot;&gt;为什么需要风险驱动的架构&lt;/h2&gt;
-&lt;p&gt;按照上述的思路，软件架构是一个&lt;strong&gt;成本相当高&lt;/strong&gt;又相当费时的工作，架构师需要对所处理的领域问题做深入的探讨、分析和分解，根据已有的解决方案做合理的评估，选出最合适的匹配才能力保最终实现出来的软件系统满足目标客户的需求，为客户创造价值的同时自己的组织也从中获取收益。可惜在敏捷开发思想日益深入人心的今天，绝大部分组织没有可能有这么多的时间让架构师做太完备的分析而不产出一行代码，你晚发布一个月，可能你的竞争对手就已经占领了更多的市场，取得更多客户的订单。&lt;/p&gt;
-
-&lt;p&gt;最理想的情况是，你的项目可能刚好是一个有很多成功先例的项目，那么仅需要&lt;strong&gt;重用那些历经考验的架构&lt;/strong&gt;做合适的适配即可投入使用；如果你面临的是一个相对很新的领域而没有现成的架构方式可以参考，你就需要特别小心谨慎的分析思考了。更可能的情况是，一个系统中有一些领域是相对成熟的有现成的方案，而另外一些子领域则可能是问题重重，需要比较大的投入去分析和考量。风险驱动的方式采用&lt;strong&gt;和项目优先级对齐&lt;/strong&gt;的架构设计方式，通过对项目优先级的分析识别出相对合理的风险优先级，再基于这些风险优先级来决定做多少架构的工作，以及需要选择什么样的技术来解决高风险的问题。&lt;/p&gt;
-
-&lt;h2 id=&quot;如何决定架构的重要性&quot;&gt;如何决定架构的重要性&lt;/h2&gt;
-&lt;p&gt;具体的就是如何判断对于某些具体的问题架构是至关重要的，而那些情况下不是。譬如开发一个现实商品细节的手机呈现页面，架构就是是无关紧要的，只需要开发者有足够的软件知识和清晰的界面布局约束，就可以以较低的风险完成编码测试并交付给客户；相反当你开发一个实现自动驾驶汽车的刹车子系统的软件模块的时候，则需要时刻关注整个自动驾驶系统的架构，因为一个微小的错误判断可能轻则导致车辆失控撞上马路旁边路灯，重则撞上前方静止等待红灯的车辆，引发严重的事故。&lt;/p&gt;
-
-&lt;p&gt;对于&lt;strong&gt;大规模或者复杂度高&lt;/strong&gt;的（有很多相关开发/测试等人员牵涉其中）系统，我们&lt;strong&gt;需要格外重视其软件架构&lt;/strong&gt;，具体而言&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;如果可能的解决方案空间很少，或者很难设计出满足要求的解决方案的系统，软件架构的风险也非常高，譬如设计一个对吞吐量、可靠性、实时性都有相当要求的系统，需要仔细的权衡那些具体的技术可以采用，可能会有哪些现在的风险&lt;/li&gt;
-  &lt;li&gt;生死攸关的系统或者&lt;strong&gt;失败风险极高&lt;/strong&gt;的系统，譬如你在开发一个网络中间设备控制器软件，改软件下游有相当多的终端设备相连，任何时候改控制器软件发生故障或者性能下降，下游的设备都会受到波及从而招致客户的抱怨；这种情况下架构的决策以及权衡也变得相当重要&lt;/li&gt;
-  &lt;li&gt;对&lt;strong&gt;质量有相当高要求&lt;/strong&gt;的系统，譬如高可用性约束的系统，对系统发生故障导致不可用的时间和故障修复时间有明确的高可靠性要求，那么具体设计中就需要考虑使用那些高可用技术既保证系统的一致性得以满足又能够有适当的备份机制提供热切换，始终尽量保持服务处于不中断状态&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;如何做风险驱动模型&quot;&gt;如何做：风险驱动模型&lt;/h2&gt;
-
-&lt;p&gt;既然风险驱动架构的目的是&lt;strong&gt;期望用最小的架构技术去降低最紧迫的风险&lt;/strong&gt;以达到事半功倍的效果。随之而来的就是具体采用怎样的步骤来达到目标,概括起来可以用如下的步骤&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;识别系统的风险，对这些风险排定优先级；这些在专门的风险管理知识中有专门的介绍，包括定性分析方法和定量分析法等，比较正规的办法是使用风险矩阵，包括美国的军方标准MIL-STD-882D，当然大部分软件组织在设计计算机系统的时候不会这么正规。&lt;/li&gt;
-  &lt;li&gt;选择运用一组技术，这些技术必须是可以用来合理的降低风险而不是增加系统的风险，同时能完成功能需求&lt;/li&gt;
-  &lt;li&gt;评估风险减低的程度&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;风险驱动模型的核心在于始终将风险放在极为显著的位置，充分将风险暴露出来，考虑其带来的影响并采用合理的技术解决之。很多情况下，特性驱动的开发模型过于关注对基本功能的完成情况而选择对系统重要的非功能风险置之不理，直&lt;strong&gt;到系统功能完成差不多了才来审视这些质量属性和约束，往往这个时候已经到了项目的维护期而为时已晚&lt;/strong&gt;，早期对这些风险的缺乏重视导致项目的维护难以为继而失败甚至推倒重来。&lt;/p&gt;
-
-&lt;p&gt;有可能出现的一个问题是，不同的开发人员对风险的评估和认识和你的不同，这个时候可能就需要仔细的评审和和基于事实的一些评估；甚至要做一些简单的原型验证工作。&lt;strong&gt;这些工作都是恰当而必要的，因为你始终工作在方法优先级较高的风险&lt;/strong&gt;上。&lt;/p&gt;
-
-&lt;h3 id=&quot;选用什么样的技术&quot;&gt;选用什么样的技术&lt;/h3&gt;
-
-&lt;p&gt;在这个语境下，技术是个很宽泛的字眼，往往关注的是一些独立于具体领域问题的技术，如设计模式或架构模式来分解系统，对领域进行建模采用&lt;a href=&quot;https://en.wikipedia.org/wiki/Domain-driven_design&quot;&gt;领域驱动设计&lt;/a&gt;,做原型测试等等。任何特定的技术都只是擅长于解决某些类型的风险，但并不一定适合于解决其它风险，譬如吞吐量分析和原型测试有利于降低性能风险，但并不能解决系统可靠性的风险。有些风险可能有多种技术手段可以解决，而有些特定的风险则必须结合多种技术才能解决，因此不能一概而论或寄期望于有一个“万能手册”&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;如果你面临 &lt;X&gt; 风险，请使用&lt;Y&gt; 技术降低它。&lt;/Y&gt;&lt;/X&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;有意义的是这种根据风险来选择技术的思路，它可以帮助我们提高工作的效率,&lt;strong&gt;避免在一些低效的技术上浪费时间或者资源&lt;/strong&gt;，但同时又不忽略那些真正关乎项目成败的风险。&lt;/p&gt;
-
-&lt;p&gt;具体实践上我们也不能根除项目的所有风险，因为消除风险的成本是巨大的，所以必须结合项目的优先级，权衡工程风险和非工程风险，合理采用技术手段和非技术（项目管理）手段，综合考虑技术因素和非技术因素最终确保项目的成功。&lt;/p&gt;
-
-&lt;h2 id=&quot;何时停止&quot;&gt;何时停止？&lt;/h2&gt;
-&lt;p&gt;合理把握设计和架构的度是个复杂的问题，因为时间成本是此消彼长的关系；用在设计和分析的时间太多了，能分配在构建和测试上的时间就会相应减少。因此我们需要一些中庸之道，采用&lt;strong&gt;恰如其分&lt;/strong&gt;的软件设计，即不做过多又不能忽视可能是实际项目实施陷入困境的风险。因而一个简单的模型指导原则是&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;为架构所付出的努力应该与相应失败的风险相称&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;譬如如果性能风险微不足道，就没必要在性能测试或者分析优化数据结构上浪费太多的时间。然而当性能变的直观重要的时候，就必须从一开始尽量想清楚目标环境的各种性能约束条件，选择合适的算法和数据结构，仔细权衡各种网络和IO开销，及早开始做性能测试甚至可以在开始阶段多做原型验证，确保设计没有大的缺陷。&lt;/p&gt;
-
-&lt;h2 id=&quot;架构和设计的演进&quot;&gt;架构和设计的演进&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://randomarchitecture.files.wordpress.com/2013/07/bduf-vs-emergent-design1.png?w=441&amp;amp;h=179&quot; alt=&quot;BDUF_vs_emergent_design&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;正如马丁·福勒在其&lt;a href=&quot;https://martinfowler.com/articles/designDead.html&quot;&gt;演进式架构&lt;/a&gt;中所说，系统的设计会随着具体的实现的增长而增长；过往的软件工程历史表明，演进式设计一直充满了争议，局部而又不协调的设计决策会带来一系列的混乱，从而制造出一个大杂烩系统，导致系统的可维护性下降，进一步阻碍系统的进一步演进。甚至于一不小心还会陷入&lt;a href=&quot;http://www.laputan.org/mud/&quot;&gt;大泥球架构&lt;/a&gt;的泥潭。&lt;/p&gt;
-
-&lt;p&gt;当然随着敏捷开发方式的日渐流行和各项重构技术的发展，演进式架构以及渐渐克服了上述这些缺点从而再度焕发生机，奥妙就在于各种更为敏捷的工程实践，包括重构、测试驱动开发、持续集成等越来越深入人心。&lt;/p&gt;
-
-&lt;p&gt;传统的方法上来说，也有预先计划式设计这种从建筑行业借鉴来的方式（架构师这个名称也是从建筑行业来的），要求实现做好周密的设计然后再开工写代码做测试；只是时至今日一见很少有人主张采用预先大量设计(&lt;a href=&quot;https://en.wikipedia.org/wiki/Big_Design_Up_Front&quot;&gt;Big Design Up Front&lt;/a&gt;)。&lt;/p&gt;
-
-&lt;p&gt;介于两者之间的是预先小量的设计，采用这种方式可能是更好的一种这种，譬如在一开始阶段，通过对系统风险的分析对最大的风险采用预先设计的方式防范最首要的风险，然后随着项目的逐步推进，采用演进式设计来逐步完善整个系统的整体设计图景；当然这里最重要的前提是，&lt;strong&gt;确保重构、持续集成、测试驱动开发等关键的敏捷开发实践能够落到实处&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;T.B.D&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="engineering" /><category term="software architecture" /><category term="agile" /><summary type="html">随着岁月的推移，软件系统的规模、功能、复杂度都在呈现数量级增长，随之而来的变化带给软件开发者的压力与日俱增，更不要说各种敏捷方法和快速开发方法的流行极大地吊起了客户对交付时间和质量的期望。开源软件的日趋完善和其对应社区的指数级增长带来了数量庞大的框架、库等基本构造块，开发者可以借助各种成熟的基础设施和成熟完善的开发工具在很短的时间内完成复杂的功能。然而软件架构和抽象洞察能力这一无形的武器依然只为少数资深的开发者所掌握，所谓的软件架构随着软件工程的进展也变得和以往更加不同，闭门造车式的旷日持久的分析-设计-编码-测试-集成-交付流程逐渐被绝大多数组织所抛弃。</summary></entry></feed>
+&lt;p&gt;&lt;strong&gt;轻量级的文档工具&lt;/strong&gt;往往使维护和修改变得更加容易，因为设计输出本身也是一个迭代的过程；便于多人评审和协作显得尤其重要。目前主流的方式基本都是基于Markdown和Plantuml的；前者可以用来存放文本，后者则可以用文本的格式来描述UML图。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="agile" /><category term="methodologies" /><summary type="html">在目前大部分的软件开发组织中，敏捷开发已经成为毋庸置疑的标配。随着数位技术大神和布道师的宣扬和数量庞大的敏捷教练的身体力行式推广，商业环境和客户需求变更速度的日益加快，采用端到端交付周期更短的敏捷开发过程基本已经成为项目成功的必要条件。</summary></entry></feed>
