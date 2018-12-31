@@ -1,0 +1,1292 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>TCP几个小选项引发的思考 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="许久不查TCP相关的问题，今天下班前被一同事拦下要帮忙，说他碰到了__奇怪__的问题。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="TCP几个小选项引发的思考">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/">
+
+
+
+  <meta property="og:description" content="许久不查TCP相关的问题，今天下班前被一同事拦下要帮忙，说他碰到了__奇怪__的问题。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="TCP几个小选项引发的思考">
+  <meta name="twitter:description" content="许久不查TCP相关的问题，今天下班前被一同事拦下要帮忙，说他碰到了__奇怪__的问题。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2009-10-19T19:18:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="TCP几个小选项引发的思考">
+    <meta itemprop="description" content="许久不查TCP相关的问题，今天下班前被一同事拦下要帮忙，说他碰到了__奇怪__的问题。">
+    <meta itemprop="datePublished" content="October 19, 2009">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">TCP几个小选项引发的思考
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 955 字，大约需要 2 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>许久不查TCP相关的问题，今天下班前被一同事拦下要帮忙，说他碰到了__奇怪__的问题。</p>
+
+<p>拿下wireshark抓到的包一看，半天才明白他所说的疑惑是指他每次发送一个数据包，通信对端就回了一个ACK包，由此就直接怀疑是否对方关闭连接或者建立新的连接了。</p>
+
+<p>花了半天功夫，总算解释清楚ACK包其实是很正常的数据包（带数据的包也有ACK标志的，wireshark只不过是把不带数据的纯协议ACK包在描述信息里边直接标出来了而已），同事也算是个很老练的Java高手了，对这点基本的小问题有一些疑义，起初是让我有点疑惑的。</p>
+
+<p>不过总算讨论清楚了这个ACK没有任何问题，本以为他遇到的根本不是问题，岂料他又抛出了一个问题：</p>
+
+<blockquote>
+  <p>既然ACK不是造成问题的症结，为什么我要发送三个数据包，只有前一个的ACK收到之后，下一个包才能发的出去？每个数据包的发送和受到ACK的时间间隔大于15ms，而他们的系统需求规定那个间隔必须小于15ms。</p>
+</blockquote>
+
+<p>这个问题算是有点深入一点了，即使认为15ms的延迟是正常的TCP协议栈行为，那么他的三个包只能顺序发出去就有些诧异了，而且据说是上千个设备都是如此规律，那么这种规律本身就不正常了。</p>
+
+<p>首先的怀疑当然是TCP的buffer满了，导致send发送阻塞，不过TCP的数据内容倒是显示没有那个问题，因为他发送的三个包每个都只有几十个字节。
+剩下的情况大概只有一种，就是应用程序手工设置了buffer大小，甚至是设置了<strong>SND_BUF</strong>为0（其实只要小于他的最小PDU长度），导致他的协议交互变成了“停等协议”了；因为每一次发送的时候，buffer缓冲都不够用，所以send调用必然是被阻塞，直到收到前一个包的ACK数据然后才能继续；不熟悉TCP协议栈的，看到这种现象，就怀疑是那个ACK回复的有问题了。</p>
+
+<p>最后他又提出了一个问题，为什么有时候他一次发送了三个包，抓包的时候只有两个？恰巧这又是一个TCP控制选项的问题，鼎鼎大名的“Nagle算法“在底下运作的结果了。</p>
+
+<p>为了确认猜测不是问题，让他Show了一下代码，确认两种现象对应的是不同的socket，可惜的是后一个socket的创建代码是无法看到了。</p>
+
+<p>这些小选项引起都是非常基本的TCP协议栈原理性知识，为何习惯了Java抽象和自带类库的人会被这种问题产生的表面现象所疑惑？</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/debugging" class="page__taxonomy-item" rel="tag">debugging</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2009-10-19T19:18:00+08:00">October 19, 2009</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=TCP几个小选项引发的思考 https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2009/10/19/tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="tcpji-ge-xiao-xuan-xiang-yin-fa-de-si-kao">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

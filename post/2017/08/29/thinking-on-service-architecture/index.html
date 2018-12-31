@@ -1,0 +1,986 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>架构服务化的一点思考 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。本文试图对这些概念和架构思想做一简单的分析和梳理。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="架构服务化的一点思考">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/">
+
+
+
+  <meta property="og:description" content="微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。本文试图对这些概念和架构思想做一简单的分析和梳理。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="架构服务化的一点思考">
+  <meta name="twitter:description" content="微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。本文试图对这些概念和架构思想做一简单的分析和梳理。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-08-29T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="架构服务化的一点思考">
+    <meta itemprop="description" content="微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。本文试图对这些概念和架构思想做一简单的分析和梳理。">
+    <meta itemprop="datePublished" content="August 29, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">架构服务化的一点思考
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 5256 字，大约需要 13 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；
+似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。
+本文试图对这些概念和架构思想做一简单的分析和梳理。</p>
+
+<!--more-->
+
+<h2 id="服务架构的前世今生">服务架构的前世今生</h2>
+<p>考虑到微服务其实仍然是基于服务的架构方式，既然有“微”则必然有“宏”与之对应;只是之前大家都是直接叫基于服务的架构而已。</p>
+
+<h3 id="没有服务的架构">没有服务的架构</h3>
+<p>在软件工程的早期洪荒时代，所有的软件都是按照最原始的模块化思路组织和开发的;那时候编程语言基本是C/C++的，各个子部分之间采用头文件的方式来模拟相互之间的接口，源代码文件作为实现之间的隔离。
+这种情况下，各个逻辑<strong>子部分的约束基本是比较弱的</strong>，要么是依赖于组织内部的约定，要么是依赖于一些比较hack的方式。
+这种方式可以认为是基于内部API和调用约定的无服务的架构方式。应用程序要么是独立组织的，要么是通过API定义好接口，然后各个模块分别开发，再统一连接起来形成最终的可执行程序。</p>
+
+<p>这么做的弊端非常明显，因为接口的定义极大地影响系统集成的效率，以至于各个模块独立开发的时候没什么问题，一旦到了集成阶段则困难重重，迟迟不能发布出来。
+个人觉得这个问题的本质在于，<strong>完美的API定义是非常困难的</strong>，需要极高的技术能力和对问题业务领域的深刻分析。</p>
+
+<h3 id="unix编程哲学">Unix编程哲学</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Unix_philosophy">Unix哲学</a>倡导如下的核心实践如下</p>
+<blockquote>
+  <ol>
+    <li>Write programs that do one thing and do it well.</li>
+    <li>Write programs to work together.</li>
+    <li>Write programs to handle text streams, because that is a universal interface.</li>
+  </ol>
+
+  <p>–Mcllory, inventor of Unix pipe</p>
+</blockquote>
+
+<p>它推崇用多进程和管道的方式开发复杂应用，每个小程序负责一件事儿，进程之间采用管道链接输入和输出。
+由于程序之间的输入和输出缺乏统一的规范化，<strong>Unix哲学推荐用基于文本的进程间接口</strong>来组织程序，以便调试和分析、诊断等。</p>
+
+<p>美中不足的是，它对于<strong>具体怎么实践这些基于文本的接口</strong>却没有统一的建议或规定，文本格式却是需要被程序去理解的，其中应该包含这负责的业务逻辑而不是简单的计算机字符串，简单按照这种设计哲学去开发应用程序依然是困难重重。</p>
+
+<p>另外一个难题是，Unix程序都假设是基于单个物理机器的运行环境，因为早期的Unix都是大型机，它无法预料到后期廉价PC的崛起。
+各种围绕本地IPC机制设计的管道、系统信号等通信方式和TCP/IP的网络环境有很大的差异，导致代码并不能很好的复用。</p>
+
+<p>然而Unix设计哲学所推荐的这种<strong>系统职责分割方式和基于文本的协议交互对后来的微服务有巨大的影响</strong>。</p>
+
+<h3 id="分布式对象技术">分布式对象技术</h3>
+<p>90年代后期，微软提出了组件化开发的COM以及DCOM开发模型，使用接口来达到软件复用，最终程序通过接口定义和动态链接和查找实现分布式开发。
+而Java社区则走向了分布式对象的模式，提出了JavaEE并和C++社区的CORBA对象代理技术兼容。
+这种情况下，对象分布式技术的着眼点是基于OOA分析的划分。</p>
+
+<h3 id="soa架构">SOA架构</h3>
+
+<p>JavaEE提出也提出了基于服务的架构方式，它在很多场合也往往被成为<strong>Big Web Service</strong>,其典型特征如下</p>
+<ul>
+  <li>复杂的系统被分割为一个一个相互通信的接口</li>
+  <li>使用WSDL来定义服务和服务之间的接口的通信</li>
+  <li>该<strong>通信方式是基于HTTP+XML+SOAP封装</strong>，消息模型为<strong>基于请求/响应</strong>的RPC模型，其中定义了消息通信的消息结构和通信端点抽象;
+支持通过工具将WSDL转换为对应的代码，简化接口编码、解码的工作量</li>
+  <li>高级特性支持安全、服务注册和发现，以及多版本向后兼容等</li>
+</ul>
+
+<p>SOA极大地提高了企业应用开发的效率，采用SOA架构的软件曾被认为是面向未来的，当时的业界对SOA的期望一如今天对微服务的期许。</p>
+
+<p>它的<strong>缺陷在于过于笨重</strong>，部分原因在于XML本身的臃肿和复杂;实际场景中可能用于XML/SOAP解析和校验的开销变得过于巨大以至于性能很糟糕。
+XML过于臃肿的特性导致大家追求通过压缩消息来节省网络带宽以优化性能，然而压缩和解压反而需要消耗额外的CPU资源。
+另一部分则是因为JAX-WS规范的一些高级特性是可选的，而<strong>某些特性是由跳过了HTTP协议直接在SOAP中实现</strong>的;然而HTTP协议本身也提供了丰富的特性，弃之不用自然会导致资源的浪费。</p>
+
+<p>此外基于RPC的通信方式并不是在所有方式下都适合，因为其隐含的模型是同步的请求、响应;实际的业务逻辑都直接定义在这些接口中，造成<strong>业务逻辑和接口直接产生了依赖</strong>。如果频繁的因为需求变动导致WSDL接口定义变更，后向兼容又会变成一个沉重的负担。当然这个也是基于服务的方式必须要面对的问题。</p>
+
+<h3 id="web技术的发展和restful架构风格">WEB技术的发展和RESTful架构风格</h3>
+<p>WEB技术在最近20年也经历了深刻的发展，从基于B/S模型的厚后端模型为起点，到基于Ajax（XML）技术的风靡一时，再到REST风格的以资源为中心的厚客户端模型，越来越多的业务逻辑被搬到了前端处理，MVC模型最终占据了大部分应用场景。</p>
+
+<p>RESTful风格的架构强调使用HTTP协议本身的语义模型，用HTTP的方法来描述资源的CRUD操作，用URL来规范操作的资源，
+接口定义上<strong>采用资源为中心的方式有效地减小了和业务流处理的耦合</strong>，相比传统的RPC方式相比，前后段的交互方式与业务流程的耦合更小，更有利于前后段独立发展。</p>
+
+<h3 id="领域驱动开发">领域驱动开发</h3>
+<p>Eric Evans通过他划时代的《领域驱动设计》一书将面向对象技术推向了新的深度;通过提倡业务统一语言，领域对象的识别和绑定上下文的分析等技术，
+实现了<strong>软件架构能更好地随着业务的的变更而低成本的演进</strong>这一需求。
+恰当的领域职责划分，以及领域专家和软件技术专家的通力合作和互相理解更容易生产出可维护、易扩展、更容易拥抱实际商业环境变化的系统。</p>
+
+<h3 id="软件开发方法学和云计算基础设施革命">软件开发方法学和云计算基础设施革命</h3>
+<p>敏捷软件开发和持续集成等实践在过去的近20年几乎席卷了软件开发领域的大部分角落。
+<strong>持续发布以及DevOps运动</strong>则进一步减小了软件开发的反馈周期，深刻地改变了大部分传统软件测试人员的工作方式和线上运维的成本结构。</p>
+
+<p>传统的先设计，再编码内部测试，最后再搞一个旷日持久的大集成及系统测试的开发模式再也不能适应追求快速响应的企业软件市场。
+<strong>更快的设计、测试、发布上线速度</strong>，成为影响企业成败的一个关键因素之一。</p>
+
+<p>云计算技术的日趋成熟将企业开发从传统厚重的基础设施维护工作中解放了出来。
+以往那种设计实现一个企业应用系统需要考虑诸多服务器部署、存储、安全、运营维护等一系列复杂的底层细节被少数提供云服务的大公司统一按需提供和管理;
+商业公司可以将研发精力聚焦在业务逻辑的部分更快地将产品推向市场，这也是<strong>社会分工更加深化</strong>的结果。
+容器技术（docker为代表）的飞速发展和原生云应用软件概念在不损失性能的情况下标准化了基础设施的管理和编排，极大地简化了中间件以及第三方组件的复用过程。</p>
+
+<h2 id="站在巨人肩上的微服务">站在巨人肩上的微服务</h2>
+<p>从某些方面看，微服务架构可谓是站在巨人的肩上诞生的新的弄潮儿;
+它是在面向对象深入发展到领域驱动设计的基础上，随着WEB技术的深度发展和RESTful的日益流行而自然产生的。其特点和要求如下</p>
+<ul>
+  <li>采用<strong>业务领域特点来划分服务边界</strong>，其基本思路是DDD的</li>
+  <li>服务的<strong>粒度要尽量的小</strong>，符合Unix的编程哲学，每个服务只做一件事并将其做好;有的建议是一个服务最好能被一个小的开发团队（比如Scrum的5～7人模型）负责分析、设计、开发、测试、发布等所有工作。</li>
+  <li><strong>每个服务是一个进程</strong>，对外提供基于RESTful风格的HTTP服务（也有基于Protobuf的gRPC微服务框架）</li>
+  <li>服务接口提供多个版本，每个服务负责自己的向后兼容性，方便<strong>独立开发和部署</strong></li>
+  <li>服务的<strong>设计本身需要预先考虑到可能的错误</strong>情况，从设计的角度需要预料到错误发生是一种正常情况</li>
+  <li>服务本身需要<strong>无状态，便于扩展</strong>;需要预料到服务示例可能有多个副本同时在运行</li>
+</ul>
+
+<p>一些隐含的假设还有</p>
+<ul>
+  <li><strong>添加新服务的代价很低</strong>，往往数小时之多数天就可以添加一个新的服务并能和现有系统集成在一起</li>
+  <li>服务的拆分需要和业务模型、领域划分想匹配;软件技术专家和业务领域专家能够紧密合作，快速变更;这是领域驱动开发的预设条件之一</li>
+  <li>采用敏捷开发技术和<strong>团队最熟悉的编程语言、框架及技术栈</strong>，但是也不宜过多;否则团队的合作又会变得难以掌控</li>
+  <li>组织开发结构和服务的拆分能互相匹配，减小组织沟通成本，最好是组建跨职能的团队;这也是由康威定律所决定的</li>
+  <li>采用服务发现和监控机制，以及负载均衡设施便于处理分布式应用场景，业务流的追踪和监控也会是新的挑战（想对于传统架构）</li>
+  <li>基于容器技术</li>
+</ul>
+
+<h2 id="微服务是银弹吗">微服务是“银弹”吗</h2>
+<p>正如Fred Brooks在1986年所语言的那样，软件开发从来没有出现一个满盘通吃的银弹;
+虽然Brooks只是比较保守地估计了其后十年的情况，然而最近30年的行业发展依然没有见证银弹的出现。</p>
+<blockquote>
+  <p>there is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.</p>
+
+  <p>– Fred Brooks, 1986</p>
+</blockquote>
+
+<p>不少人满怀希望的认为微服务会打破常规，变成大家梦寐以求的神器，然而我们也见证了太多类似这种预言的屡次落空。
+目前业内主流的观点依然是，微服务不是银弹;企业仍然需要谨慎地依据实际场景谨慎选择使用。</p>
+
+<h3 id="先决条件">先决条件</h3>
+<p>微服务的实施有很多先决条件，需要技术决策者仔细考虑。</p>
+
+<p>首当其冲的是企业的组织结构是否和微服务的拆分和设计想匹配。
+如果团队之间的沟通结构存在很多的层级和结构，微服务的设计和演进的速度就会严重受到影响。
+团队之间有明显的层级汇报或者审批关系会使情况变得更复杂，因为服务的自治性受到巨大的威胁。</p>
+<blockquote>
+  <p>“organizations which design systems … are constrained to produce designs which are copies of the communication structures of these organizations.”</p>
+
+  <p>— M. Conway</p>
+</blockquote>
+
+<p>另外一个不得不考虑的因素是<strong>企业的敏捷开发、持续集成以及发布的能力</strong>。
+如果企业的基础设施不够完善，不能尽快地对开发过程给予反馈，快速迭代难以为继，开发人员很快就会陷入困境，因为整个系统的测试和集成难度相比传统架构更高了。
+没有足够的持续交付能力，微服务落地自然很容易变成无缘之水。</p>
+
+<p><strong>开发人员的技术能力，以及选用的技术框架、编程语言</strong>是否适合成员的技术背景也会成为一个巨大的挑战。
+最好的情况是，能够开发微服务的团队至少也能够应付中对规模的单体应用。
+目前的开发生态更加倡导多语言的混合团队，使得每个团队可以选用自己擅长、喜欢的技术更快的开发自己的微服务，然而这样做也是好坏参半。
+<strong>软件开发活动归根结底是人的活动</strong>，人员的能力不能匹配技术的需求，或者有过多的技术栈以至于超出大部分成员的能力等情况，都需要慎重对待。</p>
+
+<p>正如Martin Fowler在他的<a href="https://www.martinfowler.com/bliki/MicroservicePrerequisites.html">《微服务架构的先决条件》</a>一文中所指出的那样，能力因素是个至关重要的决定因素。
+<img src="https://www.martinfowler.com/bliki/images/microservicePrerequisites/sketch.png" alt="microservice_competence" /></p>
+
+<h3 id="如何实施">如何实施</h3>
+<p>鉴于以上讨论到的这些“坑”，微服务并不是任何时候、任何组织都可以开展;应用微服务同样需要讲究天时、地利、人和。组织的敏捷程度和自动化能力，沟通结构，人员的技术配备能力都缺一不可。</p>
+
+<p>Martin Fower建议的方式是我们总是<strong>可以从传统的单体架构</strong>开始，采用演进式设计的思路逐步过度到微服务架构。
+等到我们<strong>对系统对应的问题域有更深刻的理解</strong>之后，可以自然地按照领域驱动设计的思路仔细地划分服务粒度和范围，将服务拆分出来。</p>
+
+<p>毕竟微服务是基于分布式环境的设计风格，而分布式的设计总是会有各种各样的复杂挑战需要仔细解决。
+如果需要解决的业务领域有很高的实时性要求或者大规模、高并发的需求，拆分和设计的时候更需要小心分析，大胆假设加上仔细的设计和验证。正如Martin在企业应用架构模式中所说的</p>
+<blockquote>
+  <p>First Law of Distributed Object Design: “don’t distribute your objects”</p>
+
+  <p>– Martin Fower, <a href="https://www.martinfowler.com/books/eaa.html">Patterns of Enterprise Application Architecture</a></p>
+</blockquote>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/monolith" class="page__taxonomy-item" rel="tag">monolith</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/soa" class="page__taxonomy-item" rel="tag">SOA</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-08-29T00:00:00+08:00">August 29, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=架构服务化的一点思考 https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="thinking-on-service-architecture">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

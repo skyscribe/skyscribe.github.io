@@ -1,0 +1,1070 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>用C++11/14实现一个现代的异步服务调度库 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="用C++11/14实现一个现代的异步服务调度库">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">
+
+
+
+  <meta property="og:description" content="很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="用C++11/14实现一个现代的异步服务调度库">
+  <meta name="twitter:description" content="很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2015-12-19T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="用C++11/14实现一个现代的异步服务调度库">
+    <meta itemprop="description" content="很多C++项目中都存在一个能够异步调度任务的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。">
+    <meta itemprop="datePublished" content="December 19, 2015">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">用C++11/14实现一个现代的异步服务调度库
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 7156 字，大约需要 17 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>很多C++项目中都存在一个能够<strong>异步调度任务</strong>的基础库；大部分这样的库都是用老的C++语言(98/03)写成的，要么模板元语法满天飞外加各种黑魔法导致维护困难，
+要么是采用传统的宏方式导致维护困难，布满各种隐患。既然C++11/C++14提供了更好用的武器，我也耐不住手痒自己实现一个。</p>
+
+<p>当然，这个是一个新轮子，用很少的代码实现一些核心的想法，同时又额外获得一些对新的C++的更深刻的理解，何乐而不为？</p>
+
+<!--more-->
+
+<h2 id="目标概要">目标概要</h2>
+<p>主要的目的是实现一个能够异步、高效地调用用户任务/服务的库；<strong>具体调用的形式可以由用户指定</strong>。任务以服务的方式存在，可以被存储起来以支持延迟调用；便于服务提供方和服务适用方解耦，增加应用程序的灵活性。</p>
+
+<p>比如A模块向库注册了一个名为<code class="highlighter-rouge">someService</code>的任务，并携带实现定义好的参数签名（参数列表以及类型), B模块可以按照名字来调用这个具体的service实现的任务。</p>
+
+<p>调用的方式可以是</p>
+<ol>
+  <li><strong>异步</strong>的或<strong>同步</strong>的；所谓异步即实际任务执行发生在调用返回之后；同步调用则必须等实际任务执行后才返回</li>
+  <li>阻塞的或非阻塞的：如果指定为非阻塞的，那么存储进来的参数会被临时存放起来(放在一个closure中），等到内部的线程等的合适的时间才调用；当前<strong>调用者的线程不会被暂停</strong>执行，
+而阻塞调用则会直接暂停当前的调用者线程</li>
+</ol>
+
+<p>调用者可以传入一个<strong>任务完成时候的回调</strong>，指定在实际任务执行完毕之后在<strong>同一个线程的上下文中</strong>执行，典型的应用场景是任务完成之后的链式操作，譬如要求A Task执行完毕后，执行一个调用者传入的动作；该动作中可能产生一个新的任务调用。</p>
+
+<p>调用方可以添加一个<strong>局部线型执行约束</strong>（其实是对<a href="http://www.boost.org/doc/libs/1_59_0/doc/html/boost_asio/overview/core/strands.html">Boost.asio strand</a>的模拟) - 譬如要求某些<strong>打了同一个标签</strong>的某些任务<strong>不能被并发执行</strong>；这些打了标签的任务的执行相互之间不需要加显示的锁；而没有带标签的任务可以任意并行调度，类似于操作系统调用进程的affinity特性。</p>
+
+<p>这种特性在一些复杂的应用场景中很有用，譬如某个比较耗费CPU的任务执行的中间，可能需要等待IO等操作，又<strong>不希望堵塞调度线程</strong>，一个简单的想法就是将其分解成多个子任务，那么期望这些子任务不会被交叉执行。</p>
+
+<h3 id="调用属性结构">调用属性结构</h3>
+<p>可以用一个结构来描述这些基本参数组合。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">Callable</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">CallProperty</span><span class="p">{</span>
+    <span class="kt">bool</span> <span class="n">async</span><span class="p">;</span> <span class="c1">//will the job be scheduled asynchronously (under same context)
+</span>    <span class="kt">bool</span> <span class="n">waitForDone</span><span class="p">;</span> <span class="c1">//if interfaceCall will be blocked (for done) or not, will be ignored for async call
+</span>    <span class="n">Callable</span> <span class="n">onCallDone</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">strand</span><span class="p">;</span> <span class="c1">//calls with same strand will be scheduled by same thread, async only
+</span><span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="可变参数">可变参数</h3>
+<p>由于注册的任务可能需要一些运行期的参数在真正调用的点才知道，我们需要支持预先定义好这些参数签名，仅仅在实际调用端才传入具体的参数；即如下的使用方式</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//registration
+</span><span class="n">InterfaceScheduler</span> <span class="n">sched</span><span class="p">;</span>
+<span class="n">sched</span><span class="p">.</span><span class="n">start</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span> <span class="c1">//starting a pool of 4 threads
+</span>
+<span class="kt">bool</span> <span class="n">serviceImpl</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">);</span>
+<span class="n">registerInterfaceFor</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span> <span class="s">"serviceName"</span><span class="p">,</span> <span class="n">serviceImpl</span><span class="p">);</span>
+
+<span class="c1">//calling site
+</span><span class="n">CallProperty</span> <span class="n">prop</span><span class="p">{</span><span class="nb">true</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">Callable</span><span class="p">(),</span> <span class="s">""</span><span class="p">};</span> <span class="c1">//asynchronous call, non-blocking, no strand
+</span><span class="n">sched</span><span class="p">.</span><span class="n">interfaceCall</span><span class="p">(</span><span class="s">"serviceName"</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">CallProperty</span><span class="o">&gt;</span><span class="p">(</span><span class="n">prop</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"actualParam"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>参数的定义可以使用<code class="highlighter-rouge">tuple</code>结合closure来实现灵活的绑定</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">ParaArgsBase</span><span class="p">{};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">ParamArgs</span> <span class="o">:</span> <span class="k">public</span> <span class="n">ParaArgsBase</span><span class="p">{</span>
+    <span class="n">ParamArgs</span><span class="p">(</span><span class="k">const</span> <span class="n">Args</span><span class="o">&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="o">:</span> <span class="n">parameters</span><span class="p">(</span><span class="n">args</span><span class="p">...){}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Args</span><span class="p">...</span><span class="o">&gt;</span> <span class="n">parameters</span><span class="p">;</span>
+
+    <span class="k">static</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">getType</span><span class="p">(){</span><span class="k">return</span> <span class="k">typeid</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Args</span><span class="p">...</span><span class="o">&gt;</span><span class="p">).</span><span class="n">name</span><span class="p">();}</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">I</span><span class="p">,</span> <span class="k">class</span> <span class="err">...</span> <span class="nc">Types</span><span class="o">&gt;</span>
+<span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple_element</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">Types</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">&gt;::</span><span class="n">type</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="k">const</span> <span class="n">ParamArgs</span><span class="o">&lt;</span><span class="n">Types</span> <span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">args</span><span class="p">){</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">parameters</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="设计">设计</h2>
+<p>设计起来比较简单，可以通过几个核心类和典型场景来描述。</p>
+
+<h3 id="核心的类设计">核心的类设计</h3>
+<p>主要的接口类通过一个具体的class - <code class="highlighter-rouge">InterfaceScheduler</code> 来提供，它作为库本身的入口提供；底下封装了线程池细节，允许用户在启动的时候传入内部运行的线程池数量（并发度）；同时提供注册和异步的<code class="highlighter-rouge">interfaceCall</code>接口来调用已注册的服务。具体的业务代码或服务实现类可以使用该class来注册服务或者发起服务调用。</p>
+
+<p>内部实现上，<code class="highlighter-rouge">InterfaceScheduler</code>组合了一个同步的<code class="highlighter-rouge">SyncWorker</code>类来实现同步任务实现，以及一个一个或多个<code class="highlighter-rouge">AsyncWorker</code>类来完成具体某个工作线程上的任务队列。</p>
+
+<p>主要类的职责和写作交互用<a href="https://en.wikipedia.org/wiki/Class-responsibility-collaboration_card">类CRC方法</a>来描述，见下图
+<img src="/assets/async_lib/crc.png" alt="crc_class_design" /></p>
+
+<h3 id="基于接口的注册">基于接口的注册</h3>
+<p>支持多种注册方式;处于<strong><a href="https://dzone.com/articles/how-design-good-regular-api">对称性</a></strong>考虑，一个服务可以注册，也可以被解注册。调用尚未注册的服务或者已经解注册的服务，都会返回错误给调用者。</p>
+
+<ul>
+  <li>注册后才能调用: 这是最<strong>正常</strong>的使用场景; 由于注册的时候尚不知道真正的参数，但是参数签名确实由服务提供者确定的，因此需要使用类型签名。</li>
+</ul>
+
+<p><img src="/assets/async_lib/registerInterface.png" alt="register interface" /></p>
+
+<ul>
+  <li>对注册行为的订阅（观察者）：其它用户可以对某个特定的<strong>服务注册进行监控</strong>，当某个服务被实际注册的时候得到通知。<code class="highlighter-rouge">InterfaceScheduler</code>负责维护这些观察者，并在实际的服务提供者进行注册的时候，以回调的方式通知观察者。如果实际设置观察者的时候，对应的服务以及注册，则直接回调通知观察者。
+这样服务的使用者可以在使用之前用一个回调做检查，确保服务被真正注册以后，才会发起调用，减小耦合。</li>
+</ul>
+
+<p>所有在服务注册之前订阅的观察者（不管有多少个）在实际服务被注册的时候会被逐一通知到（同样<strong>有阻塞操作</strong>）并被清理。服务注册和观察者唤醒可以并发但不能有Race Condition。</p>
+
+<p><img src="/assets/async_lib/subscribeForRegistration.png" alt="subscribe for registration" /></p>
+
+<h3 id="使用场景">使用场景</h3>
+
+<p>以下是一些具体使用的例子，包括</p>
+
+<ul>
+  <li>异步非阻塞的场景 （最常用场景）: 实际执行的动作会被保存为闭包放在内部的任务队列上；当线程池有空闲调度到给定任务的时候，之前注册的回调会在内部线程池的上下文执行。
+调用者如果提供了完成回调，则需要保证回调中的操作<strong>不能阻塞</strong>。实际的动作执行和完成通知都是在用户库内部的线程池上执行，
+所以调用者需要处理好<strong>数据并发访问的安全性问题</strong>，加锁或者其它数据一致性保证措施。</li>
+</ul>
+
+<p><img src="/assets/async_lib/asyncNonBlock.png" alt="asyncNonBlockCall" /></p>
+
+<ul>
+  <li>异步的阻塞调用: 这里其实是用异步操作来实现程序逻辑上的同步；调用者发起调用之后，并不直接返回而是等待实际任务被执行完毕后才能返回。
+这里的阻塞调用可以确保调用者返回后，对应的操作一定是完成的；显然中间过程调用者线程会被阻塞。</li>
+</ul>
+
+<p><img src="/assets/async_lib/asyncAndBlock.png" alt="asyncAndBlockCall" /></p>
+
+<ul>
+  <li>同步的阻塞调用</li>
+</ul>
+
+<p><img src="/assets/async_lib/syncAndBlock.png" alt="syncAndBlockCall" /></p>
+
+<ul>
+  <li>Strand局部Affinity约束: 这种场景下，某些任务会被显示排队放在一个线程中执行，确保没有<strong>并发调度</strong>的发生，从而这些调用之间是可以保证不会产生Race Condition；
+调用方可以避免显示加锁的麻烦。
+当然多个任务之间的顺序没有很强的保证，最简单的实现是保留发起调用的顺序来（内部放在一个队列上）一一调度。</li>
+</ul>
+
+<p><img src="/assets/async_lib/strandCall.png" alt="strandCall" /></p>
+
+<h2 id="实现">实现</h2>
+<p>整体的实现风格是基于闭包和函数对象的；由于C++11/14新引入了可变的模板参数，用该特性实现调用端的可变参数列比传统的C++03
+枚举所有可能（其实往往枚举9～19个）的泛型参数个数要省事儿很多。</p>
+
+<p>线程池的实现也没有什么特别之处，只是实现异步阻塞调用的时候，C++11的lambda表达式更有利于我们写出干净的代码。</p>
+
+<h3 id="服务注册类型安全性检查">服务注册类型安全性检查</h3>
+<p>服务注册的时候需要编码进类型信息，方便后续调用的时候进行类型签名检查，防止参数不匹配。
+这些检查都是通过一些全局的工具类函数来实现的</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="p">,</span> <span class="k">class</span> <span class="nc">ActionType</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">void</span> <span class="n">registerInterfaceFor</span><span class="p">(</span><span class="n">InterfaceScheduler</span><span class="o">&amp;</span> <span class="n">sched</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">ActionType</span> <span class="n">action</span><span class="p">){</span>
+    <span class="c1">//Check templateype-safety as possible, lambdas/binds shall have targets, while functions may not
+</span>    <span class="k">typedef</span> <span class="n">ParamArgs</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;</span> <span class="n">ActualType</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">ActualType</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">FuncType</span><span class="p">;</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_convertible</span><span class="o">&lt;</span><span class="n">is_convertibleActionType</span><span class="p">,</span> <span class="n">FuncType</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">,</span> <span class="s">"Incompatible type!"</span><span class="p">);</span>
+
+    <span class="c1">//lambdas/mem_fun_ref_tunc may not define operator bool() to check - explicit convert as a workwaround
+</span>    <span class="n">FuncType</span> <span class="n">func</span><span class="p">(</span><span class="n">action</span><span class="p">);</span> 
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="n">func</span><span class="s">"Null action specified for interface:"</span> <span class="o">+</span> <span class="n">idStr</span><span class="p">);</span>
+
+    <span class="n">sched</span><span class="p">.</span><span class="n">registerInterfaceForace</span><span class="p">(</span><span class="n">idStr</span><span class="p">,</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span> <span class="n">ParaArgsBase</span><span class="o">&amp;</span> <span class="n">p</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">{</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">ActualType</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">));</span>
+    <span class="p">},</span> <span class="n">ActualType</span><span class="o">::</span><span class="n">getType</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>由于实际注册的<code class="highlighter-rouge">action</code>可以是任何合法的函数对象，这个wrapper里做了一些额外的判断</p>
+<ul>
+  <li>类型签名是否匹配，用<code class="highlighter-rouge">is_convertible</code>和<code class="highlighter-rouge">static_assert</code>做编译器检查即可</li>
+  <li>是否传入了空函数，显然注册没有任何动作的服务是编程错误，我们希望如果这么做则抛出运行期异常，马上修改代码</li>
+</ul>
+
+<h3 id="调用类型检查">调用类型检查</h3>
+<p>调用通过一个内部带类型比对和匿名函数封装的实现函数和一个公有的可变长参数模板函数来实现。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Schedule a previously registered interface cally by CallProperty (see its definition)
+</span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="o">&gt;</span>
+<span class="kt">bool</span> <span class="n">interfaceCallfaceCall</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">CallProperty</span><span class="o">&amp;&amp;</span> <span class="n">prop</span><span class="p">,</span> <span class="k">const</span> <span class="n">Args</span><span class="o">&amp;</span> <span class="p">...</span><span class="n">args</span><span class="p">){</span>
+    <span class="k">return</span> <span class="n">checkAndInvokeCall</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;</span><span class="p">(</span><span class="n">idStr</span><span class="p">,</span> <span class="n">prop</span><span class="p">.</span><span class="n">async</span><span class="p">,</span> <span class="n">prop</span><span class="p">.</span><span class="n">waitForDone</span><span class="p">,</span> 
+        <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Callable</span><span class="o">&gt;</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="n">onCallDone</span><span class="p">),</span> <span class="n">prop</span><span class="p">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">prop</span><span class="p">..);</span>
+<span class="p">}</span>
+
+<span class="c1">//actual internal method
+//Actual call under the hood
+</span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">...</span> <span class="nc">Args</span><span class="o">&gt;</span>
+<span class="kr">inline</span> <span class="kt">bool</span> <span class="n">checkAndInvokeCall</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">idStr</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">async</span><span class="p">,</span> <span class="n">boolool</span> <span class="n">waitForDone</span><span class="p">,</span> 
+    <span class="n">Callable</span><span class="o">&amp;&amp;</span> <span class="n">onCallDone</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">strand</span><span class="p">,</span> <span class="k">const</span> <span class="n">Args</span><span class="o">&amp;</span> <span class="p">...</span> <span class="n">args</span><span class="p">){</span>
+
+    <span class="k">typedef</span> <span class="n">ParamArgs</span><span class="o">&lt;</span><span class="n">Args</span> <span class="p">...</span><span class="o">&gt;</span> <span class="n">ActualType</span><span class="p">;</span>
+    <span class="n">CallablebackType</span> <span class="n">action</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">isCallRegisteredAndTypesMatch</span><span class="p">(</span><span class="n">idStr</span><span class="p">,</span> <span class="n">ActualType</span><span class="o">:</span><span class="n">idStr</span><span class="o">:</span><span class="n">getType</span><span class="p">(),</span> <span class="n">action</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">invokeCall</span><span class="p">([</span><span class="n">args</span><span class="p">...,</span> <span class="n">action</span><span class="p">]()</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">{</span>
+            <span class="n">ActualType</span> <span class="n">param</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span>
+            <span class="k">return</span> <span class="n">action</span><span class="p">(</span><span class="n">param</span><span class="p">);</span>
+        <span class="p">},</span> <span class="n">async</span><span class="p">,</span> <span class="n">waitForDone</span><span class="p">,</span> <span class="n">idStr</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Callable</span><span class="o">&gt;</span><span class="p">(</span><span class="n">onCallDone</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>我们很喜欢C++作为强类型语言的特性，希望编译器能多帮程序员检查一些类型不匹配错误，就先用传入的参数类型和注册时候提供的类型做一比较。
+注意这里实际发生调用的时候已经是程序运行过程中了，所以模板元技术要用的话需要多费一些功夫，通过构造一个具体的<code class="highlighter-rouge">ActualType</code>和内部存储的类型做逐一比对。
+如果比对没错误，就可以构造出来一个可调用的函数传给具体的<code class="highlighter-rouge">invokeCall</code>了。底层调度任务的时候<strong>已经不知道外层传入的参数</strong>了（除非我们用可以放异构类型的容器 - 可惜variant）
+，简单的想法是采用闭包将上下文操作封装起来传给<code class="highlighter-rouge">InvokeCall</code>。</p>
+
+<p>类型比对的函数实现利用<code class="highlighter-rouge">tuple</code>的类型签名来比较，需要<code class="highlighter-rouge">typeid</code>的参与，毕竟这是运行期的判断。</p>
+
+<h3 id="异步阻塞的实现">异步阻塞的实现</h3>
+
+<p>默认异步的工作线程是处理非阻塞任务的 - 用户调用之后，生成一个job放在内部的队列里，然后立刻返回给调用者。
+对于阻塞方式，调用需要在内部实现同步机制，保证阻塞调用者线程直到异步任务实际被调度完毕 - <strong>简单直接的思路是利用已有的API</strong>，内部就地构造一个完成调用做显示同步。
+简单优雅的实现如下</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">bool</span> <span class="n">AsyncWorker</span><span class="o">::</span><span class="n">doSyncJob</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">name</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">call</span><span class="p">,</span> <span class="n">Callable</span> <span class="n">onDone</span><span class="p">){</span>
+    <span class="kt">bool</span> <span class="n">finished</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">mutex</span> <span class="n">flagMutex</span><span class="p">;</span>
+    <span class="n">condition_variable</span> <span class="n">cond</span><span class="p">;</span>
+
+    <span class="n">doJob</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Callable</span><span class="o">&gt;</span><span class="p">(</span><span class="n">call</span><span class="p">),</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]()</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">onDone</span><span class="p">)</span>
+            <span class="n">onDone</span><span class="p">();</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">flagMutex</span><span class="p">);</span>
+        <span class="n">finished</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="n">cond</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+        <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">});</span>
+
+    <span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">flagMutex</span><span class="p">);</span>
+    <span class="n">cond</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="p">]{</span><span class="k">return</span> <span class="n">finished</span><span class="p">;});</span>
+    <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>由于代码上下文很清晰，我们甚至不需要写任何子函数，直接通过lambda表达式构造完成调用，通过捕获的上下午获取（注意<code class="highlighter-rouge">[&amp;]</code>指示）条件变量和同步标记变量的引用,在内部唤醒环境变量；
+外部线程执行完异步调用之后，就守候环境变量保护的标记变量知道更新完毕。</p>
+
+<p>这段代码之所以简单清晰，一方面是由于新的lambda表达式语法威力强大，另外一个重要因素应该归于C++11对多线程编程基础设施、库的标准化 - 我们不再需要写一大堆<code class="highlighter-rouge">pthread</code>调用了，标准库已经帮我们打理好了细节。</p>
+
+<p>项目的源代码可以在<a href="https://github.com/skyscribe/servicelib">这里</a>找到。</p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/library" class="page__taxonomy-item" rel="tag">library</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2015-12-19T00:00:00+08:00">December 19, 2015</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=用C++11/14实现一个现代的异步服务调度库 https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="asynchronous-scheduling-library-with-modern-cpp">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

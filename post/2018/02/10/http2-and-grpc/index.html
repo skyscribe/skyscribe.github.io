@@ -1,0 +1,1270 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>HTTP/2和gRPC - 微服务时代的应用基础协议 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="大部分的规模较大的商业应用软件后端系统如今都采用了分布式软件架构，并沿着SOA -&gt; 微服务 的路径在往前演进；并按照领域驱动设计的绑定上下文的设计思路来切分服务；服务之间的接口则不约而同地选择了HTTP协议作为基本的交互协议，背后的原因很大一部分应该来自于HTTP协议简洁、清晰的设计（尽管功能非常复杂）和随手可得的协议栈实现。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="HTTP/2和gRPC - 微服务时代的应用基础协议">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/">
+
+
+
+  <meta property="og:description" content="大部分的规模较大的商业应用软件后端系统如今都采用了分布式软件架构，并沿着SOA -&gt; 微服务 的路径在往前演进；并按照领域驱动设计的绑定上下文的设计思路来切分服务；服务之间的接口则不约而同地选择了HTTP协议作为基本的交互协议，背后的原因很大一部分应该来自于HTTP协议简洁、清晰的设计（尽管功能非常复杂）和随手可得的协议栈实现。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="HTTP/2和gRPC - 微服务时代的应用基础协议">
+  <meta name="twitter:description" content="大部分的规模较大的商业应用软件后端系统如今都采用了分布式软件架构，并沿着SOA -&gt; 微服务 的路径在往前演进；并按照领域驱动设计的绑定上下文的设计思路来切分服务；服务之间的接口则不约而同地选择了HTTP协议作为基本的交互协议，背后的原因很大一部分应该来自于HTTP协议简洁、清晰的设计（尽管功能非常复杂）和随手可得的协议栈实现。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-02-10T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="HTTP/2和gRPC - 微服务时代的应用基础协议">
+    <meta itemprop="description" content="大部分的规模较大的商业应用软件后端系统如今都采用了分布式软件架构，并沿着SOA -&gt; 微服务 的路径在往前演进；并按照领域驱动设计的绑定上下文的设计思路来切分服务；服务之间的接口则不约而同地选择了HTTP协议作为基本的交互协议，背后的原因很大一部分应该来自于HTTP协议简洁、清晰的设计（尽管功能非常复杂）和随手可得的协议栈实现。">
+    <meta itemprop="datePublished" content="February 10, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">HTTP/2和gRPC - 微服务时代的应用基础协议
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 14050 字，大约需要 35 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>大部分的规模较大的商业应用软件后端系统如今都采用了分布式软件架构，并沿着SOA -&gt; 微服务 的路径在往前演进；并按照领域驱动设计的绑定上下文的设计思路来切分服务；
+服务之间的接口则不约而同地选择了HTTP协议作为基本的交互协议，背后的原因很大一部分应该来自于HTTP协议简洁、清晰的设计（尽管功能非常复杂）和随手可得的协议栈实现。</p>
+
+<p>可惜HTTP协议并不是完美无缺的选择，Google早就在Chrome浏览器中尝试去改进HTTP/1.1协议中的一些不足并提出了开放的SPDY协议；这一尝试基本为HTTP/2的提出铺平了道理。
+同时在Google内部，Protobuf作为其内部的跨语言接口定义语言已经被使用了很长时间；在Google之外的一些商业组织中，Protobuf也得到了广泛的应用。
+两者的结合则已经对微服务基础设施领域增添了新的可能性。</p>
+
+<!--more-->
+
+<h2 id="http协议">HTTP协议</h2>
+
+<p>HTTP协议是现金的<strong>互联网服务的基础协议</strong>，是互联网的基石之一；从TCP/IP的协议栈结构上来说，它是工作在应用层上的协议。
+它的基本通信模型遵循的是<strong>请求/响应式</strong>通信模式，通信的双方中有一方被称为服务器放，对外提供服务并接收HTTP请求；而另外一方则称为客户端方。
+一次协议交互总是从客户端发起请求开始，然后服务端收到服务请求，根据后台的资源情况做相应处理，返回结果给客户端，完成一次服务。</p>
+
+<p>HTTP服务器对外提供服务，因此也往往将其上的服务成为是Web Service。复杂的应用程序的一次服务可能需要多条强求/响应交互才可能完成，
+这种情况下基本的请求/响应模式还是不变的；尽管多个请求之间可能按照流水线的方式做优化，形成pipeline。</p>
+
+<h3 id="http的设计特点和历史">HTTP的设计特点和历史</h3>
+
+<p>HTTP协议的设计遵循<strong>典型的Unix设计哲学</strong>, 为了保持协议使用上的简单和可扩展，使用文本流作为协议的内容编码；
+这样调试和互操作就变得简单易行。其它一些应用层协议可能采用二进制的格式来编码，可能带来比较高的效率和较小的带宽压力，
+然而不同的编程语言可能处理起来就有不同的门槛（尤其一些脚本语言处理起来就比较麻烦）；而文本流是所有的编程语言都能轻松处理。
+如果要对程序的行为进行分析和调试，文本协议因为是肉眼可读的，大部分情况下不需要额外的工具就可以对抓包的数据流进行分析；
+应用开发的效率就比传统的二进制协议高的多。为了方便服务器关注于具体的业务而无需过多关注底层的传输细节，
+HTTP协议采用TCP可靠流传输协议以确保上层发送的消息总是能可靠地传递给对方。</p>
+
+<p>协议结构上看，请求消息和响应消息都遵循相同的整体结构</p>
+<ul>
+  <li>头部包含请求资源的路径信息或者响应消息的状态码、协议版本等信息作为起始行</li>
+  <li>头部的其他部分包含一系列用空行隔开的一个或者多个头，每一行中包含一个头的名字和对应的值</li>
+  <li>可选的消息体，和前面的头部之间有一个额外的空行（即和其它的头之间多了额外一个空行）</li>
+</ul>
+
+<p>早期的HTTP协议需要解决的问题往往比较简单；毕竟早期网站上的服务内容也比较有限，并且往往是静态的文字或者图片，
+早期的Web应用带有明显的文件访问的烙印：客户端发起请求访问服务器上的文件或者图片，服务器端收到HTTP请求之后，
+去本地机器上查找相应的资源，然后将资源包装在相应消息中返回给客户端。这种简单场景下，简单的文件存取加上访问控制就可以轻松应付了。</p>
+
+<p>这种情况下，资源的类型可能有多种多样的，HTTP协议采用已经在电子邮件协议中得到广泛应用的MIME协议来描述所要访问的资源类型；
+服务器端将找到的资源放在相应消息中返回，并在头部放置资源的类型。客户端在收到消息后，会先检查头部，确定类型后在决定如何解析内容。</p>
+
+<p>90年代中期网站上的动态内容逐渐增多，这个时候需要访问的资源可能就不仅限于静态的文件或者图片，而有可能是一些虚拟的资源，
+如数据的报表或者存放在数据库中的数据的索引或者查询结果；开发效率的优势催生了Perl为主流的CGI技术的流行：
+服务器端在收到请求后，根据资源请求调用外部提供服务的CGI脚本，这些脚本符合CGI接口并符合<strong>同步处理逻辑</strong>，访问具体需要处理的资源，
+并将结果写入在标准输出中，HTTP底层服务器则会接收改程序输出，原封不动地反馈给客户端。</p>
+
+<p>这里服务器端的<strong>设计方法是同步的</strong>：每次过来一个请求，服务器端就新创将一个进程，调用对应的CGI脚本处理，产生输出之后，
+该请求的处理被转交给底层的HTTP服务器，返回给客户端。CGI的方式在并发服务数逐渐增多的情况下会产生明显的性能问题，
+因为操作系统创将大量进程的开销是很可观的；加上由于服务器在调用CGI开始到CGI返回之前都必须保持阻塞，请求数量大了之后，很容易就产生瓶颈，
+导致系统资源消耗在IO等待上，无法发挥CPU的计算潜力。</p>
+
+<p>FastCGI技术的出现试图用技术手段缓解CGI技术的不足；FastCGI不再死板的对每个HTTP请求创建新的进程，而是总共就启动一个后台进程，
+并通过一个特定的后台socket服务和Web服务器本身进行连接；这样每次有新的请求过来的时候，HTTP服务器将请求内容交给FastCGI后台进程，
+由该进程进行处理后，将输出再反过来交给服务器。由于仅有一个进程在处理所有的请求，创建进程的开销，以及多个进程切换上下文的开销就可以得以节省。
+同时，一些HTTP服务器提供了类似于mod_perl/mod_php等扩展技术来优化CGI，所不同的是，该技术可以将对应的语言解释器嵌入到HTTP服务器中，
+避免脚本语言解释器启动的开销;同时在提升性能的情况下复用之前写好的CGI脚本。</p>
+
+<p>Web技术的深入发展催生了许多新的可以处理HTTP协议消息的中间件，如代理服务器、安全网关等技术；这些中间件会按照HTTP协议的规范，
+对HTTP协议的头信息做一些额外的处理，但往往不会改动消息体中的媒体内容。
+早期的HTTP/1.0版本默认会在一次请求响应交互结束之后，就关闭当前的socket连接；下次再要请求资源，就必须创将一条新的连接出来。
+这样不仅效率低下，而且会对中间代理带来了挑战，因为这些中间结点本来是需要尽可能地做到对客户端和服务器端透明不参与连接状态管理的。</p>
+
+<p>安全问题是另外一个日益引起人们重视的话题，而早期的WEB内容几乎都是明文传输的，任何人都可以在网络上窃听、监视甚至修改服务器和客户端之间的通信；
+隐私和敏感信息完全得不到保护。后来套接字层面的SSL已经TLS技术被引入到HTTP协议中来，在发起HTTP报文之前，先建立安全的套接字连接，
+或者可以根据重定向或者挑战、响应的方式建立安全的HTTP连接。这一过程可能是比较耗时的，每次都重新建立新的HTTP连接显然效率低下。</p>
+
+<p>HTTP/1.1通过默认将底层连接设置为持久性连接来解决这个问题：除非指定了 Connection: close 头，默认的HTTP连接都是长连接；服务器端在送回响应消息后并不会主动关闭连接。
+这样下次请求再来的时候，依然可以使用之前已经打开的连接，减少TCP协议栈启动时候滑动窗口自适应算法引起的延迟，从而使得内容可以尽快地发送给客户端。
+大部分HTTP流量都被传送给客户端用以显示，更快的处理速度就意味着更快的页面反应、加载速度。
+在TLS更加流行的今天，长连接的好处是TLS会话建立或者恢复（在前一个会话仍然可以被复用的情况下对应的会话块会被协商复用）的时间开销。</p>
+
+<p>典型的情况下，一个复杂一些的网页页面在被打开的瞬间，浏览器可能会同时发起几十乃至上百条连接请求资源，并在资源被发送到客户端之后，再进行加载和渲染显示。
+很多情况下，某些资源可能来自于同一个资源服务器（可能是某些CDN、缓存或者后台同一个负载均衡节点，但并不一定是处理HTTP请求的机器），采用严格顺序地请求资源，
+即使有上述的长连接优化，一来一回的时间开销也相当可观。HTTP/1.1 支持pipeline来优化这种情况</p>
+
+<p><img src="https://www.w3.org/Talks/970210HTTP/pipeline.gif" alt="http_pipeline" /></p>
+
+<p>这种情况下，发送方可以对同一个服务端的同一条连接，同时发起多个请求消息而不必等待响应消息的返回；同时请求消息之间，以及对应的响应消息之间任然保持严格的顺序关系。
+所不同的只是发送消息的时间进行了优化。这种情况下，有一个潜在的风险，即如果第一个响应消息返回了错误，那么后续发送的请求都被认为是失败的。</p>
+
+<h3 id="http11的不足">HTTP/1.1的不足</h3>
+
+<p>HTTP/1.0以及1.1在当时的互联网应用场景下是合适而成功的设计；它简单的基于文本的协议定义和容易理解的请求/响应模型取得了巨大的成功，
+大量的企业系统架构采用了HTTP协议并取得了市场上的成功；基于HTTP协议加上应用架构的演进，后续出现了依次为基础的复杂技术，
+如致力于优化前端逻辑的AJAX、基于XML+SOAP+WSDL的SOA技术（也成为Big Web Service）；以及回归HTTP协议原本并增加丰富媒体资源描述访问的
+RESTful API，后者成为了微服务设计的基本通信协议(更多思考见<a href="/post/2017/08/29/thinking-on-service-architecture/">这篇文字</a>)。</p>
+
+<p>任何事物在长期的发展过程中都会呈现两面性；随着构建于HTTP之上的应用逻辑和架构变得日益复杂，HTTP协议的一些不适应的地方也
+引起了社区的诟病。</p>
+
+<h4 id="hol-问题">HOL 问题</h4>
+<p>上述的pipeline特性虽然优化了数据的往返传输时间，但并不能满足日益严苛的需求；因为协议本身顺序、同步的语义中暗藏着一个经典的HOL问题：
+HTTP服务器返回的响应消息必须严格按照请求的顺序发送给客户端。这意味着服务器端必须强制顺序的处理逻辑；
+如果服务器端采用多线程或者异步编程的范式并发的处理请求并不按照同样的顺序返回响应，那么客户端就不能正常处理这些响应。</p>
+
+<p>这个问题在传统的网络交换设备的处理中就存在了，比如如下的交换机设备将给定的输入来的顺序数据按照按照多对一映射发送到输出端口上</p>
+
+<p><img src="https://en.wikipedia.org/wiki/File:HOL_blocking.png" alt="hol_problem" /></p>
+
+<p>其中的第一个输入端口和第三个输入端口下一个被处理的数据包的目的端口都是第四个输出端口，此时两者只能有一个可以发送数据；
+由于两者之间必须排队，导致系统的性能、吞吐率在竞争的时候必然因为排队而下降；而没有竞争的情况（第二/第四个输入）则可以在一个处理周期内完成。
+这种情形和HTTP/1.1里，同一个客户端必须要向同一个服务器发送多个请求的情况类似，由于请求响应处理的顺序性约束，
+客户端必须在处理完前一个包的响应之后，才能处理其后的一个包的响应，从而即使处理器资源允许并发处理多个连接，
+整体的时延也会由于同一个服务器连接的<strong>多条响应必须顺序到达和处理</strong>而变大，即使这些资源本身之间没有业务逻辑上的依赖。</p>
+
+<h4 id="文本协议的性能开销">文本协议的性能开销</h4>
+
+<p>基于文本的设计在应对初期的互联网应用的时候还是绰绰有余的，当时的条件下网络的带宽很窄，大部分人的应用也仅仅是从服务器上下载音乐、图片、文字等；
+后面随着技术的发展和网络传输技术本身的进步，以及动态网页技术的深入发展，前端显示的信息得到极大的扩展，大量的数据本身需要被查询、下载；
+然后渲染显示在终端界面上；这个时候需要通过HTTP协议传输的数据动不动需要几十MB甚至更多。</p>
+
+<p>媒体内容的丰富导致越来越多的信息需要被加入到HTTP的头部中，包括字符编码、分块传输、缓存有效期控制、会话信息、媒体编码等等。
+HTTP协议本身无状态的特性导致很多时候重复的信息需要在多个消息中被重复发送；这种情况下，文本协议的弊端就慢慢凸显出来。
+一些实时应用也由于种种原因选择基于HTTP协议实现，使得性能问题更加严峻。</p>
+
+<h4 id="从spdy到http2">从SPDY到HTTP/2</h4>
+
+<p>致力于提高Web反应速度的SPDY项目决定重新设计一个能更好地匹配现今Web需求的协议；它的设计目标包括</p>
+<ul>
+  <li>将页面的加载速度增加50%以上，即比传统的HTTP服务的页面加载时间减半</li>
+  <li>将对既有的网络基础设施的影响尽可能地减到最小，具体的措施是仍然使用TCP协议</li>
+  <li>尽量避免对既有的Web内容产生影响，已有的内容应该不需要修改就可以仍然被SPDY所使用</li>
+  <li>和既有的开源社区和专家合作，采用业界已有的最佳实践</li>
+</ul>
+
+<p>具体技术实现上的目标则有</p>
+<ul>
+  <li>允许在同一个TCP连接上开启多条逻辑上的并行的Web请求</li>
+  <li>通过减少一些不必要的HTTP头部和压缩头部开销来减少网络带宽的消耗</li>
+  <li>定义一个复杂度更低的协议以便简化服务器端的实现，不特别考虑传统HTTP协议中的一些复杂的边角情况</li>
+  <li>将SSL/TLS作为传输层的强制的安全措施；相对于TLS带来的额外时延和开销，安全性被认为是更重要的一个基础要求</li>
+  <li>允许服务端主动向客户端推送数据而不必被动地等待客户端方发送请求</li>
+</ul>
+
+<p>基于上述的设计目标，SPDY可以做到在一个TCP连接中建立多个并发的消息流，这些消息流可能会互相交错地发送和处理；最大限度地提高性能。
+并发而又多路复用的消息流虽然解决了上述的HOL线性处理的问题，在带宽受限的情况下，客户端却可能希望某些请求的处理优先级高于另外一些，
+因而SPDY增加了对流优先级的支持，以解决可能的网络带宽被低优先级的业务占领的情况；服务端可以依据客户端指定的优先级参数，采用合理的调度策略。
+SPDY的头部压缩处理可以在低宽带情况下减小需要在网络上传输的包的大小，从而优化性能和响应时间。</p>
+
+<p>服务端可以不经客户端请求就主动向客户端发数据则<strong>改变了HTTP协议基本的请求、响应式的通信模型</strong>。
+服务器端可以通过<code class="highlighter-rouge">X-Associated-Content</code>头来通知客户端服务器将会在非请求的情况下主动发送数据给客户端。
+另外一个特性是，服务端可以通过<code class="highlighter-rouge">X-Subresources</code>头来告知客户端，建议对方请求对应的数据；这样可以减少一次额外查询的开销。</p>
+
+<p>SPDY成功吸引了包括Chrome、Firefox等主流浏览器的支持，在SPDY的基础上，IETF下属的HTTP工作组起草了新版本的HTTP协议，
+并将其命名为HTTP/2，之所以没有用1.x的版本号，是因为这个协议的变更带有重新设计的味道。
+官方的HTTP/2协议已经于2015年2月被发布为正式版本，并定义在<a href="https://tools.ietf.org/html/rfc7540">RFC7540</a>中。</p>
+
+<p>截至2015年底，大部分浏览器都加入了对HTTP/2的支持，越来越多的大型网站后端也加入到了支持HTTP/2的怀抱中。</p>
+
+<h3 id="http2的特点">HTTP/2的特点</h3>
+
+<p>HTTP/2最初的版本就是直接拷贝自SPDY协议，基本所有的SPDY协议的特性HTTP/2都支持。
+一个主要的不同在于，HTTP/2采用基于哈夫曼编码头信息的压缩算法，而SPDY动态地根据流的信息进行压缩。
+这里主要的考虑是避免诸如<a href="https://en.wikipedia.org/wiki/CRIME">CRIME</a>之类的网络协议攻击。</p>
+
+<h4 id="协议基本设计">协议基本设计</h4>
+
+<p>和HTTP协议不同，HTTP/2的基本单元是帧。有数种不同类型的帧，每一种的目的各不尽相同。其中，
+HEADRES对应于请求消息，而DATA帧则对应于响应消息；其它一些帧类型则用于控制选项如窗口大小，
+设置帧最大大小等。</p>
+
+<p>多路的请求信息可以复合在一个连接中发送，每一路的请求即上述的流。不同的流之间是相互独立的；
+其中某个流的阻塞或者失败并不影响其他的流，除非底层传输层出错。流控制机制和优先级选项则允许对复合的流传输做适当的控制，
+以保证传输能力有限的情况下，有限的资源可以按照应用层的期望被使用。</p>
+
+<h4 id="协议的发起和初始化">协议的发起和初始化</h4>
+
+<p>HTTP/2没有改变基本的URI表示方法，也没有采用新的端口号约定；客户端依然需要像之前版本要求的那样先发起连接。</p>
+
+<p>由于服务器方有可能及支持老版本的协议，也支持HTTP/2，客户端在无法预先知晓服务端是否支持HTTP/2的情况下，需要首先探索服务器的能力。
+客户端可以通过RFC7230所定义的HTTP协议升级选项，在发出的HTTP/1.1请求消息中添加上一个<code class="highlighter-rouge">Upgrade</code>头(该头的定义在老版本协议中已经定义，
+只是HTTP/2新加了2种可能的取值，<code class="highlighter-rouge">h2</code>表示采用TLS的HTTP/2，<code class="highlighter-rouge">h2c</code>表示没有TLS加密)，如下面的例子</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET / HTTP/1.1
+Host: server.example.com
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: &lt;base64url encoding of HTTP/2 SETTINGS payload&gt;
+</code></pre></div></div>
+
+<p>如果服务器端不支持新版本的协议，它可以像假装没有收到这个升级请求那样，按照老版本的方式给出回应。
+反之，服务器端则需要发送一个101响应，并将消息内容置为空。此后服务端就可以开始发送HTTP/2的帧，如下面的例子</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+</code></pre></div></div>
+
+<p>服务端发送的第一个帧必须是一个类型为<code class="highlighter-rouge">SETTINGS</code>的帧，而客户端需要在收到101响应之后，必须返回一个<code class="highlighter-rouge">SETTINGS</code>帧以协商相关参数。
+所有的流都有一个唯一的标识符（ID )而升级之前的请求总是被赋以1作为流的ID。</p>
+
+<h4 id="不需要版本发现的初始化">不需要版本发现的初始化</h4>
+
+<p>如果客户端可以预先知道服务端已经支持HTTP/2（可以通过其它一些协议或者应用层配置约定)；这种情况下服务发现就变得没有必要。
+这种情况下，客户端依然需要先发送一个特殊的称为前言的包，该包以24字节的固定串 <code class="highlighter-rouge">PRI * HTTP/2.0\r\n\r\nSM\r\n</code>开始，
+后边更上一个可能为空的SETTINGS帧。该前言包的是专门设计为这样以方便已有的旧版本HTTP服务器可以方便地跳过后续的HTTP/2帧。</p>
+
+<p>同样的，服务器端也需要发送一个类似的前言包给客户端；两者的SETTINGS帧内容可能是不一样的。同时为了减小时延，
+协议允许客户端不必等待服务器端的前言包和SETTINGS帧就发送额外的HTTP/2帧。</p>
+
+<p>一旦连接建立成功，客户端和服务器之间就可以进行<strong>以帧为单元</strong>的数据交换。</p>
+
+<h4 id="帧结构">帧结构</h4>
+
+<p>帧结构大体上是一个固定的9字节头加上额外的可变长的流信息组成，用二进制来描述，如下图</p>
+
+<p><img src="https://isc.sans.edu/diaryimages/images/http2%281%29.png" alt="http2_frame" /></p>
+
+<p>起始的3个字节用来描述帧的长度，和大部分的基于类型、长度、值的二进制协议类似。因为SETTINGS可能会为空，
+默认情况下，帧的长度不得超过16384即只有14位被使用；如果希望使用更长的帧，则必须显式设置<code class="highlighter-rouge">SETTINGS_MAX_FRAME_SIZE</code>。
+长度的约定是不算固定头的部分。</p>
+
+<p>接下来的1个字节表示帧的类型，最多可以支持256种帧；1个字节的符号位信息预留给具体的帧类型可以按照需要指定不同的语义；
+额外的1个比特目前被预留，协议要求必须设置为0。</p>
+
+<p>剩下的31个比特表示一个唯一的流标识符，0标识符被预留来表示整个连接而不是某个具体的流 - 恰恰类似于网络地址的广播地址。
+可变长部分的结构和内容则完全依赖于具体的流类型而定。</p>
+
+<h4 id="帧长度约定">帧长度约定</h4>
+
+<p>所有的服务器和客户端必须支持长度为16384的帧，并且允许数据接收端声明更长的帧长度。
+如果数据接收端收到的帧的长度超过了预先声明的最大长度或者特定帧类型所允许的最大长度，它需要发送给对方一个<code class="highlighter-rouge">FRAME_SIZE_ERROR</code>的错误消息。
+如果帧长度错误会影响整个连接的状态，则该错误必须被当作一个连接错误被处理。</p>
+
+<p>最大帧长度的设定并不意味着发送方总要用满允许的长度，因为过长的数据帧会显著地降低性能增大延时。使用小一些的帧则往往能提高服务的响应速度。</p>
+
+<h4 id="头部压缩和解压">头部压缩和解压</h4>
+
+<p>HTTP/2和HTTP/1的头定义方式一样，所不同的仅仅是前者采用了压缩和解压。压缩算法是基于哈夫曼编码，逻辑过程如下图</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/3/30/HTTP_2_Header_Compression_HPACK.svg" alt="http2_header_compression" /></p>
+
+<p>压缩之后的字节流会被切分成一个或者多个帧，这类帧可以是HEADRES、PUSH_PROMISE、CONTINUTION等。由于Cookie的特殊性，它的处理略微不同，
+因为Cookie内部会有多个K=V的结构，处理的时候会首先将Cookie扩展为多个Cookie头，然后以单个Cookie本身不允许再被切分到多个帧中。
+接收端在收到这些头部块后，按照相反的顺序先解压然后再组装还原出原来的头部列表。</p>
+
+<p>一个完整的头部块可能是下属两种情况之一</p>
+<ul>
+  <li>单独的<code class="highlighter-rouge">HEADERS</code>或者<code class="highlighter-rouge">PUSH_PROMISE</code>帧并在该帧头部的标记位上，设置<code class="highlighter-rouge">END_HEADRES</code>标记表明这是一个独立完整的头部帧</li>
+  <li>或者在对应的帧头部上，<code class="highlighter-rouge">END_HEADRES</code>没有被设置，然后紧接着带有一个或者多个<code class="highlighter-rouge">CONTINUTATION</code>帧，最后一个上面设置了<code class="highlighter-rouge">END_HEADRES</code>标记</li>
+</ul>
+
+<p>由于头部压缩是有状态的（和多个帧相关联），因此解码的时候的错误将被视为整个连接状态出了异常。</p>
+
+<h4 id="流的状态和多路复合">流的状态和多路复合</h4>
+
+<p>HTTP/2通过流这一抽象概念来表示多个逻辑上的并发连接，每个流有一个唯一的标识符。不同的流之间逻辑相互独立，数据可以被交叉发送（以帧为基本单元），
+任何一方都可以关闭流；而流的标识有发起流的一方来指定。流本身也是有状态的，其状态图如下</p>
+
+<p><img src="http://dist-prog-book.com/chapter/1/figures/http2-stream-lifecycle.png" alt="http2_stream_state" /></p>
+
+<p>以图中间的是那个状态为分隔线，可以将状态分为2个对称的部分，左边对应的是本地发起的流，右侧对应的是对方发起的流。
+简略起见<code class="highlighter-rouge">CONTINUATION</code>帧没有标记在图中，因为该帧总是紧随<code class="highlighter-rouge">HEADRES</code>或者<code class="highlighter-rouge">PUSH_PROMISE</code>被发送。</p>
+
+<h4 id="流标志符约定">流标志符约定</h4>
+
+<p>协议约定流标志符被视为无符号的31位整数；客户端发起的流必须奇数作为标志符，而服务端发起的流则用偶数；新建立的流的标识符必须比已有的流标识符大，
+这样就可以显示地避免标识符的冲突。数字0用于全连接的虚拟标志符，数字1则用于初始协议升级的情况，因为两者都不能作为普通流的标识符。
+任何一方收到了不符合约定的标识符都必须返回连接错误，并将类型设置为协议错误<code class="highlighter-rouge">PROTOCOL_ERROR</code>。</p>
+
+<p>当一方发起一个新的流的时候，如果有较小标识符的流处于<code class="highlighter-rouge">Idle</code>状态，则这些流应该被迁移到<code class="highlighter-rouge">Closed</code>状态。
+流标志符也不允许被复用，而是一直往上增加。这样在长连接维持很长时间导致没有可用标志符的情况下，
+协议要求必须新建立一条连接来解决这种情况。
+对服务器端而言，它在出现类似情况的时候可以选择发送<code class="highlighter-rouge">GOAWAY</code>以迫使客户端关闭当前长连接，建立新的连接释放流标识符。</p>
+
+<h4 id="流的并发和控制">流的并发和控制</h4>
+
+<p>客户端或者服务端都可以独立的设置最大允许的并发流的数量；此时设置的是对方可以发起的流的数量。
+所有处于<code class="highlighter-rouge">Open</code>或者<code class="highlighter-rouge">Half-Closed</code>状态的流被统计在这个最大量控制上。
+超过这个限制的情况下，协议栈要求视为错误，类型为<code class="highlighter-rouge">PROTOCOL_ERROR</code>或者<code class="highlighter-rouge">REFUSED_STREAM</code>。</p>
+
+<p>同一个TCP连接上建立多个逻辑流带来了额外的流量控制问题：一个流的阻塞可能会影响其它的流处理。
+HTTP/2通过<code class="highlighter-rouge">WINDOW_UPDATE</code>帧来施加控制。接收方告诉发方自己可以在该流上接收多少字节，以及在整个连接上接受多少字节；
+发方必须遵照这些窗口设置，调整自己的数据发送行为；这一控制是基于接收方对发送方的信任。</p>
+
+<p>初始情况下，流量控制窗口对单个流和对整个连接都是65535个字节；流量控制机制不能被禁用。该控制仅仅使用于<code class="highlighter-rouge">DATA</code>帧，
+即其它的帧不受流量控制的限制，以免控制信息被阻塞。</p>
+
+<p>流也可以附带指定一个优先级，或者指定某个流依赖于另外一个流。优先级可以在<code class="highlighter-rouge">HEADRES</code>中指定，同时
+任意时刻我们也可以用<code class="highlighter-rouge">Priority</code>帧来调整优先级。相互依赖的流则会被分配一个【1，256】之间的权值。
+优先级和权值可以结合起来用于资源分配优先级的选择；具体细节可以参考协议定义。</p>
+
+<h3 id="tls的争议">TLS的争议</h3>
+
+<p>HTTP/2默认开启TLS并要求TLS1.2或者更高的版本，较低版本的协议已经被证明在当前的环境下不够安全。
+尽管协议规范中没有强迫必须使用TLS，但包括Chrome、Firefox、Safari、IE、Edge等主流的浏览器实现都<strong>仅仅支持基于TLS的HTTP/2</strong>；
+从而使得开启TLS称为事实上的标准。</p>
+
+<p>另外还有一些批评的声音和加密、解密的计算资源开销密切相关；事实上许多HTTP流量并没有必须加密保护的必要，强制采用TLS带来了额外的性能开销。
+另一种批评的声音认为当前的安全机制仅仅是复用已有的证书框架，在一些小型的设备上当前的模型必须强迫周期性的进行证书的登记和有效期展期，
+这些操作都需要额外的开支而不是免费的。关于安全最后一个有名的争议是关于是否支持SMTP协议已经在使用的随机加密技术，
+这种技术可以防范被动监听行为，而<a href="https://tools.ietf.org/html/rfc7258">被动监听被RFC7258列为是安全攻击</a>；所幸的是RFC8164在2017年5月被发布出来，解决来该不一致。</p>
+
+<h3 id="浏览器之外的支持">浏览器之外的支持</h3>
+
+<p>HTTP/2不仅仅被作为前后端之间的API接口，就如HTTP协议被广泛应用于后端服务之间的接口一样，HTTP/2协议也被一些基础设施软件、中间件所广泛支持。</p>
+
+<p>HTTP服务器软件上，Apache 2.4.12通过mod_h2的方式添加了对HTTP/2的支持，老的mod_spdy已经被停止开发和维护；
+Tomcat从8.5版本开始也加入了支持HTTP/2的阵营，只是需要修改些许配置；
+提供高可用和负载均衡服务的HAProxy在1.8版本中加入了对HTTP/2的支持；
+轻量级的嵌入应用服务器Jetty则从9.3版本中加入了对HTTP/2的支持；同时该版本也需要JDK8以上才能支持。
+高性能的异步网络编程框架Netty从4.1版本开始支持HTTP/2。</p>
+
+<h2 id="grpc">gRPC</h2>
+
+<p>HTTP/2的诞生给了软件架构方面新的可能性。传统的微服务架构基于HTTP协议随处可得的现状，选择了HTTP协议和RESTful API作为服务间通信的协议；
+受制于传统的HTTP协议单向请求、响应的通信模型，两个服务之间的通信如果有双向的（互相访问对方提供的服务），则不得不发起两条请求，
+并要求双方同时扮演服务器和客户端的角色，给架构带来了额外的复杂性。RESTful API的默认同步、顺序特性迫使设计过程中有时候不得不绕开这一基本协议，
+采用消息队列的方式做反向通信；遇到性能问题的时候，则不得不花费大力气去优化。</p>
+
+<p>gRPC是Google发明的一套使用HTTP/2的全部能力的基于RPC语义的协议，得益于HTTP/2所支持的服务端推送功能，它可以用一条持久连接同时支持请求、响应逻辑
+和双向的消息流。</p>
+
+<h3 id="protobuf编码">Protobuf编码</h3>
+
+<p>gRPC采用广泛使用的Protobuf来编码过程调用信息，它本质上是一种可变长编码方式，内部用固定的标签、类型、域位置信息来编码基本的消息结构，
+提供有效的信息压缩的同时兼顾了编解码的效率；客户端和服务端用于编解码的开销和JSON相差不大，而编码出来的二进制数据则必JSON要紧凑很多，
+大概仅相当于基于SOAP的WSDL消息的几分之一。</p>
+
+<h3 id="rpc语义">RPC语义</h3>
+
+<p>RPC是一种存在很久的技术，它的基本思路是跨越网络进行过程调用；服务使用方（客户端）准备好过程调用的参数，然后发起一个本地调用（类似于一个函数调用），
+然后本地的一个服务桩则将对应的调用信息封装成网络消息，并将请求发送给真正的服务端；服务端随后可以解析收到的请求，
+在服务提供方自己的机器上完成运算，然后将结果封装为消息返回。此时服务使用方的桩调用往往处于阻塞状态，
+在收到返回消息后，它再完成消息的反序列化和结构化，然后将结果返回给上层。</p>
+
+<p>传统的RPC框架往往需要自己手工写大量的代码，处理诸如网络异常、消息收发调度等和具体过程调用逻辑无关的代码才能顺利使用RPC。
+gRPC则抽象了这些底层细节，用protobuf的格式来定义过程请求的语义，用HTTP/2做高效的传输层，使应用层仅仅通过使用protobuf格式定义自己的服务原语，
+框架则可以自动生成上述这些繁琐的代码，而服务使用者仅仅需要关注自己的领域逻辑即可。</p>
+
+<p><img src="https://grpc.io/img/landing-2.svg" alt="grpc_req_resp" /></p>
+
+<p>gRPC框架本身是跨平台、跨语言的，这使得它很容易成为微服务架构下服务之间的接口。它的服务交互方式是基于RPC的，
+和传统的SOA中的Web Service的方式有些相近而和基于RESTful的架构风格截然不同。两者没有绝对的有略，而是各自有其适用的场景。
+从性能上来看，gRPC采用更紧凑的编码和领域相关的逻辑来描述服务接口，和传统的SOA中的WSDL也有明显的不同；
+前者和微服务架构的基本设计哲学是匹配的，而后者的接口仍然是哑接口，仅仅侧重于消息交换而不是领域逻辑（之前<a href="/post/2017/08/29/thinking-on-service-architecture/">一篇文字</a>探讨了微服务设计）。</p>
+
+<p>gRPC其实定义了一种自己的<a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL</a>来描述服务语义，只是它的语法和概念比WSDL要简化的多。
+因为protobuf本身就是定位于跨语言之间的信息交换的中间格式，gRPC仅在protobuf语法的基础上增加了<code class="highlighter-rouge">service</code>和<code class="highlighter-rouge">rpc</code>关键字。
+声明一个最简单的请求、响应服务的定义如下</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// The greeter service definition.
+service Greeter {
+    // Sends a greeting
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+    string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+    string message = 1;
+}
+</code></pre></div></div>
+
+<p>服务提供方和使用者两边都需要持有上述的服务定义，然后利用已有的protobuf编译器可以生成目的平台编程语言对应的代码；
+领域逻辑代码需要将生成的代码加入到代码库中，调用或者扩展生成的类/结构即可。
+目前gRPC支持11种语言环境，细节见<a href="https://grpc.io/docs/">这里</a></p>
+
+<h3 id="双向流">双向流</h3>
+
+<p>gRPC封装了HTTP/2协议的服务端推送功能，并提供了丰富的流功能，包括客户端发起的数据流服务，服务端发起的流服务，以及双向的流服务。
+调用的发起过程总是由客户端发起调用，提供服务方法和元数据;服务端在收到请求之后，可以依据流的类型发出元数据、响应消息等。</p>
+
+<p>对于服务端发起的流处理服务，服务端在收到客户端的请求之后，直接将响应消息依次写入到输出流中；这时候客户端已经准备好接收消息了，
+只需要依次从流中读取即可。客户端发起的流服务的处理是类似的，所不同的是这时候客户端可以依次写入多条请求，
+而服务端往往仅需要在处理请求的过程中，发送一条响应即可；大部分情况下，<strong>响应消息在处理完最后一个请求的时候发出</strong>。</p>
+
+<p>所谓的双向流是指它的RPC服务方的接口接受一个流作为输入，同时返回的结构又是另外一个流，逻辑上有两个相互独立的流用作两者之间的通信。
+流的发起方（客户端或者服务端）可以根据应用逻辑不断地往流中写入消息，接收方就可以依次按顺序读取其中的消息。
+具体怎样去处理流中收到的消息以及如何将两个流中的数据关联起来，完全依赖于应用层的实际，gRPC本身支持丰富的场景</p>
+<ul>
+  <li>服务端可以在收全所有的客户端流中的数据之后，再往客户端的流（输出流）中写入数据</li>
+  <li>服务端也可以每收到一条数据，就做出相应业务处理，并将处理结果写入到客户端的流，实现类似Reactor的模式</li>
+</ul>
+
+<p>流的定义是通过一个额外的<code class="highlighter-rouge">stream</code>关键字来指明的，如下面的例子</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//服务端流
+rpc manyReplies(Request) returns (stream Response){
+}
+
+//客户端流
+rpc manyRequests(stream Request) return (Response) {
+}
+//双向流
+rpc bidirectionalRequests(stream Request) return (stream Response) {
+}
+</code></pre></div></div>
+
+<p>具体stream的实现是和编程语言相关的，在Java中它是通过<code class="highlighter-rouge">StreamObserver&lt;T&gt;</code>来抽象stream对象的，它支持常见的流操作接口</p>
+<ul>
+  <li><code class="highlighter-rouge">onNext</code>方法实现往流中追加消息</li>
+  <li><code class="highlighter-rouge">onCompleted</code>则会结束流</li>
+</ul>
+
+<p>一个双向聊天的服务端实现如下</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="n">StreamObserver</span><span class="o">&lt;</span><span class="n">RouteNote</span><span class="o">&gt;</span> <span class="nf">routeChat</span><span class="o">(</span><span class="kd">final</span> <span class="n">StreamObserver</span><span class="o">&lt;</span><span class="n">RouteNote</span><span class="o">&gt;</span> <span class="n">responseObserver</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">StreamObserver</span><span class="o">&lt;</span><span class="n">RouteNote</span><span class="o">&gt;()</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onNext</span><span class="o">(</span><span class="n">RouteNote</span> <span class="n">note</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">RouteNote</span><span class="o">&gt;</span> <span class="n">notes</span> <span class="o">=</span> <span class="n">getOrCreateNotes</span><span class="o">(</span><span class="n">note</span><span class="o">.</span><span class="na">getLocation</span><span class="o">());</span>
+
+            <span class="c1">// Respond with all previous notes at this location.</span>
+            <span class="k">for</span> <span class="o">(</span><span class="n">RouteNote</span> <span class="n">prevNote</span> <span class="o">:</span> <span class="n">notes</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="k">new</span> <span class="n">RouteNote</span><span class="o">[</span><span class="mi">0</span><span class="o">]))</span> <span class="o">{</span>
+                <span class="n">responseObserver</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">prevNote</span><span class="o">);</span>
+            <span class="o">}</span>
+
+            <span class="c1">// Now add the new note to the list</span>
+            <span class="n">notes</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">note</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onError</span><span class="o">(</span><span class="n">Throwable</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">log</span><span class="o">(</span><span class="n">Level</span><span class="o">.</span><span class="na">WARNING</span><span class="o">,</span> <span class="s">"Encountered error in routeChat"</span><span class="o">,</span> <span class="n">t</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCompleted</span><span class="o">()</span> <span class="o">{</span>
+            <span class="n">responseObserver</span><span class="o">.</span><span class="na">onCompleted</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+<h3 id="超时控制和rpc终止">超时控制和RPC终止</h3>
+
+<p>在微服务架构下，一个客户端的请求往往需要经历多个微服务节点的处理才能最终完成处理返回响应，如果中间某个服务节点宕机无法提供服务，
+那么后续从错误中恢复出来后再向下游节点重新请求就会失去意义。
+gRPC通过内置的超时控制机制来简化应用层的逻辑复杂度</p>
+<ul>
+  <li>服务的调用方可以指定一个RPC必须终止的最长时间</li>
+  <li>服务端则会在调用RPC之前先检查给定的服务调用是否已经超时，或者剩余多少时间可以用于调用本身</li>
+  <li>如果已经超时，就会直接返回错误而不是继续调用服务实现</li>
+</ul>
+
+<p>gRPC正在崛起为新的微服务基础设施之一，甚至可以和传统的微服务基础设施HTTP/RESTful API并驾齐驱，越来越多的基础软件加入到了支持gRPC的行列。</p>
+
+<h2 id="参考">参考</h2>
+<ol>
+  <li><a href="https://community.akamai.com/community/web-performance/blog/2017/08/10/how-does-http2-solve-the-head-of-line-blocking-hol-issue">How does HTTP/2 solve the Head of Line blocking (HOL)</a></li>
+  <li><a href="https://www.chromium.org/spdy/spdy-whitepaper">SPDY: an experiemental protocol for a faster web</a></li>
+  <li><a href="https://tools.ietf.org/html/rfc7540">RFC7540</a></li>
+  <li><a href="http://dist-prog-book.com/chapter/1/gRPC.html">Distributed Programming Book: gRPC</a></li>
+  <li><a href="https://grpc.io/docs/guides/concepts.html">gRPC core concpets</a></li>
+</ol>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/protocol" class="page__taxonomy-item" rel="tag">protocol</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-02-10T00:00:00+08:00">February 10, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=HTTP/2和gRPC - 微服务时代的应用基础协议 https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/02/10/http2-and-grpc/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="http2-and-grpc">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

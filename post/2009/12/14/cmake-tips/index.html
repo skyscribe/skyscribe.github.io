@@ -1,0 +1,1205 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>CMake的一些小经验 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="初用CMake或者对其了解不太深的人，可能经常会被路径包含、库搜索路径、链接路径、RPath这些问题所绊倒，因为这些东西在手工执行gcc或者编写makefile的时候是很轻而易举的任务，但是由于CMake做了一些抽象，没有一些基本概念之前，大部分人可能会感觉有不少疑惑。其实我当初也有不少问号并像尽力往GNU Make的模式上去套，不过通过较长时间的实践和阅读manual，总算有了个相对很清晰的认识。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="CMake的一些小经验">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2009/12/14/cmake-tips/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2009/12/14/cmake-tips/">
+
+
+
+  <meta property="og:description" content="初用CMake或者对其了解不太深的人，可能经常会被路径包含、库搜索路径、链接路径、RPath这些问题所绊倒，因为这些东西在手工执行gcc或者编写makefile的时候是很轻而易举的任务，但是由于CMake做了一些抽象，没有一些基本概念之前，大部分人可能会感觉有不少疑惑。其实我当初也有不少问号并像尽力往GNU Make的模式上去套，不过通过较长时间的实践和阅读manual，总算有了个相对很清晰的认识。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="CMake的一些小经验">
+  <meta name="twitter:description" content="初用CMake或者对其了解不太深的人，可能经常会被路径包含、库搜索路径、链接路径、RPath这些问题所绊倒，因为这些东西在手工执行gcc或者编写makefile的时候是很轻而易举的任务，但是由于CMake做了一些抽象，没有一些基本概念之前，大部分人可能会感觉有不少疑惑。其实我当初也有不少问号并像尽力往GNU Make的模式上去套，不过通过较长时间的实践和阅读manual，总算有了个相对很清晰的认识。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2009/12/14/cmake-tips/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2009-12-14T14:11:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="CMake的一些小经验">
+    <meta itemprop="description" content="初用CMake或者对其了解不太深的人，可能经常会被路径包含、库搜索路径、链接路径、RPath这些问题所绊倒，因为这些东西在手工执行gcc或者编写makefile的时候是很轻而易举的任务，但是由于CMake做了一些抽象，没有一些基本概念之前，大部分人可能会感觉有不少疑惑。其实我当初也有不少问号并像尽力往GNU Make的模式上去套，不过通过较长时间的实践和阅读manual，总算有了个相对很清晰的认识。">
+    <meta itemprop="datePublished" content="December 14, 2009">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">CMake的一些小经验
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 6974 字，大约需要 17 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>初用CMake或者对其了解不太深的人，可能经常会被路径包含、库搜索路径、链接路径、RPath这些问题所绊倒，因为这些东西在手工执行gcc或者编写makefile的时候是很轻而易举的任务，但是由于CMake做了一些抽象，没有一些基本概念之前，大部分人可能会感觉有不少疑惑。其实我当初也有不少问号并像尽力往GNU Make的模式上去套，不过通过较长时间的实践和阅读manual，总算有了个相对很清晰的认识。</p>
+
+<!--more-->
+
+<h2 id="如何使用其manual">如何使用其manual</h2>
+
+<p>cmake的帮助组织的还是很有规律的，了解了其规律，找自己想要的东西就会很简单，所以个人觉得这一点可能是最重要的。其help系统大概是这么几类：</p>
+
+<ul>
+  <li>command
+这个是实用过程中最长用到的，相当于一般脚步语言中的基本语法，包括定义变量，foreach，string，if，builtin command都在这里。大部分的CMake语句是由这些command组成的。</li>
+</ul>
+
+<p>可以用如下这些命令获取帮助：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-commands</span>
+</code></pre></div></div>
+
+<p>这个命令将给出所有cmake内置的命令的详细帮助，一般不知道自己要找什么或者想随机翻翻得时候，可以用这个。我一般更常用的方法是将其重定向到less里边，然后在里边搜索关键字。</p>
+
+<p>另外也可以用如下的办法层层缩小搜索范围：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-command-list</span>
+cmake <span class="nt">--help-command-list</span> | <span class="nb">grep </span>find
+skyscribe@skyscribe:~/program/bld<span class="nv">$ </span>cmake <span class="nt">--help-command-list</span> | <span class="nb">grep </span>find
+find_file
+find_library
+find_package
+find_path
+find_program
+</code></pre></div></div>
+
+<p>这里找到了一些find相关的命令，可以具体查看某一个命令的manual了。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake version 2.8.5
+    find_library
+        Find a library.
+
+            find_library<span class="o">(</span>&lt;VAR&gt; name1 <span class="o">[</span>path1 path2 ...]<span class="o">)</span>
+
+    This is the short-hand signature <span class="k">for </span>the <span class="nb">command </span>that is sufficient <span class="k">in
+    </span>many cases.  It is the same as find_library<span class="o">(</span>&lt;VAR&gt; name1 <span class="o">[</span>PATHS path1
+    path2 ...]<span class="o">)</span>
+
+    find_library<span class="o">(</span>
+            &lt;VAR&gt;
+            name | NAMES name1 <span class="o">[</span>name2 ...]
+            <span class="o">[</span>HINTS path1 <span class="o">[</span>path2 ... ENV var]]
+            <span class="o">[</span>PATHS path1 <span class="o">[</span>path2 ... ENV var]]
+            <span class="o">[</span>PATH_SUFFIXES suffix1 <span class="o">[</span>suffix2 ...]]
+            <span class="o">[</span>DOC <span class="s2">"cache documentation string"</span><span class="o">]</span>
+            <span class="o">[</span>NO_DEFAULT_PATH]
+            <span class="o">[</span>NO_CMAKE_ENVIRONMENT_PATH]
+            <span class="o">[</span>NO_CMAKE_PATH]
+            <span class="o">[</span>NO_SYSTEM_ENVIRONMENT_PATH]
+            <span class="o">[</span>NO_CMAKE_SYSTEM_PATH]
+            <span class="o">[</span>CMAKE_FIND_ROOT_PATH_BOTH |
+            ONLY_CMAKE_FIND_ROOT_PATH |
+            NO_CMAKE_FIND_ROOT_PATH]
+            <span class="o">)</span>
+
+    This <span class="nb">command </span>is used to find a library.  A cache entry named by &lt;VAR&gt;
+    is created to store the result of this command.  If the library is
+    found the result is stored <span class="k">in </span>the variable and the search will not be
+    repeated unless the variable is cleared.  If nothing is found, the
+    result will be &lt;VAR&gt;-NOTFOUND, and the search will be attempted again
+    the next <span class="nb">time </span>find_library is invoked with the same variable.  The
+    name of the library that is searched <span class="k">for </span>is specified by the names
+    listed after the NAMES argument.  Additional search locations can be
+    specified after the PATHS argument.  If ENV var is found <span class="k">in </span>the HINTS
+    or PATHS section the environment variable var will be <span class="nb">read </span>and
+    converted from a system environment variable to a cmake style list of
+    paths.  For example ENV PATH would be a way to list the system path
+    variable.  The argument after DOC will be used <span class="k">for </span>the documentation
+
+    ......
+</code></pre></div></div>
+
+<ul>
+  <li>variable</li>
+</ul>
+
+<p>和command的帮助比较类似，只不过这里可以查找cmake自己定义了那些变量你可以直接使用，譬如OSName，是否是Windows，Unix等。
+我最常用的一个例子：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="nt">--help-variable-list</span>  | <span class="nb">grep </span>CMAKE | <span class="nb">grep </span>HOST
+
+CMAKE_HOST_APPLE
+CMAKE_HOST_SYSTEM
+CMAKE_HOST_SYSTEM_NAME
+CMAKE_HOST_SYSTEM_PROCESSOR
+CMAKE_HOST_SYSTEM_VERSION
+CMAKE_HOST_UNIX
+CMAKE_HOST_WIN32
+</code></pre></div></div>
+
+<p>这里查找所有CMake自己定义的builtin变量；一般和系统平台相关。</p>
+
+<p>如果希望将所有生成的可执行文件、库放在同一的目录下，可以如此做：</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Targets directory</span>
+
+<span class="nb">set</span><span class="p">(</span>CMAKE_ARCHIVE_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/lib<span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_LIBRARY_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/lib<span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_RUNTIME_OUTPUT_DIRECTORY <span class="si">${</span><span class="nv">target_dir</span><span class="si">}</span>/bin<span class="p">)</span>
+</code></pre></div></div>
+
+<p>这里的target_dir是一个实现设置好的绝对路径。（CMake里边<strong>绝对路径比相对路径更少出问题</strong>，如果可能尽量用绝对路径）</p>
+
+<ul>
+  <li>property</li>
+</ul>
+
+<p>Property一般很少需要直接改动，除非你想修改一些默认的行为，譬如修改生成的动态库文件的soname等。</p>
+
+<p>譬如需要在同一个目录下既生成动态库，也生成静态库，那么默认的情况下，cmake根据你提供的target名字自动生成类似的libtarget.so, libtarget.a，但是同一个project只能同时有一个，因为<strong>target必须唯一</strong>。</p>
+
+<p>这时候，就可以通过修改taget对应的文件名，从而达到既生成动态库也产生静态库的目的。譬如:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make <span class="nt">--help-property-list</span> | <span class="nb">grep </span>NAME
+
+GENERATOR_FILE_NAME
+IMPORTED_SONAME
+IMPORTED_SONAME_&lt;CONFIG&gt;
+INSTALL_NAME_DIR
+OUTPUT_NAME
+VS_SCC_PROJECTNAME
+
+skyscribe@skyscribe:~<span class="nv">$ </span>cmake <span class="nt">--help-property</span> OUTPUT_NAME
+cmake version 2.8.5
+    OUTPUT_NAME
+        Output name <span class="k">for </span>target files.
+
+        This sets the base name <span class="k">for </span>output files created <span class="k">for </span>an executable or
+        library target.  If not <span class="nb">set</span>, the logical target name is used by
+        default.
+
+</code></pre></div></div>
+
+<ul>
+  <li>module</li>
+</ul>
+
+<p>用于查找常用的模块，譬如boost，bzip2, python等。通过简单的include命令包含预定义的模块，就可以得到一些模块执行后定义好的变量，非常方便。</p>
+
+<p>譬如常用的boost库，可以通过如下方式：</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Find boost 1.40</span>
+<span class="nf">INCLUDE</span><span class="p">(</span>FindBoost<span class="p">)</span>
+<span class="nb">find_package</span><span class="p">(</span>Boost 1.40.0 COMPONENTS thread unit_test_framework<span class="p">)</span>
+<span class="nb">if</span><span class="p">(</span>NOT Boost_FOUND<span class="p">)</span>
+    <span class="nb">message</span><span class="p">(</span>STATUS <span class="s2">"BOOST not found, test will not succeed!"</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>一般开头部分的解释都相当有用，可满足80%需求,这里是_FindBoost_的文档：</p>
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake version 2.8.5
+    FindBoost
+        Try to find Boost include dirs and libraries
+
+        Usage of this module as follows:
+
+        NOTE: Take note of the Boost_ADDITIONAL_VERSIONS variable below.  Due
+        to Boost naming conventions and limitations in CMake this find module
+        is NOT future safe with respect to Boost version numbers, and may
+        break.
+
+        == Using Header-Only libraries from within Boost: ==
+
+            <span class="nb">find_package</span><span class="p">(</span> Boost 1.36.0 <span class="p">)</span>
+            <span class="nb">if</span><span class="p">(</span>Boost_FOUND<span class="p">)</span>
+                <span class="nb">include_directories</span><span class="p">(</span><span class="si">${</span><span class="nv">Boost_INCLUDE_DIRS</span><span class="si">}</span><span class="p">)</span>
+            <span class="nb">add_executable</span><span class="p">(</span>foo foo.cc<span class="p">)</span>
+            <span class="nb">endif</span><span class="p">()</span>
+
+
+
+
+
+        == Using actual libraries from within Boost: ==
+
+            <span class="nb">set</span><span class="p">(</span>Boost_USE_STATIC_LIBS        ON<span class="p">)</span>
+            <span class="nb">set</span><span class="p">(</span>Boost_USE_MULTITHREADED      ON<span class="p">)</span>
+            <span class="nb">set</span><span class="p">(</span>Boost_USE_STATIC_RUNTIME    OFF<span class="p">)</span>
+            <span class="nb">find_package</span><span class="p">(</span> Boost 1.36.0 COMPONENTS date_time filesystem system ... <span class="p">)</span>
+
+
+            <span class="nb">if</span><span class="p">(</span>Boost_FOUND<span class="p">)</span>
+                <span class="nb">include_directories</span><span class="p">(</span><span class="si">${</span><span class="nv">Boost_INCLUDE_DIRS</span><span class="si">}</span><span class="p">)</span>
+                <span class="nb">add_executable</span><span class="p">(</span>foo foo.cc<span class="p">)</span>
+                <span class="nb">target_link_libraries</span><span class="p">(</span>foo <span class="si">${</span><span class="nv">Boost_LIBRARIES</span><span class="si">}</span><span class="p">)</span>
+            <span class="nb">endif</span><span class="p">()</span>
+
+</code></pre></div></div>
+
+<h2 id="如何根据其生成的中间文件查看一些关键信息">如何根据其生成的中间文件查看一些关键信息</h2>
+<p>CMake相比较于autotools的一个优势就在于其生成的中间文件组织的很有序，并且清晰易懂，不像autotools会生成天书一样的庞然大物（10000+的不鲜见）。</p>
+
+<p>一般CMake对应的Makefile都是有层级结构的，并且会根据你的CMakeLists.txt间的相对结构在binary directory里边生成相应的目录结构。</p>
+
+<p>譬如对于某一个target，一般binary tree下可以找到一个文件夹:  __CMakeFiles/<targentName>.dir/__,比如：</targentName></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ls</span> <span class="nt">-l</span>
+total 84
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe 52533 2009-12-12 12:20 build.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  1190 2009-12-12 12:20 cmake_clean.cmake
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  4519 2009-12-12 12:20 DependInfo.cmake
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe    94 2009-12-12 12:20 depend.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe   573 2009-12-12 12:20 flags.make
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe  1310 2009-12-12 12:20 link.txt
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe   406 2009-12-12 12:20 progress.make
+drwxr-xr-x 2 skyscribe skyscribe  4096 2009-12-12 12:20 src
+</code></pre></div></div>
+<p>这里，每一个文件都是个很短小的文本文件，内容相当清晰明了。build.make一般包含中间生成文件的依赖规则，DependInfo.cmake一般包含源代码文件自身的依赖规则。</p>
+
+<p>比较重要的是flags.make和link.txt，前者一般包含了类似于GCC的-I的相关信息，如搜索路径，宏定义等；后者则包含了最终生成target时候的linkage信息，库搜索路径等。</p>
+
+<p>这些信息在出现问题的时候是个很好的辅助调试手段。</p>
+
+<h2 id="文件查找路径相关">文件查找、路径相关</h2>
+
+<ul>
+  <li>include<br />
+  一般常用的是：
+    <ol>
+      <li><code class="highlighter-rouge">include_directories（）</code> 用于添加头文件的包含搜索路径</li>
+      <li><code class="highlighter-rouge">link_directories()</code> 用于添加查找库文件的搜索路径</li>
+    </ol>
+  </li>
+  <li>
+    <p>library search
+  一般外部库的link方式可以通过两种方法来做，一种是显示添加路径，采用<code class="highlighter-rouge">link_directories()</code>， 一种是通过<code class="highlighter-rouge">find_library()</code>去查找对应的库的绝对路径。后一种方法是更好的，因为它可以减少不少潜在的冲突。</p>
+
+    <p>一般find_library会根据一些默认规则来搜索文件，如果找到，将会set传入的第一个变量参数、否则，对应的参数不被定义，并且有一个xxx-NOTFOUND被定义；可以通过这种方式来调试库搜索是否成功。</p>
+
+    <p>对于库文件的名字而言，动态库搜索的时候会自动搜索libxxx.so (xxx.dll),静态库则是libxxx.a（xxx.lib），对于动态库和静态库混用的情况，可能会出现一些混乱，需要格外小心；一般尽量做匹配连接。</p>
+  </li>
+  <li>rpath
+所谓的rpath是和动态库的加载运行相关的。我一般采用如下的方式取代默认添加的rpath：</li>
+</ul>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">SET</span><span class="p">(</span>CMAKE_SKIP_BUILD_RPATH  FALSE<span class="p">)</span>
+<span class="nf">SET</span><span class="p">(</span>CMAKE_BUILD_WITH_INSTALL_RPATH FALSE<span class="p">)</span> 
+<span class="nf">SET</span><span class="p">(</span>CMAKE_INSTALL_RPATH <span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_INSTALL_PREFIX</span><span class="si">}</span><span class="s2">/lib"</span><span class="p">)</span>
+<span class="nf">SET</span><span class="p">(</span>CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE<span class="p">)</span> 
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+<p>CMake Home: <a href="http://www.cmake.org/">link</a></p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2016/03/03/faster-large-cmake-project-build-optimization/">Faster build optimization for large CMake based project</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2015/12/19/asynchronous-scheduling-library-with-modern-cpp/">用C++11/14实现一个现代的异步服务调度库</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2015/11/28/rust-language-quick-overview/">Rust编程语言初探</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2015/10/04/cpp-conf-and-core-guidelines/">CppCon2015 and Cpp Core Guidelines</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2013/08/24/agile-software-development-the-cooperative-game-reading-4/">Agile software development - the cooperative game - 笔记 - 4</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2013/08/14/agile-software-development-the-cooperative-game-reading-3/">Agile software development - the cooperative game - 笔记 - 3</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/build" class="page__taxonomy-item" rel="tag">build</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cmake" class="page__taxonomy-item" rel="tag">cmake</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/build" class="page__taxonomy-item" rel="tag">build</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/tips" class="page__taxonomy-item" rel="tag">tips</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2009-12-14T14:11:00+08:00">December 14, 2009</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=CMake的一些小经验 https://skyscribe.github.io/post/2009/12/14/cmake-tips/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2009/12/14/cmake-tips/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2009/12/14/cmake-tips/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2009/12/14/cmake-tips/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="cmake-tips">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

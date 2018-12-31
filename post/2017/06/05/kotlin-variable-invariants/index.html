@@ -1,0 +1,1070 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Kotlin语言之变量约束设计 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Kotlin语言之变量约束设计">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
+
+
+
+  <meta property="og:description" content="可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Kotlin语言之变量约束设计">
+  <meta name="twitter:description" content="可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-06-05T23:12:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Kotlin语言之变量约束设计">
+    <meta itemprop="description" content="可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为继承/封装/多态等手法针对的都是程序组织上的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖过程式实现跟操作系统打交道。">
+    <meta itemprop="datePublished" content="June 05, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Kotlin语言之变量约束设计
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 5309 字，大约需要 13 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>可变状态的泛滥往往被认为是软件维护灾难的元凶之一，尤其是当过程封装遇上多线程，普通的面向对象编程技巧完全不堪大用，因为<strong>继承/封装/多态等手法针对的都是程序组织上</strong>的处理措施，具体到底层实现上，传统的C/C++/JAVA依然依赖<strong>过程式实现跟操作系统打交道</strong>。</p>
+
+<h2 id="函数式编程里的副作用">函数式编程里的副作用</h2>
+<p>在函数式编程的世界里，事情会变得很传统的过程式处理不一样，因为这里非常讲究函数本身是否是<strong>有副作用</strong>的，如果<strong>同样的输入不能保证相同的输出</strong>，那么则是有副作用的。这里的输出不仅仅表示返回值，还隐含其它形形色色的对环境的影响，包括</p>
+
+<ul>
+  <li>申请但是没有释放的内存</li>
+  <li>向操作系统请求占用共享资源如网络套接字</li>
+  <li>屏幕输出，磁盘占用等</li>
+</ul>
+
+<h2 id="为什么要区分副作用">为什么要区分副作用</h2>
+
+<p>显然，副作用引入了<strong>额外需要程序员维护</strong>的状态，而传统的线程库或基本的OS机制将其完全交给了程序员负责。从而导致在多线程编程环境下，复杂的问题随着状态的增加成<strong>指数上升</strong>。状态意味着有共享资源需要维护，当有并发执行的进程或是线程的时候，为了保证正确的程序语意，则不得不引入锁(昂贵的操作)和竞争，从而制约性能。无锁算法通过CAS+重试机制，可以<strong>部分缓解锁的开销</strong>，却不能从本质上解决问题。</p>
+
+<p>无副作用的函数则是天然适合并发的，因为没有共享自然可以并行不悖地执行，问题不是完美解决了吗？然而<strong>现实世界总是不允许绝对完美二字存在</strong>的，纯粹无副作用的函数几乎一无是处，因为它本质上没什么用，什么也做不了。</p>
+
+<p>退而求其次的想法是，能否尽量隔离两者的实现，然后又可以优雅地将二者集成起来完成实际功能？<strong>HASKELL用其优雅的monad抽象</strong>回答了这个问题。然而对于抽象思维能力不是那么强（或者没有那么好数学基础）的程序员而言，<strong>Monad实在是太阳春白雪</strong>了而难以接近；想更加接地气一点的程序语言无一不选择和Monad保持距离，即使某些构造和设计的思想就来源于Monad, 譬如随处可见的Optional，基本的map/reduce链式操作等。</p>
+
+<p>对于这些没有显示引入monad的非纯函数式语言来说，严格的隔离就显得有些太激进了。取而代之的相对折中一点的<strong>平庸</strong>策略是语言机制本身提供某些基础机制，剩下的怎么用这些基本机制，一切由程序员自己来定夺。</p>
+
+<h2 id="kotlin的语言层面基本机制">kotlin的语言层面基本机制</h2>
+
+<p>kotlin通过关键字 <code class="highlighter-rouge">val</code> 来声明<strong>只读</strong>的变量，用 <code class="highlighter-rouge">var</code> 来声明可变量。任何函数只要引入对可变量的使用，则其本身就是有明显的副作用的。然而一个变量声明为只读，仅仅表示在其对应的作用域中，不允许修改此变量的值，并<strong>不意味着实际指向的数据对象本身是不可变</strong>的， 因为在可能有其他的地方使用 <code class="highlighter-rouge">var</code> 的方式来操作此变量，或者有显示的方式将一个 <code class="highlighter-rouge">val</code> 的变量转换回可变的 <code class="highlighter-rouge">var</code>。</p>
+
+<p>考虑下边的例子：</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// field1 是只读的，在本class中不允许修改它
+</span><span class="kd">class</span> <span class="nc">SomeClass</span><span class="p">(</span><span class="kd">val</span> <span class="py">field1</span> <span class="p">:</span> <span class="n">SomeType</span><span class="p">,</span> <span class="kd">var</span> <span class="py">field2</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">fun</span> <span class="nf">doSth</span><span class="p">()</span> <span class="p">{</span>
+       <span class="c1">// can only modify field2, but not field1
+</span>   <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//calling site
+</span><span class="kd">var</span> <span class="py">someTypeInst</span> <span class="p">=</span> <span class="n">SomeType</span><span class="p">()</span>
+<span class="kd">val</span> <span class="py">obj</span> <span class="p">=</span> <span class="n">SomeClass</span><span class="p">(</span><span class="n">someTypeInst</span><span class="p">,</span> <span class="m">112</span><span class="p">)</span>
+<span class="c1">// someTypeInst can still be changed by others! Not recommended!
+</span><span class="n">obj</span><span class="p">.</span><span class="n">doSth</span><span class="p">()</span> 
+</code></pre></div></div>
+<p>虽然<code class="highlighter-rouge">someTypeInst</code>是以只读方式传入<code class="highlighter-rouge">obj</code> 的，然而并不能保证没有其它的线程并发地修改实际的对象，如果发生这种情况，<strong>程序员仍然需要保证数据的一致性和安全</strong>。</p>
+
+<h3 id="只读变量的初始化">只读变量的初始化</h3>
+
+<p>显然不可变变量则仅仅能够初始化一次，后续使用中不能再修改了。这样也带来一些限制，譬如在 <code class="highlighter-rouge">init block</code> 里想一次性初始化某些资源然后将其设置为在class内部是只读，则无能为力。一种变通的方式是将其设置为 <code class="highlighter-rouge">var</code> 类，然而这样做我们就损失了只读约束；另外一种做法则需要使用property构造来封装。</p>
+
+<h2 id="核心集合类">核心集合类</h2>
+<p>kotlin对来自JAVA的集合类库进行了二次封装，清晰地划分了只读集合类和可变集合。</p>
+
+<h3 id="接口定义">接口定义</h3>
+<p>常用的集合类接口在<code class="highlighter-rouge">kotlin,collections</code> 包中被重新定义 ( 源码中位于 <code class="highlighter-rouge">Collections.kt</code> )</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span> 
+<span class="c1">//...
+// by default not mutable
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">Iterable</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//... }
+</span>
+<span class="c1">// mutable iterable supports removing elements during iterating
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">MutableIterable</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
+</span>
+<span class="c1">//Only read access to collection
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">Collection</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Iterable</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
+</span>
+<span class="c1">// Supports read/write operations
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">MutableCollection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Collection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;,</span> <span class="n">MutableIterable</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
+</span></code></pre></div></div>
+
+<p>具体的集合类接口则选择从以上接口中<strong>选择对应的</strong>来扩展实现，因而对同一个类型有两种实现，分别是只读的 (没有前缀) 的和可变类型 (<strong>用 Mutable 做前缀区分</strong>) 。譬如 <code class="highlighter-rouge">List</code> 类就定义为</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Read only list interface
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">List</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Collection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
+// Mutable list
+</span><span class="k">public</span> <span class="kd">interface</span> <span class="nc">MutableList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;,</span> <span class="n">MutableCollection</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">{</span><span class="c1">//...}
+</span></code></pre></div></div>
+
+<p>需要注意的是，实际的具体实现类是复用Java中的定义，可参考collection包中的 <code class="highlighter-rouge">TypeAliases.kt</code> 文件</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">kotlin.collections</span>
+<span class="c1">//...
+</span><span class="n">@SinceKotlin</span><span class="p">(</span><span class="s">"1.1"</span><span class="p">)</span> <span class="k">public</span> <span class="k">typealias</span> <span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">E</span><span class="p">&gt;</span>
+</code></pre></div></div>
+<p>默认的集合操作以及Streams API返回的大部分是不可变接口对象。</p>
+
+<h3 id="集合类扩展工具函数">集合类扩展/工具函数</h3>
+<p>除了使用默认的JDK实现来生成具体集合类对象，Kotlin标准库中同时提供了大量的封装函数方便程序员使用，某些来源于对JDK的直接封装，有一些则是直接inline实现。</p>
+
+<p>譬如返回空list的包装和初始化形形色色的list</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Returns an empty read-only list. */</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">emptyList</span><span class="p">():</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">EmptyList</span>
+
+<span class="cm">/** Returns a new read-only list of given elements.  */</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">listOf</span><span class="p">(</span><span class="k">vararg</span> <span class="n">elements</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">elements</span><span class="p">.</span><span class="n">size</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span> <span class="n">elements</span><span class="p">.</span><span class="n">asList</span><span class="p">()</span> <span class="k">else</span> <span class="n">emptyList</span><span class="p">()</span>
+
+<span class="cm">/** Returns an empty read-only list. */</span>
+<span class="n">@kotlin</span><span class="p">.</span><span class="k">internal</span><span class="p">.</span><span class="n">InlineOnly</span>
+<span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">listOf</span><span class="p">():</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">emptyList</span><span class="p">()</span>
+
+<span class="cm">/**
+ * Returns an immutable list containing only the specified object [element].
+ * The returned list is serializable.
+ */</span>
+<span class="n">@JvmVersion</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">listOf</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Collections</span><span class="p">.</span><span class="n">singletonList</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>生成可变List的函数封装大多也是清晰明了 , 并且有很多种类的封装，使得就地生成 List 的工作大大简化；大部分情况仅仅需要<strong>使用已有的函数</strong>即可，不需要发明新的轮子</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/** Returns an empty new [MutableList]. */</span>
+<span class="n">@SinceKotlin</span><span class="p">(</span><span class="s">"1.1"</span><span class="p">)</span>
+<span class="n">@kotlin</span><span class="p">.</span><span class="k">internal</span><span class="p">.</span><span class="n">InlineOnly</span>
+<span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">mutableListOf</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">ArrayList</span><span class="p">()</span>
+
+<span class="cm">/** Returns an empty new [ArrayList]. */</span>
+<span class="n">@SinceKotlin</span><span class="p">(</span><span class="s">"1.1"</span><span class="p">)</span>
+<span class="n">@kotlin</span><span class="p">.</span><span class="k">internal</span><span class="p">.</span><span class="n">InlineOnly</span>
+<span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">arrayListOf</span><span class="p">():</span> <span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span> <span class="n">ArrayList</span><span class="p">()</span>
+
+<span class="cm">/** Returns a new [MutableList] with the given elements. */</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">mutableListOf</span><span class="p">(</span><span class="k">vararg</span> <span class="n">elements</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+        <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">elements</span><span class="p">.</span><span class="n">size</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span> <span class="n">ArrayList</span><span class="p">()</span> <span class="k">else</span> <span class="n">ArrayList</span><span class="p">(</span><span class="n">ArrayAsCollection</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">isVarargs</span> <span class="p">=</span> <span class="k">true</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>其它集合类  (set/map等) 的实现原理<strong>大概类似</strong>，可以通过查看对应源码。</p>
+
+<h3 id="不可变集合转换为可变集合">不可变集合转换为可变集合</h3>
+<p>很多场景下，API返回的都是不可变集合，将其变成一个可变对象再行编辑修改是常见不过的变成任务；kotlin 通过其<strong>自身的扩展机制</strong>将这些工具函数自动添加到了对应的集合类上</p>
+
+<p>如果想要将一个只读的 <code class="highlighter-rouge">Array</code> 对象变为一个可变的 <code class="highlighter-rouge">MutableList</code>，那么其实现是通过重新初始化一个新对象实现的：</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Below code is copied from generated standlib as _Arrays.kt
+//  see https://github.com/JetBrains/kotlin/tree/master/libraries/stdlib
+</span>
+<span class="cm">/**
+ * Returns a [MutableList] filled with all elements of this array.
+ */</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">Array</span><span class="p">&lt;</span><span class="k">out</span> <span class="n">T</span><span class="p">&gt;.</span><span class="n">toMutableList</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">ArrayList</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">asCollection</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>对于具体的Array类，有不同的实现，如 <code class="highlighter-rouge">ByteArray</code> 的初始化方法则有所不同，直接调用其构造函数，然后注意添加现有的各个元素</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Returns a [MutableList] filled with all elements of this array.
+ */</span>
+<span class="k">public</span> <span class="k">fun</span> <span class="nf">ByteArray</span><span class="p">.</span><span class="n">toMutableList</span><span class="p">():</span> <span class="n">MutableList</span><span class="p">&lt;</span><span class="n">Byte</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">list</span> <span class="p">=</span> <span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">Byte</span><span class="p">&gt;(</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">item</span> <span class="k">in</span> <span class="k">this</span><span class="p">)</span> <span class="n">list</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">list</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>之所以如此，是因为具体这些子类是被映射到具体的 JVM 对象上的。如ByteArray的文档如是说</p>
+<blockquote>
+  <p>public final class ByteArray defined in kotlin
+An array of bytes. 
+When targeting the JVM, instances of this class are represented as <code class="highlighter-rouge">byte[]</code>.</p>
+</blockquote>
+
+<p>而对于CharArray，则其映射到<code class="highlighter-rouge">char []</code>类型上去。</p>
+
+<h2 id="idea支持">IDEA支持</h2>
+<p>作为官方的IDE环境，IDEA对可变量的引用做了显示的<strong>下划线</strong>提醒，程序员可以一目了然地看到代码中对可变量的使用。</p>
+
+<p>然而想要更深入的查看整个实现调用链中，哪些引入副作用哪些没有，工具的支持就比较有限了。</p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/10/04/cpp-17-updates/">C++17整装待发</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/09/24/data-management-evolution/">数据访问与管理技术的演进</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-06-05T23:12:00+08:00">June 05, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Kotlin语言之变量约束设计 https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/06/05/kotlin-variable-invariants/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+              <h4 class="page__comments-title">Comments</h4>
+              
+
+              
+                
+                
+                
+                
+                
+                <article id="comment1" class="js-comment comment" itemprop="comment" itemscope itemtype="http://schema.org/Comment">
+  <div class="comment__avatar-wrapper">
+    <img class="comment__avatar" src="https://www.gravatar.com/avatar/3f43f2219b24130cce31e06577d6cc8c?d=mm&s=80">
+  </div>
+  <div class="comment__content-wrapper">
+    <h3 class="comment__author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+      
+        <span itemprop="name">test</span>
+      
+    </h3>
+    <p class="comment__date">
+      
+        <a href="#comment1" itemprop="url">
+        <time datetime="2018-03-10T16:57:49+08:00" itemprop="datePublished">March 10, 2018 at 08:57 AM</time>
+        </a>
+      
+    </p>
+    <div itemprop="text"><p>Test comment</p>
+</div>
+  </div>
+</article>
+              
+                
+                
+                
+                
+                
+                <article id="comment2" class="js-comment comment" itemprop="comment" itemscope itemtype="http://schema.org/Comment">
+  <div class="comment__avatar-wrapper">
+    <img class="comment__avatar" src="https://www.gravatar.com/avatar/3f43f2219b24130cce31e06577d6cc8c?d=mm&s=80">
+  </div>
+  <div class="comment__content-wrapper">
+    <h3 class="comment__author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+      
+        <span itemprop="name"><a rel="external nofollow" itemprop="url" href="http://www.skyscribe.me">skyscribe</a></span>
+      
+    </h3>
+    <p class="comment__date">
+      
+        <a href="#comment2" itemprop="url">
+        <time datetime="2018-03-10T17:01:46+08:00" itemprop="datePublished">March 10, 2018 at 09:01 AM</time>
+        </a>
+      
+    </p>
+    <div itemprop="text"><p>测试评论</p>
+</div>
+  </div>
+</article>
+              
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="kotlin-variable-invariants">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

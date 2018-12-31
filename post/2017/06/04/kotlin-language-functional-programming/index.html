@@ -1,0 +1,1043 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Kotlin语言之函数式编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Kotlin语言之函数式编程">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/">
+
+
+
+  <meta property="og:description" content="Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Kotlin语言之函数式编程">
+  <meta name="twitter:description" content="Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-06-04T22:32:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Kotlin语言之函数式编程">
+    <meta itemprop="description" content="Kotlin语言是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其2017年的I/O大会上将其列为Android平台官方支持的语言而窜上了热点。">
+    <meta itemprop="datePublished" content="June 04, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Kotlin语言之函数式编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 4884 字，大约需要 12 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p><a href="https://kotlinlang.org/">Kotlin语言</a>是大名鼎鼎的JetBrains公司（就是可以甩Eclipse数条大街的IntelliJ IDEA背后的公司）出品的现代的编程语言，之前已经在IDEA中蹦达出来很多次了；只是最近随着Google在其<a href="https://techcrunch.com/2017/05/17/google-makes-kotlin-a-first-class-language-for-writing-android-apps/">2017年的I/O大会上将其列为Android平台官方支持的语言</a>而窜上了热点。</p>
+
+<p>本文尝试从函数式编程的角度管窥Kotlin的特性。</p>
+
+<h2 id="jvm上的函数式语言生态">JVM上的函数式语言生态</h2>
+<p>作为一门比较年轻的编程语言，要想在既有的数百种语言中脱颖而出，成功吸引开发者的心，对新的<a href="https://en.wikipedia.org/wiki/Functional_programming">函数式编程范式</a>的支持是必然不可少的 - 这一点基本成为语言出品商心照不宣的潜规则了，当然在21实际，不支持面向对象的范式也是说不过去的。</p>
+
+<p>作为基于JVM平台的语言，和Java的互操作性肯定是一个重要的优势，当然这方面已经有成熟的函数式语言<a href="https://www.scala-lang.org/">scala</a>和更早一点的<a href="https://clojure.org/about/rationale">clojure</a>在前。可能比较遗憾的是，正统的函数式编程风格太难被传统的OO程序员所接受，因此基于传统Lisp的clojure一直曲高和寡，scala在近年来有变得更加流行的趋势，只是目前看来<a href="https://dzone.com/articles/the-rise-and-fall-of-scala">仍然没有跨越期望的引爆点</a>。</p>
+
+<h3 id="有丰富的特性还希望有速度">有丰富的特性还希望有速度</h3>
+<p>传统印象中的静态函数式语言的编译速度往往会比较慢，这一点在工程实践上是个很重要的因素。</p>
+
+<p>Kotlin作为后来者，其开发者认为静态语言的编译速度是个至关重要的，然后Scala的编译速度远不能令人满意。对大型的项目而言，笨拙的编译速度浪费的可是大量的时间和金钱；毕竟天下武功唯快不破，更快的编译时间意味着更快的反馈周期，更多次的迭代开发。Kotlin的目标之一是期望编译速度可以像Java一样快，<a href="https://medium.com/keepsafe-engineering/kotlin-vs-java-compilation-speed-e6c174b39b5d">benchmark分析</a>也表明了二者的速度是差别不大的。</p>
+
+<h2 id="基本特性">基本特性</h2>
+<p>函数式语言的基本元素就是function，这一点kotlin倒是没有玩太多花头。用<code class="highlighter-rouge">fun</code>关键字来声明函数，函数是第一等公民，可以支持函数作为参数，返回函数等基本特性。</p>
+
+<h3 id="不可变类型支持">不可变类型支持</h3>
+<p>Kotlin强制要求程序员声明某个特定的变量是否是可变类型。</p>
+
+<p>如果是可变类型，则需要用<code class="highlighter-rouge">var </code>来声明；那么后续程序中任何地方访问变量都会被IDE给highlight出来，提醒可能的副作用。因为可变类型意味着内部存储着状态，从函数式编程的角度来看，状态会<strong>影响函数的纯度</strong>，带来副作用和复杂性。</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/5275528-e33afde1447172d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="immutable_hints.png" /></p>
+
+<h3 id="函数声明">函数声明</h3>
+<p>基本的函数声明是这样的</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">thisIsAFunction</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">:</span> <span class="n">Int</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>当然这里的类型后置语法和传统的C家族语言有些不同，但是适应起来倒也不是难事儿。</p>
+
+<h3 id="类型推导">类型推导</h3>
+<p>Kotlin也支持强大的类型推导，从而在很多情况下，可以省略不必言的类型指定，简化代码；譬如函数的返回类型可以被自动推断的时候，其类型声明可以被省略。</p>
+
+<h3 id="特殊的返回类型-unit">特殊的返回类型 <code class="highlighter-rouge">Unit</code></h3>
+<p><code class="highlighter-rouge">Unit</code>是一个特殊的类型，用于指定某个函数返回的值可以被省略，类似于Java8的<code class="highlighter-rouge">Void</code>类型。如果一个函数没有返回值，那么可以指定其返回<code class="highlighter-rouge">Unit</code>或者直接省略其返回</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">someFunc</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">)</span> <span class="p">:</span> <span class="n">Unit</span> <span class="p">{</span>
+    <span class="c1">// do something with arg
+</span>    <span class="c1">// no return needed
+</span><span class="p">}</span>
+
+<span class="c1">// same as above
+</span><span class="k">fun</span> <span class="nf">someFunc</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// do something
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="中缀表达式">中缀表达式</h3>
+<p>中缀表达式写法更替进人的思维习惯，在定义某些操作符的时候是非常有用的。此用法往往用于扩展已有类型的操作，定义的时候需要满足以下条件</p>
+<ul>
+  <li>属于某个类的成员函数，或者是定义某个类的扩展函数(后边再回头来看)，因为这里我们<strong>必须知道左侧的操作对象</strong>是谁</li>
+  <li>必须只有一个函数参数（操作符后边的对象）</li>
+  <li>用<code class="highlighter-rouge">infix</code>关键字来标记</li>
+</ul>
+
+<p>譬如</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">infix</span> <span class="k">fun</span> <span class="nf">Int</span><span class="p">.</span><span class="n">shl</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Int</span> <span class="p">{</span>
+  <span class="c1">/// implementation of shl operation
+</span><span class="p">}</span>
+
+<span class="c1">// call site
+</span><span class="m">1</span> <span class="n">shl</span> <span class="m">2</span>
+</code></pre></div></div>
+
+<h3 id="命名参数和默认值">命名参数和默认值</h3>
+<p>这点和Python很像在多个参数的复杂函数的使用上有很大帮助，能极大提高可读性减少维护成本。调用方可以在调用点指定需要传入的参数的名字；也可以省略掉不需要指定的参数。</p>
+
+<p>譬如有如下的<code class="highlighter-rouge">reformat</code>函数用于格式化</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span>
+    <span class="n">normalizeCase</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
+    <span class="n">upperCaseFirstLetter</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span>
+    <span class="n">divideByCamelHumps</span> <span class="p">=</span> <span class="k">false</span><span class="p">,</span>
+    <span class="n">wordSeparator</span> <span class="p">=</span> <span class="sc">'_'</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>调用点可以简单写作</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">wordSeparator</span> <span class="p">=</span> <span class="sc">'_'</span><span class="p">)</span>
+<span class="c1">// equals to
+</span><span class="n">reformat</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="sc">'_'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>这个功能在传统的C++/Java里边没有提供，但是IDEA提供了只能提示可以弥补Java的不足；而Kotlin则将其内置在语言中了；本身没多少复杂性在里边。</p>
+
+<h2 id="高阶函数和语法糖">高阶函数和语法糖</h2>
+
+<h3 id="高阶函数">高阶函数</h3>
+<p>函数的参数可以是一个函数，这个在Kotlin的库里已经有大量的例子，譬如基本的<code class="highlighter-rouge">Sequence</code>的filter函数携带一个谓词函数，其针对给定的参数返回一个<code class="highlighter-rouge"> Boolean</code></p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">&gt;</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">Boolean</span><span class="p">):</span> <span class="n">Sequence</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">FilteringSequence</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="n">predicate</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="单参数函数的表达式形式">单参数函数的表达式形式</h3>
+<p>当函数只有一行实现的时候，可以省略其函数体，直接用<code class="highlighter-rouge">=</code>来书写，就像复制给一个变量一样</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">add2Numbers</span><span class="p">(</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span><span class="p">):</span> <span class="n">Int</span> <span class="p">=</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span>
+</code></pre></div></div>
+
+<h3 id="lambda和匿名函数">Lambda和匿名函数</h3>
+<p>匿名函数用大括号括起来，上面的例子也可以写作</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">add2Numbers2</span> <span class="p">=</span> <span class="p">{</span><span class="n">x</span> <span class="p">:</span> <span class="n">Int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Int</span> <span class="p">-&gt;</span> <span class="n">x</span><span class="p">+</span><span class="n">y</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="函数调用的形式省略">函数调用的形式省略</h3>
+<p>当函数仅仅有一个参数的时候，其参数名字默认为<code class="highlighter-rouge">it</code>保留关键字可以不用显示指定。</p>
+
+<p>当函数的最后一个参数是一个函数的时候，其函数体可以用<code class="highlighter-rouge">{}</code>块的方式来书写，获得更好的可读性。</p>
+
+<p>譬如如下的例子用于打印指定数目个偶数</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">printEvens</span> <span class="p">=</span> <span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="n">Long</span> <span class="p">-&gt;</span>
+    <span class="n">IntStream</span><span class="p">.</span><span class="n">range</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">10000000</span><span class="p">)</span>
+            <span class="p">.</span><span class="n">filter</span> <span class="p">{</span> <span class="n">it</span><span class="p">%</span><span class="m">2</span> <span class="p">==</span> <span class="m">0</span> <span class="p">}.</span><span class="n">limit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="p">.</span><span class="n">forEach</span> <span class="p">{</span> <span class="n">println</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="一个具体一点的例子">一个具体一点的例子</h3>
+
+<p>假设要实现如下功能的函数</p>
+<ol>
+  <li>遍历某个目录树</li>
+  <li>找出所有符合条件的文件夹</li>
+  <li>取其文件绝对路径</li>
+  <li>归并为一个字符串列表返回</li>
+</ol>
+
+<p>可以通过如下几个函数完成</p>
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">File</span><span class="p">(</span><span class="n">dirName</span><span class="p">).</span><span class="n">walkTopDown</span><span class="p">().</span><span class="n">filter</span> <span class="p">{</span> <span class="n">isDocDir</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
+            <span class="p">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">it</span><span class="p">.</span><span class="n">absolutePath</span> <span class="p">}.</span><span class="n">toList</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">fun</span> <span class="nf">isDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">):</span> <span class="n">Boolean</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="n">isDirectory</span> <span class="p">&amp;&amp;</span> <span class="n">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">fun</span> <span class="nf">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">):</span> <span class="n">Boolean</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">)[</span><span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">).</span><span class="n">size</span> <span class="p">-</span> <span class="m">1</span><span class="p">]</span> <span class="p">==</span> <span class="s">"doc"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这里每个函数的含义都是比较清楚易懂的。如果利用上述的省略规则，那么可以更简略的写为</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">extractAllDomainDoc</span><span class="p">(</span><span class="n">dirName</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="n">File</span><span class="p">(</span><span class="n">dirName</span><span class="p">).</span><span class="n">walkTopDown</span><span class="p">()</span>
+        <span class="p">.</span><span class="n">filter</span> <span class="p">{</span> <span class="n">isDocDir</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">}</span>
+        <span class="p">.</span><span class="n">map</span> <span class="p">{</span> <span class="n">it</span><span class="p">.</span><span class="n">absolutePath</span> <span class="p">}.</span><span class="n">toList</span><span class="p">()</span>
+
+<span class="k">private</span> <span class="k">fun</span> <span class="nf">isDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">)</span> <span class="p">=</span> <span class="n">file</span><span class="p">.</span><span class="n">isDirectory</span> <span class="p">&amp;&amp;</span> <span class="n">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+<span class="k">private</span> <span class="k">fun</span> <span class="nf">isDomainDocDir</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">)</span> <span class="p">=</span> <span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span>
+        <span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">)[</span><span class="n">file</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">separator</span><span class="p">).</span><span class="n">size</span> <span class="p">-</span> <span class="m">1</span><span class="p">]</span> <span class="p">==</span> <span class="s">"doc"</span>
+</code></pre></div></div>
+
+<h2 id="类型扩展函数">类型扩展函数</h2>
+<p>Kotlin 支持对已有的类型添加扩展，值需要在任何想要的地方添加想要的功能，则原有的类型即可像被增强了一样具有新的功能，该机制提供了OO之外新的灵活的扩展方式。</p>
+
+<p>譬如默认的Kotlin的<code class="highlighter-rouge">Iterable</code>类没有提供并发的<code class="highlighter-rouge">foreach</code>操作，可以通过扩展机制很容易的写出来一个使用<code class="highlighter-rouge">ExecutorService</code>来并发循环的版本</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// parallel for each, see also https://stackoverflow.com/questions/34697828/parallel-operations-on-kotlin-collections
+</span><span class="k">fun</span> <span class="err">&lt;</span><span class="nf">T</span><span class="p">,</span> <span class="n">R</span><span class="p">&gt;</span> <span class="n">Iterable</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">parallelForEach</span><span class="p">(</span>
+        <span class="n">numThreads</span><span class="p">:</span> <span class="n">Int</span> <span class="p">=</span> <span class="n">Runtime</span><span class="p">.</span><span class="n">getRuntime</span><span class="p">().</span><span class="n">availableProcessors</span><span class="p">(),</span>
+        <span class="n">exec</span><span class="p">:</span> <span class="n">ExecutorService</span> <span class="p">=</span> <span class="n">Executors</span><span class="p">.</span><span class="n">newFixedThreadPool</span><span class="p">(</span><span class="n">numThreads</span><span class="p">),</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="n">R</span><span class="p">):</span> <span class="n">Unit</span> <span class="p">{</span>
+
+    <span class="c1">// default size is just an inlined version of kotlin.collections.collectionSizeOrDefault
+</span>    <span class="kd">val</span> <span class="py">defaultSize</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="k">is</span> <span class="n">Collection</span><span class="p">&lt;*&gt;)</span> <span class="k">this</span><span class="p">.</span><span class="n">size</span> <span class="k">else</span> <span class="m">10</span>
+    <span class="kd">val</span> <span class="py">destination</span> <span class="p">=</span> <span class="n">Collections</span><span class="p">.</span><span class="n">synchronizedList</span><span class="p">(</span><span class="n">ArrayList</span><span class="p">&lt;</span><span class="n">R</span><span class="p">&gt;(</span><span class="n">defaultSize</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">item</span> <span class="k">in</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">exec</span><span class="p">.</span><span class="n">submit</span> <span class="p">{</span> <span class="n">destination</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">transform</span><span class="p">(</span><span class="n">item</span><span class="p">))</span> <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="n">exec</span><span class="p">.</span><span class="n">shutdown</span><span class="p">()</span>
+    <span class="n">exec</span><span class="p">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="n">DAYS</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里在函数体中，<code class="highlighter-rouge">this</code>自动会绑定于被扩展的对象。</p>
+
+<p>如果我们想实现一个自动将一大堆plantuml文件转换为png格式并copy到指定目录，因为默认的plantuml的API是单线程的，我们可以基于上述的parallelForEach实现来并发调度UML的生成过程，对应的代码可以写为</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">markDownFileLists</span><span class="p">.</span><span class="n">parallelForEach</span> <span class="p">{</span>
+    <span class="n">SourceFileReader</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">it</span><span class="p">)).</span><span class="n">generatedImages</span><span class="p">.</span><span class="n">firstOrNull</span><span class="p">()</span><span class="o">?.</span><span class="n">apply</span> <span class="p">{</span>
+        <span class="n">copyFileToDirWith</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">pngFile</span><span class="p">.</span><span class="n">absolutePath</span><span class="p">,</span> <span class="n">getCopyTarget</span><span class="p">)</span>
+        <span class="n">println</span><span class="p">(</span><span class="s">"${System.currentTimeMillis()} - Created png for $it"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/10/04/cpp-17-updates/">C++17整装待发</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/09/24/data-management-evolution/">数据访问与管理技术的演进</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/kotlin" class="page__taxonomy-item" rel="tag">kotlin</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-06-04T22:32:00+08:00">June 04, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Kotlin语言之函数式编程 https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/06/04/kotlin-language-functional-programming/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="kotlin-language-functional-programming">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

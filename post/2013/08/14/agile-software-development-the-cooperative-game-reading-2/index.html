@@ -1,0 +1,1365 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Agile software development - the cooperative game - 笔记 - part2 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="本文是第二部分(第一部分)。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Agile software development - the cooperative game - 笔记 - part2">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">
+
+
+
+  <meta property="og:description" content="本文是第二部分(第一部分)。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Agile software development - the cooperative game - 笔记 - part2">
+  <meta name="twitter:description" content="本文是第二部分(第一部分)。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2013-08-14T20:32:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Agile software development - the cooperative game - 笔记 - part2">
+    <meta itemprop="description" content="本文是第二部分(第一部分)。">
+    <meta itemprop="datePublished" content="August 14, 2013">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Agile software development - the cooperative game - 笔记 - part2
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 3090 字，大约需要 7 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>本文是第二部分(<a href="/post/2013/08/11/agile-software-development-the-cooperative-game-reading-1/index.html">第一部分</a>)。</p>
+
+<!--more-->
+
+<h2 id="作为个体的人">作为个体的人</h2>
+
+<p>人们常常选择性的忽略了软件开发和实际过程是由一个一个的<strong>个体的人</strong>来完成的；然而人都有弱点，容易犯错，有固定的失败模式/成功模式，以及通用的行为模式：</p>
+
+<ol>
+  <li>人们的行为通常是难以预测的</li>
+  <li>人性本身有些固有的失败模式</li>
+  <li>总有一些方式比另外一些方式更容易让人们共同工作，即使对同样一群人</li>
+  <li>有很多模式引起失败，那么什么样的方式才能达成成功?</li>
+</ol>
+
+<h3 id="人的行为模式">人的行为模式</h3>
+
+<p>人的行为总是非线性的并且比一般的物理实体复杂的多；给予双倍的奖励，或者双倍的惩罚，甚至于双倍的时间，都不能确定的提高一个人的思考速度/思考质量/编程设计输出。一个每周工作40个小时的人可能在下周工作60个小时就可以得到双倍的进展，但是接下来一周再工作60个小时，可能不仅不能维持之前双倍的效率，可能反而不及最初正常的效率，因为人们会产生疲惫。</p>
+
+<p>人的行为会突然发生偶然的变化，某某可能突然对测试工作发生兴趣；一个偶然的小事儿可能导致一个高级工程师的离开等；某个工程师可能在一种情况下显得特别容易沟通而换了一种环境则会变得难以沟通。人们协作的方式也可能有巨大的差异，不同的文化背景可能青睐于不同的沟通方式；直接或者保守在不同的文化氛围中显得完全不同。真因为这些不可避免的差异，所以才有各种各样的技术方法被发明出来，然后，<strong>没有一种方法是绝对有效</strong>的。这个结论是明显的，然后人们往往容易忽略之，而盲目的鼓吹某种方法是<strong>正确</strong>的方式并且期望所有人按照这种方式来工作。</p>
+
+<p>人的行为在很多方面表现出巨大的不同，并不意味着一些通用的方法就没有意义；还是有些东西在很大的范围内行之有效的。基于此，我们就可以在承认人与人之间巨大差异的基础上来建立大家认可的方法，但是并不能由此期望人们的具体行为会趋同或者可以严格预测。</p>
+
+<p>有效的过程方法的意义在于：</p>
+
+<ol>
+  <li>允许人们更容易地表述他们的想法</li>
+  <li>可以完成一个人无法独立完成的工作</li>
+  <li>将复杂而又繁琐的工作自动化</li>
+  <li>使得人们的相互沟通更容易</li>
+</ol>
+
+<h3 id="失败模式">失败模式</h3>
+
+<p>有如下五种比较普遍的失败模式：</p>
+
+<ol>
+  <li><strong>人们总是会犯错</strong> - 简单但又常常被人们忽略；敏捷和迭代开发的巨大进步意义就在于承认人总是会出错，但是通过一连串小的错误来及早暴露风险；持续不断的解决问题而不是固守详细周密的计划 - 没有错误的计划似乎只存在于真空之中</li>
+  <li><strong>倾向于保守谨慎</strong> 在最终结果一致的情况下，同样的问题通过不同的方式呈现出来，人们的反应却有可能大不相同。当我没可能获得比较高的潜在收益的时候，人们总是倾向于去冒险，然后在可能失去某些东西的时候，人们则会倾向于选择更保守的方式。一个有很多瀑布模式成功经验的manager（其实这些成功的经验有多大程度上算作成功就很难考量）在一个初级的工程师提出尝试迭代开发的模式的时候可能持激烈的反对态度；他可能更愿意采用传统的策略，能产生“确定“的输出而不是”可能产生更大收益“但是又”看起来奇怪“的方式</li>
+  <li><strong>习惯的不一致性</strong> 如果人们总能保持一致，那么就不会有减肥/锻炼的问题。问题是<strong>我们从来不缺少方法实践，缺少的恰恰是实践这些方法</strong></li>
+  <li><strong>倾向于发明新的东西而不是研究已有的方案</strong> 大概跟人们接受的教育有关 - 鼓励原创的论文/独立完成的作业等等；而不是团队工作。很多时候人们需要更好的重用已有的成果而不是自己从头发明一切</li>
+  <li><strong>自律和适当容忍的妥协</strong>  强调高度的自律往往是一厢情愿，然后过度的妥协又容易导致越来越多的混乱。项目经理可能对严格要求团队遵循某个方法实践所带来的副作用感到惊讶。譬如XP实践强调结对编程和Coach，然后很多Team在实践的过程中却将重构的工作丢下不理，等待更高级的工程师去做</li>
+</ol>
+
+<h3 id="某些方式总是比其它的更好">某些方式总是比其它的更好</h3>
+
+<p>尽管人与人之间的差异是巨大的，然而总有一些方法是更有效的。人们倾向于做的更好，如果他们</p>
+
+<ol>
+  <li>从具体的例子开始</li>
+  <li>从容易处理的东西开始着手</li>
+  <li>从已有的东西入手寻找替代/优化的方式</li>
+</ol>
+
+<p>还有一些方法也更容易让人们取得积极的进展：</p>
+
+<ol>
+  <li>通过观察和学习的同时做工作</li>
+  <li>支持精力集中的思考并同时支持积极的沟通 - 设置安静时间和公共沟通区域来加强沟通</li>
+  <li>根据人们的长处进行任务分配</li>
+  <li>选择最好的人才</li>
+  <li>激励方式的选择 - 开发人员的工作激情/成就感/贡献荣誉感觉</li>
+  <li>清晰有效的反馈 - 越及时效果越好</li>
+</ol>
+
+<h3 id="寻找成功模式">寻找成功模式</h3>
+
+<p>作者长期面试成功项目团队的经验中，如下的申明频繁的出现： <strong>一小部分人在关键的时间介入，作出了一切需要做的工作</strong>。看起来是很随意的描述，然而更仔细的审视发现，如下的一些成功因素慢慢浮现出来:</p>
+
+<ol>
+  <li>擅长于四处观望式的扫视 - 设计文档未必需要每一个细节都和实现保持一致，只要大致结构的一致即可。做维护工作的开发者就可以通过快速的浏览找到需要的部分，剩下的就是具体怎么做了，细节的准确意义并没有想的那么大了。文档只需要<strong>保持足够的精确</strong>即可，能完成主要的工作，使得人们不用费很大功夫就可以找到对应的细节即可。Tech Lead仅仅需要大致看一下问题大概在什么地方并知道其它工程师去做即可，而不是处理每一个细节</li>
+  <li>人们持续不断的学习 - 敏捷过程提出的持续改进就是这么一个思想，回顾当前迭代中那些值得改进的，持续的需西和发现不足，人们就能不断的进步。</li>
+  <li>可以改变的韧性 - 通过团队的集体氛围来慢慢提高个体的韧性，使之适应并改变 - 当然并不是每个个人都可适应这个过程，然后他就会离开</li>
+  <li>主动承担和贡献</li>
+</ol>
+
+<h4 id="融合这些成功的因素">融合这些成功的因素</h4>
+
+<p>是否有融合这些成功因素的方法存在？<strong>自组织团队</strong>的想法给出了一种思路，但是实现的过程自然是充满崎岖的。需要培养这样的氛围，每个人都需要能够第一时间发现系统中的错误，不管这个人的职位和角色是什么；<strong>他将错误传递到能够正确纠正错误的人的成本</strong>往往决定了<strong>整个项目的成本</strong>。</p>
+
+<h2 id="平衡各种策略">平衡各种策略</h2>
+
+<p>很多时候看起来很好的策略并不意味着在大部分情况都是好的 - 譬如让一个Team的成员坐在一起。<a href="http://pmdoi.org">PMDOI</a>认为，我们可以通过具体情况具体分析的策略/工具和方法来真正提高效率和可靠性。一个真正好的策略需要平衡各种足够好的基本策略，将其打包调整其中的某些不合时宜的做法。想想人们常说的，坐在一起的团队和面对面的沟通总是能达到最好的效果；但是为了达到<strong>真正高效的沟通</strong>(因为这才是<strong>最高优先级的事情</strong>),我们还需考虑到：</p>
+
+<ol>
+  <li>人们有时候需要安静的思考和集中注意力的工作</li>
+  <li>有时候需要进行一些安静的对话来交换一些深思熟虑的意见</li>
+  <li>有时候需要放松的心态学习一些新的语言/工具等</li>
+</ol>
+
+<p>Osmotic Communication要求人们做的足够的近以便周围人的谈话都很容易被听清楚，这样有什么问题就可以马上作出反应；信息传递的成本几乎为零。这样一些复杂的问题可能会被周围的专家以最快的速度解决。然后Cone of Silence策略则提出了一种相反的做法：一个或者多个团队成员坐得距离其它人远远的从而可以排除沟通干扰。但是这种策略也有典型的适用场合，譬如Tech Leader本来应该用于安排解决艰难负责的问题，然而由于周围的人不断得分散其注意力，导致复杂的问题没有被解决，进度不断被延误，进而导致情况更加恶化。Cockburn认为，相互沟通的两个人的距离超过一辆公交车的长度时，沟通的效果就会急剧下降。</p>
+
+<p>策略的平衡意味着，安排座位的时候需要考虑某些负面的影响 - 有些时候需要将人们适度分隔开来而不是聚越来越多的人在一个大的空间。当周围的噪音和干扰越来越大的时候，人们容易觉得压抑和头疼，很多重要的工作都无法正常的完成。每一种策略都有一定的限制；明智的决策什么时候<strong>Osmotic Communication</strong>是有效的，什么时候它因为人太多而失去意义是个重要的事情。</p>
+
+<p>待续。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/notes" class="page__taxonomy-item" rel="tag">notes</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2013-08-14T20:32:00+08:00">August 14, 2013</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Agile software development - the cooperative game - 笔记 - part2 https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2013/08/14/agile-software-development-the-cooperative-game-reading-2/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="agile-software-development-the-cooperative-game-reading-2">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

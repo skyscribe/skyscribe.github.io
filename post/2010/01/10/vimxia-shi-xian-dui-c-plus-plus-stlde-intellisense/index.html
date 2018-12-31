@@ -1,0 +1,1405 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>VIM下实现对C++ STL的IntelliSense - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="以前尝试过在vim下配置STL的Intellisense曾经没有成功；最近有空刚好仔细看了下vim的一些相对高级的manual，总算将OmniCppComplete主页上的效果给弄了出来（这里）。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="VIM下实现对C++ STL的IntelliSense">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/">
+
+
+
+  <meta property="og:description" content="以前尝试过在vim下配置STL的Intellisense曾经没有成功；最近有空刚好仔细看了下vim的一些相对高级的manual，总算将OmniCppComplete主页上的效果给弄了出来（这里）。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="VIM下实现对C++ STL的IntelliSense">
+  <meta name="twitter:description" content="以前尝试过在vim下配置STL的Intellisense曾经没有成功；最近有空刚好仔细看了下vim的一些相对高级的manual，总算将OmniCppComplete主页上的效果给弄了出来（这里）。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2010-01-10T18:28:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="VIM下实现对C++ STL的IntelliSense">
+    <meta itemprop="description" content="以前尝试过在vim下配置STL的Intellisense曾经没有成功；最近有空刚好仔细看了下vim的一些相对高级的manual，总算将OmniCppComplete主页上的效果给弄了出来（这里）。">
+    <meta itemprop="datePublished" content="January 10, 2010">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">VIM下实现对C++ STL的IntelliSense
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 3425 字，大约需要 8 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>以前尝试过在vim下配置STL的Intellisense曾经没有成功；最近有空刚好仔细看了下vim的一些相对高级的manual，总算将<a href="http://www.vim.org/scripts/script.php?script_id=1520">OmniCppComplete</a>主页上的效果给弄了出来（<a href="http://vissale.neang.free.fr/Vim/OmniCppComplete/ScreenShots/screenshots.htm">这里</a>）。</p>
+
+<p>具体步骤基本是按照其help按部就班，具体可在安装完OmniCppComplete之后，用<code class="highlighter-rouge">:help cppcomplete</code>查看。</p>
+
+<h2 id="首先需要有ctags-并且必须是exuberant-ctags">首先需要有ctags, 并且必须是Exuberant ctags</h2>
+
+<p>默认的Unix环境里边安装的ctags很肯能不是这个版本，不过Linux机器大部分都有。我的Ubuntu上已经是最新版了:</p>
+
+<!--more-->
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>skyscribe@skyscribe-ubuntu:~<span class="nv">$ </span>ctags <span class="nt">--version</span>
+Exuberant Ctags 5.9~svn20110310, Copyright <span class="o">(</span>C<span class="o">)</span> 1996-2009 Darren Hiebert
+    Compiled: Jul 27 2011, 11:05:43
+    Addresses: &lt;dhiebert@users.sourceforge.net&gt;, http://ctags.sourceforge.net
+    Optional compiled features: +wildcards, +regex
+</code></pre></div></div>
+
+<h2 id="加入autoload">加入autoload</h2>
+
+<p>在 ~/.vimrc 里边加入autoload taglist功能，为了方便自动更新当前tags，设置一个快捷键（这里）：</p>
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code>map <span class="p">&lt;</span>C<span class="p">-</span>F12<span class="p">&gt;</span> <span class="p">:!</span>ctags <span class="p">-</span>R <span class="p">--</span><span class="k">c</span><span class="p">++-</span>kinds<span class="p">=+</span><span class="k">p</span> <span class="p">--</span>fields<span class="p">=+</span>iaS <span class="p">--</span>extra<span class="p">=+</span><span class="k">q</span> <span class="p">.&lt;</span>CR<span class="p">&gt;</span>
+source <span class="p">~</span><span class="sr">/.vim/</span>my<span class="p">.</span><span class="k">vim</span>
+</code></pre></div></div>
+
+<p>这里的自动加载已有vim的功能，就用一个vim脚步来实现 (参考 vim :help glob给的例子)：</p>
+
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">cat</span> <span class="p">~</span><span class="sr">/.vim/</span>my<span class="p">.</span><span class="k">vim</span> 
+<span class="k">let</span> tagfiles <span class="p">=</span> glob<span class="p">(</span><span class="s2">"`find ~/.vim/tagfiles -name tags -print`"</span><span class="p">)</span>
+<span class="k">let</span> &amp;<span class="k">tags</span> <span class="p">=</span> substitute<span class="p">(</span>tagfiles<span class="p">,</span> <span class="s2">"\n"</span><span class="p">,</span> <span class="s2">","</span><span class="p">,</span> <span class="s2">"g"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>以后需要新的taglist，只需要放在~/.vim/tagfiles目录下就好了。
+vim启动的时候，会自动执行~/.vimrc，从而调用my.vim，将事先准备好的taglist更新进去；这里一般放一些不太变化的静态头文件tag就可以了。</p>
+
+<h2 id="生成stl-tags">生成STL tags</h2>
+
+<p>要有STL的intelliSense，自然要有STL C++的tags database了，这里需要生成之。
+根据上一步的惯例，需要生成一个tags文件，放在~/.vim/tagfiles/的某个子目录下：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir <span class="nt">-p</span> ~/.vim/tagfiles/gcc&lt;ver&gt;/
+<span class="nb">ls</span> –l /usr/include/c++/
+</code></pre></div></div>
+<p>这里需要将ver换成当前系统的libstdc++版本，Ubuntu 9.10上的是4.4.1.</p>
+
+<p>用上边的命令生成taglist：</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctags <span class="nt">-R</span> <span class="nt">--c</span>++-kinds<span class="o">=</span>+p <span class="nt">--fields</span><span class="o">=</span>+iaS <span class="nt">--extra</span><span class="o">=</span>+q <span class="nb">.</span> <span class="nt">-o</span> ~/.vim/tagfiles/gcc4.4/tags /usr/include/c++/4.4
+</code></pre></div></div>
+
+<h2 id="可能的问题">可能的问题</h2>
+
+<p>写一个简单的c++程序，在Insert Mode下，Ctrl+X， Ctrl+P，发现并不能工作，什么提示也没有；初步怀疑是对应的tag文件不对。</p>
+
+<p>幸好早有人尝试过了，给出了一种办法(<a href="http://design.liberta.co.za/articles/code-completion-intellisense-for-cpp-in-vim-with-omnicppcomplete/">这里</a>），可惜他的方法我试了不行，不过已经可以借用他的思路了：</p>
+
+<ol>
+  <li>将/usr/include/c++/4.4.1/的内容全部拷贝到一个目录下：</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir gcc4.4
+cp <span class="nt">-R</span> /usr/include/c++/4.4 ./
+</code></pre></div></div>
+
+<ol>
+  <li>写一个脚步替换所有的NAMESPACE宏定义(这里用sed完成宏替换，为了避免过于晦涩，还是放在一个临时的脚步文件里边来，便于调试吧)</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span><span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span><span class="k">then
+    </span><span class="nv">dir</span><span class="o">=</span><span class="nb">.</span>
+<span class="k">else
+    </span><span class="nv">dir</span><span class="o">=</span><span class="nv">$1</span>
+<span class="k">fi</span>
+
+<span class="c">#Substitute scripts</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> .edit.sed <span class="o">&lt;&lt;-</span> <span class="no">EOF</span><span class="sh">
+s/\b_GLIBCXX_BEGIN_NAMESPACE\b\s*\(\s*(\w+)\s*\)/namespace \1{/g
+s/_GLIBCXX_BEGIN_NESTED_NAMESPACE\s*\(\s*std\s*,\s*_GLIBCXX_STD_[DP]\s*\)/namespace std{/g
+s/\b_GLIBCXX_END_NAMESPACE\b/}/g
+s/\b_GLIBCXX_END_(NESTED_\?NAMESPACE\b/}/g
+</span><span class="no">EOF
+
+</span><span class="nv">count</span><span class="o">=</span>0
+<span class="nv">cols</span><span class="o">=</span><span class="sb">`</span>tput cols<span class="sb">`</span>
+<span class="nv">cols</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$cols</span><span class="s2"> - 8"</span>|bc<span class="sb">`</span>
+<span class="k">for </span>file <span class="k">in</span> <span class="sb">`</span>find <span class="nv">$dir</span> <span class="nt">-type</span> f<span class="sb">`</span><span class="p">;</span><span class="k">do
+    if</span> <span class="o">[</span> <span class="s2">"T"</span><span class="nv">$file</span> <span class="o">!=</span> <span class="s2">"T"</span><span class="nv">$0</span> <span class="o">]</span><span class="p">;</span><span class="k">then
+            </span>sed <span class="nt">-nf</span> <span class="s2">".edit.sed"</span> <span class="nv">$file</span>
+            <span class="nv">count</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$count</span><span class="s2">+1"</span>|bc<span class="sb">`</span>
+            <span class="nb">echo</span> <span class="nt">-ne</span> <span class="s2">"="</span>
+            <span class="k">if</span> <span class="o">[</span> <span class="sb">`</span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$count</span><span class="s2">%</span><span class="nv">$cols</span><span class="s2">"</span>|bc<span class="sb">`</span> <span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span><span class="k">then
+                </span><span class="nb">echo</span> <span class="s2">" </span><span class="nv">$count</span><span class="s2">"</span>
+            <span class="k">fi
+    fi
+done
+
+</span><span class="nb">echo</span> <span class="s2">"Processed </span><span class="nv">$count</span><span class="s2"> files!"</span>
+rm <span class="nt">-fr</span> .edit.sed
+
+<span class="c"># Generate ctag file</span>
+ctags <span class="nt">-R</span> <span class="nt">--c</span>++-kinds<span class="o">=</span>+p <span class="nt">--fields</span><span class="o">=</span>+iaS <span class="nt">--extra</span><span class="o">=</span>+q 
+<span class="nb">echo</span> <span class="s2">"generated tag file!"</span>
+</code></pre></div></div>
+
+<ol>
+  <li>生成tags</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>skyscribe@skyscribe:~/libstdc++/gcc4.4<span class="nv">$ </span>./generate-tags.sh <span class="nb">.</span> 
+<span class="o">====================================================================================================</span> 100
+<span class="o">====================================================================================================</span> 200
+<span class="o">====================================================================================================</span> 300
+<span class="o">====================================================================================================</span> 400
+<span class="o">====================================================================================================</span> 500
+<span class="o">====================================================================================================</span> 600
+<span class="o">===============================================================</span>Processed 663 files!
+
+generated tag file!
+<span class="nb">ls </span>tags <span class="nt">-lh</span>
+<span class="nt">-rw-r--r--</span> 1 skyscribe skyscribe 4.2M 2010-01-10 18:21 tags
+cp tags ~/.vim/tagfiles/gcc4.4/
+</code></pre></div></div>
+
+<h2 id="实验效果">实验效果</h2>
+
+<p>到这里效果终于出来了:</p>
+
+<p>上边的review窗口显示当前调用的函数信息,输入./-&gt;/:: 的时候会自动提示，也可以用CTRL+X CTRL+O 来调出提示窗口。</p>
+
+<p><img src="/images/vim-stl-1.png" alt="vim intellisense1" title="vim complete 1" />
+<img src="/images/vim-stl-2.png" alt="vim intellisense2" title="vim complete 2" /></p>
+
+<p>方向键则可以选择。</p>
+
+<p><img src="/images/vim-stl-3.png" alt="vim intellisense3" title="vim complete 3" /></p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+
+    
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/tools" class="page__taxonomy-item" rel="tag">tools</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2010-01-10T18:28:00+08:00">January 10, 2010</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=VIM下实现对C++ STL的IntelliSense https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2010/01/10/vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="vimxia-shi-xian-dui-c-plus-plus-stlde-intellisense">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

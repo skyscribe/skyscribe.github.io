@@ -1,0 +1,978 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>TCP服务端socket会丢连接的诡异问题及思考 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少：总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="TCP服务端socket会丢连接的诡异问题及思考">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/">
+
+
+
+  <meta property="og:description" content="最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少：总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="TCP服务端socket会丢连接的诡异问题及思考">
+  <meta name="twitter:description" content="最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少：总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-07-14T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="TCP服务端socket会丢连接的诡异问题及思考">
+    <meta itemprop="description" content="最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少：总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。">
+    <meta itemprop="datePublished" content="July 14, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">TCP服务端socket会丢连接的诡异问题及思考
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 4564 字，大约需要 11 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>最近在跟踪项目的性能测试的过程中，发现了一个奇怪的问题：<strong>Netty服务器端新建的Channel的数目比Tcpdump抓包得到的经历过三次握手成功的连接数要少</strong>：
+总有几个连接从抓包来看成功，然后Netty并没有为其分配Channel。直观上来看，似乎是Netty的处理问题值得怀疑，似乎是用于接受新连接的线程池堵塞了。</p>
+
+<p>深入追踪下去，发现问题不在Netty身上，而是<strong>操作系统没有通过IO事件反馈给</strong>应用程序(Netty)导致了丢连接的情况出现。经过更深层次的思考后，
+问题之所以出现，还与我们的协议设计不太合理有关。</p>
+
+<!--more-->
+
+<h2 id="问题发现和定位">问题发现和定位</h2>
+
+<p>项目的服务器端和客户端之间采用的是基于<strong>TCP长连接</strong>的应用层自定制协议；协议的基本工作流程如下</p>
+<ol>
+  <li>服务端监听在事先设置的服务端口上；用Netty的<code class="highlighter-rouge">ServerBootstrap</code>来封装服务器端的监听<code class="highlighter-rouge">socket</code>处理;其内部封装了<code class="highlighter-rouge">listen</code>和<code class="highlighter-rouge">accept</code>等底层API</li>
+  <li>针对每个连接上来的客户端，Netty会创建一个新的SocketChannel,其初始化方法中会初始化应用层的协议处理
+（即一些列的<code class="highlighter-rouge">ChannelHandler</code>对象）来负责对应连接上的IO事件以及应用层逻辑</li>
+  <li>连接建立成功后，客户端会处于Idle状态，<strong>等待服务器端发起第一条消息</strong>，初始化应用层握手。</li>
+  <li>客户端收到握手消息后，确认相关信息，之后即进入正常的协议交互处理</li>
+</ol>
+
+<p>项目的初始设计目标是需要处理<strong>最多20000条并发连接</strong>;这个性能指标应该说不算特别高，因为业界早就实现了从<a href="https://qunfei.wordpress.com/2016/09/20/from-c10k-to-c100k-problem-push-over-1000000-messages-to-web-clients-on-1-machine-simultaneously/">C10K到C100K</a>的跨越。
+当然任何<strong>性能指标如果不加以测试的话，都是假把式</strong>。为了验证该目标，我们设计了<strong>针对性的性能测试模拟器</strong>, 并设计了一个测试并发建链接的测试用例；
+其目的是模拟多个逻辑上没有依赖的客户端同时发地发起大量的连接，验证服务器端是否能满足预设计的健壮性和可靠性要求。</p>
+
+<p>当上述第二步模拟器端以每秒近1000条连接的配置从本地环回端口(loopback)发起并发连接的时候，实际走到第三步的连接数有<strong>一定的概率</strong>少于1000个，
+而模拟器端显示所有的连接都成功建立。所有的网络通信都是从127.0.0.1这个本机IP地址在不同的应用程序之间周转的，可以直接排除网络不稳定的干扰。</p>
+
+<h3 id="对模拟器和python的傲慢与偏见">对模拟器和Python的傲慢与偏见</h3>
+
+<p>由于模拟器的主框架是用Python语言写成的，一开始大家都怀疑是否是<a href="http://jakevdp.github.io/blog/2014/05/09/why-python-is-slow/">Python性能缺陷的原罪</a>导致的；
+毕竟Python的性能一直为人诟病；只是任何怀疑都必须找到切实的证据，必须做小心的分析和求证；具体到这个问题上，还是找一些中间的分析结果来的容易一些。</p>
+
+<p>两端都查了一堆的log之后最终也没有太多实质性的发现，最后大家还是决定看tcpdump的抓包，并过滤TCP协议的初始握手包更为简单直接，
+只是过滤器的设置稍微复杂一点；google一下不难找到。</p>
+
+<h3 id="网络协议分析是最强有力而值得信赖的">网络协议分析是最强有力而值得信赖的</h3>
+<p>Tcpdump的抓包分析表明，每次这些连接全部都建立成功了,统计TCP握手的3个步骤的时候，
+不管是初始的SYN(0)包，还是服务器返回的SYN(0)+ACK(1)包，以及第三次握手的ACK(1)包都完全发送成功。
+这也就意味着，从TCP/IP传输层的角度来看，第二步其实已经全部完成。客户端是无辜的。</p>
+
+<p>问题就仅可能出现在服务器端了；接下来就是尝试修改Netty的源码加入更多的打印来观察其是否调用了<code class="highlighter-rouge">ChannelInitializer</code>对连接上来的客户端初始化ChannelHandler。
+仔细看下来，居然是Initializer的数目就根本不对。
+难道是Netty的实现有问题吗?作为一个在开源业界关注度如此之高的一个项目，我们采用的还是其非常成熟的4.0版，出现这种低级错误的可能性实在太小；虽然一切皆有可能。</p>
+
+<h3 id="排除netty的嫌疑">排除Netty的嫌疑</h3>
+
+<p>稍微阅读Netty的代码后，发现并没有特别的逻辑漏洞 - 它默认采用的是异步IO模型，用<code class="highlighter-rouge">select/poll</code>模型来做连接的多路复合(Multiplexer);即使有传说中的<a href="https://github.com/netty/netty/issues/2616">CPU空跑的问题</a>,看了代码之后发现对应的问题在新版本中早已fix掉了。</p>
+
+<p>保险起见，我们又尝试<a href="http://netty.io/wiki/native-transports.html">换默认的NioEventLoop为Linux本身的Epoll</a>，问题依然没有得到解决。从行为上来说，
+epoll机制也仅仅能解决效率高低的问题，<strong>并不应该解决行为不一致</strong>的问题。</p>
+
+<p>回想到我们采用的线程模型上，server socket上的事件循环还承担着应用层程序和协议栈交互的任务（我们通过UserEvent的方式向对应的pipeline上发事件来避免数据同步），
+默认的单线程处理这些应用层事件的处理方式是否会导致效率低下也是一个值得验证的点；等到增大了线程数之后，问题依旧没有什么眉目。
+和上面的处理机制类似，这样的方式也只是从效率的思路出发尝试解决问题，<strong>逻辑上依然是无法解决行为不一致</strong>的问题。</p>
+
+<h3 id="从操作系统的角度分析">从操作系统的角度分析</h3>
+
+<p>转了一圈，发现问题还是出在<code class="highlighter-rouge">listen</code>调用和<code class="highlighter-rouge">accept</code>的交接的地方；这里实际的TCP行为是发生在Linux的内核空间的；逻辑上其内部也是有个类似的异步队列，
+对进来的TCP连接请求，内核会设置相关的socket状态，分配相关的数据结构，自动完成TCP协议的握手过程，待到握手完毕之后，将这个连接成功事件通知给应用层（select/epoll)；
+然后应用层可以检查对应的socket读事件，调用<code class="highlighter-rouge">accept</code>获取新的socket文件描述符。</p>
+
+<p>这一系列过程都是异步的，并且跨用户空间处理和内核空间调度。
+确定了可能出问题的地方，查找的方向就比较明确了；只需要找找可能影响server socket的行为就可以了。
+此时一个可以的关于SO_BACKLOG的设置引起了我们的注意,因为这里设置的值是<code class="highlighter-rouge">8</code>，尝试调大这个参数后，丢连接的情况突然消失了。</p>
+
+<h3 id="检查socket选项---backlog设置">检查socket选项 - <code class="highlighter-rouge">backlog</code>设置</h3>
+
+<p>上述的参数是从Java的API中继承来的，实际设置的时候，其实也是传给了JDK的对应的参数；引用JDK的参数说明</p>
+<blockquote>
+  <p>The maximum queue length for incoming connection indications (a request to connect) is set to the backlog parameter. If a connection indication arrives when the queue is full, the connection is refused.</p>
+</blockquote>
+
+<p>这里比较奇怪的是，当队列满了之后，从抓包的角度来看，<strong>对应的连接并没有被拒绝</strong>，而是显示连接成功了！如果后续没有任何数据交换(<code class="highlighter-rouge">send</code>/<code class="highlighter-rouge">receive</code>)的话，
+对应的socket(以及操作系统分配的相关资源)其实也悄然泄露了?可是真会有这么低级的问题吗？</p>
+
+<p>既然有此疑惑，还是仔细翻阅一下Linux的<code class="highlighter-rouge">listen</code>的manpage为好；搜索<code class="highlighter-rouge">backlog</code>选项,对应的说明如下</p>
+
+<blockquote>
+  <p>The backlog argument defines the maximum length to which the queue of pending connections for sockfd may grow.<br />
+If a connection request arrives when the queue is full, the client <strong>may receive an error</strong> with
+an indication of ECONNREFUSED or, if the underlying protocol supports retransmission, <strong>the request may be ignored</strong>
+so that a later reattempt at connection succeeds.</p>
+</blockquote>
+
+<p>不确定这是否是一个bug，因为客户端测并没有检测到这个<code class="highlighter-rouge">ECONNREFUSED</code>的错误而是显示连接成功。
+StackOverflow上有人提了<a href="https://stackoverflow.com/questions/37609951/why-i-dont-get-an-error-when-i-connect-more-sockets-than-the-argument-backlog-g">类似的问题</a>，
+合理的解释是，因为TCP支持重传，所以该请求<strong>仅仅是被忽略了</strong>，直到下一次连接过来的时候，对应的连接会直接成功！</p>
+
+<p>要保证这样能工作，操作系统也必然需要在某些地方保存已经分配好的socket（以及相关的数据结构）以便下次可以通过<code class="highlighter-rouge">accept</code>取到。</p>
+
+<h3 id="如何解决和避免再次发生">如何解决和避免再次发生</h3>
+<p>对设计用来处理比较高的并发处理请求的服务器程序来说，设置<code class="highlighter-rouge">backlog</code>选项为比较小的值是个比较糟糕的主意，更容易”踩上这个坑”。也许这也是默认情况下，
+Linux将这个值设置为128的原因；如果想修改它，最好<strong>设置的比128更大一些</strong>。</p>
+
+<p>由于这种情况在连接状态的backlog缓冲满了之后，再有新连接完成三次握手之后就可能出现，设置再大的值，理论上来说都不是足够保险;除非我们能提前预测或者限制客户端的行为，
+避免大量的并发连接上来，或者让客户端能检测到这种情况。</p>
+
+<p>考虑到实际环境中，<strong>这种情况出现的概率还是很低的</strong>，只有在基于内网的模拟器环境下，才会有这么“巧合”的情况出现;
+在不能修改客户端行为的情况下，将该选项的值修改大一些即可有效地降低其出现的几率。</p>
+
+<p>要想彻底解决这个问题，单单从socket层面来看，应该是吃力不讨好的事情，因为行为的不一致发生在
+操作系统的系统调用和用户程序的交互的地方；一个可行的思路是从更高层的应用层及时检测这种情况；这样的解决方案需要应用协议层面的特别处理才行。</p>
+
+<h2 id="对协议设计的影响">对协议设计的影响</h2>
+<p>由于问题发生的场景比较特殊一点，具体来说有以下必要条件</p>
+
+<ol>
+  <li>多个客户端在短时间内发起大量的并发连接</li>
+  <li>服务器端接收新连接的<strong>内部队列长度设置比较小</strong>，以至于某些完成握手的连接在客户端重试的时候直接返回成功</li>
+  <li>这些由于队列满而引入的默默完成的连接不被服务器应用程序所知道（没有新的IO读事件）</li>
+  <li>连接建立<strong>成功之后，客户端处于静默状态，等待服务器端发起第一条消息</strong>，从而从应用逻辑角度看，双方进入了“死锁”状态</li>
+</ol>
+
+<p>其实从根本上解决该问题的方式是避免第四个条件的出现；有两种方式可以凑效</p>
+<ul>
+  <li>永远保持让客户端发送第一条协议消息，或者</li>
+  <li>客户端在连接建立之后即发送业务层的心跳 - 这一机制在应用层有心跳支持的情况下变得更清晰</li>
+</ul>
+
+<h2 id="一点额外的总结和感想">一点额外的总结和感想</h2>
+<p>做技术的很容易对某些特定的技术产生“宗教式”的虔诚或“魔鬼式”的憎恶，技术偏见也会由此产生，并蒙蔽我们的视野，导致我们掉进一些坑里。
+一开始的时候我们对Python的想当然的偏见耽误了不少的时间来检查是否模拟器的实现是否出了问题；幸好我们及时发现这种直觉上的错误；
+顺利找到问题的根源。</p>
+
+<p>看起来很复杂的问题，根源往往在很小的一个基础的知识点上；
+对操作系统底层处理机制的积累和对基本TCP/IP协议的实现的了解极大地节约了我们分析和解决问题而耗费的时间。
+这些最基本的东西，其重要性怎么强调都不为过，应该作为程序员的基本功保持长期不懈怠。</p>
+
+<p>应用层网络协议的设计和实现上；<strong>遵循惯例和技术直觉</strong>(Least Surprise)总是没有太大错误；当初我们设计协议的时候，选择让客户端等待服务器发送第一条消息，
+虽然有一些感觉奇怪的地方，由于其它种种原因，当时没有仔细去考虑；最终在做性能测试的时候，就有问题爆出来狠狠地咬了我们一口。
+幸好这类问题还没有被真正的客户所发现就被我们“扼杀”在实验室测试中！</p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/debugging" class="page__taxonomy-item" rel="tag">debugging</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/java" class="page__taxonomy-item" rel="tag">java</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/linux" class="page__taxonomy-item" rel="tag">linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/netty" class="page__taxonomy-item" rel="tag">netty</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/debugging" class="page__taxonomy-item" rel="tag">debugging</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/linux" class="page__taxonomy-item" rel="tag">linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-07-14T00:00:00+08:00">July 14, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=TCP服务端socket会丢连接的诡异问题及思考 https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/07/14/missing-connections-by-socket-accept/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="missing-connections-by-socket-accept">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

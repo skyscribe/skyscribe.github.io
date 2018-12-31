@@ -1,0 +1,1407 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Java8中的函数式编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Java8中的函数式编程">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/">
+
+
+
+  <meta property="og:description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Java8中的函数式编程">
+  <meta name="twitter:description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2016-10-14T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Java8中的函数式编程">
+    <meta itemprop="description" content="Java8是日益臃肿、略显老态的老牌程序语言对日益流行的新的函数式编程范式的反击；它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。">
+    <meta itemprop="datePublished" content="October 14, 2016">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Java8中的函数式编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 15553 字，大约需要 38 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>Java8是日益臃肿、略显老态的老牌程序语言对日益流行的<strong>新的函数式编程范式</strong>的反击；
+它采用了巧妙的技术让自己面向对象的古老躯体也套上了函数式编程的舞鞋再度翩翩起舞，焕发新的光彩。</p>
+
+<!--more-->
+
+<h2 id="fp的基本要素函数">FP的基本要素：函数</h2>
+<p>Java并不打算放弃其面向对象的内核 - 所以的东西必须都是对象，那么函数也不例外，它依然是对象。具体而言，是一个特殊的函数式接口的实现。</p>
+
+<h3 id="函数依然是对象">函数依然是对象</h3>
+<p>在新的<code class="highlighter-rouge">java.util.function</code>包里，预定义了形形色色的函数接口，譬如带2个参数的函数的定义如下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">R</span><span class="o">&gt;{</span>
+  <span class="c1">//all functions implements apply that takes t of type T and u of type U, and returns R</span>
+  <span class="n">R</span> <span class="nf">apply</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">,</span> <span class="n">U</span> <span class="n">u</span><span class="o">);</span>
+
+  <span class="c1">//compose function</span>
+  <span class="k">default</span> <span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">BiFunction</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">U</span><span class="o">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="nf">andThen</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">R</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">after</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Objects</span><span class="o">.</span><span class="na">requrieNotNull</span><span class="o">(</span><span class="n">after</span><span class="o">);</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">,</span> <span class="n">U</span> <span class="n">u</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">after</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">apply</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">u</span><span class="o">));</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+<p>从定义来看，它是一个接口，任何实现了该接口的对象都是一个二元函数。从纯粹的面向对象思路来看，只要让所有实现类似调用的类也实现新的接口就行。
+仔细考虑则发现该思路有个不足 - 很可能我们已经有一个已有的接口</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">MyInterface</span><span class="o">{</span>
+  <span class="n">ReturnType</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyBusinessClassA</span> <span class="kd">implements</span> <span class="n">MyInterface</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="n">ReturnType</span> <span class="nf">doSomething</span><span class="o">(</span><span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">){</span>
+    <span class="c1">//detailed implementation</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>考虑用户代码想要使用上述的接口，同时希望采用函数式编程的思路，接受一个函数参数</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//client code</span>
+<span class="kt">void</span> <span class="nf">myMethod</span><span class="o">(</span><span class="n">BiFunction</span><span class="o">&lt;</span><span class="n">ArgType1</span><span class="o">,</span> <span class="n">ArgType2</span><span class="o">,</span> <span class="n">ReturnType</span><span class="o">&gt;</span> <span class="n">certainProcessing</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">//calls certainProcessing.apply(arg1, arg2);</span>
+<span class="o">}</span>
+
+<span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
+<span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">myMethod</span><span class="o">(</span><span class="cm">/*use existing business classes?*/</span><span class="o">)</span>
+</code></pre></div></div>
+<p>如果仅仅是因为需要采用函数式编程风格来编写代码，就必须要求我们修改原来的接口或者class定义破坏性就太大了。Java8采用了变通机制，
+当<strong>某个接口有且仅有一个方法定义</strong>的时候，该接口可以被编译器隐式地转换为一个函数式接口的一个扩展；实现了此业务接口的类则被视为函数式接口的一个具体实现。
+对应的这个方法(<code class="highlighter-rouge">doSomething</code>)会被认为是默认的<code class="highlighter-rouge">apply</code>方法，即使这个方法的名字是别的，
+只要参数个数、类型、返回类型能匹配到对应的泛型函数接口的对应类型(<code class="highlighter-rouge">doSomething(...)</code>)，它就会被视为是实际实现的方法。
+当用户代码用函数式编程的风格来调用抽象的函数式对象(<code class="highlighter-rouge">BiFunction</code>)的<code class="highlighter-rouge">apply</code>方法时，实际调用会被委托为实际实现方法(<code class="highlighter-rouge">doSomething</code>)的调用。</p>
+
+<p>为方便代码维护和协助编译器检查的考虑，Java8提供了<code class="highlighter-rouge">@FunctionalInterface</code>注解方便我们清晰的知道某个接口符合函数式接口的要求。
+也许是为了更灵活的配合函数式编程，Java8也允许一个接口中有提供默认实现(用<code class="highlighter-rouge">default</code>关键字标识)，此时这样的方法被认为是具体的而非抽象的；
+这样只要一个接口中<strong>有且只有一个抽象的方法</strong>，它依然符合函数对象的要求。</p>
+
+<p>如果接口声明没有加上<code class="highlighter-rouge">@FunctionalInterface</code>注解，调用的地方却使用了lambda表达式语法，编译器会检查对应的类接口中是否满足函数式对象的约束如有违反则报错。
+因而该注解不是必要的；出于代码可读性的考虑，还是建议尽量加上该注解。</p>
+
+<h3 id="内置函数">内置函数</h3>
+
+<p>Java8的工具库中提供了一些常见的基于泛型的函数式接口</p>
+
+<ul>
+  <li>返回值为布尔类型的函数 - Predicate</li>
+  <li>参数类型和返回值类型一样的函数 - <code class="highlighter-rouge">Operator</code></li>
+  <li>没有返回值的函数 - <code class="highlighter-rouge">Consumer</code></li>
+  <li>不带参数而能产生某些返回的函数 - <code class="highlighter-rouge">Producer</code></li>
+  <li>基于非装箱原始类型的特殊函数 - 某些时候希望避免自动装箱和自动解箱的性能开销</li>
+  <li>添加了参数个数信息的函数，譬如<code class="highlighter-rouge">BinaryOperator&lt;T&gt;</code>用于描述签名为<code class="highlighter-rouge">(T a, T b) -&gt; T</code>的函数;对应的<code class="highlighter-rouge">UnaryOperator&lt;T&gt;</code>用于描述的函数签名为<code class="highlighter-rouge">(T a) -&gt; T</code></li>
+</ul>
+
+<p>依据以上的命名风格，<code class="highlighter-rouge">java.util.function</code>中定义了几十个泛型的函数接口，可以满足几乎所有的简单场景。查看<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">JDK文档</a>可以发现, Java8<strong>没有提供超过2个参数</strong>的函数接口定义，默认的<code class="highlighter-rouge">Function&lt;T, R&gt;</code>描述的是最普通的单映射函数。</p>
+
+<h3 id="匿名函数和lambda">匿名函数和Lambda</h3>
+
+<p>匿名函数其实是被Java8给封装成具体的函数对象（实现某个预定义的接口)。语法上没什么奇特的地方，和C++/Haskell的都比较类似。
+在任何一个可以传入函数调用的地方，都可以传入lambda表达式或者代码块，并且类型信息可以省略,如上边代码的例子</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">MyBusinessClassA</span> <span class="n">businessClass</span><span class="o">;</span><span class="c1">// = ...;</span>
+<span class="n">ArgType1</span> <span class="n">arg1</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">ArgType2</span> <span class="n">arg2</span><span class="o">;</span> <span class="c1">//= ...;</span>
+<span class="n">myMethod</span><span class="o">((</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">businessClass</span><span class="o">.</span><span class="na">doSomething</span><span class="o">(</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">));</span>
+</code></pre></div></div>
+
+<p>lambda表达式中引用上下文变量的情况下，该lambda表达式自然形成了一个闭包。
+当函数实现逻辑不能用一行写下来的时候，也可以用大括号写代码块；和其它主流支持函数式编程的语言没什么两样。</p>
+
+<h2 id="optional类型">Optional类型</h2>
+<p>Optional类型是个典型的容器类型，用来表示有一个合法值或者空值；其本身是一种简单的<a href="http://learnyouahaskell.com/a-fistful-of-monads">Monad类型</a>。</p>
+
+<h3 id="从错误处理方式说起">从错误处理方式说起</h3>
+<p>长久以来，Java都是采用两种方式处理可能的逻辑例外情况，要么是采用返回对象的方式，要么是采用异常传递。
+Java的异常在设计上被分类为检查异常和非检查异常；前者别用来表述一些可以恢复的意外情况，编译器会在编译的时候检查可能抛出该类异常的API的<strong>调用方必须显式的处理</strong>检查异常；
+非检查异常用来表述编程上的错误；严格来说非检查异常应该是代码的某些地方处理除了问题；需要通过修改代码来解决问题。</p>
+
+<p>Sun是这样设计Java的异常机制的，开源社区却对这种编译器强制检查的异常颇有微词，甚至很多有名的开源项目都<strong>主张永远不使用检查异常</strong>；
+遍布<code class="highlighter-rouge">try/catch</code>块的代码的可读性非常差，可怜的业务逻辑很容易淹没在异常处理代码的包围圈里。</p>
+
+<p>仅使用非检查异常的副作用是，程序很容易因为没有正确处理的异常而崩溃。
+于是很多程序员会转而采用破坏对象状态的方式，到处传递空指针；为了避免空指针异常导致的程序崩溃，我们有不得不在代码中加上很多引用是否为空的判断，写出越来越难维护的代码。</p>
+
+<blockquote>
+  <p>I call it my billion-dollar mistake. It was the invention of the null reference in 1965. … My goal was to ensure that all use of references should be absolutely safe,
+with checking performed automatically by the compiler. But I couldn’t resist the temptation to put in a null reference, <strong>simply because it was so easy to implement.</strong> 
+This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.</p>
+  <blockquote>
+    <p>– Tony Honare, apology for inventing the null reference</p>
+  </blockquote>
+</blockquote>
+
+<h3 id="用optional来处理错误">用Optional来处理错误</h3>
+
+<p>传统的C/C++语言中，返回值也是一种处理错误的方式；其不足之处是，正常处理和异常情况的处理会产生很多复杂的逻辑判断，导致正常的逻辑难以理清；Java不建议集成这笔古老的遗产。</p>
+
+<p><code class="highlighter-rouge">Optional</code>类则提供了<strong>一种新的错误处理方式</strong>；从概念上来说，这三种方式是不能同时采用的，要么采用<code class="highlighter-rouge">Optional</code>要么采用异常，但是不应该两者都采用。</p>
+
+<p>从概念上来说，一个<code class="highlighter-rouge">Optional</code>对象是关于某种具体对象的一个容器，它要么包含一个已经初始化的对象，要么什么也没有。
+看起来和null引用没什么区别；主要的差异在于类型系统上 - Java是种静态语言，<strong>null对象不是一个合法初始化过的对象</strong>，对它做任何方法调用都会引起引用异常；
+<code class="highlighter-rouge">Optional</code>则不同，即使没有正确的初始化某个对象，它<strong>本身依然是一个合法的对象</strong>。它用一套统一的接口来操作内部封装的对象。</p>
+
+<p>具体到Java8的定义它本质上是一个不可被外部构造和继承的一个具体的类，可以参考JDK的源码</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Optional</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Optional</span><span class="o">&lt;?&gt;</span> <span class="n">EMPTY</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Optional</span><span class="o">&lt;&gt;();</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="n">T</span> <span class="n">value</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>从容器封装的角度来看，<code class="highlighter-rouge">Optional</code>可以<strong>看作是集合类的一个特殊的退化情况</strong> - 它要么保护一个对象，要么什么也没有；但是不能包含超过两个或更多个对象。
+<code class="highlighter-rouge">Optional</code>提供了很多API供我们使用</p>
+
+<h3 id="构造出新的optional对象">构造出新的Optional对象</h3>
+
+<p>构造的方式有很多种，可以用默认的空构造创建一个空的对象，此时内部的封装对象没有被初始化；另外一种方式是静态方法</p>
+<ul>
+  <li><code class="highlighter-rouge">of</code>方法传入一个<strong>非null</strong>的对象，构造出包含给定对象的容器</li>
+  <li><code class="highlighter-rouge">ofNullable</code>方法传入一个可能为null的对象；构造中会依据是否为null来决定是创建初始化的容器还是空容器</li>
+</ul>
+
+<p><code class="highlighter-rouge">Optional</code>对象一经创建就不允许在修改其内部的状态；但是可以通过<code class="highlighter-rouge">get</code>方法来获取内部存储的对象 - 如果是空则会抛出<code class="highlighter-rouge">NoSuchElementException</code>。
+一般情况下不建议未经检查便直接调用<code class="highlighter-rouge">get</code>方法；因为<code class="highlighter-rouge">Optional</code>本身提供了很多函数式编程的模式。</p>
+
+<h3 id="模式">模式</h3>
+
+<p>有如下模式可以供我们组合使用</p>
+
+<h4 id="对封装数据的修改转换相关的模式">对封装数据的修改/转换相关的模式</h4>
+
+<p><code class="highlighter-rouge">filter</code> 提供过滤器功能，可以依照用户传入的一个谓词函数对容器中的对象进行过滤，如果谓词判断为真，则原封不动返回原容器，如果是假，则返回空容器</p>
+
+<p><code class="highlighter-rouge">map</code> 提供对象转换功能，其参数是一个转换函数，实现一个对象到另外一个对象的转换；
+这里<code class="highlighter-rouge">Optional</code>保证传给参数函数的输入值一定不会是空对象，即<strong>转换函数不需要做null判断</strong>因为map实现本身已经帮你判断了。
+从函数式编程的角度来看，<code class="highlighter-rouge">map</code>是一个高阶函数 - 其参数是另外一个函数</p>
+
+<p><code class="highlighter-rouge">flatMap</code> 和上边的<code class="highlighter-rouge">map</code>类似，差别在于传入的参数函数的返回这无法确保非null的情况下选择了一个新的<code class="highlighter-rouge">Optional</code>类型作为返回；
+为避免<code class="highlighter-rouge">Optional&lt;Optional&lt;T&gt;&gt;</code>的麻烦，<code class="highlighter-rouge">flatMap</code>会将这个二层封装给解开，生成一个单一的封装。
+其实现代码非常简单</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="nf">map</span><span class="o">(</span><span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">T</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">U</span><span class="o">&gt;</span> <span class="n">mapper</span><span class="o">)</span> <span class="o">{</span>
+  <span class="n">Objects</span><span class="o">.</span><span class="na">requireNonNull</span><span class="o">(</span><span class="n">mapper</span><span class="o">);</span>
+  <span class="k">if</span> <span class="o">(!</span><span class="n">isPresent</span><span class="o">())</span>
+    <span class="k">return</span> <span class="nf">empty</span><span class="o">();</span>
+  <span class="k">else</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">value</span><span class="o">));</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="数据提取相关的模式">数据提取相关的模式</h4>
+<p><code class="highlighter-rouge">orElse</code> 提供容器封装对象的提取；如果原来的容器里存有合法的对象，则直接返回此对象；如果没有则返回参数提供的默认值。
+这里的提取实际上是一个解封装操作；返回的对象同样也抱枕是非null的，<strong>拿到这个对象的调用者不需要做额外的null判断</strong></p>
+
+<p><code class="highlighter-rouge">orElseGet</code> 是一个类似的提取操作，和<code class="highlighter-rouge">orElse</code>不同的是对于空容器的处理，返回值由一个传入的<code class="highlighter-rouge">Supplier</code>来提供；同样<strong>也要保证尽量不要提供nulli</strong>
+以免让使用者操心null判断的事儿。从函数式编程的角度来看，这也是一个高阶函数。</p>
+
+<p><code class="highlighter-rouge">orElseThrow</code> 则提供了一个和传统的异常相结合的方式，同样不需要外层调用者自己加逻辑判断，容器会在有对象的情况下返回对象出来，
+没有则调用传入的<code class="highlighter-rouge">Supplier&lt;? extends Throwable&gt;</code>抛出一个异常。这同样是一个高阶函数</p>
+
+<p>上述的模式提供了丰富的组合功能使我们对一个<code class="highlighter-rouge">Optional</code>对象做函数式编程变得简单明了；甚至不需要一个<code class="highlighter-rouge">if</code>/<code class="highlighter-rouge">else</code>分支判断就可以做一些复杂的操作。
+比如下面的一段代码</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">AnotherResult</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">someObj</span><span class="o">.</span><span class="na">doSth</span><span class="o">(</span><span class="n">parX</span><span class="o">))</span>
+  <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">someResult</span> <span class="o">-&gt;</span> <span class="n">someResult</span><span class="o">.</span><span class="na">meetSomeCondition</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">conditionalResult</span> <span class="o">-&gt;</span> <span class="n">transformAsAnotherResult</span><span class="o">(</span><span class="n">conditionalResult</span><span class="o">))</span>
+  <span class="c1">//.flatMap(conditionalResult -&gt; transformAsAnotherResult(conditionalResult)) if transformAsAnotherResult returns optional</span>
+  <span class="o">.</span><span class="na">orElseGet</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="k">new</span> <span class="n">anotherEmptyResult</span><span class="o">());</span>
+  <span class="c1">//.orElseThrow(() -&gt; new SomeRunTimeException()); //if we want to throw</span>
+
+<span class="c1">//Now result wouldn't be null at all!</span>
+</code></pre></div></div>
+
+<h4 id="反模式">反模式</h4>
+<p><code class="highlighter-rouge">Optional</code>可以帮助我们大大简化代码，然而也有一些<strong>反模式需要小心留意</strong>；比如以下这些</p>
+
+<h5 id="违反基本的约束">违反基本的约束</h5>
+<p>以下列举了几个常见的基本错误，这些错误只要稍微深入理解下<code class="highlighter-rouge">Optional</code>的设计思想就可以避免</p>
+
+<ol>
+  <li>
+    <p>混用异常和<code class="highlighter-rouge">Optional</code>类型返回 - 显然两种机制是鱼和熊掌的关系，设计方法的时候必须选择其中一个，而不是两者混用。
+如果<strong>选择让方法返回Optional类型，就不要在实现内部再抛出异常</strong>，否则你的用户将会抓狂。</p>
+  </li>
+  <li>
+    <p>在Optional的值中存放<code class="highlighter-rouge">null</code> - 这是明显<strong>违背设计契约</strong>的做法，导致<code class="highlighter-rouge">Optional</code>封装完全失去意义。如果想重新构造一个Optional,
+如果不能确保它不是null，请用<code class="highlighter-rouge">ofNullable</code></p>
+  </li>
+  <li>
+    <p>在模式提供的高阶函数的实现中检查参数是否为null - 这里是做了不必要的额外检查，因为<code class="highlighter-rouge">Optional</code>已经给你保证了传给你的参数不会是<code class="highlighter-rouge">null</code>。</p>
+  </li>
+</ol>
+
+<p>譬如下边的实现纯粹是画蛇添足</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSth</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
+
+<span class="kd">private</span> <span class="n">SomeType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">ValueType</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">v</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//do something and generates return type</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="c1">//This won't be ran!</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h5 id="冗余的判断">冗余的判断</h5>
+<p>还有一些典型的误用和<strong>不熟悉函数式编程的惯用法</strong>有关，可以通过简单的重构解决</p>
+
+<ol>
+  <li>混用<code class="highlighter-rouge">if/else</code>和Optional的<code class="highlighter-rouge">isPresent()</code>和<code class="highlighter-rouge">get()</code> - 这是一种非常常见的误用；往往使得代码变得更加复杂。
+因为<code class="highlighter-rouge">Optional</code>本身就是设计来处理可能的例外情况，更合适的方法是用好上述的模式。</li>
+</ol>
+
+<p>如果需要提取出值对象，就用<code class="highlighter-rouge">orElse</code>系列方法；如果不需要产生任何类型的新值，可以用<code class="highlighter-rouge">ifPresent</code>传入lambda表达式;如果需要将结果从一种类型变化为另外一种，就采用上述的转换模式。</p>
+
+<ol>
+  <li>
+    <p>复杂的链式操作，即多个连续的<code class="highlighter-rouge">map</code>操作 - 这种情况下代码的可读性也变差；根源是不同层次的细节被堆积在一个抽象层次中了；用简单的<strong>重构技巧抽出新的子函数</strong>即可。
+逻辑上来说，<code class="highlighter-rouge">anOptional.map(a -&gt; transformAsB(a)).map(b -&gt; transformAsC(b))</code> 等价于 <code class="highlighter-rouge">anOptional.map(a -&gt; composeTransformAAndB(a))</code>；这里的字函数都不需要做null判断</p>
+  </li>
+  <li>
+    <p>用<code class="highlighter-rouge">Optional</code>类型作函数的参数 - 这个是一个轻微的反模式，IntelliJ IDEA甚至会温馨的提示你需要重构。
+原因也比较简单，Optional类型和外部函数组合的时候，都期望通过合适的变换/提取函数将值取出来传出去，是否存在的事儿，用已有的模式去做就可以了。
+任何用<code class="highlighter-rouge">Optional</code>在函数中传递的写法，都<strong>对应一个更简单的复合Optional模式</strong>的写法;为什么不采用这些模式而要自己写判断？</p>
+  </li>
+</ol>
+
+<p>比如如下的例子</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
+<span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">doSth</span><span class="o">(</span><span class="n">anOptional</span><span class="o">);</span>
+
+<span class="kd">private</span> <span class="n">RetType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">opt</span><span class="o">){</span>
+  <span class="k">return</span> <span class="n">opt</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">obj</span> <span class="o">-&gt;</span> <span class="n">obj</span><span class="o">.</span><span class="na">transform</span><span class="o">()).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>可以重构为更符合<a href="https://en.wikipedia.org/wiki/Locality_of_reference">局部性原理</a>的形式,避免<code class="highlighter-rouge">Optional</code>类型的蔓延</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">SomeType</span><span class="o">&gt;</span> <span class="n">anOptional</span> <span class="o">=</span> <span class="c1">///initialize;</span>
+<span class="n">RetType</span> <span class="n">b</span> <span class="o">=</span> <span class="n">anOptional</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">doSthn</span><span class="o">(</span><span class="n">v</span><span class="o">)).</span><span class="na">orElse</span><span class="o">(</span><span class="k">new</span> <span class="n">RetType</span><span class="o">());</span>
+
+<span class="kd">private</span> <span class="n">RetType</span> <span class="nf">doSthn</span><span class="o">(</span><span class="n">SomeType</span> <span class="n">obj</span><span class="o">){</span>
+  <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="na">transform</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<h2 id="streams-api">Streams API</h2>
+<p>Java8新提供了<code class="highlighter-rouge">Streams</code> API来实现更类似于Haskell的<a href="http://learnyouahaskell.com/a-fistful-of-monads">List Monad</a>风格的函数式编程设施；
+值得注意的是，在老版本的Java库里边，<code class="highlighter-rouge">List</code>这个接口已经用来描述传统的基于共享内存模型的数据结构了（和C++的类似）；
+这也许是Java8另起炉灶新添加新的接口来描述这一概念。</p>
+
+<p>类似于Functional Interface,Streams API也是包含一系列<strong>新的Java接口</strong>的包的简称；这些接口都放在<code class="highlighter-rouge">java.util.stream</code>包中。</p>
+
+<h3 id="基本概念">基本概念</h3>
+<p>Stream是一个函数式编程概念的接口抽象；它和集合类的概念比较类似；比较大的差异在于Stream是</p>
+<ul>
+  <li>
+    <p>关于<strong>操作的抽象</strong>而不是关于数据的抽象，可以将其看作一个流水线，
+一些数据流入抽象的Stream,经过某些操作变换产生某些输出；这些输出可能成为流的下一步处理的输入</p>
+  </li>
+  <li>
+    <p>无状态的，所有绑定的<strong>操作不能修改数据源</strong>，即只能决定产生的输出是什么样子，不能回头修改输入的数据；
+这也是纯函数式编程所要求的<strong>无副作用</strong>；同样的数据经过某个处理操作产生的输出一定要是一样的。</p>
+  </li>
+  <li>
+    <p><strong>惰性运算</strong>赋值的，即Stream上的操作不一定会消耗所有的输入数据，譬如我们在一个Stream上取前3个数据，
+那么即使输入数据有无穷多个，操作也能在取到3个的时候就结束返回给下一步处理。</p>
+  </li>
+  <li>
+    <p>可能有无限多个输入，只要后续的操作是有限的</p>
+  </li>
+  <li>
+    <p>同一个Stream的输入<strong>只能被使用一次</strong>，下一次若想操作必须重新生成Stream；从这点设计约束看，Java的Stream没有Haskell的纯粹;
+也可以认为流水线一旦被处理，最原始的数据就不存在了。</p>
+  </li>
+</ul>
+
+<h3 id="基本的stream类型">基本的Stream类型</h3>
+<p>所有的<code class="highlighter-rouge">Stream</code>接口都继承自一个公共的<strong>泛型接口</strong></p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;&gt;</span> <span class="kd">extends</span> <span class="n">AutoClosurable</span> <span class="o">{</span>
+  <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">();</span>
+  <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">spliterator</span><span class="o">();</span>
+
+  <span class="nd">@Override</span>
+  <span class="kt">void</span> <span class="nf">close</span><span class="o">();</span>
+  <span class="n">S</span> <span class="nf">onClose</span><span class="o">(</span><span class="n">Runnable</span> <span class="n">closeHandler</span><span class="o">);</span>
+
+  <span class="c1">//...other common interfaces...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>其中<code class="highlighter-rouge">T</code>用于声明其初始输入的元素的类型，<code class="highlighter-rouge">S</code>则用于将子类的类型带上来，和C++的<a href="https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern">CRTP</a>技巧类似。
+从接口声明上看，一个Stream类也</p>
+<ul>
+  <li>提供了迭代器访问接口，可以用传统的迭代器访问模式操作<code class="highlighter-rouge">Stream</code></li>
+  <li>
+    <p>实现了<code class="highlighter-rouge">AutoClosurable</code>接口；从而我们可以结合Java8的try-with-resource表达式方便的自动管理资源。</p>
+
+    <p><strong>大部分的Stream实现并不会管理资源</strong>，因而不显示关闭Stream往往也不会带来什么问题。</p>
+  </li>
+</ul>
+
+<h4 id="streamt接口"><code class="highlighter-rouge">Stream&lt;T&gt;</code>接口</h4>
+
+<p>最平凡的Stream是名为<code class="highlighter-rouge">Stream&lt;T&gt;</code>的泛型接口</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">BaseStream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">,</span> <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
+  <span class="c1">//operations...</span>
+  <span class="c1">//terminators...</span>
+  <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Builder</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">Consumer</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kt">void</span> <span class="nf">accept</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">);</span>
+
+    <span class="k">default</span> <span class="n">Builder</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">add</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">){</span>
+      <span class="n">accept</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+      <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="n">Stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">build</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>该接口包含一些<strong>转换操作和终止操作</strong>组成；转换操作将Stream中的数据作为输入，经过变换或过滤等产生新的输出；并准备好下一次转换操作或终止流水线；
+终止操作则直接终止流水线，返回某些汇聚之后的结果出来。</p>
+
+<h4 id="以java基本类型为数据元素的特殊stream">以Java基本类型为数据元素的特殊Stream</h4>
+<p>Java泛型技术的一个限制是，对基本的数据类型（这些类型不是一个Object）必须用包装类，
+直接用包装类替换基本类型则会带来比较大的<a href="https://tavianator.com/java-autoboxing-performance/">性能开销</a>；
+尤其是Java5之后引入的自动装箱对程序员隐藏了这些实现细节，某种程度上加剧了问题的严重性。</p>
+
+<p><code class="highlighter-rouge">Stream</code>对所有的基本类型都提供了一个对应的接口，比如<code class="highlighter-rouge">IntStream</code>、<code class="highlighter-rouge">LongStream</code>等等。这些接口都继承自<code class="highlighter-rouge">BasicStream</code>,暴露的方法和<code class="highlighter-rouge">Stream</code>比较类似；从接口声明上看，
+很多方法和<code class="highlighter-rouge">Stream&lt;T&gt;</code>都是类似的，仅仅是针对类型做了特殊处理，这个也是很老的一个对Java语言设计的槽点了。</p>
+
+<h3 id="生成stream">生成Stream</h3>
+<p>大部分情况下，用户不需要手工创建Stream对象；它们可以用不同的方式产生</p>
+
+<ul>
+  <li>
+    <p>使用<code class="highlighter-rouge">Collection</code>接口的<code class="highlighter-rouge">.stream()</code>方法；还有一个对应的<code class="highlighter-rouge">.parallelStream()</code>返回一个可以并发执行的对象</p>
+  </li>
+  <li>
+    <p>使用<code class="highlighter-rouge">Arrays</code>工具类的<code class="highlighter-rouge">.stream(Object[])</code>从一个数组构造出来</p>
+  </li>
+  <li>
+    <p>使用<code class="highlighter-rouge">Stream</code>本身的一些静态方法产生，包括</p>
+    <ol>
+      <li><code class="highlighter-rouge">Stream.of(T t)</code>产生单个元素的Stream对象</li>
+      <li><code class="highlighter-rouge">Stream.of(T... values)</code>从对象列表中产生</li>
+      <li><code class="highlighter-rouge">Stream.generate(Supplier&lt;T&gt; s)</code> 用给定的<code class="highlighter-rouge">Supplier</code>函数产生无穷序列(其实受<code class="highlighter-rouge">Long</code>类型的最大可能值限制)</li>
+      <li><code class="highlighter-rouge">Stream.concat(Stream&lt;? extends T&gt; a, Stream&lt;? extends T&gt; b)</code>连接两个已有的流</li>
+    </ol>
+  </li>
+</ul>
+
+<p>这些方法也有对应的针对基本类型的Stream的版本。</p>
+
+<ul>
+  <li>使用<code class="highlighter-rouge">StreamSupport</code>辅助类来产生，包括
+    <ol>
+      <li><code class="highlighter-rouge">stream(Spliterator&lt;T&gt; spliterator, boolean parallel)</code>从一个迭代器产生，可以支持并发的<code class="highlighter-rouge">Stream</code></li>
+      <li><code class="highlighter-rouge">stream(Supplier&lt;? extends Spliterator&lt;T&gt;&gt; supplier, int characteristics, boolean parallel)</code>支持从给定的迭代器的Supplier中一一调用<code class="highlighter-rouge">.get()</code>方法；支持并发方式迭代</li>
+      <li>类似功能的针对基本类型的Stream的封装</li>
+    </ol>
+  </li>
+  <li>特定场景的构造方法，比如
+    <ol>
+      <li>随机数产生器流，用<code class="highlighter-rouge">Random.ints()</code></li>
+      <li>缓冲的IO流中产生的流 - <code class="highlighter-rouge">BufferedReader.lines()</code></li>
+      <li>其它形形色色的JDK库提供的封装；以及第三方库提供的封装</li>
+    </ol>
+  </li>
+  <li><code class="highlighter-rouge">Builder</code>接口
+该接口是<code class="highlighter-rouge">Stream&lt;T&gt;</code>的内部接口，扩展了<code class="highlighter-rouge">Consumer&lt;T&gt;</code>；可以利用<code class="highlighter-rouge">add(T t)</code>方法添加元素到Stream中；该操作支持链式调用，最后用<code class="highlighter-rouge">build()</code>方法生成最终的Stream对象。
+实现在<code class="highlighter-rouge">Consumer</code>的接口则具有和<code class="highlighter-rouge">add</code>类似的语意，只是不支持链式操作。比如<code class="highlighter-rouge">IntStream.Builder.add(1).add(2).add(3).build</code>生成一个包含3个数字为输入的Stream。</li>
+</ul>
+
+<h3 id="流水线操作和变换">流水线操作和变换</h3>
+<p>作为一种函数式编程工具，Stream就天然是为组合而生的；这些组合本身就构成了流水线处理 - 初始化的元素作为流水线的输入，而中间的转换步骤可以有任意多个，
+最终则往往会有一个终止操作来产生期望的输出 - 该输出也是我们从流水线上拿到最终结果的地方。</p>
+
+<h4 id="中间操作和终止操作">中间操作和终止操作</h4>
+<p>所有这些中间操作每次返回一个新的<code class="highlighter-rouge">Stream</code>状态，其输入是经过转换的 - 如前所述<code class="highlighter-rouge">Stream</code>的输入是不可修改的；该新的Stream的输入是对前一次的输入，
+输出则由前一次操作的针对每一个输入做运算之后的输出组成；如果某些运算不产生输出，则这些数据就像筛子一样被过滤下来了。</p>
+
+<p>所有的终止操作从函数签名上来看，都不会返回新的Stream对象。</p>
+
+<p>所有的中间操作都符合<strong>延迟计算</strong>规则；即真正的输出并没有在调用这些转换操作的时候被计算出来；
+只有<strong>当终止操作被调用以取出需要的值的时候</strong>，这些转换操作才真正被计算出来。</p>
+
+<p>当我们提供一个无限长的输入提供给Stream的时候，真正参与具体操作的元素个数仅仅以满足终止条件为准。</p>
+
+<p>譬如下边的代码</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">first5PrimeSum</span> <span class="o">=</span> <span class="n">IntStream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="n">isPrime</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">5</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">sum</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>初始构造的Stream包含无穷多个元素（受限于int类型的长度），但是经过<code class="highlighter-rouge">filter</code>操作之后，由用<code class="highlighter-rouge">limit</code>取出前5个，并最终求和；
+那么实际参与运算的初始输入元素只有1到11而已。</p>
+
+<p>根据以上的赋值求值规则，我们可以认为终止操作是<strong>贪婪求值</strong>的并会产生副作用；一旦调用了终止操作，Stream对象即产生了最终的运算结果；
+原始的输入元素遭到了破坏，无法回头重新来过。
+例外的情况隐藏在<code class="highlighter-rouge">iterator()</code>和<code class="highlighter-rouge">splititerator()</code>操作上，它们虽然是终止操作，却不会破坏流水线的状态，用户可以用<code class="highlighter-rouge">iterator</code>接口来决定流水线的运算时间点。</p>
+
+<h4 id="中间操作模式">中间操作模式</h4>
+<p><code class="highlighter-rouge">Stream</code>接口提供了很多传统的符合函数式编程风格的方法，一些甚至允许更灵活的高阶函数</p>
+<ul>
+  <li><code class="highlighter-rouge">map</code>用于普通的函数变化，其参数是一个转换函数，将数据从一种类型转换为新的类型</li>
+  <li><code class="highlighter-rouge">flatMap(Function&lt;? super T, ? extend Stream&lt;? extends R&gt;&gt; mapper)</code>将Stream的每一个元素应用之转换函数，然后将转换结果流中的数据取出来汇聚为新的Stream。
+ 该操作是一种相对高阶的模式，可以避免手工来拼接流</li>
+  <li><code class="highlighter-rouge">skip</code>/<code class="highlighter-rouge">limit</code>分别用于截取或者跳过某些元素</li>
+  <li><code class="highlighter-rouge">sorted</code>则产生按照给定排序规则排列为有序输出数据的流</li>
+  <li><code class="highlighter-rouge">filter</code>用来过滤流中满足给定谓词逻辑判断的数据</li>
+  <li><code class="highlighter-rouge">distinct</code>会删除重复的元素</li>
+  <li><code class="highlighter-rouge">peek</code>用于在产生输出数据的同时，做一些参数指定的函数操作；该操作大部分时候可以用于方便debug，比如
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">)</span>
+<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="o">.</span><span class="na">lenth</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="o">)</span>
+<span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Filtered value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
+<span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">String:</span><span class="o">:</span><span class="n">toUpperCase</span><span class="o">())</span>
+<span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Mapped value: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">))</span>
+<span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="有状态和无状态的中间操作">有状态和无状态的中间操作</h4>
+
+<p>中间操作可以携带lambda表达式，从而可以简单将其分类为有状态的和无状态的操作。
+有状态的操作会<strong>携带额外的上下文信息</strong>，如果这些操作的运算结果跟操作的中间结果有关，则Stream的行为会变得依赖于流水线的执行顺序 - 如果操作被并发调度，
+结果就会显得不确定。</p>
+
+<p>比如这个例子</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">seen</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="n">synchronizedSet</span><span class="p">(</span><span class="n">new</span> <span class="n">HashSet</span><span class="o">&lt;&gt;</span><span class="p">());</span>
+<span class="n">stream</span><span class="o">.</span><span class="n">parallel</span><span class="p">()</span><span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="p">(</span><span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">e</span><span class="p">;</span>
+    <span class="p">})</span>
+  <span class="o">.</span><span class="n">reduction</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div></div>
+<p>第一个<code class="highlighter-rouge">map</code>操作时间的执行体中会根据给定的元素是否已经处理过来决定返回0或元素本身；这个lambda操作本身依赖于之前的运算所以是有状态的。</p>
+
+<p>显然有状态的操作在用<code class="highlighter-rouge">parallelStream</code>调度计算的时候<strong>会产生不确定结果</strong>；而无状态的操作则没有这样的副作用。</p>
+
+<p>Java8引入<code class="highlighter-rouge">Stream</code>的首要目的就是并行计算和并发，默认串行的操作，仅仅需要在生成<code class="highlighter-rouge">Stream</code>的地方加上<code class="highlighter-rouge">parallel()</code>就可以自动获得多核并发调度的好处。</p>
+
+<h4 id="潜在的操作干扰">潜在的操作干扰</h4>
+
+<p>传给Stream的数据在Stream运算的过程中被视为静态的；如果这些数据可能被同时修改，则操作的正确性就难以保证了。
+考虑一个用Java的ArrayList产生的Stream做运算的情况</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"one"</span><span class="o">,</span> <span class="s">"two"</span><span class="o">,</span> <span class="s">"three"</span><span class="o">);</span>
+<span class="n">Stream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strm</span> <span class="o">=</span> <span class="n">strList</span><span class="o">.</span><span class="na">stream</span><span class="o">();</span>
+<span class="n">strList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"four"</span><span class="o">);</span> <span class="c1">//WoW!</span>
+<span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">strm</span><span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="n">joining</span><span class="o">(</span><span class="s">" "</span><span class="o">));</span>
+</code></pre></div></div>
+<p>有状态的函数操作或者互相干扰的函数操作会<strong>破坏并发安全性并带来出乎意料的行为</strong>（因为多线程、同步、调度的细节被隐藏了）；应该不建议使用。</p>
+
+<h4 id="常用的终止操作">常用的终止操作</h4>
+<p>终止操作的方法很多，基本上<code class="highlighter-rouge">Stream</code>的API中，除了静态方法以外，所有的返回类型不是<code class="highlighter-rouge">Stream</code>的都是终止操作，常用的有</p>
+<ul>
+  <li><code class="highlighter-rouge">allMatch</code>/<code class="highlighter-rouge">anyMatch/nonMatch</code>接受一个谓词函数作为参数，返回是否流中的元素都满足给定的条件，或至少有一个满足条件;以及是否没有满足条件的元素</li>
+  <li><code class="highlighter-rouge">collect(Collector&lt;? super T, A, R&gt;)</code>用于收集流参数到给定的集合中;这里的<code class="highlighter-rouge">Collector</code>是一个可修改的归并操作运算抽象；
+ 常用的方式是使用<code class="highlighter-rouge">Collectors</code>这一工具类提供的静态方法传入各种各样的<code class="highlighter-rouge">Collector</code></li>
+  <li><code class="highlighter-rouge">collect(Supplier&lt;R&gt; supplier, BiConsumer&lt;R, ? extends T&gt; accumulator, BiConsumer&lt;R, R&gt; combiner)</code>是上述接口的一个简化版本，显示提供了归并操作的其中三个函数参数</li>
+  <li><code class="highlighter-rouge">count</code>返回元素的个数</li>
+  <li><code class="highlighter-rouge">toArray</code>返回元素为数组形式</li>
+  <li><code class="highlighter-rouge">forEach</code>则提供遍历操作</li>
+  <li><code class="highlighter-rouge">findFirst</code>/<code class="highlighter-rouge">findAny</code>返回第一个/任意一个元素，由于可能不存在希望取的元素（没有元素的情况），返回类型是<code class="highlighter-rouge">Optional&lt;T&gt;</code></li>
+  <li><code class="highlighter-rouge">reduce</code>归并操作，包含几个重载形式</li>
+</ul>
+
+<h3 id="归并">归并</h3>
+<p>归并操作是map/reduce模式中比较复杂和灵活的终止操作；<code class="highlighter-rouge">Stream</code>接口也提供了丰富的支持。其实这里的<code class="highlighter-rouge">reduce</code>在其它的函数式语言中也被称为<code class="highlighter-rouge">fold</code>。</p>
+
+<h4 id="最灵活的形式">最灵活的形式</h4>
+
+<p>一般形式的<code class="highlighter-rouge">reduce</code>操作支持如下几个参数</p>
+<ul>
+  <li><code class="highlighter-rouge">U identity</code>是单位元元素，同时作为输出的默认值</li>
+  <li><code class="highlighter-rouge">BiFunction&lt;U, ? super T, U&gt; accumulator</code> 负责中间的每一次运算的累加</li>
+  <li><code class="highlighter-rouge">BinaryOperator&lt;U&gt; combiner</code> 约束accumulator 和 identity的函数，需要满足 <code class="highlighter-rouge">combiner.apply(u, accumulator.apply(identity, t)) = accumulator.apply(u, t)</code></li>
+</ul>
+
+<p>调用的效果类似于</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">U</span> <span class="n">result</span> <span class="o">=</span> <span class="n">identity</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">combiner</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">accumulator</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">identity</span><span class="o">,</span> <span class="n">t</span><span class="o">))</span>
+<span class="k">return</span> <span class="n">result</span>
+</code></pre></div></div>
+
+<h4 id="省略combiner的版本-t-reducet-identity-binaryoperatort-accumulator">省略<code class="highlighter-rouge">combiner</code>的版本: <code class="highlighter-rouge">T reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></h4>
+<p>该形式下，accumulator的类型是<code class="highlighter-rouge">BinaryOperator&lt;T&gt;</code>,同时<code class="highlighter-rouge">identity</code>的类型必须和Stream中的元素类型相同。</p>
+
+<p><code class="highlighter-rouge">sum</code>/<code class="highlighter-rouge">max</code>/<code class="highlighter-rouge">min</code>等都可视作是该版本的特化实现；即</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
+<span class="c1">//same as</span>
+<span class="n">Integer</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">integers</span><span class="o">.</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">sum</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h4 id="只有accumulator的版本">只有<code class="highlighter-rouge">accumulator</code>的版本</h4>
+<p>这种情况下，返回的类型是<code class="highlighter-rouge">Optional&lt;T&gt;</code>;由于没有默认值，因此返回合适的结果必须至少有2个元素可以参与累加器运算；如果少于2个则返回空的Optional。
+等价的代码为</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">boolean</span> <span class="n">found</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+<span class="n">T</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">T</span> <span class="nl">element:</span> <span class="k">this</span> <span class="n">stream</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(!</span><span class="n">found</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">accumulator</span><span class="o">.</span><span class="na">apply</span><span class="o">(</span><span class="n">result</span><span class="o">,</span> <span class="n">element</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="k">return</span> <span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</code></pre></div></div>
+<p>该种形式的操作将Stream和Optional结合了起来。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>在函数式编程变得日益火热、几乎无处不在的今天，传统的基于面向对象范式的Java语言最终也通过<strong>更新语言核心</strong>的形式<strong>拥抱</strong>这一新的编程范式。
+其设计从根本上来说，依然是基于围绕着传统的面向对象的抽象、封装、接口形式实现的，处处体现着面向对象编程的影子。
+它对<code class="highlighter-rouge">Optional</code>类型的丰富支持和多样的接口抽象能极大地方便程序员的日常使用；强大的<code class="highlighter-rouge">Streams API</code>提供了基于流水线的高层抽象；
+并发流的支持使得仅仅需要加入一个简单的<code class="highlighter-rouge">parallel()</code>调用即可实现无状态运算的并行化。</p>
+
+<p>同时，一些”历史包袱”也深深地影响着Java的实现方式，包括基本类型不是对象，以及泛型接口的类型设计特性等导致某些接口看起来比较臃肿和罗嗦。
+早期Java的简单性早已经消失殆尽了，因为它同样随着时间的推移加入了面向对象、泛型编程、注解、函数式编程等复杂的特性；
+也许这是作为大规模采纳的程序语言不可避免的老路。</p>
+
+<p>总体上来看，这些问题依然是瑕不掩瑜，大部分情况下普通程序员不需要被困扰过多。
+随着时间的推移，业界的大规模采纳应该不是什么问题。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/java" class="page__taxonomy-item" rel="tag">java</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/optional" class="page__taxonomy-item" rel="tag">optional</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/pattern" class="page__taxonomy-item" rel="tag">pattern</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/stream" class="page__taxonomy-item" rel="tag">stream</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/fp" class="page__taxonomy-item" rel="tag">fp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2016-10-14T00:00:00+08:00">October 14, 2016</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Java8中的函数式编程 https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2016/10/14/fp-support-in-java8/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="fp-support-in-java8">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

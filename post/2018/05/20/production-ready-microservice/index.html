@@ -1,0 +1,1282 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>标准化和生产环境就绪的微服务 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，走的人多了，必然有些更容易走的”直路”显现出来。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="标准化和生产环境就绪的微服务">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">
+
+
+
+  <meta property="og:description" content="微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，走的人多了，必然有些更容易走的”直路”显现出来。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="标准化和生产环境就绪的微服务">
+  <meta name="twitter:description" content="微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，走的人多了，必然有些更容易走的”直路”显现出来。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-05-20T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="标准化和生产环境就绪的微服务">
+    <meta itemprop="description" content="微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，走的人多了，必然有些更容易走的”直路”显现出来。">
+    <meta itemprop="datePublished" content="May 20, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">标准化和生产环境就绪的微服务
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 13999 字，大约需要 34 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；
+然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。
+其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；
+微服务引入过程中的<strong>一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解</strong>。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，
+走的人多了，必然有些更容易走的”直路”显现出来。</p>
+
+<!--more-->
+
+<h2 id="为什么需要标准化">为什么需要标准化</h2>
+
+<p>Susan J.Fowler作为一名来自Uber的站点可靠性工程师(Site Reliability Engineer)见证了Uber自身将其庞大而又复杂的单体API剥离成逾千个微服务的，
+并达到超过85%的微服务团队并无配备SRE这一角色也能确保自己的服务运行良好。同时她也见证了微服务团队（尤其是大型微服务架构）中SRE工程师所面临的巨大挑战：</p>
+
+<ul>
+  <li>对SRE本身的能力要求是全方位的，他/她必须是包括软件工程、系统工程、软件架构等多个方面的综合性专家</li>
+  <li>在有成百上千个微服务组成的企业应用中，大部分的团队更本不可能拥有SRE的资源；SRE也不太可能熟悉哪怕系统中大部分微服务的关键细节</li>
+  <li>SRE需要对系统整体的可靠性负责，然而任何一个微服务的SLA水平下降都可能带来整个系统的SLA下降；在大多数团队不配备SRE的情况下，
+如何保证日常的开发中新引入的功能不会破坏整体的可靠性、可用性和性能的关键指标，或者如何做有效的回归和可靠性测试，并在发现可能的失败情况下，
+及早地回退引起整体质量下降的服务代码，都是一个看起来几乎不可能的任务</li>
+</ul>
+
+<p>Susan希望他们可以找到一种简单而又直接的方法来定义微服务实践的规范程度，即一种简单而又可靠的标准，使得组织中的每一个微服务团队都可以仅仅需要遵循这些标准就可以交付符合SLA要求的服务，
+同时还保有微服务架构本身带来的诸如自由选择编程语言、技术栈的优势。这一套标准其实是用一系列检查列表（CheckList)的方式提供，微服务团队在提交自己的实现之前检查这些列表，
+确保所有的实现都能满足列表的要求的情况下才将代码引入到生产环境中；这样整个系统的SLA就可以得到保证。</p>
+
+<h2 id="基本原则">基本原则</h2>
+
+<p>Susan他们给出的标准化微服务的标准大概可以划分到八个大的基本原则之下，每个微服务必须满足</p>
+<ul>
+  <li>稳定</li>
+  <li>可靠</li>
+  <li>可扩展</li>
+  <li>容错</li>
+  <li>性能良好</li>
+  <li>被合理监控</li>
+  <li>有良好的文档</li>
+  <li>容灾就绪</li>
+</ul>
+
+<p>在这些大的原则之下，Susan他们还详细定义了每一个原则里面的详细列表，并要求每一个原则必须是<strong>可以量化</strong>以方便提供度量结果，
+从而可以极大地提高微服务系统的可用性。只有<strong>满足了这里列出的所有的条件</strong>的微服务，才可以被认为是生产就绪的。</p>
+
+<h3 id="微服务生态系统">微服务生态系统</h3>
+
+<p>微服务从来都不是孤立从在的，它们被构建、运行和交互的环境就是它们生存的环境；大型的微服务系统的生存环境就像是一大片森林，一个沙漠或者一个大海；
+将相关的<strong>整个环境考虑为一个生态系统</strong>往往更有利于我们采用微服务风格来架构我们的应用系统。</p>
+
+<p>设计良好的可持续的微服务生态系统往往会尽力用一个基础设施层将底层的细节和上层的微服务应用相隔离开；这样微服务的开发人员可以像开发一个单体应用一样，
+使用他们喜欢的技术和编程语言，自己决定服务内部的软件架构；并不需要过多考虑底层基础设施这些细节，比如操作系统、网络、存储等复杂的基础知识。
+自然地，将这些基础设施保持地稳定、高效、可扩展并能良好地容错就成为一个非常基本的需求。</p>
+
+<p>微服务的生态系统可以简单地划分为四个层次，尽管有时候层次之间的界限并不是那么清晰而绝对</p>
+<ul>
+  <li>硬件层</li>
+  <li>通信层</li>
+  <li>软件应用平台</li>
+  <li>微服务层</li>
+</ul>
+
+<p>最底层的部分是硬件层，它负责处理诸如实际的物理资源，包括真实硬件、网络节点，乃至数据中心的机架、交换机或者SDN网络、存储设备等；这些设施可以是自己搭建的数据中心，
+也可以是从其它的云服务商处租赁来，比如AWS EC2、Google GCP、MS Azure等。所有这些相关的细节被硬件层所管理。
+硬件之上的操作系统，以及相关的配置，资源隔离和抽象设置，主机层面的日志、监控也需要被这一层统一提供；
+具体的系统选择和日志、监控工具可能由企业应用具体的环境来选择决定。
+某种意义上可以将这一硬件层看作是云时代的网络操作系统。</p>
+
+<p>硬件层之上的是通信层；该层本质上参与了上面两层的交互，因为<strong>所有微服务乃至软件应用平台的交互</strong>都被这一层所处理。
+从严格分层的角度来看，似乎这一层有些定义不太良好。幸运的是，基本的要素是清晰的。
+它需要处理诸如网络设置、DNS解析、RPC设施、API端点控制、服务发现和注册、负载均衡等微服务底层治理设施。</p>
+
+<p>作为第三层的软件平台层负责处理所有微服务共享的内部工具、共享的基础服务等。
+这一层必须提供整个系统范围内共享的基础应用软件设施，使得微服务团队<strong>不需要自己设计和维护他们自身微服务逻辑之外的复杂基础软件</strong>；
+从而微服务团队可以专注于自身需要实现的业务逻辑，而不是比较底层的软件技术。
+设计良好的软件平台需要提供内部开发者共同使用的方便的<strong>内部开发工具,自动化构建和测试平台</strong>，中心化的自动部署和发布方案，比如一些DevOps工具，自动发布工具，
+微服务层面的日志、监控工具等。</p>
+
+<p>微服务层处于这个生态系统的最上层，主要负责其职责范围内的业务逻辑和API实现，并和底层的硬件、服务治理设施、通用应用软件平台隔离开。
+唯一一个没有和下面几层完全隔离的就是微服务自身的配置。一种常见的做法是将所有的微服务的配置都用中心化的方式来管理和控制；然而这在大型的微服务软件中可能带来巨大的问题，
+因为当微服务人员需要修改其配置的时候，往往不得不修改其下面几层的文件（因为被中心化托管），由于微服务数量庞大，开发人员往往不知应该改动哪里或者遗漏重要的配置。
+这种情况下，更合理的方案是将各个微服务的配置放在自己的代码库中，然后让底层的工具或者平台可以访问这些配置文件。</p>
+
+<h2 id="可靠性和稳定性">可靠性和稳定性</h2>
+<p>微服务架构其实给软件系统的可靠性和稳定性带来的更多的挑战，这些挑战本质上是分布式软件架构内生的矛盾引起的，而我们又没有办法回到单体架构的时代。
+从整个生态系统的角度来考虑，任何一个环节、要素的可靠性损失都会传导到相关的上下游，从而使得整个系统的可用性下降。</p>
+
+<h3 id="构建稳定而又可靠的微服务的基本原则">构建稳定而又可靠的微服务的基本原则</h3>
+<p>微服务架构给开发人员引入了巨大的灵活性，并使得快速的功能迭代成为可能。各个微服务团队可以选用他们自己所熟悉的编程语言、库和微观架构，
+只要提供定义良好的API接口即可。每个服务的设计和功能特性都可能在随时发生着巨大的变化，因而整个系统中的任何一个微服务因为设计不良或者考虑不周引起的稳定性下降或者可靠性降低，
+都会对整个系统的可用性和可靠性带来毁灭性的影响。因此我们天然期望<strong>微服务的任何一次代码的合入都不会引起</strong>服务的可靠性、可用性水平的下降。</p>
+
+<p>构建和维护一个可以被称之为稳定而又可靠的微服务，意味着任何一次功能的添加、问题的修复或者代码的重构及演进不会带来整个系统的可靠性和稳定性的降低。
+当然变得更好是会更受欢迎的。为了发布和维护可靠的微服务，我们需要保证有良好的开发流程来支持，并且最好有一个标准化的开发周期模型使得</p>
+
+<ol>
+  <li>新功能的开发或者其它原因引入的代码改动<strong>必须经过预先定义的多个阶段的流水线检查</strong>，确保问题尽可能在早期阶段被发现并及时回滚</li>
+  <li>服务之间的<strong>依赖失效问题可以被尽早发现并阻止</strong>；一般认为对服务API打版本标签是一种反模式而不值得提倡，因为这样很容易引起沟通不足而导致下游微服务意外失效</li>
+  <li>适当的路由检查、断路器控制应该被继承到通信层上，实现对微服务出错情况下的处理，防止引起系统性的崩溃</li>
+  <li>某个特定的微服务提供的API可以被废弃或者微服务本身失效的情况下，其它的微服务不应该一并失效</li>
+</ol>
+
+<p>稳定而又可靠的微服务开发往往经历如下的开发模型</p>
+<ol>
+  <li>一旦开发人员提交代码的改动到仓库中的新分支（git模型），新的自动化构建任务即被创建起来执行，并做好自动化的代码检查和服务内部的测试</li>
+  <li>同时改动的代码需要被仔细的审查和评审，确保可能的问题被及早发现</li>
+  <li>只有当前两步的检查都没有问题的时候，新的代码才会被提交给外部的构建系统中和其它的服务做集成，打包，测试</li>
+  <li>测试通过的包会被同时发送给部署的流水线做持续部署测试和提交到服务对应的仓库中</li>
+</ol>
+
+<h3 id="部署流水线">部署流水线</h3>
+
+<p>大型系统中的大部分错误通常都被认为是来源于错误的部署。在大型的开发组织中，可能有上百个微服务在按照各自的节奏做设计、开发和维护，
+微服务团队之间通常很少有足够好的协调和沟通（因为康威定律决定了跨大型组织的沟通成本是极其高昂）。这种情况下，
+任何一个微服务部署了错误的有问题的版本都有可能造成整个系统的停摆。这种情况下，引入复杂而又分阶段的部署流水线则成为保证微服务系统可靠、稳定的必需手段。</p>
+
+<p>当一个新的微服务版本被发送到部署流水线的时候（紧接着上一节的过程）</p>
+
+<ol>
+  <li>该版本暂时被标记为候选的发布版本，先放置到 Staging 阶段，并运行一系列的测试</li>
+  <li>如果上述测试都通过并觉得没有太大问题，则顺序进入下一个“金丝雀部署”阶段；这里的环境其实是从正在线上运行的微服务生产环境中，
+跳出一部分工作负载，让新的候选微服务版本提供服务，并观察是否有异常情况发生</li>
+  <li>如果没有问题，则可以慢慢地按照既定的策略用新的微服务版本逐步替换就的服务版本</li>
+</ol>
+
+<p>任何一个阶段发现问题，则应当必须尽快回滚，基础设施和构建服务必须能快速回溯到出问题的改动，待对应的微服务团队诊断问题进一步修复。
+通常情况下，Staging 的测试环境往往和后边两个阶段的环境有比较大的区别。金丝雀发布阶段可以根据服务实例的个数或者API的流量选择重定向一小部分到新的候选服务版本；
+譬如5%到10%的生产环境的情况可以被路由到新的服务实例上做处理；一旦发生错误不致于给用户带来很大的困扰，并且的出错的情况下，应该及时终止这一部署回滚到稳定的生产环境版本，
+并抓取对应的日志、诊断信息，以便SRE工程师或者具体的微服务团队解决问题，重新发布。</p>
+
+<h4 id="staging">Staging</h4>
+<p>Staging环境的测试虽然往往和生产环境不同，然而也需要尽量保证硬件设置上和生产环境比较接近，只是没有真正的用户流量。
+由于资源的限制，在云平台上生产环境可能有数百个微服务的实例来均衡处理实际的负载，而staging环境上实例的数量可能就少得多。
+用户请求的流量可以用mock的方法来模拟测试，或者用工具甚至手工测试的方法来验证。它和开发环境的本质不同是，发布到该环境的服务是可以被发布的候选版本。
+开发人员<strong>必须用同等的重视程度和优先级来应对staging环境上可能出现的错误</strong>并及时修复。</p>
+
+<p>有两种不同的方法来选择和构建Staging环境，一种是Full Staging，这种情况下，staging环境基本上就是生产环境的比例缩小的一个拷贝。
+所有的微服务生态系统都被完整的运行，它可以和生产环境共享同样的基础设施、平台等，只是前后端的流量不是来自于真实的用户，
+它也会有自己单独的数据库，并且永远不会和生产环境的微服务发生通信和交互。另外一种配置方式被称之为Partial Staging，
+这种环境下，Staging和生产环境并没有完全做镜像隔离，即staging环境的微服务（往往是候选版本）可能会和生产环境中的微服务有进行交互，
+从而使用生产环境中的下游微服务的API，当然处于数据保护的需要，生产环境中的数据不应该被Partial  Staging的微服务所修改，而只允许读取和访问操作。
+由于Partial Staging环境中的候选版本的微服务可能访问生产环境中的服务，测试和配置的时候则需要更加小心一些，以防对生产环境造成比较大的破坏。</p>
+
+<h4 id="金丝雀部署">金丝雀部署</h4>
+
+<p>金丝雀部署的想法其实是借鉴了以前矿工下矿井的时候的准备不周，由于不确定矿井中的瓦斯含量和氧气含量是否会由于人体无法感知的异常而引起死亡等事故，
+矿工们往往会带一只金丝雀下井，金丝雀对环境的敏感程度远远超过人类，如果一氧化碳含量过高，金丝雀就会停止鸣叫从而矿工们便知道井下不安全。
+金丝雀部署的策略和旧时矿工们所采用的策略类似，先选择一小部分真实的环境做实验，如果没有异常出现说明可以继续放心部署下去。</p>
+
+<p>金丝雀部署是<strong>将候选的微服务版本直接放入了生产环境中</strong>使用(尽管只服务一小部分流量)，因此应该认为它是生产环境部署的一部分。
+所有的监控、诊断、日志信息应该和生产环境中的配置完全相同，以便开发人员可以很方便地调试和解决可能出现的问题。如果有异常的情况出现，
+自动回滚金丝雀环境也是至关重要的；因为任何的错误都意味着声场环境出了问题。</p>
+
+<p>另外一个相关的问题是怎么确定一个服务的新候选版本应该在金丝雀部署环境中呆多长时间才可以被放心地放入大规模部署中。
+这个其实取决于具体微服务的流量模式和具体的业务逻辑模型，我们需要根据服务的流量模式和业务模型确定一个金丝雀周期时间，
+只有活过了事先定义好的周期时间后，对应的候选版本才能进一步部署到生产环境中。</p>
+
+<h4 id="生产环境的部署">生产环境的部署</h4>
+
+<p>任何一次的构建和发布到部署环境的改动都应该尽力保证做到稳定而可靠。经过前述各个阶段的测试和检查，
+最终部署到生产环境的微服务候选版本应该是被充分测试和验证过的，<strong>任何情况下（除非是一些极端危急的情况），都不应该跳过前述的步骤</strong>而直接放到生产环境中。
+最后的部署可以是采用一次性全部部署到所有的实例上的方式，也可以采用更审慎的方式，按照某种预先指定的百分比策略逐步铺开，
+比如先部署25%的实例，再慢慢到50%，75%乃至最后完全部署成功。其它的策略也可以按照服务的国家、地区、数据中心、或者混合上述这些策略来部署开来。</p>
+
+<p>确保上述的开发和部署流水线被正确执行是保证微服务系统稳定、可靠发布和运行的关键，因为只有如此，
+才能有把握将可能出现的问题在发布之前被尽可能早地揪出来修复掉，避免破坏生产环境的稳定、可靠运行。
+对某些开发者来说，严格遵循上述的周期和流水线可能显得笨拙而缓慢，然而很多情况下，期望一天可以发布数次微服务的变更而又不破坏系统的稳定性和可靠性，
+在复杂的大型微服务系统中变得几乎不可能。每隔几个小时就发生变化的微服务很少是稳定而又可靠的。</p>
+
+<h3 id="依赖管理">依赖管理</h3>
+<p>微服务架构的一大设想就是各个微服务团队可以独立地发布和演进他们的微服务；这在理论上没什么问题，现实环境中依赖却无处不在。
+从设计上来说，我们可以努力减少服务之间的依赖和耦合，却永远不能一劳永逸地消灭依赖。几乎每一个微服务都有上下游的依赖，
+它需要从上游的微服务接收请求，处理返回，并在处理的过程中调用下游的微服务提供的API。</p>
+
+<p><strong>理解微服务的上下游依赖，事前仔细的规划和应对可能的依赖失效、错误</strong>是确保服务可靠、稳定运行的关键要素之一。因为任何上游服务的可用性下降如果没有被正确处理，
+都会导致该微服务的可用性（SLA水平 ）大大下降。为了提高可用性，微服务必须对其所依赖的服务做好失效时的应对措施，采取诸如冗余备份、回滚、缓存或可选副本的方式，
+以便所依赖的微服务出现失败的时候，<strong>整个系统不至于有单点故障</strong>。</p>
+
+<p>为了方便规划、跟踪和管理，微服务之间的依赖关系必须被很好地分析、文档化并实时更总变化。任何可能导致微服务系统SLA水平下降的依赖都应该被包含在本微服务的架构图中，
+并放在微服务的仪表盘中被实时监控着。有可能的情况下，最好尽可能地自动产生服务实现的依赖关系图，便于跟踪和规划。有了这些东西，
+接下来一个关键的步骤就是设置冗备份、缓存等；具体的情况需要依据实际微服务的具体情况而定。一种常用的设置cache的策略是所谓的LRU方法，
+即最近使用的数据被放置在一个队列中，当队列满的时候则将最长时间没有使用的数据给删除掉。这种缓存策略也常常被称为防御性缓存。</p>
+
+<h3 id="路由和服务发现">路由和服务发现</h3>
+
+<p>另外一个保证可靠性和可用性的考虑是需要保证第二层即<strong>微服务生态中的具体的微服务实例之间的通信层总是可靠的</strong>。
+用于保证这一层可靠性的机制即是服务注册、服务发现和负载均衡。为了保证通信的可靠，任何时刻某个服务实例的状态必须是明确知道的，
+这就潜在地要求微服务实例的健康检查必须持续地进行，以确保服务请求不会被发送到失效的节点上造成请求失败。
+一种最常用的方式是，采用一个特定的和业务通信无关的通道来监控服务状态。被监控的服务最好需要返回一些有明确意义的信息而不仅仅是返回诸如200 OK这样的状态码。</p>
+
+<p>如果一个服务的状态变得不可用，那么负载均衡就要做好正确的路由重定向，以保后续的请求不会转发给失效的节点。
+如果整个微服务实例变得不可用，那么负载均衡则需要确保在问题被修复之前，所有的请求都不会路由给失效的微服务。
+然而负载均衡器并不是唯一的选择，在网络没有出现故障单大批微服务返回异常的情况下，断路器该被用来及早地断开微服务调用链路上的尽量靠近上游的节点，防止系统失败蔓延。</p>
+
+<h3 id="版本升级和微服务删除">版本升级和微服务删除</h3>
+
+<p>旧版本的API需要退出整个系统的情况并不是很少见；如果没有仔细规划和应对该情况，也会引起预料之外的系统稳定性下降。
+微服务团队打算废除某些旧版本的API的时候，他们<strong>必须确保没有使用旧版本服务的客户端（下游）遭到波及</strong>。解决这一问题本身没有很好的技术手段，
+可能需要更多依赖于一些社会工程学上的手段，和具体组织的文化、组织结构密切相关。</p>
+
+<p>典型的流程要求旧版本的微服务用户必须被提早通知到（如果做了很好的微服务架构文档管理则不是什么难事），提供新版本的微服务团队需要告知
+原有的客户怎么迁移到新的版本，何时开始彻底废弃老的版本。<strong>在旧版本被废除之前，监控整个系统的状况是至关重要</strong>的。
+删除一个过时的微服务的情况和版本迁移是类似的情况；但是经常被忽视的是，忘记删除一些不再使用的微服务也会降低系统的可靠性和可用性；
+需要尽早被监控并在合适的时间尽早退出微服务生态系统。</p>
+
+<h2 id="可扩展性和性能">可扩展性和性能</h2>
+
+<p>生产环境就绪的微服务<strong>必须要是可扩展并且性能良好</strong>的。它不但能处理大量的请求和任务，并可以根据需要动态伸缩实际使用的资源，
+合理利用云平台基础设施的优势降低商业成本。确保微服务具有良好的可扩展性和性能，需要我们正确理解微服务的定性和定量的扩展因子，
+硬件的效率，正确地识别资源限制和使用瓶颈，正确地估计容量和规划流量的动态扩展情况，以及存储的可扩展性和依赖的动态扩展性。</p>
+
+<h3 id="保持可扩展和高性能的重要原则">保持可扩展和高性能的重要原则</h3>
+<p>正确评估大型的分布式微服务架构系统的挑战比传统的单体应用要大得多，不幸的是这是由分布式软件系统和计算机架构的内生复杂性所决定的。
+简单来说，你的微服务系统牵扯到的微服务越多，某单个微服务本身的性能和扩展性对整个软件系统的影响就越小 - 这里的关键是我们必须看清全局。
+另一方面，在一个增长而活跃的微服务系统中，流量可能在日渐增加，<strong>每一个微服务都必须能够随着系统的规模的增加而良好地扩展</strong>才不至于使整个系统遭遇性能问题。
+对任意一个微服务我们必须对下面的这些信息做到心中有数</p>
+
+<ul>
+  <li>定量和定性的增长规模</li>
+  <li>硬件资源的使用效率情况</li>
+  <li>资源瓶颈和需求情况以便合理地做容量规划</li>
+  <li>确保微服务的依赖的下游微服务也能够随着自己很好的扩展</li>
+  <li>流量可以被用可扩展的方式所管理和控制</li>
+  <li>任务和请求可以被高效地处理</li>
+  <li>数据必须被以可扩展的方式所存储</li>
+</ul>
+
+<h3 id="增长规模">增长规模</h3>
+<p>我们需要从来两个方面来分析和理解微服务的增长规模：定量增长规模和定性增长规模；两者同时在分析和规划资源分配的时候起着至关重要的作用。
+定性的增长规模可以从对给定微服务在整个微服务生态系统中的重要性和对相应的上层业务逻辑的关键指标的影响上分析的来。
+定量的增长规模则需要用可以度量的、定义良好的、定量的数值来确定该微服务具体可以处理多少业务流量。</p>
+
+<p>定量的指标经常用每秒请求次数（RPS）和每秒查询测试（QPS）来表述。前者经常用来描述微服务本身的API请求规模，后者则更多用于数据访问情况；
+很多时候两者是可以互换的。这些指标很重要，但是在失去上下文（即定性指标）的情况下可能就毫无用处。
+我们经常可以用负载测试的方式来衡量微服务的定量指标，和历史数据做对照来确定给定的微服务是否满足扩展性需求。</p>
+
+<p>考虑到<strong>微服务在大的微服务软件生态系统中从来不是单独存在的，我们也需要根据具体的业务逻辑规则来分析定性的增长规模指标</strong>，这就是定性增长规模的用武之地了。
+整个系统的业务逻辑往往是绑定在整个微服务生态系统的，而不仅仅是某一个具体的微服务。微服务团队需要根据业务分析团队传达的高层业务逻辑需要，
+分解到自己的微服务的上下游逻辑，然后来确定自己的微服务需要应对什么样的扩展性要求；这些分析必然是模糊的，却和定量指标一样重要。</p>
+
+<h3 id="资源有效使用情况和使用瓶颈">资源有效使用情况和使用瓶颈</h3>
+<p>在一个由很多微服务构成的应用软件系统中，诸如网络、运算节点、存储等资源总是有限而昂贵的。
+出于成本和资源利用率最大化的考虑，整个微服务生态系统需要<strong>按照所提供的业务逻辑的重要性对系统中的微服务做好优先级分类</strong>，
+使得优先级更高的微服务总是可以得到更大份额的资源使用。
+技术上的挑战则往往来源于上述的微服务生态系统的最底层，诸如是否给某个微服务分配固定的物理资源（成本高但是可靠），或者某些类型的微服务是否可以共享某些资源，
+同时微服务可靠性的潜在要求往往需要我们尽可能地隔离同一个微服务的多个实例，以提高物理硬件失效情况下的可用性。</p>
+
+<p>规划资源分配之前，还需要着重检查的一件事是确定微服务的资源需求情况和使用瓶颈。这些瓶颈可能来源于一些扩展性上随着资源配额的变化而不能很好扩展的具体限制。
+资源需求情况是指某个微服务需要多少的物理资源才能顺畅地运行，以便</p>
+<ul>
+  <li>有效地处理任务</li>
+  <li>很好地实现水平或者垂直扩展</li>
+</ul>
+
+<p>最常见的需要识别的需求要素当然是微服务单个实例运行需要的CPU计算资源和RAM。这两者是微服务实现扩展的基本要素。
+确定某个微服务的CPU和RAM情况可能会有如下的挑战</p>
+<ul>
+  <li>水平扩展还是垂直扩展</li>
+  <li>扩展的极限在哪里</li>
+  <li>单个服务实例需要处理的业务流量会是怎样的</li>
+</ul>
+
+<p>资源使用的瓶颈则往往来源于微服务自身设计上的一些限制，这些限制本身会对服务的扩展性产生决定性的影响，从而无法通过添加更多的资源提高任务处理的吞吐率。
+这些资源瓶颈可能是来自于基础设施的限制，也可能来自于微服务自身内部架构设计的制约：因为任何软件架构决策都充满了取舍。</p>
+
+<p>当资源的瓶颈没有办法很好分析和预测的时候，一种好办法是做充分的负载测试。</p>
+
+<h3 id="容量规划">容量规划</h3>
+
+<p>容量规划用于解决当微服务的实例被提供更多的物理资源的时候，它可以以适当的方式扩展来处理更多的业务工作负载。
+要达到这一目标，需要保证</p>
+<ul>
+  <li>资源被有效地使用</li>
+  <li>事先为业务增长做好规划</li>
+  <li>从<strong>一开始就为服务的性能和扩展性做好设计</strong></li>
+</ul>
+
+<p>为确保微服务系统可以很好地随着业务量的增长很好地利用资源，<strong>需要做好定期的资源规划</strong>，基本的原则包括</p>
+<ul>
+  <li>事先确定好每一个微服务的资源需求情况</li>
+  <li>将这些需求编制进资源预算中</li>
+  <li>确保对应的硬件被预留好可以处理阶段内的业务增长
+做好定期准备的好处是，当业务增长的时候，永远不会出现因为准备不足而造成的服务不稳定或者不可用。反之，
+如果微服务系统没有为业务的增长做好合适的准备和规划，带来的服务宕机或者不可用招致的损失回事巨大的。</li>
+</ul>
+
+<p>资源容量规划上的另外一个挑战是，规划时候的认为疏忽或者错误可能引起生产环境上的线上故障从而带来损失。
+一种自然的解决之道是，尽可能地将这些过程做成一个自动化的内部资源规划工具，这个工具就可以放在生态系统的第三层中维护，使得所有上层的微服务团队都可以使用来进行试算。</p>
+
+<h3 id="依赖服务的扩展性">依赖服务的扩展性</h3>
+<p>即使一个微服务被细心地设计以方便很好的扩展，如果它所依赖的微服务没法很好地随着业务量的增长来扩展，整个微服务系统依然是无法满足扩展性和性能要求的。
+确保某个微服务所依赖的微服务都可以随着业务量的增长而顺利地扩展是确保微服务系统生产环境就绪的重要条件之一。</p>
+
+<p>微服务依赖链条的可扩展性必须得到满足潜在的意味着我们<strong>必须要保持整个组织的所有微服务都需要采用同样的标准</strong>。
+如果只有核心而又关键的微服务满足高可扩展性，而其他的上下游依赖的微服务不同时满足，则整个微服务系统就无法按照实际业务负载的增长顺利地实现平滑扩展。
+除了保持高度的设计标准化之外，微服务团队需要尽力地确保自己所依赖的微服务可以按照自己的要求正常地伸缩扩展。
+<strong>跨微服务团队的沟通变得至关重要</strong>，否则系统的关键扩展性瓶颈就无法及时地识别；某种程度上说，这和微服务架构本身的灵活性是相互制约的。
+一种策略是，确保微服务团队之间经常进行架构的评审，并将扩展性的影响和依赖服务的扩展性情况放在微服务架构设计文档中。</p>
+
+<h3 id="流量管理">流量管理</h3>
+
+<p>微服务系统必须能处理日渐增长的业务流量，并用更为智能的方式管理流量的增长；并保持良好的扩展性和效率。做到这一点需要我们</p>
+<ul>
+  <li>根据业务的增长规模来<strong>事先预估将来流量的增减</strong></li>
+  <li>流量增减的模式必须被充分分析和理解，并以及做好准备；这样新引入的对微服务的改动如果会引起流量处理模式上的变化可以被预先分析和规划。
+服务监控措施也可以顺利跟上，以便在出问题的时候能尽快抓住问题的根源提供快速修复，避免造成业务损失。</li>
+  <li>微服务必须能够处理流量增长过程中可能出现的爆发和流量尖峰。它必须能以可扩展的方式应对可能出现的业务俱增或者骤降，
+有效地伸缩使用分配的硬件资源，防止可能的流量洪峰造成整个系统的奔溃。然而这些总是说起来容易作起来难。即使是设计良好的微服务，
+即便他们拥有良好的监控、日志措施，一旦出现流量尖峰仍然可能带来系统性的问题。通常来说，这些尖峰应该在基础设施层面做好规划，
+并辅以适当的负责测试措施来事先演练可能出现的情况。</li>
+</ul>
+
+<p>通常情况下，大型的微服务系统可能跑在跨越多个地区的数据中心上，这些数据中心甚至可能跨越地理上相距甚远的国家。
+<strong>数据中心之间的数据通信出现问题</strong>并不是一个少见的现象；在基础设施层做好流量的分发和路由是一种常见的做法，
+当然上层的微服务应用也要做好流量被重定向到其它数据中心的准备；这个过程中系统的可用性还不能降低太多。</p>
+
+<h3 id="任务管理">任务管理</h3>
+
+<p>任何一个微服务都需要出来来自其上游的某些任务请求，做相应的本地处理或者运算，返回处理响应给请求的发送者。
+这个过程中，它可能还要产生新的请求发给其下游的微服务完成自己的处理过程；这里面的每一次处理可以成为一个任务。
+线上的微服务系统在任一时刻可能有大量的任务被同时处理，性能和扩展的角度要求我们尽量提高微服务的处理能力以便更有效地使用资源。
+有许多制约因素值得考虑</p>
+
+<ul>
+  <li>
+    <p>编程语言和对应框架的限制，很多时候多任务处理的能力和微服务本身的编程语言选择密切相关，
+因为不同的编程语言可能有自己特色的平台框架来完成任务处理，并发控制，异步调度等纯技术的挑战。
+某种程度上说，编程语言的选择是具体微服务设计中的最大的架构决策；这方面需要根据具体微服务的目标和团队背景合理选择，没有一种编程语言适用于所有场景。
+当然选择太多的编程语言也会带来巨大的平台支持挑战。</p>
+  </li>
+  <li>
+    <p>除了编程语言上的限制，微服务团队在设计自己的服务的时候，也需要用标准化地方式思考他们的架构怎么处理任务，这种处理的效率怎么样，
+当更多的请求上来的时候它的处理机制是否容易扩展的问题。为了提高处理能力，任务处理需要支持并发和分区。
+并发意味着不能采用单线程的方式一个任务处理完再调度下一个的方式，因为这样会浪费大量的资源并引起竞争和锁开销。
+分区则要求我们可以将大的任务拆分成小的颗粒去并行调度和执行，执行完毕之后结果可以高效地合并起来。</p>
+  </li>
+</ul>
+
+<h3 id="数据存储的扩展性">数据存储的扩展性</h3>
+
+<p>微服务系统中的数据存储访问和管理经常成为性能和扩展的痛点。微服务<strong>怎样设计它的数据分割和扩展往往成为整个微服务系统扩展的一个最大的限制</strong>因素。
+选择正确的数据库系统（不同的微服务可能有不同的选择，完全由业务逻辑的特点决定）在微服务设计中是一个至关复杂的话题。</p>
+
+<p>仔细审视微服务生态系统的四个层次发现我们可以有两种思路，一种是在平台层将数据库软件作为服务提供给具体的微服务；一种思路是由各个微服务团队自己选择
+采用哪种数据库，怎么集成、打包和发布他们的数据库。当然还有一种混合的思路也可以工作良好，即平台层提供数据库服务，
+同时允许微服务团队在给定的数据库平台服务不匹配他们的需求的时候，选择他们自己的数据库。</p>
+
+<p>无论采用哪种方式，微服务团队都需要考虑应该采用关系数据库，还是采用弱结构化的NoSQL数据库；他们的业务扩张的方式是更需要水平扩展增加实例，还是水平扩展分配更多的资源。
+一般来说，如果水平扩展的要求比较高，读写需要并行地进行，那么NoSQL可能是更好的选择。</p>
+
+<p>另外一个麻烦的挑战来源于数据库的测试，尤其是<strong>测试数据的构建、使用和管理</strong>。
+在部署流水线中，staging阶段需要读写真正的数据库，full staging的情况下，测试环境会有自己独立的数据库，所有的测试数据库访问都会和生产环境的数据隔离开了。
+而partial stagging的部署情况下，测试可能需要访问生产数据库；这个时候我们需要格外小心确保生产数据库可以正确地区分测试数据不至于被写坏，
+并且测试过程中产生的数据可以被定期地清除以免产生不必要的垃圾。</p>
+
+<h2 id="容错和容灾演练">容错和容灾演练</h2>
+<p>生产环境就绪的微服务系统需要保证能在服务出错的情况下仍然可用，并在发生灾难性故障的时候，有恰当的应对措施提供定义好的可用性等级。
+这不仅要求微服务系统设计经过仔细的规划，准备好灾难处理，还要求时不时地将某些微服务置于失效的情况下，然后确保它可以正常而优雅地恢复服务。</p>
+
+<h3 id="容错处理的基本原则">容错处理的基本原则</h3>
+
+<p>在一个由很多个微服务组成的微服务系统中，任何一个可能发生错误的微服务都最终会在某个时间出错。复杂的服务间依赖关系会导致其中一个服务的错误
+蔓延到其他相互依赖的服务上，如果处理不当最终会导致整个系统的失效和不可用。唯一的应对措施是，<strong>务必保证系统中的每一个微服务都是</strong>可容错的并做好容灾准备。</p>
+
+<p>要想达到上述目标，第一件事情就是需要定位系统中的单点故障并竭力从设计上去除这些单点故障。所谓的单点故障是指，
+某个服务（或者其他实体）出现故障的时候，整个系统就会变得不可用。在微服务生态系统中，四个层次中的每一层都可能存在潜在的单点。
+有时候并不是系统中的所有单点故障都可以完美地从设计中移除。此时我们需要识别系统中可能的失败场景，并做好应对措施。</p>
+
+<p>从设计上我们需要做到让微服务可以应对两种可能的错误</p>
+<ul>
+  <li>内部错误，即微服务内部设计上的可能的错误</li>
+  <li>外部错误则包括微服务生态系统上其它层次的错误</li>
+</ul>
+
+<p>一旦我们移除了单点，并识别到了可能的失败场景，下一件重要的事情是需要验证和测试是否我们的微服务可以在出现错误或者灾难的时候可以从容地从错误中恢复服务；
+并因此<strong>确定微服务是否具有足够的弹性</strong>来应对错误。再好的设计都必须用严格的测试来保证当具体的微服务被置于错误的场景的时候系统是否可以足够从容地恢复。
+一种常见的做法是，定期而随机地将生产环境中的某些微服务置于失效的场景（杀死或者关闭某些基础设施），并测试是否系统的正常运行收到影响。</p>
+
+<p>由于并不是所有的错误和灾难都可以被事前预测，非技术的组织因素也应该被仔细准备。包括错误检测机制和应对策略需要被预先准备并制定好周密的计划；
+一旦出现事前未预料到的故障，可以按照事前定义的策略很快地处理以恢复系统服务。</p>
+
+<h3 id="避免系统单点故障">避免系统单点故障</h3>
+
+<p>理论上说，任何一个微服务从设计上来说都不应该引入单点故障；而现实情况是，很多微服务都会经常性地编程系统的单点。
+在系统真正失败的时候识别系统中的微服务单点是很容易的，而事前分析和发现系统的单点则困难得多；当然我们要也能通过坐等单点故障出现来慢慢修复单点。
+一种好办法是事先和具体的微服务团队进行服务架构评审，并通过仔细的分析和提问发现潜在的单点。架构师可以和微服务团队的成员在白板前
+就该微服务可能的错误场景进行讨论，借此识别可能出现的故障点。一旦识别到这些可能的故障点，要么我们需要从设计上将其从微服务架构中去除，
+要么就要设计好应对措施；注意前者并不是总能够做到的。</p>
+
+<h3 id="典型错误场景">典型错误场景</h3>
+
+<p>识别可能出现的错误或者灾难场景是去除单点故障之后的下一步要做的要紧事。通常我们可以依据微服务生态系统的层次划分，将这些错误和灾难分为四类</p>
+<ul>
+  <li>最常见的错误是硬件的错误或者失效</li>
+  <li>基础设施层（通信基础设施，中间件，网关、路由、服务发现）的故障</li>
+  <li>依赖微服务的失效</li>
+  <li>微服务内部的错误</li>
+</ul>
+
+<p>完整地列举所有可能的错误场景是不现实的，然而分析一些常见的失效场景却可能是非常有意义的。
+这些错误可能和整个组织的文化和行为方式有密切的关系，并会对整个微服务生态系统的可靠性造成巨大的影响。
+当然这也是为什么我们需要标准化的微服务实践以便更好地规避这些可能的陷阱。</p>
+
+<p>第一种常见的错误是缺乏足够的微服务设计和充分的架构分析和讨论，从而使得<strong>服务的设计低劣</strong>。这在大型的组织中影响格外大需要更加小心留意。
+需要避免这种错误的原因也显而易见：没有人可以有能力知道大型系统的所有细节，没有人知道四个层次中所有的关键细节知识。
+当新的系统被设计，新的微服务被添加的时候，确保生态系统中的四个层次中的工程师参与设计的评审过程以决定系统或者服务应该怎样构建和运行是是至关重要的。
+由于微服务系统的演进速度可能很快，定期的设计评审和文档化以保持架构的新鲜度往往是必须的：死的架构文档是没有意义的。</p>
+
+<p>第二种场景的错误是缺乏足够充分的代码评审。当然这个问题不是微服务架构独有的，微服务架构的方式却有意无意地放大了这个问题的严重程度。
+每个微服务的设计和演进和其他微服务尽量保持解耦这一目标给微服务组织带来了新的挑战。复杂的微服务系统中，要求频繁的上下文切换，更多的汇报或者会议，
+管理人员对速度的迷恋都会导致无穷无尽的bug被引入到系统中而没有被恰当的代码评审所发现。我们可以写更多的测试来覆盖可能场景，
+增加更多的回归测试条件，确保如果代码bug没有被评审时候发现，那么它也可以在自动化测试或者持续部署流水线中发现。</p>
+
+<p>另外一种常见的问题来源于部署错误；这可能是前两种常见错误的延伸，比如没有经过仔细设计和评审的包含bug的代码在未经过充分的测试或者良好的持续部署流水线检查即进入生产环境，
+往往会带来灾难性的后果造成线上环境事故。构建良好的工程师文化氛围确保</p>
+<ul>
+  <li>代码评审可以被认真地对待</li>
+  <li>开发人员有足够的时间来评审他们同事的代码，并尽量在开始的时候就一次将可能做好的事情做对</li>
+  <li>构建稳定、可靠的基础设施和自动化测试环境</li>
+  <li>采纳良好的持续集成和持续部署实践</li>
+</ul>
+
+<h4 id="硬件错误">硬件错误</h4>
+<p><strong>TBD</strong></p>
+
+<h4 id="通信层和平台层错误">通信层和平台层错误</h4>
+<p><strong>TBD</strong></p>
+
+<h4 id="服务依赖错误">服务依赖错误</h4>
+<p><strong>TBD</strong></p>
+
+<h4 id="服务内部错误">服务内部错误</h4>
+<p><strong>TBD</strong></p>
+
+<h3 id="弹性测试">弹性测试</h3>
+
+<p><strong>TBD</strong></p>
+
+<h3 id="故障检测和修复">故障检测和修复</h3>
+
+<p><strong>TBD</strong></p>
+
+<h3 id="事故和响应处理">事故和响应处理</h3>
+
+<p><strong>TBD</strong></p>
+
+<h2 id="微服务监控">微服务监控</h2>
+
+<p><strong>TBD</strong></p>
+
+<h2 id="文档">文档</h2>
+
+<p><strong>TBD</strong></p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2017/11/18/kafka-design-study/">Kafka的设计为什么高效</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/standardization" class="page__taxonomy-item" rel="tag">standardization</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-20T00:00:00+08:00">May 20, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=标准化和生产环境就绪的微服务 https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="production-ready-microservice">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

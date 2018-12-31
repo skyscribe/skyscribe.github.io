@@ -1,0 +1,1333 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>函数式反应式编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，一般人们将二者的结合称为函数式反应式编程或者FRP。FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的论文,">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="函数式反应式编程">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">
+
+
+
+  <meta property="og:description" content="流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，一般人们将二者的结合称为函数式反应式编程或者FRP。FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的论文,">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="函数式反应式编程">
+  <meta name="twitter:description" content="流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，一般人们将二者的结合称为函数式反应式编程或者FRP。FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的论文,">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-03-10T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="函数式反应式编程">
+    <meta itemprop="description" content="流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，一般人们将二者的结合称为函数式反应式编程或者FRP。FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的论文,">
+    <meta itemprop="datePublished" content="March 10, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">函数式反应式编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 14372 字，大约需要 35 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
+由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，
+一般人们将二者的结合称为函数式反应式编程或者FRP。
+FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的<a href="http://conal.net/papers/icfp97/icfp97.pdf">论文</a>,</p>
+
+<!--more-->
+
+<h2 id="基本概念">基本概念</h2>
+
+<p>从基本思想上看，FRP本质上是以函数式编程思想为基础的。</p>
+
+<h3 id="函数式编程的简单历史">函数式编程的简单历史</h3>
+
+<p>函数式编程早不是一个新鲜的概念，<a href="http://www.cse.psu.edu/~gxt29//historyOfFP/historyOfFP.html">在计算机历史的早期阶段就被提出</a>和实现，
+可能是由于它和数学理论概念更接近，即使是有<a href="http://haskell.cs.yale.edu/wp-content/uploads/2011/02/history.pdf">Haskell这样的致力于提升影响力的开源项目</a>在上个世纪八十年代被提出以解决不同的语言语义分裂的问题，
+也长期不能带其脱离“叫好不叫座”的尴尬境地，毕竟Unix/C的影响力太大了，以至于大部分人更喜欢面向过程的具体化思维，即使是一度流行的面向对象技术
+也得和传统的面向过程技术相结合才取得了长足的发展。</p>
+
+<p>进入21世纪以来，传统的依赖单核CPU频率提升的“摩尔定律”慢慢失效，软件的复杂性又与日俱增对计算能力的需求有增无减，
+原本用于大型机的多处理器核心被引入以应对商业软件领域的挑战。不幸的是传统的面向对象技术并不能很好地应对这些挑战;
+自然而然可以优雅地应对这些挑战的函数式编程技术重新引起人们的关注。</p>
+
+<p>微服务架构的兴起则为两者的结合提供了更好的舞台，因为<strong>无状态是微服务的潜在要求</strong>也是最重要的一个要求之一；
+函数式编程相较于其他编程范式更强调无副作用的编程思维，和微服务的基本要求自然契合的很好。</p>
+
+<h3 id="函数式编程的基本概念">函数式编程的基本概念</h3>
+
+<p>函数式编程的基本思路是将<strong>程序的执行看作是一堆函数的组合处理和求值</strong>过程；纯粹的函数式编程要求数据是不可变的，
+同样的数值输入在流经同样的函数处理的时候必须得到确定的输出，不容许有预料之外的副作用产生。程序员的任务可以想象为两个过程</p>
+
+<ol>
+  <li>声明运算过程所需要的函数及其组合算法；程序的主要逻辑是组合这些函数算法来完成运算</li>
+  <li>实现这些函数的内部逻辑实现，这个过程内部仍然是以声明式的写法为主</li>
+</ol>
+
+<p>由于声明式的代码更接近于实际的问题领域逻辑，一个明显的好处是函数式代码具有很高的可读性和可维护性。</p>
+
+<h3 id="流及反应式抽象">流及反应式抽象</h3>
+
+<p>流的抽象在计算机编程语言和计算机基础技术中非常常见。</p>
+
+<p>C++语言的早期STL标准库就提出了IO流的概念，它将输入输出设备进行抽象，
+外部用户仅仅需要关心自己的数据可以写入流中或者从流中读取，具体怎么实现底层的输入输出控制的细节则被标准IO流库所封装和隐藏。</p>
+
+<p>TCP协议的设计是另外一个例子，逻辑上看TCP服务的提供者和使用者之间在通信之前需要先建立一个虚拟的数据流，
+然后发送方可以<strong>按照严格而固定的顺序</strong>将数据写入这个数据流中，对方则可以保证按照发送发的写入顺序读取到数据。
+这里一个明显的共同特征是，流用于表述一种允许<strong>生产者顺序往后追加，消费者可以依据同样顺序读取出数据</strong>的逻辑抽象通道。
+只要逻辑通道处于连接状态，发送方就可以持续不断地向数据流中填充数据，接收方则可以得到保证不管中间经过多少节点（路由器或者交换机），
+数据总是以相同的顺序被放置在本地的协议栈缓冲中以便读取（这里暂不考虑网卡驱动丢包等异常情况）。</p>
+
+<p>Unix 的管道也满足类似的特征，管道的输入端进程可以源源不断地将自己的标准输出信息重定向到给定的管道中，
+而管道另外一侧的进程则按照同样的顺序从管道里读取数据。</p>
+
+<p>这些例子中，流中的数据是一经产生即不会被修改的，并且多个不同的流其实可以或多或少按照某种方式去组合；譬如可以组合多个进程，
+让前一个进程的输出作为下一个进程的收入，管道的长度可以达到任意长度（当然实际的长度会受制于计算机的处理能力 ）。
+同时这种采用组合来扩展程序的能力虽然简单却有着巨大的威力，管道的思想被认为是 Unix 编程哲学的核心要义之一。</p>
+
+<p>在这种抽象语义下，除了流的开端出的处理逻辑，<strong>其它相连的中间处理过程或者结束过程都是反应式</strong>的，即遵循被动式的处理逻辑：
+从输入中拿到内容 (可以是消息或者应用数据 ) , 按照业务领域意图做转换处理，然后将产生的结果放入流中，以便下游可以继续处理。</p>
+
+<h3 id="将两者相结合">将两者相结合</h3>
+
+<p>上述<strong>流的抽象其实和函数式编程的基本要素可以无缝地融合</strong>在一起，因为流的运算特征满足不可变性的特征，并且易于组合。</p>
+
+<p>简单地说，FRP的核心思维方式是将<strong>异步的数据流</strong>作为基本的数据抽象，异步是为了解耦处理流的处理和参与者；
+作为编程模型的基本抽象，它支持用各种各样的方式来创建数据流，可以是一个外部的变量，也可以是图形界面点击事件，
+缓冲更新等等。</p>
+
+<p>基于该基本抽象，FRP还提供给使用者灵活的工具箱来处理流，使我们可以创建新的流、过滤已有的流、组合或者终结流的数据；
+显然这些操作手法是典型的函数式的，所不同的是<strong>流被当作了基本的数据处理单元</strong>，
+上述的这些操作都可以看作是作用于流的函数或者高阶函数。</p>
+
+<p>FRP的实现基本都依赖于基本的函数式编程特性，尽管各种编程语言不约而同地慢慢从函数式编程语言中汲取营养加入到新的版本中，
+或者没有历史兼容包袱（适合于一些新语言）地直接在语言核心加入函数式编程支持，</p>
+
+<p>在不同的编程语言中实现FRP面临的挑战也是不一样的。最有名的FRP实现是 <a href="http://reactivex.io/">ReactiveX</a>,
+下面我们来粗略看下不同的编程语言中的RFP实现和基本特征。</p>
+
+<h2 id="javascript">Javascript</h2>
+
+<p>Javascript从早期版本开始就支持函数作为语言基本设施这一重要的函数式编程入门条件，在Javascript中实现FRP也比较清晰容易。</p>
+
+<p>想象一个简单的功能：我们需要在启动的时候从github中读取三个账户数据，用过程式的方法也很简单，
+但是我们这里想用FRP的方法来实现并顺便看下它的基本语义。</p>
+
+<p>首先我们需要先产生一个流，毕竟这是一切运算的基础，用ReactiveX 的说法我们需要一个 <code class="highlighter-rouge">Observable</code>，我们可以简单认为它就是一个流</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">requestStream</span> <span class="o">=</span> <span class="nx">Rx</span><span class="p">.</span><span class="nx">Observable</span><span class="p">.</span><span class="nx">just</span><span class="p">(</span><span class="s1">'https://api.github.com/users'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>这时候我们得到的还仅仅是一个字符串流；我们需要给它加上一些动作，当对应的数据被推送给流的时候，后续的运算可以继续进行下去</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">requestStream</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// execute the request</span>
+    <span class="kd">var</span> <span class="nx">responseStream</span> <span class="o">=</span> <span class="nx">Rx</span><span class="p">.</span><span class="nx">Observable</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">observer</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">jQuery</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span> <span class="nx">observer</span><span class="p">.</span><span class="nx">onNext</span><span class="p">(</span><span class="nx">response</span><span class="p">);</span> <span class="p">})</span>
+            <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">jqXHR</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">error</span><span class="p">)</span> <span class="p">{</span> <span class="nx">observer</span><span class="p">.</span><span class="nx">onError</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span> <span class="p">})</span>
+            <span class="p">.</span><span class="nx">always</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">observer</span><span class="p">.</span><span class="nx">onCompleted</span><span class="p">();</span> <span class="p">});</span>
+    <span class="p">});</span>
+
+    <span class="nx">responseStream</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// do something with the response</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>上述代码中，我们用 <code class="highlighter-rouge">subscribe</code> 函数作为组合函数，对应的参数是一个函数，该函数会取到 <code class="highlighter-rouge">requestStream</code> 中的字符串URL，
+执行AJAX回调，并基于处理结果决定如何处理流，这里的 <code class="highlighter-rouge">create</code> 函数用于创建一个自定义的流，传入的 <code class="highlighter-rouge">observer</code> 为下游的stream (ReactiveX叫他<code class="highlighter-rouge">Observable</code>)。
+当AJAX异步执行成功或者出错的时候，上面的实现将对应的相应结果通知给下游，分别是</p>
+
+<ul>
+  <li><code class="highlighter-rouge">onNext</code> 通知下一个数据需要被处理</li>
+  <li><code class="highlighter-rouge">onError</code> 通知异常情况发生，遇到错误需要被处理</li>
+  <li><code class="highlighter-rouge">onCompleted</code> 标记流的结束</li>
+</ul>
+
+<p>需要处理这些响应数据的代码写在第二个 <code class="highlighter-rouge">subscribe</code> 代码块中。</p>
+
+<p>上面的代码中，我们在一个流的处理中嵌套了另外一个流的处理，写的多了很容易掉入 <a href="http://callbackhell.com/">Callback Hell</a> 的陷阱。
+所幸的是，我们可以使用流变换的技术来简化它，重写为如下的版本</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">responseMetastream</span> <span class="o">=</span> <span class="nx">requestStream</span>
+  <span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">Rx</span><span class="p">.</span><span class="nx">Observable</span><span class="p">.</span><span class="nx">fromPromise</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">));</span>
+  <span class="p">});</span>
+</code></pre></div></div>
+
+<p>这是函数式编程中基本的<code class="highlighter-rouge">map</code>函数 - 将一种数据经过运算后编程另外一种数据，这里麻烦的是我们的<code class="highlighter-rouge">map</code>默认就会将内部的返回类型封装为一个Stream,
+加上里面的返回值本身已经是一个 Stream，最终我们得到了一个封装了两次的stream，好在<code class="highlighter-rouge">flatMap</code>可以帮我们轻松解开一层封装</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">responseStream</span> <span class="o">=</span> <span class="nx">requestStream</span>
+  <span class="p">.</span><span class="nx">flatMap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">Rx</span><span class="p">.</span><span class="nx">Observable</span><span class="p">.</span><span class="nx">fromPromise</span><span class="p">(</span><span class="nx">jQuery</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="nx">requestUrl</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>实现的流处理过程如下图</p>
+
+<p><img src="https://camo.githubusercontent.com/0b0ac4a249e1c15d7520c220957acfece1af3e95/687474703a2f2f692e696d6775722e636f6d2f4869337a4e7a4a2e706e67" alt="js_rx_flatmap" /></p>
+
+<p>更复杂的功能可以参考<a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754">这篇gist</a>，文字和视频都很清晰易懂。</p>
+
+<h2 id="java8-基本流">Java8 基本流</h2>
+
+<p>Java8在JDK中提供了丰富的 stream API，其定义是一个泛型的接口，支持最基本的流操作，包括 <code class="highlighter-rouge">map</code>/<code class="highlighter-rouge">flatMap</code>/<code class="highlighter-rouge">filter</code>/<code class="highlighter-rouge">skip</code>/<code class="highlighter-rouge">sorted</code>/<code class="highlighter-rouge">reduce</code>等方法。
+一个新的<code class="highlighter-rouge">stream</code>对象可以用包括静态的<code class="highlighter-rouge">of</code>方法、<code class="highlighter-rouge">Builder</code>辅助类构造出来，同时JDK提供的<code class="highlighter-rouge">Collection</code>类大多支持一个新的<code class="highlighter-rouge">stream()</code>方法用以构造一个新的stream对象。</p>
+
+<p>需要注意的是Java8语言本身的函数式支持是通过面向对象的方法来模拟的，只是从FRP编程的角度来看，可以认为Java8的流是用函数式思维组织设计，用OO的方法来提供实现。
+更多Java8的函数式特性和流实现细节记录在<a href="/post/2016/10/14/fp-support-in-java8/">这篇文章</a>中。</p>
+
+<h2 id="rxjava扩展">RxJava扩展</h2>
+
+<p><a href="https://github.com/ReactiveX/RxJava">RxJava</a> 项目用库的方式对JVM平台进行扩展，提供易于组合、异步、事件驱动的反应式编程支持。
+它的基本思路是扩展<a href="http://en.wikipedia.org/wiki/Observer_pattern">观察者模式</a> 以方便地支持数据、事件流，并提供高层抽象，
+将核心业务逻辑和底层的线程、同步、并发数据结构这些计算机底层的具体技术所隔离，使得应用程序开发者可以更关注于业务逻辑，提高开发效率。</p>
+
+<p>由于反应式编程天然和函数式编程的关系密切，并且Java8才支持Lamba表达式和Stream这些抽象，所以在Java8平台上使用 <code class="highlighter-rouge">RxJava</code> 会更清晰自然。
+一个最简单的回显 <code class="highlighter-rouge">Hello World</code> 的流程序的例子如下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">io.reactivex.*</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Flowable</span><span class="o">.</span><span class="na">just</span><span class="o">(</span><span class="s">"Hello world"</span><span class="o">).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>这个最简单的例子中, 我们先使用 <code class="highlighter-rouge">Flowable.just</code> 方法产生一个流并初始化为传入的数据 <code class="highlighter-rouge">Hello World</code>，并且当给定的数据传入流之后，流即终止。
+<code class="highlighter-rouge">subscribe</code>方法则提供一个流数据的消费者，这里是一个lambda表达式，将实际数据传给 <code class="highlighter-rouge">System.out.println</code> 打印在控制台上。
+当然这个例子是在实际应用中没多大意义，没有人会写出这样的实际代码来增加无畏的复杂性。</p>
+
+<h3 id="更复杂一点的例子">更复杂一点的例子</h3>
+
+<p>更常见一点的任务是，我们想根据输入数据做一些运算，这些运算本身可能比较复杂而耗时所以我们希望它在一些后台进程上做，做完之后，再将结果汇聚起来放在界面上显示出来。
+如果我们采用Java7提供的并发包中的工具来做，则需要仔细考虑一下线程之类的东西 （或者使用ForkJoinPool来做）；
+RxJava 则允许我们仅仅关注于需要解决的问题逻辑，其实现可以如下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Flowable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span> <span class="c1">//  imitate expensive computation</span>
+        <span class="k">return</span> <span class="s">"Done"</span><span class="o">;</span>
+<span class="o">}).</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">single</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">,</span> <span class="nl">Throwable:</span><span class="o">:</span><span class="n">printStackTrace</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>该例中，每一个语句调用结果都会产生一个新的不可变的 <code class="highlighter-rouge">Flowable</code>对象出来，整个代码的书写方式是链式调用的风格；如果将每个调用写在单独的一样上，
+应用处理逻辑则一目了然。</p>
+
+<p>RxJava并不直接使用Java8的线程或者 <code class="highlighter-rouge">ExecutorService</code> 接口，而是用 <code class="highlighter-rouge">Scheduler</code> 抽象和底层的JVM线程库做交互；<code class="highlighter-rouge">Scheduler</code> 负责和底层的线程或者
+<code class="highlighter-rouge">ExecutorService</code>实例做绑定；遵循常用的Java命名约定，<code class="highlighter-rouge">Schedulers</code> 工具类封装了一些常用的静态 <code class="highlighter-rouge">Scheduler</code> 实例方便编程使用。</p>
+
+<h3 id="使用并发">使用并发</h3>
+
+<p>RxJava 允许并发的运行计算以提高处理能力，然而当流中的输入数据是线性传入的时候，默认情况下则无法并发，下面的例子</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Flowable</span><span class="o">.</span><span class="na">range</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">computation</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">blockingSubscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+</code></pre></div></div>
+<p>虽然使用了默认共享的计算线程池（假设我们有多个处理器核心），但是因为输入的数据是线性传入的，中间的计算并不会自动地派发到多个计算线程上。
+为了打开并发处理，我们需要额外下一番功夫，使用 <code class="highlighter-rouge">flatMap</code> 方法显示地展开流并在运算完毕后自动合并流数据：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Flowable</span><span class="o">.</span><span class="na">range</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">flatMap</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span>
+    <span class="n">Flowable</span><span class="o">.</span><span class="na">just</span><span class="o">(</span><span class="n">v</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">computation</span><span class="o">())</span>
+      <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">w</span> <span class="o">-&gt;</span> <span class="n">w</span> <span class="o">*</span> <span class="n">w</span><span class="o">)</span>
+  <span class="o">).</span><span class="na">blockingSubscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>新一点的版本中，RxJava还加入了 <code class="highlighter-rouge">parallel()</code> 方法以生成一个并发的流对象 <code class="highlighter-rouge">ParallelFlowable</code> 从而更大地简化代码</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Flowable</span><span class="o">.</span><span class="na">range</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">parallel</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">runOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">computation</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">sequential</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">blockingSubscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>需要注意的是，<code class="highlighter-rouge">Flowable</code> 和 <code class="highlighter-rouge">ParallelFlowable</code> 是完全不同的类型，二者都是泛型类，但没有共同的接口。<code class="highlighter-rouge">ParallelFlowable</code>提供了丰富的接口可以得到一个<code class="highlighter-rouge">Flowable</code></p>
+<ul>
+  <li><code class="highlighter-rouge">reduce</code> 可以用一个调用者指定的函数来得到一个顺序的流</li>
+  <li><code class="highlighter-rouge">sequential</code> 可以显示地从每个流的尾部用轮询的方式得到一个顺序流</li>
+  <li><code class="highlighter-rouge">sorted</code> 则可以排序并发流并合并的恶道一个顺序流</li>
+  <li><code class="highlighter-rouge">toSortedList</code> 则得到一个排序列表的流</li>
+</ul>
+
+<h3 id="合理的设计和使用">合理的设计和使用</h3>
+
+<p>RxJava 建议最好的使用方式是 :</p>
+
+<ol>
+  <li>创建产生数据的可被流感知的对象(<code class="highlighter-rouge">Observable</code>)，作为流的输入数据</li>
+  <li>创建对数据进行运算的处理逻辑，它们自己本身可以对流推送过来的数据做适当运算，产生新的结果写入流中</li>
+  <li>完成处理所关心的数据的处理逻辑，将数据汇聚归并成最终关心的形式</li>
+</ol>
+
+<p>RxJava 支持从已有的数据结构中创建 <code class="highlighter-rouge">Observable</code>, 我们可以很方便的使用 <code class="highlighter-rouge">from</code>/<code class="highlighter-rouge">just</code> 或者 <code class="highlighter-rouge">create</code>方法创建出来，
+他们可以同步地一次调用<code class="highlighter-rouge">onNext</code>方法通知感兴趣的订阅者；在所有的数据都通知完毕的情况下，则会调用 <code class="highlighter-rouge">onCompleted()</code> 方法通知订阅者。</p>
+
+<h4 id="组合和变化-observable">组合和变化 <code class="highlighter-rouge">Observable</code></h4>
+
+<p>RxJava 支持我们方便地连接或者组合多个<code class="highlighter-rouge">Observable</code>, 考虑如下的 groovy 代码</p>
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">def</span> <span class="nf">simpleComposition</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">customObservableNonBlocking</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">skip</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">take</span><span class="o">(</span><span class="mi">5</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">({</span> <span class="n">stringValue</span> <span class="o">-&gt;</span> <span class="k">return</span> <span class="n">stringValue</span> <span class="o">+</span> <span class="s2">"_xform"</span><span class="o">})</span>
+        <span class="o">.</span><span class="na">subscribe</span><span class="o">({</span> <span class="n">println</span> <span class="s2">"onNext =&gt; "</span> <span class="o">+</span> <span class="n">it</span><span class="o">})</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>它的处理流程其实是如下的流水线处理</p>
+
+<p><img src="https://github.com/Netflix/RxJava/wiki/images/rx-operators/Composition.1.png" alt="groovy_pipeline" /></p>
+
+<h2 id="kafka-streams">Kafka Streams</h2>
+
+<p>Kafka本身（可以参考<a href="/post/2017/11/18/kafka-design-study/">前一篇文字</a>）就可以看作是一个流式处理平台。同时它还提供了专门的流处理API，其特性如下</p>
+<ul>
+  <li>
+    <p>Kafka Streams 本身是一个客户端的库，可以看作是一个用户端程序而不是其平台核心部分；它本身被设计为可以<strong>很容易地嵌入到用户端的Java程序</strong>中，方便部署和集成。
+除了Kafka平台本身，它不依赖于其他的库或者系统；同事又能依托于Kafka平台提供的可伸缩性和一致性保证提供高可靠的实时处理能力。</p>
+  </li>
+  <li>
+    <p>支持流处理中插入自定义的本地状态，从而结合传统的过程式编程的本地状态的便利；当然破坏了纯函数性编程无状态的假设会带来复杂的问题，以提高性能；
+各种取舍需要用户自己去选择。</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">Stream</code>是Kafka Streams提供的最重要的抽象，它表示无边界、持续更新的数据流；一个流是有序而可重放的，其中的数据是由按时间顺序的不可变的数据序列组成；
+其中的一条数据或者记录被定为为一个 <code class="highlighter-rouge">Key, Value</code> 对。</p>
+  </li>
+  <li>
+    <p>建立在stream之上的应用程序可以看作是由一个或者流处理对象（stream processor）组成；这些流处理对象是高度可组合的，它们可以将一个或者多个流作为输入，
+经过一定的函数变换产生一个或者多个流对象输出。
+这里的两种例外情况是被称之为 <code class="highlighter-rouge">Source</code> 和 <code class="highlighter-rouge">Sink</code> 的处理对象；<code class="highlighter-rouge">Source</code>可以从Kafka平台中读取某个<code class="highlighter-rouge">Topic</code>作为输入经过处理后，产生新的数据流，
+而<code class="highlighter-rouge">Sink</code>可以从上游的流中拿到数据，作处理之后，将结果写入一个特定的<code class="highlighter-rouge">Topic</code>上。</p>
+  </li>
+</ul>
+
+<p>Kafka Stream的流处理拓扑结构如下图</p>
+
+<p><img src="https://kafka.apache.org/10/images/streams-architecture-topology.jpg" alt="kafka_streams_topo" /></p>
+
+<h3 id="两种流处理技术">两种流处理技术</h3>
+
+<p>Kafka Streams提供了两种方法来操作流处理逻辑</p>
+<ul>
+  <li>专门的<a href="https://kafka.apache.org/10/documentation/streams/developer-guide/#streams_dsl">领域语言(DSL)</a> 提供了基于Steams的高级API来转换流；用户可以用这些API的组合来完成自己的应用程序逻辑。</li>
+  <li>相对底层一些的 Processor API，适用于用户想自己定义自己的流处理逻辑的情况；这里我们只粗略看看DSL的特性和使用。</li>
+</ul>
+
+<p>DSL支持基于Streams和Table的抽象，有三个主要的接口</p>
+<ul>
+  <li><code class="highlighter-rouge">KStream</code>是基本的数据流对象</li>
+  <li><code class="highlighter-rouge">KTable</code>是一个二维表，可以方便地用在需要数据连接或者分组的情况</li>
+  <li><code class="highlighter-rouge">GlobalKTable</code>是一个全局的表，其本身可以和Kafka的数据分块等能力结合起来用</li>
+</ul>
+
+<p><code class="highlighter-rouge">KStream</code>用来表述流的概念，而后两者用来对应于数据表结构。基于 <code class="highlighter-rouge">StreamsBuilder</code> 类，我们可以很方便地将Kafka中的某个topic数据读加载到流中或者数据表中。
+这些接口提供了丰富的变换操作（方法），其中一些变换方法会产生一个新的<code class="highlighter-rouge">KStream</code>而另外一些则会产生新的<code class="highlighter-rouge">KTable</code>。
+从实现上看，这些接口都是用泛型技术实现的，并且是强类型的。</p>
+
+<p>所谓的流变换可以分为两类：无状态的后有状态的。无状态的变换支持诸如 <code class="highlighter-rouge">map</code>/<code class="highlighter-rouge">filter</code>/<code class="highlighter-rouge">flatMap</code>/<code class="highlighter-rouge">filterNot</code>/<code class="highlighter-rouge">foreach</code>/<code class="highlighter-rouge">groupByKey</code>/<code class="highlighter-rouge">selectByKey</code>/<code class="highlighter-rouge">toStream</code>等操作；
+其中<code class="highlighter-rouge">toStream</code>可以实现从<code class="highlighter-rouge">KTable</code>到<code class="highlighter-rouge">KStream</code>的转换；而<code class="highlighter-rouge">groupBy</code>则返回分组过的流或者数据表。
+有状态的变换除了将传入的流作为输入外，还需要一个额外的状态数据存储参与到变换处理过程中；
+比如一个<code class="highlighter-rouge">window</code>操作会在处理过程中读取<code class="highlighter-rouge">window</code>信息来确定输入流中的哪些数据应该被处理并将其结果放置在输出流中。</p>
+
+<p>有状态的流变换包含如下几种</p>
+<ul>
+  <li>聚合</li>
+  <li>连接操作(Join)，可以将其想象为SQL的表连接</li>
+  <li>上述的window操作</li>
+  <li>自定义的流处理变换操作，由于是自定义的所以可能是有状态的</li>
+</ul>
+
+<p>它们之间的关系可以参考下图</p>
+
+<p><img src="https://kafka.apache.org/10/images/streams-stateful_operations.png" alt="kafka_stateful_transformation_relation" /></p>
+
+<h3 id="一个简单的例子">一个简单的例子</h3>
+
+<p>下面是一个简答的Java8的程序，用于统计某个文本行中的词出现的次数</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Assume the record values represent lines of text.  For the sake of this example, you can ignore</span>
+<span class="c1">// whatever may be stored in the record keys.</span>
+<span class="n">KStream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">textLines</span> <span class="o">=</span> <span class="o">...;</span>
+
+<span class="n">KStream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Long</span><span class="o">&gt;</span> <span class="n">wordCounts</span> <span class="o">=</span> <span class="n">textLines</span>
+    <span class="c1">// Split each text line, by whitespace, into words.  The text lines are the record</span>
+    <span class="c1">// values, i.e. you can ignore whatever data is in the record keys and thus invoke</span>
+    <span class="c1">// `flatMapValues` instead of the more generic `flatMap`.</span>
+    <span class="o">.</span><span class="na">flatMapValues</span><span class="o">(</span><span class="n">value</span> <span class="o">-&gt;</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">value</span><span class="o">.</span><span class="na">toLowerCase</span><span class="o">().</span><span class="na">split</span><span class="o">(</span><span class="s">"\\W+"</span><span class="o">)))</span>
+    <span class="c1">// Group the stream by word to ensure the key of the record is the word.</span>
+    <span class="o">.</span><span class="na">groupBy</span><span class="o">((</span><span class="n">key</span><span class="o">,</span> <span class="n">word</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">word</span><span class="o">)</span>
+    <span class="c1">// Count the occurrences of each word (record key).</span>
+    <span class="c1">// This will change the stream type from `KGroupedStream&lt;String, String&gt;` to</span>
+    <span class="c1">// `KTable&lt;String, Long&gt;` (word -&gt; count).</span>
+    <span class="o">.</span><span class="na">count</span><span class="o">()</span>
+    <span class="c1">// Convert the `KTable&lt;String, Long&gt;` into a `KStream&lt;String, Long&gt;`.</span>
+    <span class="o">.</span><span class="na">toStream</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h2 id="rxcpp">RxCpp</h2>
+
+<p><a href="https://github.com/Reactive-Extensions/RxCpp">RxCpp</a> 提供类似了和 <a href="https://github.com/ericniebler/range-v3">Ranges-v3</a> 库类似的管线操作，其处理方式本质上也是反应式的。
+由于C++支持运算符重载，<code class="highlighter-rouge">|</code> 操作符可以天然地作为管道操作符拿来用，而现代C++语言对函数式编程和Lambda表达式的丰富的表达能力使得写出可读性好的代码不算什么难事。</p>
+
+<p>下面是其项目文档中的一个例子,实现如下一个解析任务</p>
+<ul>
+  <li>给定一个二进制文件作为输入，其中存放的是一段不等长字符串构成的二进制表示，可以有多行；每行用之间回车符号隔开 ；输入长度被分割为固定长度的行</li>
+  <li>要求解析给定的输入，将二进制数表示的字符打印出来，并且每一行对应于原输入中的一行</li>
+</ul>
+
+<p>输入的格式如下（假设一行有17个字符的二进制数表示 )</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 
+13 67 67 67 67 67 67 67 67 67 67 67 13 68 68 68 68 
+68 68 68 68 13 69 69 69 69 69 69 69 69 69 13
+</code></pre></div></div>
+
+<p>对应的输出应该为</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BBBBBBBBBBBBBBBBB
+CCCCCCCCCCC
+DDDDDDDD
+EEEEEEEEE
+</code></pre></div></div>
+
+<p>产生一段随机的字符输入可以用RxCpp的方式写为如下的函数式代码</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">random_device</span> <span class="n">rd</span><span class="p">;</span>   <span class="c1">// non-deterministic generator
+</span><span class="n">mt19937</span> <span class="n">gen</span><span class="p">(</span><span class="n">rd</span><span class="p">());</span>
+<span class="n">uniform_int_distribution</span><span class="o">&lt;&gt;</span> <span class="n">dist</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">18</span><span class="p">);</span>
+
+<span class="c1">// for testing purposes, produce byte stream that from lines of text
+</span><span class="k">auto</span> <span class="n">bytes</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> 
+    <span class="o">|</span> <span class="n">flat_map</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">auto</span> <span class="n">body</span> <span class="o">=</span> <span class="n">from</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="sc">'A'</span> <span class="o">+</span> <span class="n">i</span><span class="p">))</span> 
+                <span class="o">|</span> <span class="n">repeat</span><span class="p">(</span><span class="n">dist</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span> 
+                <span class="o">|</span> <span class="n">as_dynamic</span><span class="p">();</span>
+            <span class="k">auto</span> <span class="n">delim</span> <span class="o">=</span> <span class="n">from</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)</span><span class="sc">'\r'</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">from</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">delim</span><span class="p">)</span> 
+                <span class="o">|</span> <span class="n">concat</span><span class="p">();</span>
+        <span class="p">})</span> 
+    <span class="o">|</span> <span class="n">window</span><span class="p">(</span><span class="mi">17</span><span class="p">)</span> 
+    <span class="o">|</span> <span class="n">flat_map</span><span class="p">([](</span><span class="n">observable</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">w</span><span class="p">){</span>
+        <span class="k">return</span> <span class="n">w</span> 
+            <span class="o">|</span> <span class="n">reduce</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(),</span> <span class="p">[](</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">b</span><span class="p">){</span>
+                    <span class="n">v</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="n">v</span><span class="p">;</span>
+                <span class="p">})</span> 
+            <span class="o">|</span> <span class="n">as_dynamic</span><span class="p">();</span>
+        <span class="p">})</span> 
+    <span class="o">|</span> <span class="n">tap</span><span class="p">([](</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;&amp;</span> <span class="n">v</span><span class="p">){</span>
+            <span class="c1">// print input packet of bytes
+</span>            <span class="n">copy</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cout</span><span class="p">,</span> <span class="s">" "</span><span class="p">));</span>
+            <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+        <span class="p">});</span>
+</code></pre></div></div>
+
+<p>这里虽然有多个管道操作，不习惯函数式编程风格代码的程序员可能看起来有些头晕，好在只要我们加上恰当的缩进，在熟悉RxCpp库的命名的情况下，代码的逻辑还是比较简单明了的</p>
+
+<p><code class="highlighter-rouge">range(0, 10)</code> 先生称一个<code class="highlighter-rouge">Observable</code>对象作为流的起点，内部会一次产生0,1,2,…,10发布给流，通知其后的 <code class="highlighter-rouge">subscriber</code>, 后边的管道操作符连接了流处理的下一个环节。
+接下来，用给定的字符得到一个对应ASCII码，然后用 <code class="highlighter-rouge">repeat</code>函数经给定的字符做重复，产生4~18个重复的字符，<code class="highlighter-rouge">as_dynamic</code>则是一个特殊的函数用于解决C++类型安全方面的一些问题。
+这是一个字符行的二进制串，然后我们还需要用换行符将其连接起来，<code class="highlighter-rouge">from</code> 的双参数形式可以产生一行新的 <code class="highlighter-rouge">Observable</code> 对象，用第二个参数作为分隔符连接第一个<code class="highlighter-rouge">Observable</code>,
+进而这里的多个行便被连接成一个整体的 <code class="highlighter-rouge">Observable</code>对象给后续处理了。</p>
+
+<p>由于我们希望每一行的输入仅有17个二进制串，紧接着的 <code class="highlighter-rouge">window</code>函数就是用来将输入的流按照固定的长度分隔为固定长度的行的；需要留意的是每一个字符的长度可能是4~18的一个随机值，
+这个在前面<code class="highlighter-rouge">repeat</code>的时候便确定了。<code class="highlighter-rouge">flat_map</code>可以将lambda表达式封装的实际的 <code class="highlighter-rouge">observable</code> 提出出来。
+有了上面这些按行分割好的集合，接下来的任务是需要将这些记录保存到一个容器中，便于后续解析处理，因而后续的一个<code class="highlighter-rouge">flat_map()</code>调用针对前面的集合，
+采用<code class="highlighter-rouge">reduce</code>算法收集一个一个的字符并以行为单位放入容器中，最终的流会每次产生一个<code class="highlighter-rouge">vector&lt;uint8_t&gt;</code>待后续处理。
+出于调试的便利，我们同时用<code class="highlighter-rouge">tap</code>函数安插一个方便调试的打印操作，该函数本身不会修改流的数据内容。</p>
+
+<p>下面的代码则完成一些变换逻辑，用更多的中间变量会使得代码更容易理解一些，当然代码就不如上面的输入部分那么紧凑了。</p>
+
+<p>首先我们需要一个工具函数删除给定字符串中的空格字符，用一个lambda表达式可以很容易的写出来</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">removespaces</span> <span class="o">=</span> <span class="p">[](</span><span class="n">string</span> <span class="n">s</span><span class="p">){</span>
+    <span class="n">s</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">remove_if</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="o">::</span><span class="n">isspace</span><span class="p">),</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>接下来我们就可以针对上面已经生成好的bytes流，按照回车符号进行拆分,过滤掉输入中的空格字符，拆分过程可以用C++标准库的<code class="highlighter-rouge">cregex_token_iterator</code>来完成，
+并将结果用迭代器封装访问，而C++11的移动语义可以额外的减少临时字符串的开销。<code class="highlighter-rouge">concat_map</code>将所有的去掉了换行符的字符串连接起来，交给流的下游，
+然后完成过滤空格字符串的操作。</p>
+
+<p>最后我们需要将处理好的串再加上回车符号，并最终输出，加上<code class="highlighter-rouge">publish</code>和<code class="highlighter-rouge">ref_count</code>可以使得我们写2个单独的订阅者，第一个自动建立流的连接，
+最后一个订阅者处理完毕后自动关闭流. 代码如下</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1">// create strings split on \r
+</span><span class="k">auto</span> <span class="n">strings</span> <span class="o">=</span> <span class="n">bytes</span> 
+    <span class="o">|</span> <span class="n">concat_map</span><span class="p">([](</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">){</span>
+            <span class="n">string</span> <span class="n">s</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+            <span class="n">regex</span> <span class="n">delim</span><span class="p">(</span><span class="s">R"/(\r)/"</span><span class="p">);</span>
+            <span class="n">cregex_token_iterator</span> <span class="n">cursor</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">delim</span><span class="p">,</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">});</span>
+            <span class="n">cregex_token_iterator</span> <span class="n">end</span><span class="p">;</span>
+            <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">splits</span><span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="n">end</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">iterate</span><span class="p">(</span><span class="n">move</span><span class="p">(</span><span class="n">splits</span><span class="p">));</span>
+        <span class="p">})</span> 
+    <span class="o">|</span> <span class="n">filter</span><span class="p">([](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">){</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span>
+        <span class="p">})</span> 
+    <span class="o">|</span> <span class="n">publish</span><span class="p">()</span> 
+    <span class="o">|</span> <span class="n">ref_count</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>由于最后一行不像前边的行一样有一个额外的回车符，我们需要将其分拣出来，使用<code class="highlighter-rouge">filter</code>和<code class="highlighter-rouge">window_toggle()</code>可以很方便地将二者进行分组，
+然后再将结果用<code class="highlighter-rouge">sum</code>连接起来并删除中间的空格字符。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// filter to last string in each line
+</span><span class="k">auto</span> <span class="n">closes</span> <span class="o">=</span> <span class="n">strings</span> 
+    <span class="o">|</span> <span class="n">filter</span><span class="p">(</span> <span class="p">[](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">){</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">==</span> <span class="sc">'\r'</span><span class="p">;</span>
+        <span class="p">})</span> 
+    <span class="o">|</span> <span class="n">Rx</span><span class="o">::</span><span class="n">map</span><span class="p">([](</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span><span class="p">){</span><span class="k">return</span> <span class="mi">0</span><span class="p">;});</span>
+
+<span class="c1">// group strings by line
+</span><span class="k">auto</span> <span class="n">linewindows</span> <span class="o">=</span> <span class="n">strings</span> 
+    <span class="o">|</span> <span class="n">window_toggle</span><span class="p">(</span><span class="n">closes</span> <span class="o">|</span> <span class="n">start_with</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="kt">int</span><span class="p">){</span><span class="k">return</span> <span class="n">closes</span><span class="p">;});</span>
+
+<span class="c1">// reduce the strings for a line into one string
+</span><span class="k">auto</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">linewindows</span> 
+    <span class="o">|</span> <span class="n">flat_map</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">observable</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">w</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">w</span> 
+            <span class="o">|</span> <span class="n">start_with</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">""</span><span class="p">)</span> 
+            <span class="o">|</span> <span class="n">sum</span><span class="p">()</span> 
+            <span class="o">|</span> <span class="n">Rx</span><span class="o">::</span><span class="n">map</span><span class="p">(</span><span class="n">removespaces</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>最后一段代码用于接产生好的流打印出来，直接传递给<code class="highlighter-rouge">println</code>即可</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// print result
+</span><span class="n">lines</span> <span class="o">|</span> <span class="n">subscribe</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">println</span><span class="p">(</span><span class="n">cout</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>看这里的代码，可以明显看到里面没有一个传统的过程式控制逻辑，没有分支、循环和判断，有的只是函数定义、调用和流连接操作。
+如果熟悉Rx系列库的API，处理逻辑还是比较清晰明了的。</p>
+
+<h2 id="reactive-spring">Reactive Spring</h2>
+
+<p><a href="https://www.infoq.com/news/2015/09/spring-43-5">Spring 5.0 框架</a>的一个重心就是增加对FRP风格的架构的支持。
+Spring框架之所以流行，一个很重要的原因就是其易用而又性能极好的MVC框架可以很好地替代传统的servelet-API，虽然Spring MVC可以很好地解耦一部的HTTP请求，
+但是在不破坏既有框架的前提下增强非阻塞的IO模型却碰到了不少困难。另一方面，基于注解的MVC工具带来了更具可读性的代码和清晰的业务逻辑，
+Spring 5.0在尽力不破坏既有注解的前提下，实现了一个底层的Reactive Engine。</p>
+
+<p>同时Spring还发布了一个基于JVM平台的<a href="https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#specification">反应式流处理规格说明</a>，尝试将改编程范式在JVM平台上实现标准化。
+目前该规格致力于实现多种异步组件驱动在JVM平台之上的互操作性，<a href="https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html">Flow接口</a>已经加入到Java9的中;
+它由4个接口，一些rule 以及一个TCK组成</p>
+<ul>
+  <li><code class="highlighter-rouge">Publisher</code> 用于产生可以无固定边界的元素的序列，这些元素可以被发布给特定的订阅者</li>
+  <li><code class="highlighter-rouge">Subscribe</code> 用于从<code class="highlighter-rouge">Publisher</code>中接收数据更新</li>
+  <li><code class="highlighter-rouge">Subscription</code> 用于表述<code class="highlighter-rouge">Publisher</code>和<code class="highlighter-rouge">Subscriber</code>之间的订阅关系并可以对数据的处理做控制，有<code class="highlighter-rouge">request</code>和<code class="highlighter-rouge">cancel</code>方法</li>
+  <li><code class="highlighter-rouge">Processor</code> 用于表述流处理的中间状态</li>
+</ul>
+
+<h2 id="其它语言和平台">其它语言和平台</h2>
+<p>对于其它编程语言环境和平台，微软的开源项目<a href="https://github.com/Reactive-Extensions">Reactive Extensions</a>提供了丰富的支持。</p>
+
+<h2 id="参考材料">参考材料</h2>
+<ol>
+  <li><a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754">The introduction to reactive programming you’ve been missing</a></li>
+  <li><a href="https://stackoverflow.com/questions/1028250/what-is-functional-reactive-programming/1030631#1030631">Conal’s reply on “what’s (functional) reactive programming</a></li>
+  <li><a href="https://github.com/Reactive-Extensions/RxJS">RxJs</a></li>
+  <li><a href="https://github.com/ReactiveX/RxJava">RxJava</a></li>
+  <li><a href="https://kafka.apache.org/10/documentation/streams/core-concepts">Kafka Streams: concepts</a></li>
+</ol>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/concurrency" class="page__taxonomy-item" rel="tag">concurrency</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-03-10T00:00:00+08:00">March 10, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=函数式反应式编程 https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="functional-reactive-programming">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

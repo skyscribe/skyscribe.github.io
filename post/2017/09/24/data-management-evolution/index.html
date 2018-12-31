@@ -1,0 +1,1076 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>数据访问与管理技术的演进 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="数据访问与管理技术的演进">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2017/09/24/data-management-evolution/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2017/09/24/data-management-evolution/">
+
+
+
+  <meta property="og:description" content="数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="数据访问与管理技术的演进">
+  <meta name="twitter:description" content="数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2017/09/24/data-management-evolution/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2017-09-24T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="数据访问与管理技术的演进">
+    <meta itemprop="description" content="数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。">
+    <meta itemprop="datePublished" content="September 24, 2017">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">数据访问与管理技术的演进
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 10153 字，大约需要 25 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，
+乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，
+无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。</p>
+
+<!--more-->
+<h2 id="数据访问管理技术的关键要素">数据访问、管理技术的关键要素</h2>
+<p>到目前为止，几乎所有的软件依然是工作在冯诺依曼设定的计算机架构之上,因而从<strong>最微观的粒度看,运算器、控制器、存储设备互相配合</strong>完成形形色色的任务。
+各色复杂的软件都要在此基础上做更高层次的抽象和封装，才能完成复杂度更高的任务。程序语言、编译器和各种各样的库函数、中间件等则都围绕着该基本模型来处理高层次的领域相关问题。</p>
+
+<p>由于最底层的硬件要么具有访问速度快但易失性的特点，要么是访问速度慢但可以持续保存很长时间；同时硬件在长时间工作的情况下总会面临各种各样的失败。
+面向业务问题的计算机<strong>软件必须要被仔细设计以隔离上述问题，使得用户觉得失败永远不可能发生</strong>（或者至少是现实意义上的不会失败）。
+这对数据的访问和管理技术提出了很高的挑战</p>
+<ul>
+  <li>数据容量在需要的情况下能尽可能地大，甚至是可以<strong>按需动态扩展</strong>；传统上基于单机的数据存储模型被扩展到可以被存储在地理上分散的网络节点</li>
+  <li>数据访问的延时需要满足特定的场景需求；由于数据可能被存放在不同的设备上，不同的存储设备有不同的访问性能和时延特性</li>
+  <li>多用户同时访问的一致性：复杂的应用总会允许有逻辑上同时访问数据的需求，如果是访问同样的数据或者相互有逻辑关联的数据，用户不应该得到不一致的数据状态</li>
+  <li>数据的可靠性：在任何硬件失效的情况下，数据的丢失总是应该被尽量杜绝的</li>
+</ul>
+
+<p>这些目标、挑战有些是互相矛盾的，因此在现有的技术条件下并没有出现过一种一招通吃的方案，各色各样的技术方案都会在某些方面有所取舍。
+只是在同样的取舍考虑下，优秀的技术能比它的竞争对手们做的更为出色。</p>
+
+<h2 id="前关系数据库时期的数据结构和文件方案">前“关系数据库”时期的数据结构和文件方案</h2>
+<p>在20世纪70年代关系数据库理论出现之前，软件已经被用于解决很多形形色色的问题了， 这个时期其实并没有专门针对数据管理的特定技术。</p>
+
+<h3 id="基于操作系统和基本库的思路">基于操作系统和基本库的思路</h3>
+<p>需要管理和访问数据的时候，最基本的方案就是依赖操作系统和编程语言提供的基础设施了。
+这种场景下数据的访问<strong>基本是没有很强的结构化特性</strong>的，软件的规模也不是太大，因而直接依赖于底层的机制也算够用了。</p>
+
+<p>数据组织上基本以常用的数据结构为主，从最简单的顺序数组，到稍微复杂一点的链表结构，乃至树形结构、跳表、哈希表等依赖于计算机内部存储（处理器寄存器乃至内存）的高效数据机构。这些数据组织方式特别适合于规模不大的数据管理；
+其优点是数据的访问和存取都比较高效，然而其限制也比较明显，数据量比较大的时候，就必须找数据持久化存储的方法。</p>
+
+<p>一种最简单的方式是将数据用文件的方式写入到外部存储设备中；然后在需要的时候在从外部设备加载回来。
+数据量超过内部存储容量（或者超出预先分配的空间）的时候，可以用选择性的方式将某些数据换回到外部设备中。</p>
+
+<h3 id="问题和挑战">问题和挑战</h3>
+<p>带来的挑战是如何选择合适的算法来确定什么时候需要将数据保存到外部存储设备，或者何时需要将数据加载到内存中。
+另外一个难题是如果<strong>存储设备出错了，应该怎样应对这些错误</strong>?对操作系统和通用的库函数来说，这可是应用程序自己的责任。
+由于应用程序的处理逻辑和数据管理、控制逻辑是放在一起的，这些异常处理和策略选择会使软件的逻辑复杂度大大提高。</p>
+
+<h4 id="数据抽象能力和校验">数据抽象能力和校验</h4>
+<p>因为操作系统和函数库提供了非常基本的抽象，数据结构之上所承载的数据格式定义，以及数据内容之间的相互关联关系都需要应用程序自己负责维护。
+当有大量类似关系的数据需要在多个地方处理和保存的时候，就会出现明显的代码重复并引入额外的维护想难题。</p>
+
+<p>一个可行的方案是当程序的规模变得比较大的时候，提供统一的应用层封装库最为基础设施给开发人员使用；
+不足之处是维护这样的<strong>通用基础设施的技术复杂度比一般的上层程序逻辑要复杂</strong>，需要考虑到很多负责的异常情况并有很强的适应性以匹配各种期望的场景。
+还有一种考虑是可以购买第三方成熟的中间件系统以减小维护成本；不利之处是系统出了问题的时候，仍然需要对所使用的软件有很深入的了解才能快速解决复杂问题；
+尤其当实际场景对安全性或者法律合规方面有比较打顾虑的时候，第三方软件的成熟度可能成为一个极大的问题，
+有时候如果这些第三方软件的设计缺陷没有被及早发现的话，后果可能更加难以承受。</p>
+
+<h4 id="存储设备特性和性能考量">存储设备特性和性能考量</h4>
+<p>另外一个挑战是当数据容量变得特别巨大的时候，不可避免的需要将存储设备放在不同的物理机器上，
+然后通过网络通信协议的方式（比如NFS）将远端机器上的文件系统挂载在本地机器上；使本地机器以为它是在控制“本地”的文件;
+而微观上所有的操作都是通过一个网络通信通道（socket）加上对应的控制协议和数据搬运协议来完成。</p>
+
+<p>从寄存器到内存到磁盘再到网络磁盘，数据的容量是越来越大，然而其性能和延迟也急速下降；对CPU寄存器的访问可能几个时钟周期就可以完成（虽然其容量很小），
+对内存的一次读写需要的时间就会达到几十乃至数百倍，访问本地磁盘的延时往往是毫秒级甚至几十毫秒；当文件被用NFS的方式映射到本地的时候，
+一次访问的时间可能在数十毫秒乃至数秒；因为<strong>网络层的封装可能是很厚重的，往往一个简单的操作可能后台需要好几次消息的来回</strong>才能完成。
+如果网络出现拥堵或者中间设备出现故障，系统行为将变得更加难以预料。</p>
+
+<p>这些时间上的开销给软件开发带来了诸多挑战 - 长时间的延时（要么是库函数调用要么是系统调用）导致同步调用变得效率底下，甚至抵消了多线程编程带来的便利。
+由于太多阻塞的操作导致处理器使用率底下，更高的吞吐率难以达到，我们不得不借助于异步编程技术来分割应用程序的逻辑。</p>
+
+<h4 id="编程模型和协作的挑战">编程模型和协作的挑战</h4>
+<p>可惜的是，因为IO行为的差异引发的编程模型的转化是的软件的可维护行大大降低。
+试想一个简单的业务逻辑因为需要访问外部存储设备而被分割成２个任务，丢在２个不同的线程调度器里，通过IO完成的callback事件关联在一起；
+这比基于内存数据的顺序处理逻辑复杂多了。</p>
+
+<p>虽然函数式编程模型或者Reactor模型可以应对这一设计挑战，但是仅仅因为数据访问的原因而变更熟悉的编程模型并不是在很多场景下都可以被轻易接受；
+毕竟软件开发是依赖于人的集体智力活动。</p>
+
+<h3 id="对软件设计和架构的影响">对软件设计和架构的影响</h3>
+<p>这些<strong>非功能的属性会极大影响到应用程序的逻辑设计</strong>；软件设计人员不得不在开发的早期阶段谨慎选择，以免掉入性能不足的漩涡最后不得不重写代码。
+本来软件的抽象是为了解决应用领域的复杂问题，隔离底层的细节，不幸的是<strong>当底层细节的不同影响到了程序整体的行为的时候，这种关注点分离的方式就很难凑效</strong>。
+尽管有各种各样的限制，在很多复杂度不是很高的场景下，基于操作系统和基础设施的数据管理方案仍然是最直观且最优的选择。
+只要切记在合适的时机依据需求的变化切换到更合适的方案上来即可；要么是变更的成本不大可以直接修改代码完成之，要么是一开始的时候设计好数据访问的隔离，
+才与适配器的模式隔离数据访问部分。</p>
+
+<h2 id="基于严格结构化的关系数据库技术sql">基于严格结构化的关系数据库技术(SQL)</h2>
+
+<p>关系数据库技术自从上个世纪７０～８０年代诞生以来便得到了业界的青睐；其<strong>清晰的模型和严格的数学理论论证</strong>深刻地征服了各个主要的IT厂商，
+其采用专门的属于来规范数据的定义和各种功能、非功能属性，学院式的精心设计预先考虑到了各种各样可能出现的问题。</p>
+
+<h3 id="基本机制和思路">基本机制和思路</h3>
+<p>关系数据库理论采用结构化的方式定义数据，严格的区分数据定义、处理的范围和边界。
+数据库管理系统作为专门的软件系统隔离了数据的定义、操作；应用程序通过预先定义的接口JDBC/ODBC等接口访问数据库系统。</p>
+
+<h4 id="数据定义">数据定义</h4>
+<p>数据的<strong>结构抽象用schema来表述，逻辑上所有的数据都是满足给定schema的二维表</strong>，每一行是一条记录；所有的记录都具有相同的列。
+每一行数据的相同列具有相同的定义和约束；每一行数据中的某些列作为访问的关键列（称为键）。这些列有些可以为空有些则必须不能为空。
+对数据的访问则以行为单位，可以进行增加、删除、修改等变更性操作和根据某些条件进行查询。
+<strong>数据的完整性校验可以通过在数据发生变更的时候依靠数据库系统软件的自动检查</strong>来完成。</p>
+
+<p>数据表之间可以有丰富多样的相互关联(通过主键、外键设置)，从而支持在查询的时候跨越多个表进行复杂的检索。
+为了便于应用逻辑处理，关系数据库系统还提供了虚拟的表（称之为视图），这些虚拟的表结构可以基于底层实际的”物理记录表”信息的变化而自动更新；
+触发器则支持设置类似于应用程序指定的“自动操作”，当对应的数据被更新的时候，触发器会被自动运行。</p>
+
+<p>通常情况下，复杂的业务数据<strong>可以依据不同的范围来隔离</strong>，可以放在不同的数据库中，也可以放在同一个数据库的不同数据表中。
+多个数据表之间的逻辑关联关系用关系代数来描述，一般不同的数据表之间有相对的关联，
+比如某个表的某一列也出现在另外一个表中作为另外一个表的主键，这样查询的时候，可以将两个表联合起来提供单个表不能提供的丰富信息。</p>
+
+<p>数据表之间的关系用数据库范式来描述，严格的关系数据库理论定义了多种关系范式，用以描述信息的冗余度、结构化程度；不同的范式可以大概表征数据一致性的维护难度。
+<strong>复杂的范式往往也会带来性能开销和处理复杂度</strong>，因此商业的应用程序中一般出于性能考虑不会采用很高的范式。</p>
+
+<h4 id="数据查询和sql语言">数据查询和SQL语言</h4>
+<p>关系数据库系统一个最引人注目的特性是提供了一个关于数据定义的结构化模型和<strong>接近于自然语言的领域特定语言SQL</strong>，并将其和关系代数理论紧密结合在一起。
+SQL语言采用了类似于英语的语法，以数据查询为中心同时兼顾增加、删除和修改操作，
+并支持对数据集的聚集、归并、分类、排序等常见的操作，实现了对数据管理和访问的细节隔离，使得<strong>应用程序仅仅需要关注于数据操作的意图</strong>即可。</p>
+
+<p>SQL是面向数据操纵和访问用户的接口语言，数据库管理系统可以优化用户提供的SQL查询，转换成性能最好的内部实现。
+这也是DSL的好处，整个数据库管理系统<strong>通过精心定义的查询语言将接口和实现分离</strong>开；应用程序可以专注于业务逻辑的实现，而数据库关系系统可以专注于数据的管理和维护。
+这也是计算机科学一直采用的基本的分而治之的思路－分割问题领域，然后在各个击破之。
+从这个意义上来说，关系数据库系统提供了<strong>良好的抽象和职责分离</strong>。</p>
+
+<h4 id="查询优化和索引">查询优化和索引</h4>
+<p>由于商业数据库的数据往往数据量非常大，可能被保存很长时间，因此大部分时候，绝大部分数据都是被保存在磁盘中（甚至是网络磁盘）并在需要的时候读取进来加载进内存中给用户使用。大部分时候，用户的查询操作比修改操作要多得多，因此查询的性能是至关重要的。</p>
+
+<p>虽然数据很多，但是<strong>某个时候用户需要访问的可能只是一小部分数据，怎样快速地检索</strong>到对应的数据并提供给用户就变得至关重要。
+关系数据库系统一般是通过在数据表上建立索引表来实现的，同时基于成熟的B+数数据结构，保证经过少数几次的磁盘IO读写操作就可以定位到具体的数据记录存储快，然后将对应的块读出操作系统内存中去。
+这也潜在的要求数据库系统组织<strong>数据存储的时候，需要按照记录块的方式</strong>将其存储在外部设备中；并最好和操作系统的虚拟内存所支持的页面大小保持对齐，尽可能减少磁盘的读写次数和寻道时间。</p>
+
+<p>当数据量特别大以至于简单的索引表也无法加载进内存的时候，可能需要建立多级索引结构，用一个新的结构指向某一部分数据的索引表在磁盘上存储的位置；而只是将最顶层的索引表放在内存中。
+查询的时候，则需要先通过一级索引找到对应小范围数据记录对应的索引的存储位置，通过一次额外的磁盘操作加载二级索引，然后通过二级索引的数检索操作，找到对应的数据块的物理位置。</p>
+
+<p>实际情况下，往往通过少数几次的IO操作（通过B+树的算法保证）便可定位到实际的数据并将其加载入内存中，减少慢速IO对性能的不利影响。</p>
+
+<h4 id="事务及acid属性">事务及ACID属性</h4>
+<p>作为数据的访问接口，SQL定义了复杂的查询接口以适应复杂的数据访问、管理需求；然而深入到最底层，细粒度的数据访问仍然要落实到二维数据表的某一个行记录上。
+由于这些单一的行是操作的最小粒度，数据库处理系统必须要保证对记录的访问在外部用户看来总是处于合理的状态。</p>
+
+<p>譬如一个用户打算修改某记录的一个列值，而另外一个用户可能同时打算删除该记录，那么<strong>两个用户可能是并行在使用数据库</strong>，数据库系统必须保证两者的操作返回之后，数据库系统人然处于一个自然的状态；
+要么某个用户操作成功返回修改生效，另外一个用户得到失败的反馈，要么２者都失败需要某一方尝试重试，要么数据库系统在内部实现某种机制保证至少一个成功一个失败。
+当实际操作的SQL语句牵扯到多个数据表操作的时候，一致性保证将变得更为困难。因为从并发控制的角度来看，只要牵扯到同一个数据的读写，既要保证读到的数据不能是中间状态，也要保证写入之后数据库中的状态需要恰好是刚刚写入的值。</p>
+
+<p>关系数据库系统<strong>用事务作为数据操作的基本单元的抽象</strong>，一个事务用来封装一次对数据库的操作；关系数据库系统用内部机制保证事物操作满足四个基本的属性</p>
+<ul>
+  <li>原子性(Atomicy)：事务操作必须像是在一个最基本的操作中完成的，执行过程中不会被另外一个打断</li>
+  <li>一致性(Consistency)：一个事务被提交执行前后，数据库系统中所有的相关数据仍然处于一致性的状态，要么数据被按照事务期望的方式被修改（事务被执行），要么完全保持原样（事务撤销）</li>
+  <li>隔离性(Isolation)：各个事务的执行和调度对应用程序是不可见的；从事务提交者的角度来看，好像就他自己在使用数据库系统</li>
+  <li>持久性(Durablility)：事务操作的结果是持久有效的，即使是发生了故障或者重启，已经发生的修改必须被永久保存下去；不允许数据丢失情况的发生。</li>
+</ul>
+
+<p>ACID是关系数据库系统的基本特征，甚至于不支持ACID特性的数据库软件都不被认为是关系数据库软件；它被各大数据库厂商广泛地支持和实现。</p>
+
+<h3 id="问题和挑战-1">问题和挑战</h3>
+
+<p>ACID里边<strong>最为关键和复杂的就是一致性和持久性</strong>，尤其是当数据库系统的访问可能来自与网络的时候，由于延时的增加以及不可预期的复杂事务可能被远程调度执行，如何<strong>高效、公平地实现事务的一致性控制</strong>，又不引起性能的急剧恶化是个巨大的挑战。
+从数据持久性角度来看，数据库系统作为一个应用软件本身是运行在操作系统的用户空间，而真正将数据的更新落地到非易失性存储设备需要经历上层的IO调度到操作系统内核空间的控制和数据搬运，操作系统内核的实现和磁盘驱动的读写等等一系列异步操作，
+数据库系统需要始终保证<strong>任何一个环节出错，数据总是能恢复到正确的状态</strong>。</p>
+
+<p>为了实现这些复杂特性，很多数据库厂商（譬如Oracle）会通过修改操作系统驱动甚至内核等方式在可用性和性能之间进行折中。
+同时为了提高可用性并兼顾性能，某些数据库系统会<strong>要求有非常好的单机性能</strong>，使用具有高级特性的磁盘存储设备等。</p>
+
+<h4 id="和面行对象软件系统的集成难题">和面行对象软件系统的集成难题</h4>
+<p>关系数据库理论早于面向对象技术出现，然而软件开发领域内面向对象技术则在80~90年代迅速席卷了行业的大部分角落。
+应用程序上层用面向对象技术写成的特点注定了当它需要去访问数据的时候，<strong>中间提供隔离的层次需要协调两者模型上的不一致</strong>：
+面向对象技术组织数据操作的方式是通过继承、封装和多态来提供抽象能力，而数据库技术的组合方式是基于SQL查询。</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Object-relational_mapping">ORM技术</a>被发明出来用以实现传统的<a href="https://www.martinfowler.com/books/eaa.html">企业应用架构</a>中的对象和关系模型的映射，虽然<strong>有一些复杂的框架技术来缓解这一难题</strong>，总归是显得复杂而臃肿。
+好在Java语言用类型注解的方式提供了相对优雅的解决方案，从而通过少数几行代码就可以注入约束和检查，大大减小了数据访问层的负担。</p>
+
+<h4 id="扩展性的挑战">扩展性的挑战</h4>
+<p>由于商业数据库有很大的数据需要存储和使用，当系统需要动态扩展以支持更多的业务量的时候，<strong>单实例、中心化的数据库系统往往能为扩展性的瓶颈</strong>。</p>
+
+<p>维护数据一致性的代价越来越大，因为分布式数据库系统的扩展和优化需要面对<a href="http://robertgreiner.com/2014/08/cap-theorem-revisited/">CAP理论</a>的限制：要么保证可用性牺牲一致性，要么保证一致性牺牲可用性。
+当有２个并发的用户访问数据库系统的时候，既保证数据的一致性，又保存高度的可用性会成为巨大的挑战,即如下的情况，在没有异常发生的时候N1的更新很容易通过网络同步、复制的方式被N2看到</p>
+
+<p><img src="http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-1.png" alt="normal case" /></p>
+
+<p>当网络发生异常的时候，就会出现不一致</p>
+
+<p><img src="http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-2.png" alt="network failure" /></p>
+
+<p>网络分割是无法妥协的，因为没有足够强大的机器来维持足够好的单机器性能;分布式应用基本无法在实际中妥协了。</p>
+
+<blockquote>
+  <p>No set of failures less than total network failure is allowed to cause the system to respond incorrectly.</p>
+
+  <p>— <a href="http://www.julianbrowne.com/article/viewer/brewers-cap-theorem">Partition Tolerance as defined by Gilbert &amp; Lynn</a></p>
+</blockquote>
+
+<p>类似于两阶段提交算法等分布式事务(2PC)处理机制从理论的角度看起来很美好，实际应用中却因为性能过于低下而被束之高阁。</p>
+
+<p><strong>成本和投入产出比</strong>也是需要考虑的显示因素，因为传统的关系数据库系统需要强大的专有硬件（如磁盘RAID、EMC专业存储方案）来保证较高的可靠性和可用性。
+在互联网技术日益发展深入的背景下，企业需要尽量控制IT支撑环境的成本，并快速部署给用户，并<strong>需要技术架构和实现能随着业务量的增加而快速演进</strong>，传统的将数据库作为独立中间件部署的方式因为太厚重而慢慢被边缘化了。</p>
+
+<h2 id="非结构化数据和nosql技术">非结构化数据和NoSQL技术</h2>
+<p>21世纪头十年互联网技术的严谨为提非结构化数据(即键值数据库系统)蓬勃发展的土壤。从关系数据库理论的角度来看，没有提供ACID支持的数据库甚至都不叫数据库系统；
+然而新世纪IT技术对越来越多行业的深入改造带来了数量巨大的数据；而很多数据并不是天然具有很强的结构化特性；将他们强赛进关系数据库系统中会带来臃肿的设计、复杂的模型以及地下的性能。</p>
+
+<h3 id="基本思路">基本思路</h3>
+<p>NoSQL技术从简化数据管理的角度来解决这一难题：一方面我们有大量的数据需要存储，这些数据之间没有非常强的相互关联；另外一方面对这些数据的访问可能有很高的并发需求和扩展性需求。
+<strong>既然关系数据库提供的东西远远多于实际需要的，何不将这些复杂的功能向上移动到应用程序问题域</strong>内？
+这样数据库系统仅仅需要管理没太多逻辑结构的数据，并提供足够好的并发访问性能、可扩展性、可靠性；而将怎样使用数据交给应用程序去处理？
+毕竟最了解数据使用场景的还是上层应用程序。</p>
+
+<h3 id="数据管理特性和元数据">数据管理特性和元数据</h3>
+<p>NoSQL其实不是一类技术的统称，而是不采用强结构化形式管理数据的一大堆数据管理技术的集合。
+不同的方案提供不同的技术实现，并呈现出不同的特性；从简单的基于纯粹Key-Value对的大数据集合到能够提供一些稍微复杂一点的如关联映射、集合类型的多类型数据管理系统3（典型如Redis），
+乃至提供一些比较复杂的<a href="https://en.wikipedia.org/wiki/Document-oriented_database">面向文档</a>的数据结构（相比SQL可以认为是半结构化）以及较强检索能力的中间型数据库（典型的如MongoDB提供了复杂的json互操作特性);总体上可谓是<a href="https://en.wikipedia.org/wiki/NoSQL#Types_and_examples_of_NoSQL_databases">百花齐放</a>，各有千秋。</p>
+
+<h3 id="亮点">亮点</h3>
+<p>大部分NoSQL技术都提供了很高的性能和强大的集群管理能力，其处理能力想对于传统的关系数据库有很大的提升。
+之所以如此，是因为它从技术上打破了传统SQL要求的复杂限制，专注于自身特定的数据定义模型和特点，有针对性地最大化使用计算机硬件。</p>
+
+<p>同时大部分NoSQL技术设计的时候就考虑到了可能出错的情况，不再假设底层的硬件本身具有很高的性能，而是通过自身软件的设计达到较高的可用性和可靠度。譬如Redis本身常常被作为缓存系统使用，而其自身的持久化机制在合理配置的情况下，可以保证数据在１秒内内一定会被写入磁盘，从而尽可能减少数据丢失。</p>
+
+<h3 id="nosql的折中">NoSQL的折中</h3>
+<p>基于纯粹的KV关系的数据库系统对数据的具体结构接近与一无所知；从应用程序的角度看，它似乎仅仅是提供了数据操作层面的虚拟关联表。
+其好处是很容易达到很高的性能，但不足之处是，应用程序<strong>如何合理地管理键的模式</strong>是一个比较打的挑战。</p>
+
+<p>提供复杂结构的NoSQL的好处是应用层程序的负担比较小，因为一些常见的结构化操作已经有了不错的支持，可以直接调用即可。
+美中不足的是，这样的方案的性能往往也不是那么好，优化起来也会比较困难，因为数据的存储管理也相对比较复杂，如MongoDB采用树结构来保存数据，不深入其底层实现做针对性的优化就比较困难一些。</p>
+
+<h3 id="挑战">挑战</h3>
+<p>NoSQL自然也不是银弹，它也有它自己的问题需要应对；尤其是当它的用户企图将具有很强结构化特征的数据塞进去的时候：应用程序用来维护这些数据之间的关联关系就会变得异常复杂。</p>
+
+<p>另外一个比较麻烦的事情<strong>是NoSQL的不同提供者具有不同的特性</strong>，应用程序想从一种切换到另外一种就远远没有传统的SQL来的方便;很可能你需要某个数据库的高级特性在另外一个数据库中就不存在了。
+这也是<strong>缺乏类似于SQL语言这类DSL的不足</strong>;比如Redis定义了类似通配符的模糊查询键值的方式，并提供了类似于一个Key关联多个属性的数据控制原语；换到MongoDB上我们就需要不同的方式来解决类似的问题。</p>
+
+<p>这些复杂的数据操作可能在应用程序层面来看又比较常见和繁琐，以至于使用<strong>纯粹的NoSQL会让人产生退回到SQL出现之前的混沌时代的错觉</strong>！这当然也不是NoSQL的错，因为从来就没有银弹；合适的方案才是最好的；而怎样决定什么样的方案才是最好的？
+当然是需要一句具体的业务场景来确定了。</p>
+
+<h3 id="base理论">BASE理论</h3>
+<p>NoSQL解决<a href="https://www.cs.cornell.edu/Projects/mrc/IEEE-CAP.16.pdf">数据一致性和高可用的CAP矛盾</a>的方案是所谓的<a href="http://www.dataversity.net/acid-vs-base-the-shifting-ph-of-database-transaction-processing/">BASE方法</a>，它常常被错误的想象为是ACID的对立面</p>
+<ol>
+  <li>基本可用而不是高可用(Base Availability) 强调数据库系统并不总是返回高度可用的数据，某些情况下可能出错或者不返回，或者返回不一致的数据；应用程序比系显式地处理这些情况</li>
+  <li>弱状态或不稳定状态（Soft state)表明数据的状态可能在不断发生变化，以至于传统关系数据库的这种事务回滚或者提交的状态则不复存在。这些都是为了应对最终一致性的目标。</li>
+  <li>最终一致性约束(Evenutal consistency)保证数据的更新经过一段时间的处理在没有后续输入的情况下可以达到一致状态；但是中间的不一致性状态仍然对应用程序是可见的。</li>
+</ol>
+
+<p>基本上<strong>这些特性都是为最终一致性服务的</strong>；数据库系统不再强制保证很强的一致性，而是由应用程序本身负责中间不一致状态的处理。
+好处是性能可以得到极大提高，因为数据库系统不需要采用很复杂的策略来保证每一项数据的高度可靠和一致，没有复杂的同步、锁策略，开销自然少；
+不利之处是应用程序需要仔细处理失败的情况，这在很多时候也是一个公平的折中，因为最了解数据特性的毕竟是上层程序本身。</p>
+
+<h2 id="微服务架构下的数据演进和newsql">微服务架构下的数据演进和NewSQL</h2>
+<p>随着云计算技术的深入发展和容器技术的广泛应用，微服务风格的架构技术变得愈发流行起来。
+按照微服务设计的思路，传统的分层、单体、集中式的架构方式被<strong>分布式去中心化、按照业务领域分隔</strong>以及轻量级的接口为特征的架构方式所取代。
+同时鉴于以上这些NoSQL技术的种种不足并不能一招通吃，<strong>传统的SQL技术又被人们重新重视起来使用在合适的场景</strong>中；
+在一个一个具体的服务内部，SQL所定义的查询语言作为完美的数据操作接口仍然有极大的魅力，我们依然可以继续享用它而不需要因为复杂的数据操作而增加应用程序的逻辑复杂度。</p>
+
+<p>最显著的不同在于，服务是较为细粒度的、以业务逻辑功能为核心的一个一个小的独立的进程。<strong>数据也会根据此思路进行分割管理</strong>，而不再统一的放在一个大的数据库中。
+从整个系统的角度看，数据的交换和同步是通过服务之间的协议接口进行的，因而这些协议要求必须是轻量级的，以减少数据序列化、反序列化的开销。
+因为<strong>微服务的高可用是通过同时运行多个副本外加负载均衡等分布式技术</strong>来实现的，服务之间的耦合必须是很松散的；分布式一致性的问题采用的依然是最终一致性的思路。</p>
+
+<p>这种新的结合了传统SQL接口来管理本地数据，用部分NoSQL思路来处理系统一致性的方式又被成为NewSQL,甚至于NoSQL又被重新宣称为是Not Only SQL的缩略词。
+显然在计算机科学领域，从来就没有一招打遍天下的技术，数据管理领域也不外如是。</p>
+
+<blockquote>
+  <p>There is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.</p>
+
+  <p>– Fred Books, 1986</p>
+</blockquote>
+
+<p>业界因为商业、宣传等各种原因，会在某个技术刚刚崭露头角的时候宣称可以包治百病(否则也不会引人注意得到发展)；
+经过比较长时间的洗礼<strong>最终会回到其本源应用到其最合适的场合</strong>，而怎样鉴别什么样的场合使用什么样的技术，依然是软件开发者、架构师最大的挑战之一。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/database" class="page__taxonomy-item" rel="tag">database</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-09-24T00:00:00+08:00">September 24, 2017</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=数据访问与管理技术的演进 https://skyscribe.github.io/post/2017/09/24/data-management-evolution/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2017/09/24/data-management-evolution/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2017/09/24/data-management-evolution/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2017/09/24/data-management-evolution/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="data-management-evolution">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

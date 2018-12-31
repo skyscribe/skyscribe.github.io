@@ -1,0 +1,1134 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Spring新版本的响应式编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(前文有一些简单探讨)，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Spring新版本的响应式编程">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">
+
+
+
+  <meta property="og:description" content="流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(前文有一些简单探讨)，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Spring新版本的响应式编程">
+  <meta name="twitter:description" content="流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(前文有一些简单探讨)，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-04-04T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(38)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(13)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Spring新版本的响应式编程">
+    <meta itemprop="description" content="流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(前文有一些简单探讨)，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。">
+    <meta itemprop="datePublished" content="April 04, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Spring新版本的响应式编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 10857 字，大约需要 27 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(<a href="/post/2018/03/10/functional-reactive-programming/">前文有一些简单探讨</a>)
+，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。
+Spring最新的<a href="https://spring.io/blog/2018/02/19/spring-framework-5-0-4-available-now">5.0版本</a>更新也顺应这一潮流，加入了原生支持FRP的行列。</p>
+
+<!-- more -->
+
+<h2 id="最大的版本改动源于设计范式选择的增加">最大的版本改动源于设计范式选择的增加</h2>
+
+<p>Spring的官方博客声称该版本的改动是项目从2014年创立以来最大的一次版本更新；主要的考虑是，
+增加对异步流式编程范式的支持在Java语言平台下是一个思维方式上的巨大变化。</p>
+
+<p>传统的Java编程范式是基于面向对象设计的实现，具体到底层上还是命令式的同步、阻塞调用思维；
+你调用一个对象提供的方法，则调用者默认必须等待操作完毕之后，用返回值（或者异常）的方式通知调用者。
+即使有异步编程技术的辅助，这些细节也被认为是抽象接口下面的实现细节，很少被作为主要的设计决策。
+FRP的方式就显著地不同，它的主要设计对象变为异步的流，所以对流的操作、变换等都是异步发生的，
+程序的<strong>主要逻辑不需要再关注底层的操作是怎么被调度的，而仅仅关心一个一个具体的操作应该做什么，互相配合</strong>完成系统目标。
+这个角度来说，FRP的方式是声明式的；而声明式的代码相对传统的过程式代码有更好的可读性和可维护性。</p>
+
+<p>经典的面向对象设计方法容易入门却不易精通，设计者很容易掉入过度设计的陷进而滥用继承（接口也是类似）而带来不必要的过度抽象；
+当然抽象不足也是另外一个问题这里略去不提。GoF在设计模式里面特别声明了我们需要考虑优先使用组合而不是继承，
+不幸的是这一忠告从来就没有被人们认真对待；生搬硬套这些模式的设计者很容易就掉入叠床架屋的花花架子中无法自拔。
+FRP的思维方式完全不提继承的事儿，但是封装依然是必要的；组合则被提到了首要的位置，因为函数式编程的主要复用方式就是组合。</p>
+
+<p>Spring其实采用了一种相对中庸的态度，给你提供了FRP的支持，但是决定权仍然在用户自己手里；
+你可以选择用传统的OOD方式，这样更熟悉也没有什么额外的迁移成本；也可以根据项目的实际情况，
+选用异步的函数式编程，当你决定这样选择的时候，Spring的基础设施已经做到足够的完善，你可以仅仅关注于你的程序逻辑就行了。</p>
+
+<h2 id="和其他jvm上的frp的对比">和其他JVM上的FRP的对比</h2>
+
+<p>如果将视角扩大到整个JVM平台上，那么Spring显然不是唯一的选择，也不是最强大的FRP选择。
+类似于Akka这样的框架本身就是基于Actor模型来实现更高层次的函数式编程设施的，尽管Actor的模型和FRP并不是完全目标一致。
+Scala语言则提供完整的函数式编程语言支持，更复杂的FP抽象也不在话下，在Java8之前甚至被认为是JVM平台下最好的选择。
+RxJava以语言扩展的方式也出现了比较长的时间。</p>
+
+<p>Spring 5.0的核心FRP抽象逻辑和上述这些高层的框架的核心概念是一致的；它独特的地方在于其本身作为一个开源平台的灵活性；
+你可以选择用Spring Boot，也可以不用；可以选择微服务架构来使用FRP，也可以完全不使用微服务架构。
+正如Netflix在其Zuul2项目的重构过程中所总结的，尽管使用异步的方式来构建程序可以极大地提高性能和资源使用的有效性，提高自动扩展的能力；
+运维的难度和调试挑战也被急剧放大。如果用来解决正确的问题，收效就会比较大，然而如果用来解决错误的问题，情况反而会更加糟糕。
+关键的是，我们需要<strong>用正确的工具来解决正确的问题</strong>。</p>
+
+<h2 id="springmvc和webflux">SpringMVC和WebFlux</h2>
+
+<p>Spring-webmvc是Spring中的一个经典MVC模块，它最初是作为一种基于Servelet技术的Web后端框架提供给后端程序员使用的。传统的Spring MVC框架工作机制如下</p>
+<ol>
+  <li><code class="highlighter-rouge">DispatcherServelet</code> 会搜索<code class="highlighter-rouge">WebApplicationContext</code>来查找DI容器中注册的Controller以处理进来的HTTP请求</li>
+  <li>本地化解析的Bean在这一过程中也会被一并查找并关联起来以便后续渲染View的时候使用来本地化View中的显示内容</li>
+  <li>主题解析的Bean则被用来关联后续要使用的View模板,以进行CSS渲染等额外处理</li>
+  <li>如果HTTP请求包含多部分媒体内容，那么请求会被封装在一个<code class="highlighter-rouge">MultipartHttpServeletRequest</code>中处理</li>
+  <li>Dispatcher会搜索对应的Handler，找到之后，handler对应的controller以及其前置处理、后续处理会被按照顺序依次处理以准备模型返回，或者被用于后续View渲染</li>
+  <li>如果一个模型被返回，对应的View就会被渲染并返回响应的HTTP消息
+整体的处理逻辑是一个线性的同步处理逻辑。</li>
+</ol>
+
+<p>传统的Sping MVC框架的接口都定义在 <code class="highlighter-rouge">org.springframework.web.servlet</code>包中，而支持响应式编程的Web框架被命名为WebFlux,对应的接口和注解放在一个新的Java包中：
+<code class="highlighter-rouge">org.springframework.web.reactive</code>。它是全异步、非阻塞的，可以很方便的使用在基于事件循环的异步编程模型中，仅仅需要很少个线程就可以高效地处理大量的请求。
+其功能不仅支持传统的Servelet容器，也支持诸如Netty、Undertow这些不是基于Servelet的编程框架上。</p>
+
+<h3 id="mono和flux"><code class="highlighter-rouge">Mono</code>和<code class="highlighter-rouge">Flux</code></h3>
+
+<p><code class="highlighter-rouge">Mono</code>或者<code class="highlighter-rouge">Flux</code>对象概念有些类似于Java8中的<code class="highlighter-rouge">CompletableFuture</code>,自身支持类似的lambda表达式组合来实现流式操作。
+这两个类型本质上实现了Reactive Stream中的<code class="highlighter-rouge">Publish</code>的概念，可以认为它是流的发布者。</p>
+
+<p><code class="highlighter-rouge">Mono</code>用来表示可以最多产生一个结果或者产生一个错误的流发布者概念。
+改类型提供了丰富的构造方法来产生<code class="highlighter-rouge">Mono</code>对象，我们可以通过</p>
+<ul>
+  <li><code class="highlighter-rouge">just</code> 方法就地构造出一个会产生传入类型对象的值的封装对象</li>
+  <li><code class="highlighter-rouge">justOrEmpty</code>方法可以从一个<code class="highlighter-rouge">Optional</code>对象中获取值作为发布的对象，如果里面没有值则不产生实际的事件</li>
+  <li><code class="highlighter-rouge">fromXXX</code>方法从各种各样的事件源中获取一个对象，譬如一个<code class="highlighter-rouge">CompletableFuture</code>对象，或者<code class="highlighter-rouge">Supplier</code>函数对象，或者线程执行结果，乃至另外一个<code class="highlighter-rouge">Publisher</code>接口的实现对象等</li>
+  <li><code class="highlighter-rouge">never</code>则用于模拟永远不会终止的事件，下游的流订阅者永远不会得到通知</li>
+  <li>组合多个发布者对象的聚合操作，如<code class="highlighter-rouge">when</code>用于在给定的多个发布者中任何一个产生事件的时候，其结果时间被作为单一的输出事件的情况；
+<code class="highlighter-rouge">first</code>用于等待传入的多个发布者中的第一个发布者产生输出事件的时候，将其作为整体的输出事件，更高级的<code class="highlighter-rouge">zipXXX</code>方法则支持更复杂的语义</li>
+  <li><code class="highlighter-rouge">and</code>方法则用于合并本身和传入的<code class="highlighter-rouge">Mono</code>中的事件，在两者都结束的时候，产生一个空的事件作为输出</li>
+</ul>
+
+<p><img src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/mono.png" alt="mono_publisher" /></p>
+
+<p><code class="highlighter-rouge">zip</code>本身支持多种不同的语法，一种是带转换函数的方法，声明为<code class="highlighter-rouge"> zip(Iterable&lt;? extends Mono&lt;?&gt;&gt; monos, Function&lt;? super    Object[],? extends R&gt; combinator)</code>,
+作用机制是，对传入的多个事件发布者，当他们的事件结果都被产生的时候，调用传入的聚合函数，对这些事件的结果进行函数运算，并将其返回值作为最终的事件输出。
+另一种用法是将结果返回为元组而不做额外的运算；因为Java本身不支持不同类型的变长模板参数，对应的声明需要对不同的参数个数单独写出来，最多可以支持6个事件的元组组合，即</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">static</span> <span class="o">&lt;</span><span class="n">T1</span><span class="o">,</span><span class="n">T2</span><span class="o">,</span><span class="n">T3</span><span class="o">,</span><span class="n">T4</span><span class="o">,</span><span class="n">T5</span><span class="o">,</span><span class="n">T6</span><span class="o">&gt;</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Tuple6</span><span class="o">&lt;</span><span class="n">T1</span><span class="o">,</span><span class="n">T2</span><span class="o">,</span><span class="n">T3</span><span class="o">,</span><span class="n">T4</span><span class="o">,</span><span class="n">T5</span><span class="o">,</span><span class="n">T6</span><span class="o">&gt;&gt;</span> 
+<span class="nf">zip</span><span class="o">(</span><span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T1</span><span class="o">&gt;</span> <span class="n">p1</span><span class="o">,</span> <span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T2</span><span class="o">&gt;</span> <span class="n">p2</span><span class="o">,</span> <span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T3</span><span class="o">&gt;</span> <span class="n">p3</span><span class="o">,</span> <span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T4</span><span class="o">&gt;</span> <span class="n">p4</span><span class="o">,</span> <span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T5</span><span class="o">&gt;</span> <span class="n">p5</span><span class="o">,</span> <span class="n">Mono</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">T6</span><span class="o">&gt;</span> <span class="n">p6</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Flux</code>和<code class="highlighter-rouge">Mono</code>的不同是，它本身会产生0到N个事件输出到流中；然后才最终完成或者报错。</p>
+
+<p><img src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/flux.png" alt="flux_class" /></p>
+
+<p>由于<code class="highlighter-rouge">Flux</code>本身就会产生多个事件，多个<code class="highlighter-rouge">Flux</code>之间的组合处理就会变得更加复杂和灵活；它本身支持如下一些API</p>
+<ul>
+  <li><code class="highlighter-rouge">combineLatest</code> 会组合多个发布者中的最近发生的事件，依照事件顺序依次将其作为输出事件，最终产生的事件序列会按照时间交错</li>
+  <li><code class="highlighter-rouge">concat</code>方法会将多个发布者的事件一一串起来而不管各自发生的时间</li>
+  <li><code class="highlighter-rouge">merge</code>方法会将单一的事件发布者的事件交叉串成一个新的<code class="highlighter-rouge">Flux</code>发布出来</li>
+  <li><code class="highlighter-rouge">zip</code>的逻辑和<code class="highlighter-rouge">Mono</code>类似，只是这里的合并函数需要处理多个<code class="highlighter-rouge">Tuple</code>对象</li>
+</ul>
+
+<p>如<code class="highlighter-rouge">combineLatest</code>的事件发布逻辑如下
+<img src="https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/combinelatest.png" alt="combinelatest_flux" /></p>
+
+<h3 id="webclient">WebClient</h3>
+
+<p>传统的Spring MVC中，我们可以使用<code class="highlighter-rouge">RestTemplate</code>来组装发起HTTP客户端请求，对应的Reactive版本的概念是<code class="highlighter-rouge">WebClient</code>。
+一个最简单的异步发起HTTP请求的例子如下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">WebClient</span> <span class="n">webClient</span> <span class="o">=</span> <span class="n">WebClient</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+
+<span class="n">Mono</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">person</span> <span class="o">=</span> <span class="n">webClient</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="s">"http://localhost:8080/persons/42"</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">accept</span><span class="o">(</span><span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">exchange</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">then</span><span class="o">(</span><span class="n">response</span> <span class="o">-&gt;</span> <span class="n">response</span><span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">));</span>
+</code></pre></div></div>
+<p>这里例子依然是使用<code class="highlighter-rouge">WebClient</code>俩创建一个流。<code class="highlighter-rouge">WebClient</code>提供了丰富的API来操纵HTTP客户端行为；
+默认情况下HTTP的连接通过Netty来完成，有需要的情况下，用户也可以自己指定一个<code class="highlighter-rouge">ClientHttpConnector</code>用插件的方式配置进来。
+<code class="highlighter-rouge">WebClient</code>的API提供了fluent风格的链式调用，并在需要输出的情况下返回一个<code class="highlighter-rouge">Mono</code>或者<code class="highlighter-rouge">Flux</code>对象。</p>
+
+<p><code class="highlighter-rouge">exchange()</code>方法无法处理服务端返回的非2XX响应，如果需要处理，可以使用<code class="highlighter-rouge">retrieve()</code>方法来做，譬如</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Mono</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="s">"/persons/{id}"</span><span class="o">,</span> <span class="n">id</span><span class="o">).</span><span class="na">accept</span><span class="o">(</span><span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">retrieve</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">onStatus</span><span class="o">(</span><span class="nl">HttpStatus:</span><span class="o">:</span><span class="n">is4xxServerError</span><span class="o">,</span> <span class="n">response</span> <span class="o">-&gt;</span> <span class="o">...)</span>
+    <span class="o">.</span><span class="na">onStatus</span><span class="o">(</span><span class="nl">HttpStatus:</span><span class="o">:</span><span class="n">is5xxServerError</span><span class="o">,</span> <span class="n">response</span> <span class="o">-&gt;</span> <span class="o">...)</span>
+    <span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div></div>
+<p>上述的<code class="highlighter-rouge">onStatus</code>方法的第二个参数可以用lambda表达式书写，以得到更好的可读性。</p>
+
+<h4 id="封装http的body">封装HTTP的Body</h4>
+
+<p>如果不需要关心操作的返回，我们也可以用<code class="highlighter-rouge">Void</code>类型来填充流发布者(<code class="highlighter-rouge">Mono</code>/<code class="highlighter-rouge">Flux</code>)的模板参数。同时在POST方法中，
+我们往往需要填充具体的HTTP请求的消息体，它往往也是用JSON的格式来发送给服务器端的；实现的方法是，可以直接将一个对象填进去即可。
+如下面的创建一个REST资源的例子</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Flux</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">personFlux</span> <span class="o">=</span> <span class="n">createSomePerson</span><span class="o">();</span>
+<span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">post</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="s">"/person/{id}"</span><span class="o">,</span> <span class="n">id</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_STREAM_JSON</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">body</span><span class="o">(</span><span class="n">personFlux</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">retrieve</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">Void</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>如果对应的资源对象可以直接得到而不需要通过流异步获取，那么可以直接调用<code class="highlighter-rouge">syncBody</code></p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Person</span> <span class="n">person</span> <span class="o">=</span> <span class="n">constructPerson</span><span class="o">();</span>
+<span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">post</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="s">"/persons/{id}"</span><span class="o">,</span> <span class="n">id</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">syncBody</span><span class="o">(</span><span class="n">person</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">retrieve</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">Void</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div></div>
+
+<h3 id="服务端的支持">服务端的支持</h3>
+
+<p>服务端的支持有两个层，一个是用于处理HTTP方法请求的<code class="highlighter-rouge">HttpHandler</code>，一个是WebHandler。</p>
+
+<p>HttpHandler 在Web服务器启动的时候，需要和对应的服务地址和端口相绑定；不同的服务实现都需要和业务代码自己写的HttpHandler绑定起来组合使用。
+Spring的闪亮指出一方面在于其高度的灵活性，不同的第三方Web Server实现都可以通过几行代码绑定使用起来。
+比如使用Netty的方式如下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HttpHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">ReactorHttpHandlerAdapter</span> <span class="n">adapter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReactorHttpHandlerAdapter</span><span class="o">(</span><span class="n">handler</span><span class="o">);</span>
+<span class="n">HttpServer</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">).</span><span class="na">newHandler</span><span class="o">(</span><span class="n">adapter</span><span class="o">).</span><span class="na">block</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>另外一个流行的Web框架<code class="highlighter-rouge">Jetty</code>的使用方法如下</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HttpHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">Servlet</span> <span class="n">servlet</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JettyHttpHandlerAdapter</span><span class="o">(</span><span class="n">handler</span><span class="o">);</span>
+
+<span class="n">Server</span> <span class="n">server</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Server</span><span class="o">();</span>
+<span class="n">ServletContextHandler</span> <span class="n">contextHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServletContextHandler</span><span class="o">(</span><span class="n">server</span><span class="o">,</span> <span class="s">""</span><span class="o">);</span>
+<span class="n">contextHandler</span><span class="o">.</span><span class="na">addServlet</span><span class="o">(</span><span class="k">new</span> <span class="n">ServletHolder</span><span class="o">(</span><span class="n">servlet</span><span class="o">),</span> <span class="s">"/"</span><span class="o">);</span>
+<span class="n">contextHandler</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+<span class="n">ServerConnector</span> <span class="n">connector</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServerConnector</span><span class="o">(</span><span class="n">server</span><span class="o">);</span>
+<span class="n">connector</span><span class="o">.</span><span class="na">setHost</span><span class="o">(</span><span class="n">host</span><span class="o">);</span>
+<span class="n">connector</span><span class="o">.</span><span class="na">setPort</span><span class="o">(</span><span class="n">port</span><span class="o">);</span>
+<span class="n">server</span><span class="o">.</span><span class="na">addConnector</span><span class="o">(</span><span class="n">connector</span><span class="o">);</span>
+<span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>基于HttpHandler, WebHandler提供了更高层次的处理链，包括诸如异常处理，过滤器，以及目标的<code class="highlighter-rouge">WebHandler</code>。所有的组件都是在<code class="highlighter-rouge">ServerWebExchange</code>之上工作的，
+所有这些处理链都可以用一个<code class="highlighter-rouge">WebHttpHandlerBuilder</code>来组装，最终组装的结果是一个上述的<code class="highlighter-rouge">HttpHandler</code>,并最终运行在不同的WebServer实现上。</p>
+
+<h4 id="dispatcherhandler"><code class="highlighter-rouge">DispatcherHandler</code></h4>
+<p>和SpringMVC的基本概念一样，居于中心地位的是一个<code class="highlighter-rouge">DispatcherHandler</code>，它本身是一个Bean，可以被Spring的DI容器框架自动发现并加入到上述的<code class="highlighter-rouge">WebHttpHandlerBUilder</code>中，
+载入服务器实现中最终提供对外服务。<code class="highlighter-rouge">DispatcherHandler</code>的Bean名字被设置为<code class="highlighter-rouge">webHandler</code>,并实现了<code class="highlighter-rouge">ApplicationContextAware</code>接口，以便它可以访问DI容器上下文。</p>
+
+<p><code class="highlighter-rouge">DispatcherHandler</code>是通过委托给一些实现定义的Spring的Bean来完成对HTTP请求的处理，并渲染对应的HTTP响应消息的。
+Spring-WebFlux框架提供了默认的实现以保证这些Bean是开箱即用的，同时用户也可以根据需要来扩展、定制这些组件。
+这些Bean包括</p>
+<ul>
+  <li>HandlerMapping 负责经对应的请求派发给某个Handler实现</li>
+  <li>HandlerAdapter帮助<code class="highlighter-rouge">Dispatcher</code>依据注解解析等手段将Handler调用的细节和<code class="highlighter-rouge">DispatcherHandler</code>的逻辑解耦</li>
+  <li>HandlerResultHnaler用于处理上一个<code class="highlighter-rouge">HandlerAdapter</code>返回的结果</li>
+</ul>
+
+<p><code class="highlighter-rouge">DispatcherHandler</code>的处理流程如下</p>
+<ul>
+  <li>查询所有的<code class="highlighter-rouge">HandlerMapping</code>，并选择第一个匹配的Handler</li>
+  <li>如果找到，则使用对应的<code class="highlighter-rouge">HandlerAdapter</code>来触发Handler调用，它会发挥一个<code class="highlighter-rouge">HandlerResult</code></li>
+  <li>上述的Result会被<code class="highlighter-rouge">HandlerResultHandler</code>所处理以便产生Response并将Response送给View层去渲染，或者直接返回给客户端</li>
+</ul>
+
+<h4 id="controller">Controller</h4>
+<p>传统的Spring MVC框架下应用程序仅仅需要按照业务逻辑划分，分别写好Controller，并用注解来指明某个方法需要处理的方法，带入请求作为参数，即可指定自己的参数校验Bean，
+Spring框架会自动帮我们完成参数校验到请求分发这一系列背后的复杂处理。这些已有的注解在Reactive方式下仍然被完美地支持。</p>
+
+<p>传统的这些注解都继续被用同样的方式所支持</p>
+<ul>
+  <li><code class="highlighter-rouge">@RestController</code> 标注一个POJO是一个controller类</li>
+  <li><code class="highlighter-rouge">@PostMapping/@PutMapping/@GetMapping...</code>可以加注在方法上，Spring可以自动发现他们用来处理对应的Web方法请求，注解中的参数可以用于携带URL等</li>
+  <li><code class="highlighter-rouge">@ResponseStatus</code>可以用来指定HTTP返回的状态码</li>
+  <li><code class="highlighter-rouge">@PathVariable</code>可以用于将URL中的参数传入进来绑定到Java类型的参数上，甚至正则表达式也可以被处理</li>
+  <li>媒体类型的注解也可以放置在方法注解的参数中
+这些注解的用法和意图都和传统的Sping MVC没什么两样，这里无需赘述。</li>
+</ul>
+
+<h4 id="函数式的端点">函数式的端点</h4>
+
+<p>Spring WebFlux提供了新的基于函数变换的Web处理端点，它的基本逻辑是基于函数式的不可变设计的。虽然和上述传统的基于注解的方式看起来有很多差异，
+两者却是可以完美地运行在同样的底层服务实现上的。</p>
+
+<p>和<code class="highlighter-rouge">HandlerFunction</code>相对应的处理HTTP请求的handler函数通常接收一个HTTP请求作为输入，并产生一个<code class="highlighter-rouge">Mono&lt;ServerResponse&gt;</code>作为处理的输出。这样的一个函数
+作用上和一个声明了<code class="highlighter-rouge">@RequestMapping</code>的方法类似，不同的是<code class="highlighter-rouge">ServerRequest</code>和<code class="highlighter-rouge">ServerResponse</code>都被设计为是符合不可变对象的约束。
+访问一个请求中的内容的方法通过<code class="highlighter-rouge">bodyToXXX</code>的方式来实现，比如</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Mono</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">string</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div></div>
+<p>就可以返回一个将会产生一个字符串作为输出事件的发布者。</p>
+
+<p>类似地，我们也可以使用<code class="highlighter-rouge">bodyToFlux</code>返回一个<code class="highlighter-rouge">Flux</code>的封装，两者在底层上都是通过一个更灵活的<code class="highlighter-rouge">body(BodyExtractor)</code>方法来实现的。
+<code class="highlighter-rouge">bodyToMono</code>其实等价于<code class="highlighter-rouge">body(BodyExtractors.toMono(String.class)</code>。</p>
+
+<p>如果需要叠加对响应消息的额外处理，使用流的方式则可以用一个<code class="highlighter-rouge">Builder</code>对象来完成，因为<code class="highlighter-rouge">ServerResponse</code>本身是不可变的。
+用lambda表达式的方式写一个简单的Hello程序，可以是</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HandlerFunction</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="n">helloWorld</span> <span class="o">=</span>
+    <span class="n">request</span> <span class="o">-&gt;</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">body</span><span class="o">(</span><span class="n">fromObject</span><span class="o">(</span><span class="s">"Hello World"</span><span class="o">));</span>
+</code></pre></div></div>
+<p>当然这样的书写方式有潜在的可读性丢失的损耗。另外一种推荐的做法是，将不同的handler仍然聚合到一个controller类中，然后用不同的方法来组合实现不同的处理，
+下面是一个更复杂的例子</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonHandler</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">PersonRepository</span> <span class="n">repository</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">PersonHandler</span><span class="o">(</span><span class="n">PersonRepository</span> <span class="n">repository</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">repository</span> <span class="o">=</span> <span class="n">repository</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="nf">listPeople</span><span class="o">(</span><span class="n">ServerRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span> 
+        <span class="n">Flux</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">people</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="na">allPeople</span><span class="o">();</span>
+        <span class="k">return</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">contentType</span><span class="o">(</span><span class="n">APPLICATION_JSON</span><span class="o">).</span><span class="na">body</span><span class="o">(</span><span class="n">people</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="nf">createPerson</span><span class="o">(</span><span class="n">ServerRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span> 
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">person</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">build</span><span class="o">(</span><span class="n">repository</span><span class="o">.</span><span class="na">savePerson</span><span class="o">(</span><span class="n">person</span><span class="o">));</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="nf">getPerson</span><span class="o">(</span><span class="n">ServerRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span> 
+        <span class="kt">int</span> <span class="n">personId</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">pathVariable</span><span class="o">(</span><span class="s">"id"</span><span class="o">));</span>
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="n">notFound</span> <span class="o">=</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">notFound</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">personMono</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">repository</span><span class="o">.</span><span class="na">getPerson</span><span class="o">(</span><span class="n">personId</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">personMono</span>
+            <span class="o">.</span><span class="na">flatMap</span><span class="o">(</span><span class="n">person</span> <span class="o">-&gt;</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">ok</span><span class="o">().</span><span class="na">contentType</span><span class="o">(</span><span class="n">APPLICATION_JSON</span><span class="o">).</span><span class="na">body</span><span class="o">(</span><span class="n">fromObject</span><span class="o">(</span><span class="n">person</span><span class="o">)))</span>
+            <span class="o">.</span><span class="na">switchIfEmpty</span><span class="o">(</span><span class="n">notFound</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="路由处理函数">路由处理函数</h4>
+
+<p>通常情况下，我们不需要自己写路由函数，仅仅需要调用<code class="highlighter-rouge">RouterFunctions.route(RequestPredicate, HandlerFunction)</code>做分发就可以了。
+如果第一个参数指定的谓词判断匹配进来的HTTP请求，那么第二个参数指定的HandlerFunction就会被调用，并将请求传入，正如上面例子中一个一个的public方法所做的那样。
+如果没有找到匹配的，则直接返回404(即上例中的<code class="highlighter-rouge">notFound</code>)。</p>
+
+<p>多个路由函数可以通过函数式编程的组合方法构造出新的路由函数来。匹配的时候，先比对第一个函数，如果没有匹配再一次往下顺序比对和处理。
+我们可以使用<code class="highlighter-rouge">RouterFunction.and(routeFunction)</code>或者<code class="highlighter-rouge">or</code>来组合多个条件判断，用<code class="highlighter-rouge">andRoute</code>来组合多个路由函数，写出的代码是比较清晰易懂的流畅风格。
+基于上面的例子，使用路由函数的组合如下</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PersonRepository</span> <span class="n">repository</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">PersonHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PersonHandler</span><span class="o">(</span><span class="n">repository</span><span class="o">);</span>
+
+<span class="n">RouterFunction</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="n">personRoute</span> <span class="o">=</span>
+    <span class="n">route</span><span class="o">(</span><span class="n">GET</span><span class="o">(</span><span class="s">"/person/{id}"</span><span class="o">).</span><span class="na">and</span><span class="o">(</span><span class="n">accept</span><span class="o">(</span><span class="n">APPLICATION_JSON</span><span class="o">)),</span> <span class="nl">handler:</span><span class="o">:</span><span class="n">getPerson</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">andRoute</span><span class="o">(</span><span class="n">GET</span><span class="o">(</span><span class="s">"/person"</span><span class="o">).</span><span class="na">and</span><span class="o">(</span><span class="n">accept</span><span class="o">(</span><span class="n">APPLICATION_JSON</span><span class="o">)),</span> <span class="nl">handler:</span><span class="o">:</span><span class="n">listPeople</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">andRoute</span><span class="o">(</span><span class="n">POST</span><span class="o">(</span><span class="s">"/person"</span><span class="o">).</span><span class="na">and</span><span class="o">(</span><span class="n">contentType</span><span class="o">(</span><span class="n">APPLICATION_JSON</span><span class="o">)),</span> <span class="nl">handler:</span><span class="o">:</span><span class="n">createPerson</span><span class="o">);</span>
+</code></pre></div></div>
+<p>每一行一个路由函数的方式具有很强的不言自明性，不需要稳定仅仅通过读这段代码就可以知道每个URL是怎样被某个函数所处理了。</p>
+
+<p>由于这里的主要编程范式是函数式的，Spring库提供的大部分组合函数都是静态函数，这里的方法引用逻辑借助于Java8的语法特性进一步提高了lambda表达式的表达能力。
+这也许是这些新特性都仅仅在Java8平台下才能工作的原因。</p>
+
+<h4 id="启动server和过滤器">启动Server和过滤器</h4>
+
+<p>启动一个后端Web服务器的方法和前面的类似，只是我们需要构造一个<code class="highlighter-rouge">HttpHandler</code>出来；实现的方法是通过<code class="highlighter-rouge">RouterFunctions.toHttpHandler(routerFunction)</code>;
+构造出来的HttpHandler就可以被用相同的方法调用特定的后端服务器实现了。</p>
+
+<p>过滤器可以用在<code class="highlighter-rouge">routerFunction</code>组合之间，提供额外的安全控制和拦截器处理。譬如如下的使用<code class="highlighter-rouge">SecurityManager</code>的例子</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">RouterFunction</span><span class="o">&lt;</span><span class="n">ServerResponse</span><span class="o">&gt;</span> <span class="n">filteredRoute</span> <span class="o">=</span>
+    <span class="n">route</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">next</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">securityManager</span><span class="o">.</span><span class="na">allowAccessTo</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">path</span><span class="o">()))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">next</span><span class="o">.</span><span class="na">handle</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">else</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">ServerResponse</span><span class="o">.</span><span class="na">status</span><span class="o">(</span><span class="n">UNAUTHORIZED</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">});</span>
+</code></pre></div></div>
+<p>当给定的请求可以被安全策略放行的时候，我们可以直接调用<code class="highlighter-rouge">next.handle(request)</code>将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。</p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/01/20/api-gw-to-servicemesh/">从API网关到服务网格</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/microservice" class="page__taxonomy-item" rel="tag">microservice</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/spring" class="page__taxonomy-item" rel="tag">spring</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-04-04T00:00:00+08:00">April 04, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Spring新版本的响应式编程 https://skyscribe.github.io/post/2018/04/04/spring-reactive/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/04/04/spring-reactive/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/04/04/spring-reactive/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/04/04/spring-reactive/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="spring-reactive">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2018 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
