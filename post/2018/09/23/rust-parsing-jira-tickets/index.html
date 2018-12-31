@@ -664,6 +664,7 @@ HTTP协议的无状态保证和REST API的分页查询机制，使得我们只�
     <span class="k">pub</span> <span class="n">issues</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <p>最后一个字段稍微有些复杂是因为程序中有多个不同条件的查询，返回的结构可能是不一样的，<code class="highlighter-rouge">serde_json</code>
 可以支持<strong>用泛型的方法来定制可扩展的抽象类型</strong>。内部泛型中指定lifetime的做法在这里显得特别突兀，
 但是暂时也没有更优雅的办法，因为出于效率的考虑，默认的Rust数据结构是具有移动语义的，
@@ -676,26 +677,26 @@ HTTP协议的无状态保证和REST API的分页查询机制，使得我们只�
 <p>Rust本身提供了丰富的函数式操作类型，并有强大的 <code class="highlighter-rouge">iterator</code>抽象了丰富的操作组合，但是某些稍微复杂一点的处理还是需要不少重复劳动；
 <code class="highlighter-rouge">itertool</code>这个工具库提供不少高级的功能；对于熟悉函数式编程的程序员来说，这一高级工具不容错过。比如下面这个是过滤其中某个特定领域的条目病按照某个给定条件分组之后再行统计规划状态的例子</p>
 
-<pre><code class="language-Rust">//check planning status
-let mut planned = 0;
-let mut unplanned = 0;
-for (fid, mut sub_items) in &amp;items
-    .into_iter()
-    .filter(|it| area_features.binary_search_by(|fid| cmp_with_prefix_as_equal(fid, it.sub_id.as_str())).is_ok() )
-    .group_by(|item| get_system_split(&amp;item.sub_id).clone()) {
-        //check if ET planned
-        let test_status = if sub_items.any(|it| it.activity == Activity::Testing) {
-            planned += 1;
-            "planned"
-        } else {
-            unplanned += 1;
-            "not planned!"
-        };
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//check planning status</span>
+<span class="k">let</span> <span class="k">mut</span> <span class="n">planned</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">let</span> <span class="k">mut</span> <span class="n">unplanned</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="k">mut</span> <span class="n">sub_items</span><span class="p">)</span> <span class="n">in</span> <span class="o">&amp;</span><span class="n">items</span>
+    <span class="nf">.into_iter</span><span class="p">()</span>
+    <span class="nf">.filter</span><span class="p">(|</span><span class="n">it</span><span class="p">|</span> <span class="n">area_features</span><span class="nf">.binary_search_by</span><span class="p">(|</span><span class="n">fid</span><span class="p">|</span> <span class="nf">cmp_with_prefix_as_equal</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">it</span><span class="py">.sub_id</span><span class="nf">.as_str</span><span class="p">()))</span><span class="nf">.is_ok</span><span class="p">()</span> <span class="p">)</span>
+    <span class="nf">.group_by</span><span class="p">(|</span><span class="n">item</span><span class="p">|</span> <span class="nf">get_system_split</span><span class="p">(</span><span class="o">&amp;</span><span class="n">item</span><span class="py">.sub_id</span><span class="p">)</span><span class="nf">.clone</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c">//check if ET planned</span>
+        <span class="k">let</span> <span class="n">test_status</span> <span class="o">=</span> <span class="k">if</span> <span class="n">sub_items</span><span class="nf">.any</span><span class="p">(|</span><span class="n">it</span><span class="p">|</span> <span class="n">it</span><span class="py">.activity</span> <span class="o">==</span> <span class="nn">Activity</span><span class="p">::</span><span class="n">Testing</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">planned</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="s">"planned"</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">unplanned</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="s">"not planned!"</span>
+        <span class="p">};</span>
 
-    let line = format(format_args!("Fid = {}, Testing status ={}\n", fid, test_status));
-    buf_writer.write(line.as_bytes()).unwrap();
-}
-</code></pre>
+    <span class="k">let</span> <span class="n">line</span> <span class="o">=</span> <span class="nf">format</span><span class="p">(</span><span class="nd">format_args!</span><span class="p">(</span><span class="s">"Fid = {}, Testing status ={}</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">test_status</span><span class="p">));</span>
+    <span class="n">buf_writer</span><span class="nf">.write</span><span class="p">(</span><span class="n">line</span><span class="nf">.as_bytes</span><span class="p">())</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h2 id="编译驱动开发">编译驱动开发</h2>
 <p>其实在官方的指导文档(Rust Book)中，几位布道者就提出了所谓的<strong>编译驱动开发</strong>的编程实践；一路实践下来果然深有体会;
