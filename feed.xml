@@ -1,4 +1,204 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2018-12-31T16:48:16+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">标准化和生产环境就绪的微服务</title><link href="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" rel="alternate" type="text/html" title="标准化和生产环境就绪的微服务" /><published>2018-05-20T00:00:00+08:00</published><updated>2018-05-20T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/05/20/production-ready-microservice</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">&lt;p&gt;微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2018-12-31T21:25:06+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">用Rust实现一个高效的REST解析工具</title><link href="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/" rel="alternate" type="text/html" title="用Rust实现一个高效的REST解析工具" /><published>2018-09-23T00:00:00+08:00</published><updated>2018-09-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/">&lt;p&gt;公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦，
+经常一个页面打开需要等待大半天还是不是崩溃。有些心急的同时已经默默地回到了老的方式，导出数据到Excel然后打开Office工具来搞定。
+作为一名程序员，最简单直接的想法就是&lt;strong&gt;自己撸起袖子来写代码解决&lt;/strong&gt;呗，即使是投入产出比不高，好歹是在写工具的过程中提高了自己，一举多得何乐而不为呢？&lt;/p&gt;
+
+&lt;p&gt;&amp;lt;–more–&amp;gt;&lt;/p&gt;
+
+&lt;p&gt;之前用各种Shell/Awk/Sed/Grep等传统的脚本语言实现了太多类似的解析工具，这里不想再重复自己，因为耍自己熟悉的套路还有点浪费时间和生命的感觉。
+简单翻阅了一下JIRADC的RESTAPI文档，发现它的API设计的还是比较完备的，当然也意味着&lt;strong&gt;解析的任务比较繁重&lt;/strong&gt;，除了解析基本的JSON文档，还要处理多个记录的分页。
+考虑到服务器用浏览器打开都经常慢或者超时，那么最好也要能实现并发的请求和处理。这么多的需求考虑下来，其实传统的脚本语言的确有些勉为其难了。
+当然还可以考虑被称为完成胶水的python语言，只是这么大的数据量和多并发处理，想想也挺繁琐的，况且还没有新鲜感，这个也是很重要的。&lt;/p&gt;
+
+&lt;p&gt;于是便想到了之前每次学一半就因为太无聊而放弃的Rust语言；之前是因为只顾着读文档，走马观花地读，到了中间就读不下去了，因为&lt;strong&gt;之前太多的概念没有动手实践，总会很容易就卡壳&lt;/strong&gt;；
+而Rust毕竟是被成为学习曲线很陡峭的严肃的编程语言。说不定这次可以进步更多呢，毕竟这次可是带着目标的去深入学习的，很多大师们都分享过这一绝招&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;深入学习一门语言还是要带着实际的项目去编码，才会更有效率。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;当然这些项目大多是一些私人的小项目，这里正当其时。当然我想拉取的是服务器上数千人的数据，那么数据量本身也是很大的；
+这方面Rust语言本身的运行效率也是我想观察和思考的一个方面。
+起码从它的实际目标来看，作为一门面向系统编程领域并追求和C++一样的&lt;strong&gt;零成本抽象&lt;/strong&gt;设计目标的Rust语言来说，用来实现高效的文本解析工作也不应该有什么难度。&lt;/p&gt;
+
+&lt;h2 id=&quot;实现&quot;&gt;实现&lt;/h2&gt;
+&lt;p&gt;主要的需求就是字符串解析，而且是需要解析RESTAPI中的结构化数据，并按照自己的需要来分析和处理数据。
+基本的HTTP协议解析和JSON处理是必然少不得的；这方面只要按照官方文档，准备好对应的cargo文件即可，一个命令就可以拉下来所有需要的第三方包的最新版本，这方面比C++进步太多了，那边厢module的提案还在遥不可及的草案讨论中呢。&lt;/p&gt;
+
+&lt;h3 id=&quot;异步编程处理&quot;&gt;异步编程处理&lt;/h3&gt;
+
+&lt;p&gt;因为需要处理服务器响应慢的问题，初步估算程序运行的瓶颈应该在IO，毕竟这可是一门系统编程语言，
+就那么几千条文本数据的反序列化和查询变换，应该是可以在几百毫秒级别的运算中完成的。
+因此程序的设计上必然要用到多线程处理和异步编程，可惜Rust对协程的支持还没有完善，也没什么大问题，启动多个线程来做就可以了。
+这方面&lt;strong&gt;Tokio库是当之无愧的王者&lt;/strong&gt;，直接拉下来用就好了，官方的crate文档写的不错，例子也很简单易懂，
+很多处理和JDK的executor处理很像似，即使不读文档，&lt;strong&gt;很多API望文生义也可以差不多&lt;/strong&gt;工作。&lt;/p&gt;
+
+&lt;p&gt;使用中发现Tokio其实已经是一个比较大的库，上一次关注它的时候还是个比较简单精致的小工具库；
+随着多个版本的迭代和功能的丰富，它在提供对底层的异步操作处理的基础上还增加了上层通信模型的封装，
+并提供了它自己的&lt;code class=&quot;highlighter-rouge&quot;&gt;future&lt;/code&gt;实现，这方面和标准库中的类似设施并不完全一致，用的时候不加留意很容易陷入奇怪的编译错误无法自拔。&lt;/p&gt;
+
+&lt;p&gt;考虑到服务器端本身不是很稳定，必须要处理好可能的失败，并且收集成功的查询，并发起对失败查询的重试直到成功为止；
+HTTP协议的无状态保证和REST API的分页查询机制，使得我们只要保存查询条件，即可很方便地重试知道成功。
+基本的带重试的查询是按照两步查询的思路进行的，第一步先查到总共的记录个数以便决定接下来还有多少个记录待查，
+第二步则查询第一页之外的记录。&lt;/p&gt;
+
+&lt;p&gt;出于简化期间，第一次可能的失败没有处理，大致的处理代码如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;//Search by given jql and issue fields, and collect all results in one single &lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// result, 2-phases based search is used to calculating paging properly.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;perform&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DeserializeOwned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;QueryResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;search&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jql&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//first search&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.reset_pending&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;vec!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;search&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()])&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;.perform_parallel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.issues&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;error!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;First search failed?&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;panic!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Unexpected ending!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//remaining&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;info!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Got first result now, check remaining by page info!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.reset_pending&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;search&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.create_remaining&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.total&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;nf&quot;&gt;.perform_parallel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;perform_parallel&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DeserializeOwned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;QueryResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;channel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.pending_jobs&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.finished&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.drain_all_jobs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.collect_all_responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clean_finished_from_pending&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里采用典型的&lt;code class=&quot;highlighter-rouge&quot;&gt;channel&lt;/code&gt;结构来交换信息，因为实际的查询处理是放在future里面并行处理的；
+这也是Rust Book里面示例给出的方法，&lt;strong&gt;虽然有些麻烦但是肯定不会出错&lt;/strong&gt;。
+主要的查询调度是通过&lt;strong&gt;联合所有的子查询并合并为一个组合的future&lt;/strong&gt;来完成的，这是个典型的函数式编程范式的应用句号；
+每一个子查询将它自己的标识符和处理结构反馈到消息通道里面返回给调用者。&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;drain_all_jobs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DeserializeOwned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sender&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;QueryResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sub_queries&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//Drain all pending jobs &lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.pending_jobs&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;//query this page&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;move&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StatusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nn&quot;&gt;StatusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Ok&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;parse_query_result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.ok_or_else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.startAt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.startAt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;post_info&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;RequestInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.to_json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;guard1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sub_fetch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.fetcher&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.query_with&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;post_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.core&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                &lt;span class=&quot;nf&quot;&gt;.map_err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;move&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+                    &lt;span class=&quot;c&quot;&gt;//TODO: handle exceptions in graceful manner?&lt;/span&gt;
+                    &lt;span class=&quot;nd&quot;&gt;warn!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;This job {} has failed by {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.startAt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;guard1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;qry&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.startAt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt; 
+                    &lt;span class=&quot;s&quot;&gt;&quot;failed&quot;&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sub_queries&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sub_fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.core&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;join_all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sub_queries&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;协议解析和数据结构化处理&quot;&gt;协议解析和数据结构化处理&lt;/h3&gt;
+
+&lt;p&gt;HTTP的解析毕竟繁琐，好在&lt;code class=&quot;highlighter-rouge&quot;&gt;hyper&lt;/code&gt;库的功能非常完备，一般能想到的都已经有支持了，
+包括proxy的设置，请求响应的封装，都有丰富的API可供调用，直接用起来就行了，倒也没有太多的难点；
+唯一稍微让人觉得有些不一致的是它的请求消息的设计采用的是典型的函数式的不可变设计，需要&lt;strong&gt;用一个builder来构建&lt;/strong&gt;，稍微熟悉一下即可。&lt;/p&gt;
+
+&lt;p&gt;REST数据的处理上，有赖于REST本身强大的&lt;code class=&quot;highlighter-rouge&quot;&gt;Trait&lt;/code&gt;抽象支持，即便是没有官方的基于class的多态支持，
+基于抽象数据类型的serde抽象还是提供了强大的代码复用能力；形形色色的第三方库只要声明对各种数据类型的&lt;code class=&quot;highlighter-rouge&quot;&gt;serde&lt;/code&gt;支持，
+就可以&lt;strong&gt;方便地以非侵入的方式提供&lt;/strong&gt;给用户。只是从语法上，用户需要定义自己的结构体，
+并且用头上加注解的方式添加声明让编译器知道该数据可以被放置在对应的数据解析的上下文中。&lt;/p&gt;
+
+&lt;p&gt;Rust自身也默认规定了命名风格，并且对不符合它期望的命名一律报以警告处理；而第三方的API中的数据恰好和这一风格相悖；
+好在&lt;code class=&quot;highlighter-rouge&quot;&gt;serde_json&lt;/code&gt;库也支持自己重命名另外一个名字，这样就可以绕开命名风格不一的问题，只是实际写出来的代码可能有些臃肿；
+还有一种简单的办法就是告诉编译器下面的名字不遵循默认的下划线分隔的命名风格，没有很强的强迫症或者赶时间的话到时可以务实一点跳过编译器的警告。&lt;/p&gt;
+
+&lt;p&gt;具体的绑定json的查询结果的结构如下&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;crate&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serde&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;crate&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;serde_json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;serde&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Deserialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;serde&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;de&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DeserializeOwned&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;nd&quot;&gt;#[derive(Deserialize,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;Clone)]&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;#[allow(non_snake_case,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;dead_code)]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;QueryResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;expand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;startAt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    
+    &lt;span class=&quot;c&quot;&gt;//not used&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;maxResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//total records&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//actual issue structure&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;#[serde(bound(deserialize&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;T:Deserialize&amp;lt;'de&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;))]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;issues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;最后一个字段稍微有些复杂是因为程序中有多个不同条件的查询，返回的结构可能是不一样的，&lt;code class=&quot;highlighter-rouge&quot;&gt;serde_json&lt;/code&gt;
+可以支持&lt;strong&gt;用泛型的方法来定制可扩展的抽象类型&lt;/strong&gt;。内部泛型中指定lifetime的做法在这里显得特别突兀，
+但是暂时也没有更优雅的办法，因为出于效率的考虑，默认的Rust数据结构是具有移动语义的，
+这里&lt;strong&gt;必须加上对应的生存周期的约束&lt;/strong&gt;，以便编译器可以在编译期间做好安全检查，防止非法的数据访问。&lt;/p&gt;
+
+&lt;h3 id=&quot;结果的处理&quot;&gt;结果的处理&lt;/h3&gt;
+&lt;p&gt;解析的结构都放在容器中，用于对取到的结果分析然后提取自己想要的信息，这方面的处理其实倒是平淡无奇，
+无非是一些常规的查询和处理；当然由于本身数据是不可变的，用函数式的方法写出来代码更加清晰自然易懂。&lt;/p&gt;
+
+&lt;p&gt;Rust本身提供了丰富的函数式操作类型，并有强大的 &lt;code class=&quot;highlighter-rouge&quot;&gt;iterator&lt;/code&gt;抽象了丰富的操作组合，但是某些稍微复杂一点的处理还是需要不少重复劳动；
+&lt;code class=&quot;highlighter-rouge&quot;&gt;itertool&lt;/code&gt;这个工具库提供不少高级的功能；对于熟悉函数式编程的程序员来说，这一高级工具不容错过。比如下面这个是过滤其中某个特定领域的条目病按照某个给定条件分组之后再行统计规划状态的例子&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Rust&quot;&gt;//check planning status
+let mut planned = 0;
+let mut unplanned = 0;
+for (fid, mut sub_items) in &amp;amp;items
+    .into_iter()
+    .filter(|it| area_features.binary_search_by(|fid| cmp_with_prefix_as_equal(fid, it.sub_id.as_str())).is_ok() )
+    .group_by(|item| get_system_split(&amp;amp;item.sub_id).clone()) {
+        //check if ET planned
+        let test_status = if sub_items.any(|it| it.activity == Activity::Testing) {
+            planned += 1;
+            &quot;planned&quot;
+        } else {
+            unplanned += 1;
+            &quot;not planned!&quot;
+        };
+
+    let line = format(format_args!(&quot;Fid = {}, Testing status ={}\n&quot;, fid, test_status));
+    buf_writer.write(line.as_bytes()).unwrap();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;编译驱动开发&quot;&gt;编译驱动开发&lt;/h2&gt;
+&lt;p&gt;其实在官方的指导文档(Rust Book)中，几位布道者就提出了所谓的&lt;strong&gt;编译驱动开发&lt;/strong&gt;的编程实践；一路实践下来果然深有体会;
+因为写代码实现的过程中，大部分在其他语言中用来调试的时间都被挪用到了和编译器做斗争的事情上。
+一个原因可能是本身对某些第三方库的设计还不是很熟，需要边写代码边阅读它的设计文档，
+另一个原因也许是跟Rust语言本身的设计哲学有很大的关系，因为它将编译器的静态检查能力推向了一个极致的地步；
+可以说&lt;strong&gt;编译器的检查是极端保守的&lt;/strong&gt;，任何可能造成程序不稳定或者有数据访问冲突或者踩踏的行为，都不会呗编译器放过。
+也只有做到了这样，它才可以大胆地保证，绝大部分情况下&lt;strong&gt;只要你的程序通过了编译，那么运行起来也就是没有问题的&lt;/strong&gt;。这种思路在软件工程上不得不说是一个很激进的尝试。&lt;/p&gt;
+
+&lt;p&gt;相比较与传统的Ｃ和C++语言选择相信程序员，还要想尽量贴近硬件，还想要给程序员很多高级的武器以提高生产效率，
+最终在实际的大项目中却往往走入难以为继的泥潭；也许Rust提出了&lt;strong&gt;一条更为坚实但是也更为艰难的路&lt;/strong&gt;，有多少程序员可以克服最初的不适应期都是个很大的难题；
+尤其是关于生存周期检查的处理非常晦涩难懂，不深入了解它的原理，有可能就会被奇怪的编译错误所吓倒；
+而出于性能的考虑，又不好轻易地选择copy数据结构，选择往往未必是那么容易。&lt;/p&gt;
+
+&lt;h2 id=&quot;效率的问题&quot;&gt;效率的问题&lt;/h2&gt;
+&lt;p&gt;毫无疑问，效率是一开始学习和思考的出发点之一，最终程序写完了自然要考察一下它的执行效率。
+不出意外对于这个简单的小程序而言，数千条数据的解析和处理都可以在几百毫秒内完成；效率还是非常令人满意的。
+毕竟没有很好的运行效率的话，这门艰深的语言几乎没有什么存在的价值了；
+serde_json库称自己是最快的JSON解析库，还真不是白吹的。&lt;/p&gt;
+
+&lt;p&gt;希望下次再动手写一个工具的时候，还可以再次深入的学习Rust的其它美妙之处。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><summary type="html">公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦， 经常一个页面打开需要等待大半天还是不是崩溃。有些心急的同时已经默默地回到了老的方式，导出数据到Excel然后打开Office工具来搞定。 作为一名程序员，最简单直接的想法就是自己撸起袖子来写代码解决呗，即使是投入产出比不高，好歹是在写工具的过程中提高了自己，一举多得何乐而不为呢？</summary></entry><entry><title type="html">标准化和生产环境就绪的微服务</title><link href="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" rel="alternate" type="text/html" title="标准化和生产环境就绪的微服务" /><published>2018-05-20T00:00:00+08:00</published><updated>2018-05-20T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/05/20/production-ready-microservice</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">&lt;p&gt;微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；
 然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。
 其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；
 微服务引入过程中的&lt;strong&gt;一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解&lt;/strong&gt;。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，
@@ -3108,161 +3308,4 @@ SQL语言采用了类似于英语的语法，以数据查询为中心同时兼�
 &lt;/blockquote&gt;
 
 &lt;p&gt;业界因为商业、宣传等各种原因，会在某个技术刚刚崭露头角的时候宣称可以包治百病(否则也不会引人注意得到发展)；
-经过比较长时间的洗礼&lt;strong&gt;最终会回到其本源应用到其最合适的场合&lt;/strong&gt;，而怎样鉴别什么样的场合使用什么样的技术，依然是软件开发者、架构师最大的挑战之一。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="database" /><category term="microservice" /><summary type="html">数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用， 乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题， 无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。</summary></entry><entry><title type="html">架构服务化的一点思考</title><link href="https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/" rel="alternate" type="text/html" title="架构服务化的一点思考" /><published>2017-08-29T00:00:00+08:00</published><updated>2017-08-29T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/08/29/thinking-on-service-architecture/">&lt;p&gt;微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务；
-似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。
-本文试图对这些概念和架构思想做一简单的分析和梳理。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;服务架构的前世今生&quot;&gt;服务架构的前世今生&lt;/h2&gt;
-&lt;p&gt;考虑到微服务其实仍然是基于服务的架构方式，既然有“微”则必然有“宏”与之对应;只是之前大家都是直接叫基于服务的架构而已。&lt;/p&gt;
-
-&lt;h3 id=&quot;没有服务的架构&quot;&gt;没有服务的架构&lt;/h3&gt;
-&lt;p&gt;在软件工程的早期洪荒时代，所有的软件都是按照最原始的模块化思路组织和开发的;那时候编程语言基本是C/C++的，各个子部分之间采用头文件的方式来模拟相互之间的接口，源代码文件作为实现之间的隔离。
-这种情况下，各个逻辑&lt;strong&gt;子部分的约束基本是比较弱的&lt;/strong&gt;，要么是依赖于组织内部的约定，要么是依赖于一些比较hack的方式。
-这种方式可以认为是基于内部API和调用约定的无服务的架构方式。应用程序要么是独立组织的，要么是通过API定义好接口，然后各个模块分别开发，再统一连接起来形成最终的可执行程序。&lt;/p&gt;
-
-&lt;p&gt;这么做的弊端非常明显，因为接口的定义极大地影响系统集成的效率，以至于各个模块独立开发的时候没什么问题，一旦到了集成阶段则困难重重，迟迟不能发布出来。
-个人觉得这个问题的本质在于，&lt;strong&gt;完美的API定义是非常困难的&lt;/strong&gt;，需要极高的技术能力和对问题业务领域的深刻分析。&lt;/p&gt;
-
-&lt;h3 id=&quot;unix编程哲学&quot;&gt;Unix编程哲学&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_philosophy&quot;&gt;Unix哲学&lt;/a&gt;倡导如下的核心实践如下&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;ol&gt;
-    &lt;li&gt;Write programs that do one thing and do it well.&lt;/li&gt;
-    &lt;li&gt;Write programs to work together.&lt;/li&gt;
-    &lt;li&gt;Write programs to handle text streams, because that is a universal interface.&lt;/li&gt;
-  &lt;/ol&gt;
-
-  &lt;p&gt;–Mcllory, inventor of Unix pipe&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;它推崇用多进程和管道的方式开发复杂应用，每个小程序负责一件事儿，进程之间采用管道链接输入和输出。
-由于程序之间的输入和输出缺乏统一的规范化，&lt;strong&gt;Unix哲学推荐用基于文本的进程间接口&lt;/strong&gt;来组织程序，以便调试和分析、诊断等。&lt;/p&gt;
-
-&lt;p&gt;美中不足的是，它对于&lt;strong&gt;具体怎么实践这些基于文本的接口&lt;/strong&gt;却没有统一的建议或规定，文本格式却是需要被程序去理解的，其中应该包含这负责的业务逻辑而不是简单的计算机字符串，简单按照这种设计哲学去开发应用程序依然是困难重重。&lt;/p&gt;
-
-&lt;p&gt;另外一个难题是，Unix程序都假设是基于单个物理机器的运行环境，因为早期的Unix都是大型机，它无法预料到后期廉价PC的崛起。
-各种围绕本地IPC机制设计的管道、系统信号等通信方式和TCP/IP的网络环境有很大的差异，导致代码并不能很好的复用。&lt;/p&gt;
-
-&lt;p&gt;然而Unix设计哲学所推荐的这种&lt;strong&gt;系统职责分割方式和基于文本的协议交互对后来的微服务有巨大的影响&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;分布式对象技术&quot;&gt;分布式对象技术&lt;/h3&gt;
-&lt;p&gt;90年代后期，微软提出了组件化开发的COM以及DCOM开发模型，使用接口来达到软件复用，最终程序通过接口定义和动态链接和查找实现分布式开发。
-而Java社区则走向了分布式对象的模式，提出了JavaEE并和C++社区的CORBA对象代理技术兼容。
-这种情况下，对象分布式技术的着眼点是基于OOA分析的划分。&lt;/p&gt;
-
-&lt;h3 id=&quot;soa架构&quot;&gt;SOA架构&lt;/h3&gt;
-
-&lt;p&gt;JavaEE提出也提出了基于服务的架构方式，它在很多场合也往往被成为&lt;strong&gt;Big Web Service&lt;/strong&gt;,其典型特征如下&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;复杂的系统被分割为一个一个相互通信的接口&lt;/li&gt;
-  &lt;li&gt;使用WSDL来定义服务和服务之间的接口的通信&lt;/li&gt;
-  &lt;li&gt;该&lt;strong&gt;通信方式是基于HTTP+XML+SOAP封装&lt;/strong&gt;，消息模型为&lt;strong&gt;基于请求/响应&lt;/strong&gt;的RPC模型，其中定义了消息通信的消息结构和通信端点抽象;
-支持通过工具将WSDL转换为对应的代码，简化接口编码、解码的工作量&lt;/li&gt;
-  &lt;li&gt;高级特性支持安全、服务注册和发现，以及多版本向后兼容等&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;SOA极大地提高了企业应用开发的效率，采用SOA架构的软件曾被认为是面向未来的，当时的业界对SOA的期望一如今天对微服务的期许。&lt;/p&gt;
-
-&lt;p&gt;它的&lt;strong&gt;缺陷在于过于笨重&lt;/strong&gt;，部分原因在于XML本身的臃肿和复杂;实际场景中可能用于XML/SOAP解析和校验的开销变得过于巨大以至于性能很糟糕。
-XML过于臃肿的特性导致大家追求通过压缩消息来节省网络带宽以优化性能，然而压缩和解压反而需要消耗额外的CPU资源。
-另一部分则是因为JAX-WS规范的一些高级特性是可选的，而&lt;strong&gt;某些特性是由跳过了HTTP协议直接在SOAP中实现&lt;/strong&gt;的;然而HTTP协议本身也提供了丰富的特性，弃之不用自然会导致资源的浪费。&lt;/p&gt;
-
-&lt;p&gt;此外基于RPC的通信方式并不是在所有方式下都适合，因为其隐含的模型是同步的请求、响应;实际的业务逻辑都直接定义在这些接口中，造成&lt;strong&gt;业务逻辑和接口直接产生了依赖&lt;/strong&gt;。如果频繁的因为需求变动导致WSDL接口定义变更，后向兼容又会变成一个沉重的负担。当然这个也是基于服务的方式必须要面对的问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;web技术的发展和restful架构风格&quot;&gt;WEB技术的发展和RESTful架构风格&lt;/h3&gt;
-&lt;p&gt;WEB技术在最近20年也经历了深刻的发展，从基于B/S模型的厚后端模型为起点，到基于Ajax（XML）技术的风靡一时，再到REST风格的以资源为中心的厚客户端模型，越来越多的业务逻辑被搬到了前端处理，MVC模型最终占据了大部分应用场景。&lt;/p&gt;
-
-&lt;p&gt;RESTful风格的架构强调使用HTTP协议本身的语义模型，用HTTP的方法来描述资源的CRUD操作，用URL来规范操作的资源，
-接口定义上&lt;strong&gt;采用资源为中心的方式有效地减小了和业务流处理的耦合&lt;/strong&gt;，相比传统的RPC方式相比，前后段的交互方式与业务流程的耦合更小，更有利于前后段独立发展。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域驱动开发&quot;&gt;领域驱动开发&lt;/h3&gt;
-&lt;p&gt;Eric Evans通过他划时代的《领域驱动设计》一书将面向对象技术推向了新的深度;通过提倡业务统一语言，领域对象的识别和绑定上下文的分析等技术，
-实现了&lt;strong&gt;软件架构能更好地随着业务的的变更而低成本的演进&lt;/strong&gt;这一需求。
-恰当的领域职责划分，以及领域专家和软件技术专家的通力合作和互相理解更容易生产出可维护、易扩展、更容易拥抱实际商业环境变化的系统。&lt;/p&gt;
-
-&lt;h3 id=&quot;软件开发方法学和云计算基础设施革命&quot;&gt;软件开发方法学和云计算基础设施革命&lt;/h3&gt;
-&lt;p&gt;敏捷软件开发和持续集成等实践在过去的近20年几乎席卷了软件开发领域的大部分角落。
-&lt;strong&gt;持续发布以及DevOps运动&lt;/strong&gt;则进一步减小了软件开发的反馈周期，深刻地改变了大部分传统软件测试人员的工作方式和线上运维的成本结构。&lt;/p&gt;
-
-&lt;p&gt;传统的先设计，再编码内部测试，最后再搞一个旷日持久的大集成及系统测试的开发模式再也不能适应追求快速响应的企业软件市场。
-&lt;strong&gt;更快的设计、测试、发布上线速度&lt;/strong&gt;，成为影响企业成败的一个关键因素之一。&lt;/p&gt;
-
-&lt;p&gt;云计算技术的日趋成熟将企业开发从传统厚重的基础设施维护工作中解放了出来。
-以往那种设计实现一个企业应用系统需要考虑诸多服务器部署、存储、安全、运营维护等一系列复杂的底层细节被少数提供云服务的大公司统一按需提供和管理;
-商业公司可以将研发精力聚焦在业务逻辑的部分更快地将产品推向市场，这也是&lt;strong&gt;社会分工更加深化&lt;/strong&gt;的结果。
-容器技术（docker为代表）的飞速发展和原生云应用软件概念在不损失性能的情况下标准化了基础设施的管理和编排，极大地简化了中间件以及第三方组件的复用过程。&lt;/p&gt;
-
-&lt;h2 id=&quot;站在巨人肩上的微服务&quot;&gt;站在巨人肩上的微服务&lt;/h2&gt;
-&lt;p&gt;从某些方面看，微服务架构可谓是站在巨人的肩上诞生的新的弄潮儿;
-它是在面向对象深入发展到领域驱动设计的基础上，随着WEB技术的深度发展和RESTful的日益流行而自然产生的。其特点和要求如下&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;采用&lt;strong&gt;业务领域特点来划分服务边界&lt;/strong&gt;，其基本思路是DDD的&lt;/li&gt;
-  &lt;li&gt;服务的&lt;strong&gt;粒度要尽量的小&lt;/strong&gt;，符合Unix的编程哲学，每个服务只做一件事并将其做好;有的建议是一个服务最好能被一个小的开发团队（比如Scrum的5～7人模型）负责分析、设计、开发、测试、发布等所有工作。&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;每个服务是一个进程&lt;/strong&gt;，对外提供基于RESTful风格的HTTP服务（也有基于Protobuf的gRPC微服务框架）&lt;/li&gt;
-  &lt;li&gt;服务接口提供多个版本，每个服务负责自己的向后兼容性，方便&lt;strong&gt;独立开发和部署&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;服务的&lt;strong&gt;设计本身需要预先考虑到可能的错误&lt;/strong&gt;情况，从设计的角度需要预料到错误发生是一种正常情况&lt;/li&gt;
-  &lt;li&gt;服务本身需要&lt;strong&gt;无状态，便于扩展&lt;/strong&gt;;需要预料到服务示例可能有多个副本同时在运行&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;一些隐含的假设还有&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;添加新服务的代价很低&lt;/strong&gt;，往往数小时之多数天就可以添加一个新的服务并能和现有系统集成在一起&lt;/li&gt;
-  &lt;li&gt;服务的拆分需要和业务模型、领域划分想匹配;软件技术专家和业务领域专家能够紧密合作，快速变更;这是领域驱动开发的预设条件之一&lt;/li&gt;
-  &lt;li&gt;采用敏捷开发技术和&lt;strong&gt;团队最熟悉的编程语言、框架及技术栈&lt;/strong&gt;，但是也不宜过多;否则团队的合作又会变得难以掌控&lt;/li&gt;
-  &lt;li&gt;组织开发结构和服务的拆分能互相匹配，减小组织沟通成本，最好是组建跨职能的团队;这也是由康威定律所决定的&lt;/li&gt;
-  &lt;li&gt;采用服务发现和监控机制，以及负载均衡设施便于处理分布式应用场景，业务流的追踪和监控也会是新的挑战（想对于传统架构）&lt;/li&gt;
-  &lt;li&gt;基于容器技术&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;微服务是银弹吗&quot;&gt;微服务是“银弹”吗&lt;/h2&gt;
-&lt;p&gt;正如Fred Brooks在1986年所语言的那样，软件开发从来没有出现一个满盘通吃的银弹;
-虽然Brooks只是比较保守地估计了其后十年的情况，然而最近30年的行业发展依然没有见证银弹的出现。&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;there is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.&lt;/p&gt;
-
-  &lt;p&gt;– Fred Brooks, 1986&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;不少人满怀希望的认为微服务会打破常规，变成大家梦寐以求的神器，然而我们也见证了太多类似这种预言的屡次落空。
-目前业内主流的观点依然是，微服务不是银弹;企业仍然需要谨慎地依据实际场景谨慎选择使用。&lt;/p&gt;
-
-&lt;h3 id=&quot;先决条件&quot;&gt;先决条件&lt;/h3&gt;
-&lt;p&gt;微服务的实施有很多先决条件，需要技术决策者仔细考虑。&lt;/p&gt;
-
-&lt;p&gt;首当其冲的是企业的组织结构是否和微服务的拆分和设计想匹配。
-如果团队之间的沟通结构存在很多的层级和结构，微服务的设计和演进的速度就会严重受到影响。
-团队之间有明显的层级汇报或者审批关系会使情况变得更复杂，因为服务的自治性受到巨大的威胁。&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;“organizations which design systems … are constrained to produce designs which are copies of the communication structures of these organizations.”&lt;/p&gt;
-
-  &lt;p&gt;— M. Conway&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;另外一个不得不考虑的因素是&lt;strong&gt;企业的敏捷开发、持续集成以及发布的能力&lt;/strong&gt;。
-如果企业的基础设施不够完善，不能尽快地对开发过程给予反馈，快速迭代难以为继，开发人员很快就会陷入困境，因为整个系统的测试和集成难度相比传统架构更高了。
-没有足够的持续交付能力，微服务落地自然很容易变成无缘之水。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;开发人员的技术能力，以及选用的技术框架、编程语言&lt;/strong&gt;是否适合成员的技术背景也会成为一个巨大的挑战。
-最好的情况是，能够开发微服务的团队至少也能够应付中对规模的单体应用。
-目前的开发生态更加倡导多语言的混合团队，使得每个团队可以选用自己擅长、喜欢的技术更快的开发自己的微服务，然而这样做也是好坏参半。
-&lt;strong&gt;软件开发活动归根结底是人的活动&lt;/strong&gt;，人员的能力不能匹配技术的需求，或者有过多的技术栈以至于超出大部分成员的能力等情况，都需要慎重对待。&lt;/p&gt;
-
-&lt;p&gt;正如Martin Fowler在他的&lt;a href=&quot;https://www.martinfowler.com/bliki/MicroservicePrerequisites.html&quot;&gt;《微服务架构的先决条件》&lt;/a&gt;一文中所指出的那样，能力因素是个至关重要的决定因素。
-&lt;img src=&quot;https://www.martinfowler.com/bliki/images/microservicePrerequisites/sketch.png&quot; alt=&quot;microservice_competence&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;如何实施&quot;&gt;如何实施&lt;/h3&gt;
-&lt;p&gt;鉴于以上讨论到的这些“坑”，微服务并不是任何时候、任何组织都可以开展;应用微服务同样需要讲究天时、地利、人和。组织的敏捷程度和自动化能力，沟通结构，人员的技术配备能力都缺一不可。&lt;/p&gt;
-
-&lt;p&gt;Martin Fower建议的方式是我们总是&lt;strong&gt;可以从传统的单体架构&lt;/strong&gt;开始，采用演进式设计的思路逐步过度到微服务架构。
-等到我们&lt;strong&gt;对系统对应的问题域有更深刻的理解&lt;/strong&gt;之后，可以自然地按照领域驱动设计的思路仔细地划分服务粒度和范围，将服务拆分出来。&lt;/p&gt;
-
-&lt;p&gt;毕竟微服务是基于分布式环境的设计风格，而分布式的设计总是会有各种各样的复杂挑战需要仔细解决。
-如果需要解决的业务领域有很高的实时性要求或者大规模、高并发的需求，拆分和设计的时候更需要小心分析，大胆假设加上仔细的设计和验证。正如Martin在企业应用架构模式中所说的&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;First Law of Distributed Object Design: “don’t distribute your objects”&lt;/p&gt;
-
-  &lt;p&gt;– Martin Fower, &lt;a href=&quot;https://www.martinfowler.com/books/eaa.html&quot;&gt;Patterns of Enterprise Application Architecture&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="architecture" /><category term="SOA" /><category term="microservice" /><category term="monolith" /><summary type="html">微服务是个非常热门的话题，最近几年随着互联网的深入演进和云计算的逐渐普及，几乎所有的公司、技术社区、组织都是言必谈微服务； 似乎没有微服务都不好意思说自己能保持技术能力的与时俱进了。这厢微服务还没有完全在实践中铺开，那边潮头Amazon又挑起了无服务器架构的大旗，引来无数人的关注。 本文试图对这些概念和架构思想做一简单的分析和梳理。</summary></entry></feed>
+经过比较长时间的洗礼&lt;strong&gt;最终会回到其本源应用到其最合适的场合&lt;/strong&gt;，而怎样鉴别什么样的场合使用什么样的技术，依然是软件开发者、架构师最大的挑战之一。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="database" /><category term="microservice" /><summary type="html">数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用， 乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题， 无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。</summary></entry></feed>

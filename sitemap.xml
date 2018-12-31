@@ -317,6 +317,10 @@
 <lastmod>2018-05-20T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/</loc>
+<lastmod>2018-09-23T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/about/</loc>
 </url>
 <url>
@@ -513,6 +517,9 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/tags/standardization/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/rust/</loc>
 </url>
 <url>
 <loc>https://skyscribe.github.io/categories/cpp/</loc>
