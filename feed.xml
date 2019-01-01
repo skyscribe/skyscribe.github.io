@@ -1,8 +1,144 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2018-12-31T21:34:24+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">用Rust实现一个高效的REST解析工具</title><link href="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/" rel="alternate" type="text/html" title="用Rust实现一个高效的REST解析工具" /><published>2018-09-23T00:00:00+08:00</published><updated>2018-09-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/">&lt;p&gt;公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦，
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-01T11:47:59+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">现代C++语言是否走上了歧路?</title><link href="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" rel="alternate" type="text/html" title="现代C++语言是否走上了歧路?" /><published>2018-12-30T00:00:00+08:00</published><updated>2018-12-30T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">&lt;p&gt;C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。
+进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。
+只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在&lt;a href=&quot;https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/&quot;&gt;这篇名为哀悼现代C++&lt;/a&gt;的博客文章。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;作者是一位来自Unity的游戏开发程序员，而一般意义上认为C++仍然具有顽强生命力的领域中，游戏开发是很大的一块地盘；因此这篇来自游戏社区的自己人的反思更加惹人注目；
+难道是死忠粉都不愿意继续坚持自己的语言宗教信仰而要改换门庭另投明主了吗？仔细阅读了作者的文字，又发现并不是完全这样。&lt;/p&gt;
+
+&lt;h2 id=&quot;作者为什么要挑起这个话题&quot;&gt;作者为什么要挑起这个话题&lt;/h2&gt;
+
+&lt;p&gt;其实作者也是有感于最近的C++20语言标准正式纳入了ranges这个有名的第三方库而发（其实我个人第一次看到这个库的时候也是眼前一亮，可惜这么多年还在语言标准的门外徘徊）。
+Ranges库的作者在自己的&lt;a href=&quot;http://ericniebler.com/2018/12/05/standard-ranges/&quot;&gt;博客中&lt;/a&gt;兴奋地告诉大家它的库重要要成为新的2020标准的一部分了，
+并且&lt;strong&gt;信心满满地给大家演示了一个具体的例子&lt;/strong&gt;来宣传这个新的特性是如何的激动人心。不料社区众人并不买账，
+很多游戏开发圈子的人给出的确是大大的不喜欢，甚至Aras直接引述了他自己写的一篇twitter消息&lt;strong&gt;将不满发泄到了整个现代的语言标准进化方向&lt;/strong&gt;上(
+不知道Bjarne老爷子会不会气的跳起来，毕竟他在负责领导标准委员会中的语言演进方向工作小组)，
+并直言不讳地说，负责制定语言标准的大佬们实在是走错了方向，没有真正关心一线开发人员的诉求；于是一石激起千层浪，
+整个社区都充满了对语言标准委员会掌舵的演进方向的不满。&lt;/p&gt;
+
+&lt;p&gt;撇开很是主观的争论不说，技术方面看，Aras是否太偏激了？&lt;/p&gt;
+
+&lt;h2 id=&quot;作者的痛点&quot;&gt;作者的痛点&lt;/h2&gt;
+
+&lt;p&gt;整篇文章写的比较长，也许是预料到很多人没有耐心仔细读完，作者在开头就简单概括了他所认为的现代语言标准的三宗罪&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;编译时间&lt;/strong&gt;是个非常重要的话题，可惜标准委员会视若不见&lt;/li&gt;
+  &lt;li&gt;非优化模式即&lt;strong&gt;调试模式&lt;/strong&gt;下的编译时间尤其恐怖，调试的需求被忽视&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;心智负担&lt;/strong&gt;太重，要想轻松地写出显然正确的程序需要极其细心地推敲才行&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;原始的ranges库的例子&quot;&gt;原始的Ranges库的例子&lt;/h3&gt;
+
+&lt;p&gt;既然讨论是因为Eric的Range库而发，作者先详细描述了这个用于计算毕达哥拉斯三元组（也就是勾股定理数）的例子，原文的例子比较长，但是核心的部分还是不难理解的。&lt;/p&gt;
+
+&lt;p&gt;首先是一些简单的匿名函数，因为原作者想用&lt;strong&gt;函数式编程&lt;/strong&gt;的写法来演示他的新库；首先是一个使用了concept约束的&lt;code class=&quot;highlighter-rouge&quot;&gt;for_each&lt;/code&gt;函数&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// &quot;for_each&quot; creates a new view by applying a
+// transformation to each element in an input
+// range, and flattening the resulting range of
+// ranges.
+// (This uses one syntax for constrained lambdas
+// in C++20.)
+&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Range&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;iterator_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;IndirectUnaryInvocable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Range&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indirect_result_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;然后还需要一个&lt;code class=&quot;highlighter-rouge&quot;&gt;yield_if&lt;/code&gt;函数用于按照给定的条件，生成一个结果出来，还是典型的函数式编程的路子 (这里省略了&lt;code class=&quot;highlighter-rouge&quot;&gt;maybe_view&lt;/code&gt;泛型的定义，可以去原文中翻查)&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// &quot;yield_if&quot; takes a bool and a value and
+// returns a view of zero or one elements.
+&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yield_if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Semiregular&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;maybe_view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
+             &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;maybe_view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;主体部分则是一个用惰性方法求三元组的代码，输入是一个理论上无限长的整数序列，通过&lt;code class=&quot;highlighter-rouge&quot;&gt;for_each&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;yield_if&lt;/code&gt;的组合调用，过滤出符合条件的所有的三元组，
+最终在现实输出的时候，用新的标准库的&lt;code class=&quot;highlighter-rouge&quot;&gt;take&lt;/code&gt;取前１０个元素打印输出。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Define an infinite range of all the
+// Pythagorean triples:
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triples&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yield_if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;make_tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Display the first 10 triples
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triples&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'('&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;','&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;','&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;')'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;如果熟悉函数式编程的常规范式，会发现这个是一个再简单不过的例子；只是示例代码的实际意义可能显得不大，
+毕竟最老式的Ｃ风格代码也还是容易理解的&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;printNTriples&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d, %d, %d&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;当然处于代码可维护性的角度来考虑，新风格的现代C++代码要容易复用并且难出错的多，
+因为代码的复杂度大大降低了，逻辑表达式的嵌套也被分散到了各个更小而又基本的组合函数上了。
+不过这些因素不是Aras想要讨论的点。&lt;/p&gt;
+
+&lt;h3 id=&quot;编译时间&quot;&gt;编译时间&lt;/h3&gt;
+&lt;p&gt;作者很快毕竟了一下两个版本的编译时间，毫无悬念，现代的C++版本完败，而且差距是相当惊人的。
+没有用任何模板元泛型编程手段的老C++代码只需要64毫秒就可以编译完毕，得到的可执行文件只要8KB（当然肯定是动态链接了系统库了);
+这个还是带调试模式的编译，如果用上所有的优化手段，则编译耗费了71毫秒，并且在１毫秒之内得到了100组输出。&lt;/p&gt;
+
+&lt;p&gt;而原例子中的现代的C++代码则需要用最新的C++17标准编译，在调试模式和正常模式下，
+编译时间分别是2920毫秒和3020毫秒，运行时间则相差无几。所以作者得出的结论是，其他方面可能差不多，
+性能也没有损失，编译时间却暴涨了几十倍。&lt;/p&gt;
+
+&lt;p&gt;作为一个对比的例子，作者拿出来了一个开源数据库SQLLite的编译时间作为对比，并发现用同样的硬件，
+可以在&lt;strong&gt;不到１秒钟的时间内完成SQLLite所有的２２万行Ｃ代码&lt;/strong&gt;的编译，这个差异还是很惊人的。
+原因在哪里？无外乎是模板元和泛型的滥用导致庞大的头文件预处理和解析；这个问题在完整的模块化机制被支持之前，没有很好的解决办法。&lt;/p&gt;
+
+&lt;p&gt;回到当前状态的range库，第三个版本的代码&lt;strong&gt;居然有180万行的代码全部包在头文件&lt;/strong&gt;中了，如果谁在自己的头文件中保护了这个库，编译的时候就真的会演变成一场灾难了。
+这个抱怨和吐槽的确是稳准而狠，没法简单解决的。&lt;/p&gt;
+
+&lt;h3 id=&quot;调试模式的编译&quot;&gt;调试模式的编译&lt;/h3&gt;
+
+&lt;p&gt;吐槽完绝对的编译时间，作者又对调试模式下差不多的编译时间做起了批判，也许是游戏行业有很轻的需求来调试而没有很多的自动化测试吗？
+另外一个第三方的例子来自于&lt;a href=&quot;https://www.youtube.com/watch?v=m1jAgV4ZOhQ&quot;&gt;Optiming OBJ Loader&lt;/a&gt;，里面给出的结论是，尽量&lt;strong&gt;避免使用STL&lt;/strong&gt;，
+赤裸裸地打脸标准委员会呀。&lt;/p&gt;
+
+&lt;h3 id=&quot;心智负担&quot;&gt;心智负担&lt;/h3&gt;
+
+&lt;p&gt;这方面作者没有特别仔细的展开，似乎怨愤都集中在了上面的编译时间，并且在解密为什么编译时间那么长的时候，
+顺带抱怨了模板元的滥用导致非常复杂的处理规则需要小心谨记。
+当然C++编程语言复杂的多范式支持本身的确也会让人写起代码来畏首畏尾，这方面也没什么可说的。&lt;/p&gt;
+
+&lt;p&gt;社区会如何反应这方面的挑战，是说模块化的提案已经在加速讨论和演进吗，还是说constexpr的增强可以给编译器更多的指示信息来提高编译速度？
+毕竟Herb Sutter一直在推动让现代的C++语言往更好使用的方向去走，对面Rust语言遇到的困难和获得的经验，
+也许可以被社区的大佬们借鉴。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="cpp" /><summary type="html">C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。 进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。 只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。</summary></entry><entry><title type="html">用Rust实现一个高效的REST解析工具</title><link href="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/" rel="alternate" type="text/html" title="用Rust实现一个高效的REST解析工具" /><published>2018-09-23T00:00:00+08:00</published><updated>2018-09-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/09/23/rust-parsing-jira-tickets/">&lt;p&gt;公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦，
 经常一个页面打开需要等待大半天还是不是崩溃。有些心急的同时已经默默地回到了老的方式，导出数据到Excel然后打开Office工具来搞定。
 作为一名程序员，最简单直接的想法就是&lt;strong&gt;自己撸起袖子来写代码解决&lt;/strong&gt;呗，即使是投入产出比不高，好歹是在写工具的过程中提高了自己，一举多得何乐而不为呢？&lt;/p&gt;
 
-&lt;p&gt;&amp;lt;–more–&amp;gt;&lt;/p&gt;
+&lt;!--more--&gt;
 
 &lt;p&gt;之前用各种Shell/Awk/Sed/Grep等传统的脚本语言实现了太多类似的解析工具，这里不想再重复自己，因为耍自己熟悉的套路还有点浪费时间和生命的感觉。
 简单翻阅了一下JIRADC的RESTAPI文档，发现它的API设计的还是比较完备的，当然也意味着&lt;strong&gt;解析的任务比较繁重&lt;/strong&gt;，除了解析基本的JSON文档，还要处理多个记录的分页。
@@ -3054,259 +3190,4 @@ AutoSAR的策略是允许使用动态内存分配，前提是仔细的使用。&
   &lt;li&gt;&lt;a href=&quot;https://hackernoon.com/a-tour-of-c-17-if-constexpr-3ea62f62ff65&quot;&gt;A tour of C++ 17: if constexpr&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;en.cppreference.com&quot;&gt;CPP Reference&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/CppCon/CppCon2017&quot;&gt;CppCon 2017 Github Repo&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="cpp" /><category term="language" /><category term="fp" /><summary type="html">9月份对于C++社区而言绝对是个令人振奋的收获季节。</summary></entry><entry><title type="html">数据访问与管理技术的演进</title><link href="https://skyscribe.github.io/post/2017/09/24/data-management-evolution/" rel="alternate" type="text/html" title="数据访问与管理技术的演进" /><published>2017-09-24T00:00:00+08:00</published><updated>2017-09-24T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2017/09/24/data-management-evolution</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/09/24/data-management-evolution/">&lt;p&gt;数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用，
-乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题，
-无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。&lt;/p&gt;
-
-&lt;!--more--&gt;
-&lt;h2 id=&quot;数据访问管理技术的关键要素&quot;&gt;数据访问、管理技术的关键要素&lt;/h2&gt;
-&lt;p&gt;到目前为止，几乎所有的软件依然是工作在冯诺依曼设定的计算机架构之上,因而从&lt;strong&gt;最微观的粒度看,运算器、控制器、存储设备互相配合&lt;/strong&gt;完成形形色色的任务。
-各色复杂的软件都要在此基础上做更高层次的抽象和封装，才能完成复杂度更高的任务。程序语言、编译器和各种各样的库函数、中间件等则都围绕着该基本模型来处理高层次的领域相关问题。&lt;/p&gt;
-
-&lt;p&gt;由于最底层的硬件要么具有访问速度快但易失性的特点，要么是访问速度慢但可以持续保存很长时间；同时硬件在长时间工作的情况下总会面临各种各样的失败。
-面向业务问题的计算机&lt;strong&gt;软件必须要被仔细设计以隔离上述问题，使得用户觉得失败永远不可能发生&lt;/strong&gt;（或者至少是现实意义上的不会失败）。
-这对数据的访问和管理技术提出了很高的挑战&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;数据容量在需要的情况下能尽可能地大，甚至是可以&lt;strong&gt;按需动态扩展&lt;/strong&gt;；传统上基于单机的数据存储模型被扩展到可以被存储在地理上分散的网络节点&lt;/li&gt;
-  &lt;li&gt;数据访问的延时需要满足特定的场景需求；由于数据可能被存放在不同的设备上，不同的存储设备有不同的访问性能和时延特性&lt;/li&gt;
-  &lt;li&gt;多用户同时访问的一致性：复杂的应用总会允许有逻辑上同时访问数据的需求，如果是访问同样的数据或者相互有逻辑关联的数据，用户不应该得到不一致的数据状态&lt;/li&gt;
-  &lt;li&gt;数据的可靠性：在任何硬件失效的情况下，数据的丢失总是应该被尽量杜绝的&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这些目标、挑战有些是互相矛盾的，因此在现有的技术条件下并没有出现过一种一招通吃的方案，各色各样的技术方案都会在某些方面有所取舍。
-只是在同样的取舍考虑下，优秀的技术能比它的竞争对手们做的更为出色。&lt;/p&gt;
-
-&lt;h2 id=&quot;前关系数据库时期的数据结构和文件方案&quot;&gt;前“关系数据库”时期的数据结构和文件方案&lt;/h2&gt;
-&lt;p&gt;在20世纪70年代关系数据库理论出现之前，软件已经被用于解决很多形形色色的问题了， 这个时期其实并没有专门针对数据管理的特定技术。&lt;/p&gt;
-
-&lt;h3 id=&quot;基于操作系统和基本库的思路&quot;&gt;基于操作系统和基本库的思路&lt;/h3&gt;
-&lt;p&gt;需要管理和访问数据的时候，最基本的方案就是依赖操作系统和编程语言提供的基础设施了。
-这种场景下数据的访问&lt;strong&gt;基本是没有很强的结构化特性&lt;/strong&gt;的，软件的规模也不是太大，因而直接依赖于底层的机制也算够用了。&lt;/p&gt;
-
-&lt;p&gt;数据组织上基本以常用的数据结构为主，从最简单的顺序数组，到稍微复杂一点的链表结构，乃至树形结构、跳表、哈希表等依赖于计算机内部存储（处理器寄存器乃至内存）的高效数据机构。这些数据组织方式特别适合于规模不大的数据管理；
-其优点是数据的访问和存取都比较高效，然而其限制也比较明显，数据量比较大的时候，就必须找数据持久化存储的方法。&lt;/p&gt;
-
-&lt;p&gt;一种最简单的方式是将数据用文件的方式写入到外部存储设备中；然后在需要的时候在从外部设备加载回来。
-数据量超过内部存储容量（或者超出预先分配的空间）的时候，可以用选择性的方式将某些数据换回到外部设备中。&lt;/p&gt;
-
-&lt;h3 id=&quot;问题和挑战&quot;&gt;问题和挑战&lt;/h3&gt;
-&lt;p&gt;带来的挑战是如何选择合适的算法来确定什么时候需要将数据保存到外部存储设备，或者何时需要将数据加载到内存中。
-另外一个难题是如果&lt;strong&gt;存储设备出错了，应该怎样应对这些错误&lt;/strong&gt;?对操作系统和通用的库函数来说，这可是应用程序自己的责任。
-由于应用程序的处理逻辑和数据管理、控制逻辑是放在一起的，这些异常处理和策略选择会使软件的逻辑复杂度大大提高。&lt;/p&gt;
-
-&lt;h4 id=&quot;数据抽象能力和校验&quot;&gt;数据抽象能力和校验&lt;/h4&gt;
-&lt;p&gt;因为操作系统和函数库提供了非常基本的抽象，数据结构之上所承载的数据格式定义，以及数据内容之间的相互关联关系都需要应用程序自己负责维护。
-当有大量类似关系的数据需要在多个地方处理和保存的时候，就会出现明显的代码重复并引入额外的维护想难题。&lt;/p&gt;
-
-&lt;p&gt;一个可行的方案是当程序的规模变得比较大的时候，提供统一的应用层封装库最为基础设施给开发人员使用；
-不足之处是维护这样的&lt;strong&gt;通用基础设施的技术复杂度比一般的上层程序逻辑要复杂&lt;/strong&gt;，需要考虑到很多负责的异常情况并有很强的适应性以匹配各种期望的场景。
-还有一种考虑是可以购买第三方成熟的中间件系统以减小维护成本；不利之处是系统出了问题的时候，仍然需要对所使用的软件有很深入的了解才能快速解决复杂问题；
-尤其当实际场景对安全性或者法律合规方面有比较打顾虑的时候，第三方软件的成熟度可能成为一个极大的问题，
-有时候如果这些第三方软件的设计缺陷没有被及早发现的话，后果可能更加难以承受。&lt;/p&gt;
-
-&lt;h4 id=&quot;存储设备特性和性能考量&quot;&gt;存储设备特性和性能考量&lt;/h4&gt;
-&lt;p&gt;另外一个挑战是当数据容量变得特别巨大的时候，不可避免的需要将存储设备放在不同的物理机器上，
-然后通过网络通信协议的方式（比如NFS）将远端机器上的文件系统挂载在本地机器上；使本地机器以为它是在控制“本地”的文件;
-而微观上所有的操作都是通过一个网络通信通道（socket）加上对应的控制协议和数据搬运协议来完成。&lt;/p&gt;
-
-&lt;p&gt;从寄存器到内存到磁盘再到网络磁盘，数据的容量是越来越大，然而其性能和延迟也急速下降；对CPU寄存器的访问可能几个时钟周期就可以完成（虽然其容量很小），
-对内存的一次读写需要的时间就会达到几十乃至数百倍，访问本地磁盘的延时往往是毫秒级甚至几十毫秒；当文件被用NFS的方式映射到本地的时候，
-一次访问的时间可能在数十毫秒乃至数秒；因为&lt;strong&gt;网络层的封装可能是很厚重的，往往一个简单的操作可能后台需要好几次消息的来回&lt;/strong&gt;才能完成。
-如果网络出现拥堵或者中间设备出现故障，系统行为将变得更加难以预料。&lt;/p&gt;
-
-&lt;p&gt;这些时间上的开销给软件开发带来了诸多挑战 - 长时间的延时（要么是库函数调用要么是系统调用）导致同步调用变得效率底下，甚至抵消了多线程编程带来的便利。
-由于太多阻塞的操作导致处理器使用率底下，更高的吞吐率难以达到，我们不得不借助于异步编程技术来分割应用程序的逻辑。&lt;/p&gt;
-
-&lt;h4 id=&quot;编程模型和协作的挑战&quot;&gt;编程模型和协作的挑战&lt;/h4&gt;
-&lt;p&gt;可惜的是，因为IO行为的差异引发的编程模型的转化是的软件的可维护行大大降低。
-试想一个简单的业务逻辑因为需要访问外部存储设备而被分割成２个任务，丢在２个不同的线程调度器里，通过IO完成的callback事件关联在一起；
-这比基于内存数据的顺序处理逻辑复杂多了。&lt;/p&gt;
-
-&lt;p&gt;虽然函数式编程模型或者Reactor模型可以应对这一设计挑战，但是仅仅因为数据访问的原因而变更熟悉的编程模型并不是在很多场景下都可以被轻易接受；
-毕竟软件开发是依赖于人的集体智力活动。&lt;/p&gt;
-
-&lt;h3 id=&quot;对软件设计和架构的影响&quot;&gt;对软件设计和架构的影响&lt;/h3&gt;
-&lt;p&gt;这些&lt;strong&gt;非功能的属性会极大影响到应用程序的逻辑设计&lt;/strong&gt;；软件设计人员不得不在开发的早期阶段谨慎选择，以免掉入性能不足的漩涡最后不得不重写代码。
-本来软件的抽象是为了解决应用领域的复杂问题，隔离底层的细节，不幸的是&lt;strong&gt;当底层细节的不同影响到了程序整体的行为的时候，这种关注点分离的方式就很难凑效&lt;/strong&gt;。
-尽管有各种各样的限制，在很多复杂度不是很高的场景下，基于操作系统和基础设施的数据管理方案仍然是最直观且最优的选择。
-只要切记在合适的时机依据需求的变化切换到更合适的方案上来即可；要么是变更的成本不大可以直接修改代码完成之，要么是一开始的时候设计好数据访问的隔离，
-才与适配器的模式隔离数据访问部分。&lt;/p&gt;
-
-&lt;h2 id=&quot;基于严格结构化的关系数据库技术sql&quot;&gt;基于严格结构化的关系数据库技术(SQL)&lt;/h2&gt;
-
-&lt;p&gt;关系数据库技术自从上个世纪７０～８０年代诞生以来便得到了业界的青睐；其&lt;strong&gt;清晰的模型和严格的数学理论论证&lt;/strong&gt;深刻地征服了各个主要的IT厂商，
-其采用专门的属于来规范数据的定义和各种功能、非功能属性，学院式的精心设计预先考虑到了各种各样可能出现的问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;基本机制和思路&quot;&gt;基本机制和思路&lt;/h3&gt;
-&lt;p&gt;关系数据库理论采用结构化的方式定义数据，严格的区分数据定义、处理的范围和边界。
-数据库管理系统作为专门的软件系统隔离了数据的定义、操作；应用程序通过预先定义的接口JDBC/ODBC等接口访问数据库系统。&lt;/p&gt;
-
-&lt;h4 id=&quot;数据定义&quot;&gt;数据定义&lt;/h4&gt;
-&lt;p&gt;数据的&lt;strong&gt;结构抽象用schema来表述，逻辑上所有的数据都是满足给定schema的二维表&lt;/strong&gt;，每一行是一条记录；所有的记录都具有相同的列。
-每一行数据的相同列具有相同的定义和约束；每一行数据中的某些列作为访问的关键列（称为键）。这些列有些可以为空有些则必须不能为空。
-对数据的访问则以行为单位，可以进行增加、删除、修改等变更性操作和根据某些条件进行查询。
-&lt;strong&gt;数据的完整性校验可以通过在数据发生变更的时候依靠数据库系统软件的自动检查&lt;/strong&gt;来完成。&lt;/p&gt;
-
-&lt;p&gt;数据表之间可以有丰富多样的相互关联(通过主键、外键设置)，从而支持在查询的时候跨越多个表进行复杂的检索。
-为了便于应用逻辑处理，关系数据库系统还提供了虚拟的表（称之为视图），这些虚拟的表结构可以基于底层实际的”物理记录表”信息的变化而自动更新；
-触发器则支持设置类似于应用程序指定的“自动操作”，当对应的数据被更新的时候，触发器会被自动运行。&lt;/p&gt;
-
-&lt;p&gt;通常情况下，复杂的业务数据&lt;strong&gt;可以依据不同的范围来隔离&lt;/strong&gt;，可以放在不同的数据库中，也可以放在同一个数据库的不同数据表中。
-多个数据表之间的逻辑关联关系用关系代数来描述，一般不同的数据表之间有相对的关联，
-比如某个表的某一列也出现在另外一个表中作为另外一个表的主键，这样查询的时候，可以将两个表联合起来提供单个表不能提供的丰富信息。&lt;/p&gt;
-
-&lt;p&gt;数据表之间的关系用数据库范式来描述，严格的关系数据库理论定义了多种关系范式，用以描述信息的冗余度、结构化程度；不同的范式可以大概表征数据一致性的维护难度。
-&lt;strong&gt;复杂的范式往往也会带来性能开销和处理复杂度&lt;/strong&gt;，因此商业的应用程序中一般出于性能考虑不会采用很高的范式。&lt;/p&gt;
-
-&lt;h4 id=&quot;数据查询和sql语言&quot;&gt;数据查询和SQL语言&lt;/h4&gt;
-&lt;p&gt;关系数据库系统一个最引人注目的特性是提供了一个关于数据定义的结构化模型和&lt;strong&gt;接近于自然语言的领域特定语言SQL&lt;/strong&gt;，并将其和关系代数理论紧密结合在一起。
-SQL语言采用了类似于英语的语法，以数据查询为中心同时兼顾增加、删除和修改操作，
-并支持对数据集的聚集、归并、分类、排序等常见的操作，实现了对数据管理和访问的细节隔离，使得&lt;strong&gt;应用程序仅仅需要关注于数据操作的意图&lt;/strong&gt;即可。&lt;/p&gt;
-
-&lt;p&gt;SQL是面向数据操纵和访问用户的接口语言，数据库管理系统可以优化用户提供的SQL查询，转换成性能最好的内部实现。
-这也是DSL的好处，整个数据库管理系统&lt;strong&gt;通过精心定义的查询语言将接口和实现分离&lt;/strong&gt;开；应用程序可以专注于业务逻辑的实现，而数据库关系系统可以专注于数据的管理和维护。
-这也是计算机科学一直采用的基本的分而治之的思路－分割问题领域，然后在各个击破之。
-从这个意义上来说，关系数据库系统提供了&lt;strong&gt;良好的抽象和职责分离&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h4 id=&quot;查询优化和索引&quot;&gt;查询优化和索引&lt;/h4&gt;
-&lt;p&gt;由于商业数据库的数据往往数据量非常大，可能被保存很长时间，因此大部分时候，绝大部分数据都是被保存在磁盘中（甚至是网络磁盘）并在需要的时候读取进来加载进内存中给用户使用。大部分时候，用户的查询操作比修改操作要多得多，因此查询的性能是至关重要的。&lt;/p&gt;
-
-&lt;p&gt;虽然数据很多，但是&lt;strong&gt;某个时候用户需要访问的可能只是一小部分数据，怎样快速地检索&lt;/strong&gt;到对应的数据并提供给用户就变得至关重要。
-关系数据库系统一般是通过在数据表上建立索引表来实现的，同时基于成熟的B+数数据结构，保证经过少数几次的磁盘IO读写操作就可以定位到具体的数据记录存储快，然后将对应的块读出操作系统内存中去。
-这也潜在的要求数据库系统组织&lt;strong&gt;数据存储的时候，需要按照记录块的方式&lt;/strong&gt;将其存储在外部设备中；并最好和操作系统的虚拟内存所支持的页面大小保持对齐，尽可能减少磁盘的读写次数和寻道时间。&lt;/p&gt;
-
-&lt;p&gt;当数据量特别大以至于简单的索引表也无法加载进内存的时候，可能需要建立多级索引结构，用一个新的结构指向某一部分数据的索引表在磁盘上存储的位置；而只是将最顶层的索引表放在内存中。
-查询的时候，则需要先通过一级索引找到对应小范围数据记录对应的索引的存储位置，通过一次额外的磁盘操作加载二级索引，然后通过二级索引的数检索操作，找到对应的数据块的物理位置。&lt;/p&gt;
-
-&lt;p&gt;实际情况下，往往通过少数几次的IO操作（通过B+树的算法保证）便可定位到实际的数据并将其加载入内存中，减少慢速IO对性能的不利影响。&lt;/p&gt;
-
-&lt;h4 id=&quot;事务及acid属性&quot;&gt;事务及ACID属性&lt;/h4&gt;
-&lt;p&gt;作为数据的访问接口，SQL定义了复杂的查询接口以适应复杂的数据访问、管理需求；然而深入到最底层，细粒度的数据访问仍然要落实到二维数据表的某一个行记录上。
-由于这些单一的行是操作的最小粒度，数据库处理系统必须要保证对记录的访问在外部用户看来总是处于合理的状态。&lt;/p&gt;
-
-&lt;p&gt;譬如一个用户打算修改某记录的一个列值，而另外一个用户可能同时打算删除该记录，那么&lt;strong&gt;两个用户可能是并行在使用数据库&lt;/strong&gt;，数据库系统必须保证两者的操作返回之后，数据库系统人然处于一个自然的状态；
-要么某个用户操作成功返回修改生效，另外一个用户得到失败的反馈，要么２者都失败需要某一方尝试重试，要么数据库系统在内部实现某种机制保证至少一个成功一个失败。
-当实际操作的SQL语句牵扯到多个数据表操作的时候，一致性保证将变得更为困难。因为从并发控制的角度来看，只要牵扯到同一个数据的读写，既要保证读到的数据不能是中间状态，也要保证写入之后数据库中的状态需要恰好是刚刚写入的值。&lt;/p&gt;
-
-&lt;p&gt;关系数据库系统&lt;strong&gt;用事务作为数据操作的基本单元的抽象&lt;/strong&gt;，一个事务用来封装一次对数据库的操作；关系数据库系统用内部机制保证事物操作满足四个基本的属性&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;原子性(Atomicy)：事务操作必须像是在一个最基本的操作中完成的，执行过程中不会被另外一个打断&lt;/li&gt;
-  &lt;li&gt;一致性(Consistency)：一个事务被提交执行前后，数据库系统中所有的相关数据仍然处于一致性的状态，要么数据被按照事务期望的方式被修改（事务被执行），要么完全保持原样（事务撤销）&lt;/li&gt;
-  &lt;li&gt;隔离性(Isolation)：各个事务的执行和调度对应用程序是不可见的；从事务提交者的角度来看，好像就他自己在使用数据库系统&lt;/li&gt;
-  &lt;li&gt;持久性(Durablility)：事务操作的结果是持久有效的，即使是发生了故障或者重启，已经发生的修改必须被永久保存下去；不允许数据丢失情况的发生。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;ACID是关系数据库系统的基本特征，甚至于不支持ACID特性的数据库软件都不被认为是关系数据库软件；它被各大数据库厂商广泛地支持和实现。&lt;/p&gt;
-
-&lt;h3 id=&quot;问题和挑战-1&quot;&gt;问题和挑战&lt;/h3&gt;
-
-&lt;p&gt;ACID里边&lt;strong&gt;最为关键和复杂的就是一致性和持久性&lt;/strong&gt;，尤其是当数据库系统的访问可能来自与网络的时候，由于延时的增加以及不可预期的复杂事务可能被远程调度执行，如何&lt;strong&gt;高效、公平地实现事务的一致性控制&lt;/strong&gt;，又不引起性能的急剧恶化是个巨大的挑战。
-从数据持久性角度来看，数据库系统作为一个应用软件本身是运行在操作系统的用户空间，而真正将数据的更新落地到非易失性存储设备需要经历上层的IO调度到操作系统内核空间的控制和数据搬运，操作系统内核的实现和磁盘驱动的读写等等一系列异步操作，
-数据库系统需要始终保证&lt;strong&gt;任何一个环节出错，数据总是能恢复到正确的状态&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;为了实现这些复杂特性，很多数据库厂商（譬如Oracle）会通过修改操作系统驱动甚至内核等方式在可用性和性能之间进行折中。
-同时为了提高可用性并兼顾性能，某些数据库系统会&lt;strong&gt;要求有非常好的单机性能&lt;/strong&gt;，使用具有高级特性的磁盘存储设备等。&lt;/p&gt;
-
-&lt;h4 id=&quot;和面行对象软件系统的集成难题&quot;&gt;和面行对象软件系统的集成难题&lt;/h4&gt;
-&lt;p&gt;关系数据库理论早于面向对象技术出现，然而软件开发领域内面向对象技术则在80~90年代迅速席卷了行业的大部分角落。
-应用程序上层用面向对象技术写成的特点注定了当它需要去访问数据的时候，&lt;strong&gt;中间提供隔离的层次需要协调两者模型上的不一致&lt;/strong&gt;：
-面向对象技术组织数据操作的方式是通过继承、封装和多态来提供抽象能力，而数据库技术的组合方式是基于SQL查询。&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Object-relational_mapping&quot;&gt;ORM技术&lt;/a&gt;被发明出来用以实现传统的&lt;a href=&quot;https://www.martinfowler.com/books/eaa.html&quot;&gt;企业应用架构&lt;/a&gt;中的对象和关系模型的映射，虽然&lt;strong&gt;有一些复杂的框架技术来缓解这一难题&lt;/strong&gt;，总归是显得复杂而臃肿。
-好在Java语言用类型注解的方式提供了相对优雅的解决方案，从而通过少数几行代码就可以注入约束和检查，大大减小了数据访问层的负担。&lt;/p&gt;
-
-&lt;h4 id=&quot;扩展性的挑战&quot;&gt;扩展性的挑战&lt;/h4&gt;
-&lt;p&gt;由于商业数据库有很大的数据需要存储和使用，当系统需要动态扩展以支持更多的业务量的时候，&lt;strong&gt;单实例、中心化的数据库系统往往能为扩展性的瓶颈&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;维护数据一致性的代价越来越大，因为分布式数据库系统的扩展和优化需要面对&lt;a href=&quot;http://robertgreiner.com/2014/08/cap-theorem-revisited/&quot;&gt;CAP理论&lt;/a&gt;的限制：要么保证可用性牺牲一致性，要么保证一致性牺牲可用性。
-当有２个并发的用户访问数据库系统的时候，既保证数据的一致性，又保存高度的可用性会成为巨大的挑战,即如下的情况，在没有异常发生的时候N1的更新很容易通过网络同步、复制的方式被N2看到&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-1.png&quot; alt=&quot;normal case&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;当网络发生异常的时候，就会出现不一致&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.julianbrowne.com/assets/attachments/brewers-cap-theorem/images/scenario-2.png&quot; alt=&quot;network failure&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;网络分割是无法妥协的，因为没有足够强大的机器来维持足够好的单机器性能;分布式应用基本无法在实际中妥协了。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;No set of failures less than total network failure is allowed to cause the system to respond incorrectly.&lt;/p&gt;
-
-  &lt;p&gt;— &lt;a href=&quot;http://www.julianbrowne.com/article/viewer/brewers-cap-theorem&quot;&gt;Partition Tolerance as defined by Gilbert &amp;amp; Lynn&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;类似于两阶段提交算法等分布式事务(2PC)处理机制从理论的角度看起来很美好，实际应用中却因为性能过于低下而被束之高阁。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;成本和投入产出比&lt;/strong&gt;也是需要考虑的显示因素，因为传统的关系数据库系统需要强大的专有硬件（如磁盘RAID、EMC专业存储方案）来保证较高的可靠性和可用性。
-在互联网技术日益发展深入的背景下，企业需要尽量控制IT支撑环境的成本，并快速部署给用户，并&lt;strong&gt;需要技术架构和实现能随着业务量的增加而快速演进&lt;/strong&gt;，传统的将数据库作为独立中间件部署的方式因为太厚重而慢慢被边缘化了。&lt;/p&gt;
-
-&lt;h2 id=&quot;非结构化数据和nosql技术&quot;&gt;非结构化数据和NoSQL技术&lt;/h2&gt;
-&lt;p&gt;21世纪头十年互联网技术的严谨为提非结构化数据(即键值数据库系统)蓬勃发展的土壤。从关系数据库理论的角度来看，没有提供ACID支持的数据库甚至都不叫数据库系统；
-然而新世纪IT技术对越来越多行业的深入改造带来了数量巨大的数据；而很多数据并不是天然具有很强的结构化特性；将他们强赛进关系数据库系统中会带来臃肿的设计、复杂的模型以及地下的性能。&lt;/p&gt;
-
-&lt;h3 id=&quot;基本思路&quot;&gt;基本思路&lt;/h3&gt;
-&lt;p&gt;NoSQL技术从简化数据管理的角度来解决这一难题：一方面我们有大量的数据需要存储，这些数据之间没有非常强的相互关联；另外一方面对这些数据的访问可能有很高的并发需求和扩展性需求。
-&lt;strong&gt;既然关系数据库提供的东西远远多于实际需要的，何不将这些复杂的功能向上移动到应用程序问题域&lt;/strong&gt;内？
-这样数据库系统仅仅需要管理没太多逻辑结构的数据，并提供足够好的并发访问性能、可扩展性、可靠性；而将怎样使用数据交给应用程序去处理？
-毕竟最了解数据使用场景的还是上层应用程序。&lt;/p&gt;
-
-&lt;h3 id=&quot;数据管理特性和元数据&quot;&gt;数据管理特性和元数据&lt;/h3&gt;
-&lt;p&gt;NoSQL其实不是一类技术的统称，而是不采用强结构化形式管理数据的一大堆数据管理技术的集合。
-不同的方案提供不同的技术实现，并呈现出不同的特性；从简单的基于纯粹Key-Value对的大数据集合到能够提供一些稍微复杂一点的如关联映射、集合类型的多类型数据管理系统3（典型如Redis），
-乃至提供一些比较复杂的&lt;a href=&quot;https://en.wikipedia.org/wiki/Document-oriented_database&quot;&gt;面向文档&lt;/a&gt;的数据结构（相比SQL可以认为是半结构化）以及较强检索能力的中间型数据库（典型的如MongoDB提供了复杂的json互操作特性);总体上可谓是&lt;a href=&quot;https://en.wikipedia.org/wiki/NoSQL#Types_and_examples_of_NoSQL_databases&quot;&gt;百花齐放&lt;/a&gt;，各有千秋。&lt;/p&gt;
-
-&lt;h3 id=&quot;亮点&quot;&gt;亮点&lt;/h3&gt;
-&lt;p&gt;大部分NoSQL技术都提供了很高的性能和强大的集群管理能力，其处理能力想对于传统的关系数据库有很大的提升。
-之所以如此，是因为它从技术上打破了传统SQL要求的复杂限制，专注于自身特定的数据定义模型和特点，有针对性地最大化使用计算机硬件。&lt;/p&gt;
-
-&lt;p&gt;同时大部分NoSQL技术设计的时候就考虑到了可能出错的情况，不再假设底层的硬件本身具有很高的性能，而是通过自身软件的设计达到较高的可用性和可靠度。譬如Redis本身常常被作为缓存系统使用，而其自身的持久化机制在合理配置的情况下，可以保证数据在１秒内内一定会被写入磁盘，从而尽可能减少数据丢失。&lt;/p&gt;
-
-&lt;h3 id=&quot;nosql的折中&quot;&gt;NoSQL的折中&lt;/h3&gt;
-&lt;p&gt;基于纯粹的KV关系的数据库系统对数据的具体结构接近与一无所知；从应用程序的角度看，它似乎仅仅是提供了数据操作层面的虚拟关联表。
-其好处是很容易达到很高的性能，但不足之处是，应用程序&lt;strong&gt;如何合理地管理键的模式&lt;/strong&gt;是一个比较打的挑战。&lt;/p&gt;
-
-&lt;p&gt;提供复杂结构的NoSQL的好处是应用层程序的负担比较小，因为一些常见的结构化操作已经有了不错的支持，可以直接调用即可。
-美中不足的是，这样的方案的性能往往也不是那么好，优化起来也会比较困难，因为数据的存储管理也相对比较复杂，如MongoDB采用树结构来保存数据，不深入其底层实现做针对性的优化就比较困难一些。&lt;/p&gt;
-
-&lt;h3 id=&quot;挑战&quot;&gt;挑战&lt;/h3&gt;
-&lt;p&gt;NoSQL自然也不是银弹，它也有它自己的问题需要应对；尤其是当它的用户企图将具有很强结构化特征的数据塞进去的时候：应用程序用来维护这些数据之间的关联关系就会变得异常复杂。&lt;/p&gt;
-
-&lt;p&gt;另外一个比较麻烦的事情&lt;strong&gt;是NoSQL的不同提供者具有不同的特性&lt;/strong&gt;，应用程序想从一种切换到另外一种就远远没有传统的SQL来的方便;很可能你需要某个数据库的高级特性在另外一个数据库中就不存在了。
-这也是&lt;strong&gt;缺乏类似于SQL语言这类DSL的不足&lt;/strong&gt;;比如Redis定义了类似通配符的模糊查询键值的方式，并提供了类似于一个Key关联多个属性的数据控制原语；换到MongoDB上我们就需要不同的方式来解决类似的问题。&lt;/p&gt;
-
-&lt;p&gt;这些复杂的数据操作可能在应用程序层面来看又比较常见和繁琐，以至于使用&lt;strong&gt;纯粹的NoSQL会让人产生退回到SQL出现之前的混沌时代的错觉&lt;/strong&gt;！这当然也不是NoSQL的错，因为从来就没有银弹；合适的方案才是最好的；而怎样决定什么样的方案才是最好的？
-当然是需要一句具体的业务场景来确定了。&lt;/p&gt;
-
-&lt;h3 id=&quot;base理论&quot;&gt;BASE理论&lt;/h3&gt;
-&lt;p&gt;NoSQL解决&lt;a href=&quot;https://www.cs.cornell.edu/Projects/mrc/IEEE-CAP.16.pdf&quot;&gt;数据一致性和高可用的CAP矛盾&lt;/a&gt;的方案是所谓的&lt;a href=&quot;http://www.dataversity.net/acid-vs-base-the-shifting-ph-of-database-transaction-processing/&quot;&gt;BASE方法&lt;/a&gt;，它常常被错误的想象为是ACID的对立面&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;基本可用而不是高可用(Base Availability) 强调数据库系统并不总是返回高度可用的数据，某些情况下可能出错或者不返回，或者返回不一致的数据；应用程序比系显式地处理这些情况&lt;/li&gt;
-  &lt;li&gt;弱状态或不稳定状态（Soft state)表明数据的状态可能在不断发生变化，以至于传统关系数据库的这种事务回滚或者提交的状态则不复存在。这些都是为了应对最终一致性的目标。&lt;/li&gt;
-  &lt;li&gt;最终一致性约束(Evenutal consistency)保证数据的更新经过一段时间的处理在没有后续输入的情况下可以达到一致状态；但是中间的不一致性状态仍然对应用程序是可见的。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;基本上&lt;strong&gt;这些特性都是为最终一致性服务的&lt;/strong&gt;；数据库系统不再强制保证很强的一致性，而是由应用程序本身负责中间不一致状态的处理。
-好处是性能可以得到极大提高，因为数据库系统不需要采用很复杂的策略来保证每一项数据的高度可靠和一致，没有复杂的同步、锁策略，开销自然少；
-不利之处是应用程序需要仔细处理失败的情况，这在很多时候也是一个公平的折中，因为最了解数据特性的毕竟是上层程序本身。&lt;/p&gt;
-
-&lt;h2 id=&quot;微服务架构下的数据演进和newsql&quot;&gt;微服务架构下的数据演进和NewSQL&lt;/h2&gt;
-&lt;p&gt;随着云计算技术的深入发展和容器技术的广泛应用，微服务风格的架构技术变得愈发流行起来。
-按照微服务设计的思路，传统的分层、单体、集中式的架构方式被&lt;strong&gt;分布式去中心化、按照业务领域分隔&lt;/strong&gt;以及轻量级的接口为特征的架构方式所取代。
-同时鉴于以上这些NoSQL技术的种种不足并不能一招通吃，&lt;strong&gt;传统的SQL技术又被人们重新重视起来使用在合适的场景&lt;/strong&gt;中；
-在一个一个具体的服务内部，SQL所定义的查询语言作为完美的数据操作接口仍然有极大的魅力，我们依然可以继续享用它而不需要因为复杂的数据操作而增加应用程序的逻辑复杂度。&lt;/p&gt;
-
-&lt;p&gt;最显著的不同在于，服务是较为细粒度的、以业务逻辑功能为核心的一个一个小的独立的进程。&lt;strong&gt;数据也会根据此思路进行分割管理&lt;/strong&gt;，而不再统一的放在一个大的数据库中。
-从整个系统的角度看，数据的交换和同步是通过服务之间的协议接口进行的，因而这些协议要求必须是轻量级的，以减少数据序列化、反序列化的开销。
-因为&lt;strong&gt;微服务的高可用是通过同时运行多个副本外加负载均衡等分布式技术&lt;/strong&gt;来实现的，服务之间的耦合必须是很松散的；分布式一致性的问题采用的依然是最终一致性的思路。&lt;/p&gt;
-
-&lt;p&gt;这种新的结合了传统SQL接口来管理本地数据，用部分NoSQL思路来处理系统一致性的方式又被成为NewSQL,甚至于NoSQL又被重新宣称为是Not Only SQL的缩略词。
-显然在计算机科学领域，从来就没有一招打遍天下的技术，数据管理领域也不外如是。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;There is no single development, in either technology or management technique, which by itself promises even one order of magnitude [tenfold] improvement within a decade in productivity, in reliability, in simplicity.&lt;/p&gt;
-
-  &lt;p&gt;– Fred Books, 1986&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;业界因为商业、宣传等各种原因，会在某个技术刚刚崭露头角的时候宣称可以包治百病(否则也不会引人注意得到发展)；
-经过比较长时间的洗礼&lt;strong&gt;最终会回到其本源应用到其最合适的场合&lt;/strong&gt;，而怎样鉴别什么样的场合使用什么样的技术，依然是软件开发者、架构师最大的挑战之一。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="database" /><category term="microservice" /><summary type="html">数据访问和管理是软件设计需要解决的一项非常关键而又基础的问题;从早期的大型Unix应用开始，到基于C/S架构的商业应用， 乃至在互联网大潮中取得压倒性优势的基于B/S架构的企业应用，对于如何管理、访问、保存、检索、备份、维护数据这一基本问题， 无数先辈们创造了丰富多样的技术选项，然而随着行业潮流的变换，不同的技术依然在它各自适应的领域闪耀这光芒。</summary></entry></feed>
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="cpp" /><category term="language" /><category term="fp" /><summary type="html">9月份对于C++社区而言绝对是个令人振奋的收获季节。</summary></entry></feed>

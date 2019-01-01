@@ -1,0 +1,980 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>现代C++语言是否走上了歧路? - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="现代C++语言是否走上了歧路?">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">
+
+
+
+  <meta property="og:description" content="C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="现代C++语言是否走上了歧路?">
+  <meta name="twitter:description" content="C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-12-30T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(12)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(10)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(23)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(40)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(15)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="现代C++语言是否走上了歧路?">
+    <meta itemprop="description" content="C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。">
+    <meta itemprop="datePublished" content="December 30, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">现代C++语言是否走上了歧路?
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 4084 字，大约需要 10 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。
+进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。
+只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在<a href="https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/">这篇名为哀悼现代C++</a>的博客文章。</p>
+
+<!--more-->
+
+<p>作者是一位来自Unity的游戏开发程序员，而一般意义上认为C++仍然具有顽强生命力的领域中，游戏开发是很大的一块地盘；因此这篇来自游戏社区的自己人的反思更加惹人注目；
+难道是死忠粉都不愿意继续坚持自己的语言宗教信仰而要改换门庭另投明主了吗？仔细阅读了作者的文字，又发现并不是完全这样。</p>
+
+<h2 id="作者为什么要挑起这个话题">作者为什么要挑起这个话题</h2>
+
+<p>其实作者也是有感于最近的C++20语言标准正式纳入了ranges这个有名的第三方库而发（其实我个人第一次看到这个库的时候也是眼前一亮，可惜这么多年还在语言标准的门外徘徊）。
+Ranges库的作者在自己的<a href="http://ericniebler.com/2018/12/05/standard-ranges/">博客中</a>兴奋地告诉大家它的库重要要成为新的2020标准的一部分了，
+并且<strong>信心满满地给大家演示了一个具体的例子</strong>来宣传这个新的特性是如何的激动人心。不料社区众人并不买账，
+很多游戏开发圈子的人给出的确是大大的不喜欢，甚至Aras直接引述了他自己写的一篇twitter消息<strong>将不满发泄到了整个现代的语言标准进化方向</strong>上(
+不知道Bjarne老爷子会不会气的跳起来，毕竟他在负责领导标准委员会中的语言演进方向工作小组)，
+并直言不讳地说，负责制定语言标准的大佬们实在是走错了方向，没有真正关心一线开发人员的诉求；于是一石激起千层浪，
+整个社区都充满了对语言标准委员会掌舵的演进方向的不满。</p>
+
+<p>撇开很是主观的争论不说，技术方面看，Aras是否太偏激了？</p>
+
+<h2 id="作者的痛点">作者的痛点</h2>
+
+<p>整篇文章写的比较长，也许是预料到很多人没有耐心仔细读完，作者在开头就简单概括了他所认为的现代语言标准的三宗罪</p>
+<ol>
+  <li><strong>编译时间</strong>是个非常重要的话题，可惜标准委员会视若不见</li>
+  <li>非优化模式即<strong>调试模式</strong>下的编译时间尤其恐怖，调试的需求被忽视</li>
+  <li><strong>心智负担</strong>太重，要想轻松地写出显然正确的程序需要极其细心地推敲才行</li>
+</ol>
+
+<h3 id="原始的ranges库的例子">原始的Ranges库的例子</h3>
+
+<p>既然讨论是因为Eric的Range库而发，作者先详细描述了这个用于计算毕达哥拉斯三元组（也就是勾股定理数）的例子，原文的例子比较长，但是核心的部分还是不难理解的。</p>
+
+<p>首先是一些简单的匿名函数，因为原作者想用<strong>函数式编程</strong>的写法来演示他的新库；首先是一个使用了concept约束的<code class="highlighter-rouge">for_each</code>函数</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// "for_each" creates a new view by applying a
+// transformation to each element in an input
+// range, and flattening the resulting range of
+// ranges.
+// (This uses one syntax for constrained lambdas
+// in C++20.)
+</span><span class="kr">inline</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">for_each</span> <span class="o">=</span>
+  <span class="p">[]</span><span class="o">&lt;</span><span class="n">Range</span> <span class="n">R</span><span class="p">,</span>
+     <span class="n">Iterator</span> <span class="n">I</span> <span class="o">=</span> <span class="n">iterator_t</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="p">,</span>
+     <span class="n">IndirectUnaryInvocable</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span> <span class="n">Fun</span><span class="o">&gt;</span><span class="p">(</span><span class="n">R</span><span class="o">&amp;&amp;</span> <span class="n">r</span><span class="p">,</span> <span class="n">Fun</span> <span class="n">fun</span><span class="p">)</span>
+        <span class="n">requires</span> <span class="n">Range</span><span class="o">&lt;</span><span class="n">indirect_result_t</span><span class="o">&lt;</span><span class="n">Fun</span><span class="p">,</span> <span class="n">I</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="o">|</span> <span class="n">view</span><span class="o">::</span><span class="n">transform</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span>
+        <span class="o">|</span> <span class="n">view</span><span class="o">::</span><span class="n">join</span><span class="p">;</span>
+  <span class="p">};</span>
+</code></pre></div></div>
+
+<p>然后还需要一个<code class="highlighter-rouge">yield_if</code>函数用于按照给定的条件，生成一个结果出来，还是典型的函数式编程的路子 (这里省略了<code class="highlighter-rouge">maybe_view</code>泛型的定义，可以去原文中翻查)</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// "yield_if" takes a bool and a value and
+// returns a view of zero or one elements.
+</span><span class="kr">inline</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">yield_if</span> <span class="o">=</span>
+  <span class="p">[]</span><span class="o">&lt;</span><span class="n">Semiregular</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="kt">bool</span> <span class="n">b</span><span class="p">,</span> <span class="n">T</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">b</span> <span class="o">?</span> <span class="n">maybe_view</span><span class="p">{</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span>
+             <span class="o">:</span> <span class="n">maybe_view</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">{};</span>
+  <span class="p">};</span>
+</code></pre></div></div>
+
+<p>主体部分则是一个用惰性方法求三元组的代码，输入是一个理论上无限长的整数序列，通过<code class="highlighter-rouge">for_each</code>和<code class="highlighter-rouge">yield_if</code>的组合调用，过滤出符合条件的所有的三元组，
+最终在现实输出的时候，用新的标准库的<code class="highlighter-rouge">take</code>取前１０个元素打印输出。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Define an infinite range of all the
+// Pythagorean triples:
+</span><span class="k">using</span> <span class="n">view</span><span class="o">::</span><span class="n">iota</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">triples</span> <span class="o">=</span>
+<span class="n">for_each</span><span class="p">(</span><span class="n">iota</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">for_each</span><span class="p">(</span><span class="n">iota</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">for_each</span><span class="p">(</span><span class="n">iota</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">yield_if</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">==</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">,</span>
+        <span class="n">make_tuple</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">));</span>
+    <span class="p">});</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+
+<span class="c1">// Display the first 10 triples
+</span><span class="k">for</span><span class="p">(</span><span class="k">auto</span> <span class="n">triple</span> <span class="o">:</span> <span class="n">triples</span> <span class="o">|</span> <span class="n">view</span><span class="o">::</span><span class="n">take</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sc">'('</span>
+        <span class="o">&lt;&lt;</span> <span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">triple</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="sc">','</span>
+        <span class="o">&lt;&lt;</span> <span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">triple</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="sc">','</span>
+        <span class="o">&lt;&lt;</span> <span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">triple</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="sc">')'</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>如果熟悉函数式编程的常规范式，会发现这个是一个再简单不过的例子；只是示例代码的实际意义可能显得不大，
+毕竟最老式的Ｃ风格代码也还是容易理解的</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">printNTriples</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">z</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="p">;</span> <span class="o">++</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">;</span> <span class="o">++</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">;</span> <span class="o">++</span><span class="n">y</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">==</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">printf</span><span class="p">(</span><span class="s">"%d, %d, %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span>
+                        <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>当然处于代码可维护性的角度来考虑，新风格的现代C++代码要容易复用并且难出错的多，
+因为代码的复杂度大大降低了，逻辑表达式的嵌套也被分散到了各个更小而又基本的组合函数上了。
+不过这些因素不是Aras想要讨论的点。</p>
+
+<h3 id="编译时间">编译时间</h3>
+<p>作者很快毕竟了一下两个版本的编译时间，毫无悬念，现代的C++版本完败，而且差距是相当惊人的。
+没有用任何模板元泛型编程手段的老C++代码只需要64毫秒就可以编译完毕，得到的可执行文件只要8KB（当然肯定是动态链接了系统库了);
+这个还是带调试模式的编译，如果用上所有的优化手段，则编译耗费了71毫秒，并且在１毫秒之内得到了100组输出。</p>
+
+<p>而原例子中的现代的C++代码则需要用最新的C++17标准编译，在调试模式和正常模式下，
+编译时间分别是2920毫秒和3020毫秒，运行时间则相差无几。所以作者得出的结论是，其他方面可能差不多，
+性能也没有损失，编译时间却暴涨了几十倍。</p>
+
+<p>作为一个对比的例子，作者拿出来了一个开源数据库SQLLite的编译时间作为对比，并发现用同样的硬件，
+可以在<strong>不到１秒钟的时间内完成SQLLite所有的２２万行Ｃ代码</strong>的编译，这个差异还是很惊人的。
+原因在哪里？无外乎是模板元和泛型的滥用导致庞大的头文件预处理和解析；这个问题在完整的模块化机制被支持之前，没有很好的解决办法。</p>
+
+<p>回到当前状态的range库，第三个版本的代码<strong>居然有180万行的代码全部包在头文件</strong>中了，如果谁在自己的头文件中保护了这个库，编译的时候就真的会演变成一场灾难了。
+这个抱怨和吐槽的确是稳准而狠，没法简单解决的。</p>
+
+<h3 id="调试模式的编译">调试模式的编译</h3>
+
+<p>吐槽完绝对的编译时间，作者又对调试模式下差不多的编译时间做起了批判，也许是游戏行业有很轻的需求来调试而没有很多的自动化测试吗？
+另外一个第三方的例子来自于<a href="https://www.youtube.com/watch?v=m1jAgV4ZOhQ">Optiming OBJ Loader</a>，里面给出的结论是，尽量<strong>避免使用STL</strong>，
+赤裸裸地打脸标准委员会呀。</p>
+
+<h3 id="心智负担">心智负担</h3>
+
+<p>这方面作者没有特别仔细的展开，似乎怨愤都集中在了上面的编译时间，并且在解密为什么编译时间那么长的时候，
+顺带抱怨了模板元的滥用导致非常复杂的处理规则需要小心谨记。
+当然C++编程语言复杂的多范式支持本身的确也会让人写起代码来畏首畏尾，这方面也没什么可说的。</p>
+
+<p>社区会如何反应这方面的挑战，是说模块化的提案已经在加速讨论和演进吗，还是说constexpr的增强可以给编译器更多的指示信息来提高编译速度？
+毕竟Herb Sutter一直在推动让现代的C++语言往更好使用的方向去走，对面Rust语言遇到的困难和获得的经验，
+也许可以被社区的大佬们借鉴。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/09/23/rust-parsing-jira-tickets/">用Rust实现一个高效的REST解析工具</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/02/10/http2-and-grpc/">HTTP/2和gRPC - 微服务时代的应用基础协议</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/notes" class="page__taxonomy-item" rel="tag">notes</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/study" class="page__taxonomy-item" rel="tag">study</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-12-30T00:00:00+08:00">December 30, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=现代C++语言是否走上了歧路? https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="modern-cpp-reflection">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
