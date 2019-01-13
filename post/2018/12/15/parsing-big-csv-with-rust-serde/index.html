@@ -1,0 +1,1209 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>用Rust来辅助报表解析 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="最近遇到一个麻烦而繁琐的操作，需要从工作用的缺陷跟踪系统中导出报表，分析其中的一些数据模式，分类整理后用更好的方式整合出来；本来这类反复重复的零碎工作，如果不是很复杂，依赖于Excel本身的强大的表格计算功能是很容易自动化的(在线系统比较古老仅仅支持ＣＳＶ格式导出)，只是内部的字段量比较多，并且有很复杂的相互关联，用脚本来自动化是最直接的一个想法。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="用Rust来辅助报表解析">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/">
+
+
+
+  <meta property="og:description" content="最近遇到一个麻烦而繁琐的操作，需要从工作用的缺陷跟踪系统中导出报表，分析其中的一些数据模式，分类整理后用更好的方式整合出来；本来这类反复重复的零碎工作，如果不是很复杂，依赖于Excel本身的强大的表格计算功能是很容易自动化的(在线系统比较古老仅仅支持ＣＳＶ格式导出)，只是内部的字段量比较多，并且有很复杂的相互关联，用脚本来自动化是最直接的一个想法。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="用Rust来辅助报表解析">
+  <meta name="twitter:description" content="最近遇到一个麻烦而繁琐的操作，需要从工作用的缺陷跟踪系统中导出报表，分析其中的一些数据模式，分类整理后用更好的方式整合出来；本来这类反复重复的零碎工作，如果不是很复杂，依赖于Excel本身的强大的表格计算功能是很容易自动化的(在线系统比较古老仅仅支持ＣＳＶ格式导出)，只是内部的字段量比较多，并且有很复杂的相互关联，用脚本来自动化是最直接的一个想法。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2018-12-15T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(12)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(22)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(24)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(41)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(1)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="用Rust来辅助报表解析">
+    <meta itemprop="description" content="最近遇到一个麻烦而繁琐的操作，需要从工作用的缺陷跟踪系统中导出报表，分析其中的一些数据模式，分类整理后用更好的方式整合出来；本来这类反复重复的零碎工作，如果不是很复杂，依赖于Excel本身的强大的表格计算功能是很容易自动化的(在线系统比较古老仅仅支持ＣＳＶ格式导出)，只是内部的字段量比较多，并且有很复杂的相互关联，用脚本来自动化是最直接的一个想法。">
+    <meta itemprop="datePublished" content="December 15, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">用Rust来辅助报表解析
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+本文有 12573 字，大约需要 31 分钟可以读完
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>最近遇到一个麻烦而繁琐的操作，需要从工作用的缺陷跟踪系统中导出报表，分析其中的一些数据模式，分类整理后用更好的方式整合出来；
+本来这类反复重复的零碎工作，如果不是很复杂，依赖于Excel本身的强大的表格计算功能是很容易自动化的(在线系统比较古老仅仅支持ＣＳＶ格式导出)，
+只是内部的字段量比较多，并且有很复杂的相互关联，用<strong>脚本来自动化</strong>是最直接的一个想法。</p>
+
+<p>刚好今年花了比较多的时间深入学习Rust了，这么这个分析工具可以作为<strong>第二个很好的练手项目</strong>，
+刚好可以用来更深入地研究和体会这门以系统编程和高效率著称的语言。</p>
+
+<!--more-->
+
+<h2 id="主要目标">主要目标</h2>
+<p>这里想解决的问题主要有几个方面的难点</p>
+<ol>
+  <li>数据量比较大，单单导出的CSV文件就有30~40MB的文本</li>
+  <li>需要提取的信息毕竟复杂，各个字段之间有很多相关性，需要解析之后做二次处理</li>
+  <li>导出格式毕竟复杂，基本用到了CSV格式文本中的所有高级特性，比如字段内包含分隔符和空行，某些字段可能是空等</li>
+  <li>处理的结果需要再次保存为csv格式的输出，以便结合Excel本身强大的报表功能，展现给最终的目标用户</li>
+</ol>
+
+<p>这里的字符串处理任务会非常繁重，因为有些字段包含有自由文本的信息，而需要提取的信息又毕竟散乱，
+并没有很好的规律可寻，必须<strong>要有强大的正则表达式引擎</strong>，否则处理效率必然堪忧。
+即便是抛开学习的目的想快速解决问题也很有挑战，因为传统的Unix工具(sed/awk/grep)组合能力虽然很强，却没有很好的<strong>复杂CSV解析</strong>的能力。</p>
+
+<h2 id="实现思路">实现思路</h2>
+
+<p>处理程序本身的核心逻辑其实是个数据萃取和转换，需要从输入文件中读取原始输入，格式化为记录数据，
+然后根据业务特点做过滤、提取、组合和分组，填充为新的记录格式，保存为文件。
+大部分的繁琐的地方其实是在细节中，比较<strong>考验Rust语言的表达能力</strong>，毕竟这是传统的脚本语言的专长，严肃而正经的静态语言实现起来往往是有手脚被束缚的无力感。</p>
+
+<p>现代的编程语言都在慢慢地往函数式编程的路子上靠拢，因为函数式语言设施更容易写出声明性的代码；
+所以换句话说实现好这个工具写出地道的代码的<strong>重要条件还是需要好好熟悉Rust的ＦＰ</strong>特性。</p>
+
+<h2 id="数据数据的解析和处理">数据数据的解析和处理</h2>
+
+<p>Rust社区的serde库提供了各种各样常见的文本格式的序列化和反序列化抽象，而<a href="https://docs.rs/csv/1.0.5/csv/">CSV</a>提供了灵活而高效的读写CSV文件的能力，
+并且和serde框架无缝融合，简单拉取就可以很简单的使用；虽然serde的文档不是很容易理解，
+好在已经有前边使用json的经验，用起来<strong>只要结合直觉和官方文档</strong>，便没有什么压力。</p>
+
+<p>稍微有些讨厌的是工具导出的原始CSV包含了可恶的汇总信息，这些信息并不遵循CSV的语法，
+需要在解析之前先将这些额外的头去掉，然后再放入csv处理；该额外处理本来用一行shell脚本就可以很简单的完成:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>input.csv | sed <span class="s2">"1,7d"</span> <span class="o">&gt;</span> input_trunct.csv<span class="p">;</span>
+</code></pre></div></div>
+<p>考虑到已经用Rust来写了，就想让这个<strong>工具变得纯粹一些</strong>(为了学习的目的可以给自己加一些复杂一点的需求也算可以理解的吧)，能在Windows环境直接使用岂不是更好?
+并且考虑到原始的文件可能比较大，正儿八经地实现的时候，不自然就加入了个缓冲机制，避免每次运行的时候都要做这个剪切操作，只需要运行起来的时候，判断文件在不在就可以了；
+这方面需要用到文件系统访问相关的API，好在这方面Rust的标准库已经提供了(不知道比C++好了多少呢)</p>
+
+<p>文件的路径需要从输入来，所以用一个结构保存文件名和它对于的缓存文件；<strong>高效的前提来自于减少内存的拷贝</strong>，所以这里需要用lifetime声明显示地指出这是一个引用</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">InputFixer</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">raw_fname</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span>  
+    <span class="n">local_fname</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> 
+<span class="p">}</span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="n">InputFixer</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">fpath</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">InputFixer</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="n">InputFixer</span> <span class="p">{</span>
+            <span class="n">raw_fname</span><span class="p">:</span> <span class="n">fpath</span><span class="p">,</span>
+            <span class="n">local_fname</span><span class="p">:</span> <span class="nd">format!</span><span class="p">(</span><span class="s">"{}_trunct.csv"</span><span class="p">,</span> <span class="n">fpath</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">fix</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'a</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="nn">std</span><span class="p">::</span><span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nn">Path</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="py">.local_fname</span><span class="p">)</span><span class="nf">.exists</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nf">Ok</span><span class="p">(</span><span class="k">self</span><span class="py">.local_fname</span><span class="nf">.as_str</span><span class="p">())</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">self</span><span class="nf">.fix_and_save</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c">//...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>对外提供的处理函数是通过一个基本的缓存文件检查来实现的，如果存在则直接返回，如果不存在，就调用真正的预处理。
+真正的处理是通过跳过当前行直到遇到期望的表头而中止，然后将剩余的行拷贝到中间文件中，形成一个没有额外信息的CSV文件</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//Remove extra headlines from reports, save until we found valid header</span>
+<span class="k">fn</span> <span class="nf">fix_and_save</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'a</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="nn">std</span><span class="p">::</span><span class="nn">io</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">outf</span> <span class="o">=</span> <span class="nn">BufWriter</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">File</span><span class="p">::</span><span class="nf">create</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="py">.local_fname</span><span class="p">)</span><span class="o">?</span><span class="p">);</span>
+
+    <span class="k">let</span> <span class="n">inf</span> <span class="o">=</span> <span class="nn">File</span><span class="p">::</span><span class="nf">open</span><span class="p">(</span><span class="k">self</span><span class="py">.raw_fname</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">line</span> <span class="o">=</span> <span class="nn">String</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">reader</span> <span class="o">=</span> <span class="nn">BufReader</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">inf</span><span class="p">);</span>
+
+    <span class="k">let</span> <span class="k">mut</span> <span class="n">found_header</span> <span class="o">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="k">while</span> <span class="o">!</span><span class="n">found_header</span> <span class="p">{</span>
+        <span class="n">reader</span><span class="nf">.read_line</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">line</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+        <span class="k">if</span> <span class="n">line</span><span class="nf">.find</span><span class="p">(</span><span class="n">r</span><span class="err">#</span><span class="s">""</span><span class="n">Problem</span> <span class="n">ID</span><span class="s">","</span><span class="n">Title</span><span class="s">","</span><span class="err">#</span><span class="p">)</span><span class="nf">.is_some</span><span class="p">()</span> <span class="p">{</span>
+            <span class="n">found_header</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+            <span class="n">outf</span><span class="nf">.write</span><span class="p">(</span><span class="nd">format!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span><span class="nf">.as_bytes</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c">//warn!("Skip bad line {}", line);</span>
+        <span class="p">}</span>
+        <span class="n">line</span><span class="nf">.clear</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nd">info!</span><span class="p">(</span><span class="s">"Copying remaining bytes..."</span><span class="p">);</span>
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">buf_len</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">buf</span> <span class="o">=</span> <span class="n">reader</span><span class="nf">.fill_buf</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
+            <span class="k">if</span> <span class="n">buf</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+                <span class="n">outf</span><span class="nf">.write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">buf</span><span class="nf">.len</span><span class="p">()</span>
+        <span class="p">};</span>
+
+        <span class="k">if</span> <span class="n">buf_len</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">reader</span><span class="nf">.consume</span><span class="p">(</span><span class="n">buf_len</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nd">info!</span><span class="p">(</span><span class="s">"New file created = {}"</span><span class="p">,</span> <span class="k">self</span><span class="py">.local_fname</span><span class="p">);</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="k">self</span><span class="py">.local_fname</span><span class="nf">.as_str</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>主要的读写方式是需要按照行来判断和进行，可以用<code class="highlighter-rouge">BufReader</code>/<code class="highlighter-rouge">BufWriter</code>来提高效率，这一实际的数据其实经过了一次按块读取的拷贝，而这里的代码处理不需要任何拷贝。</p>
+
+<p>实际测试了一下在我的笔记本上，完成30MB的文件处理，可以在300毫秒内完成，效率还算让人满意；当然运行多次后因为磁盘缓存的原因，时间会缩短到100毫秒，基本不会太影响真正的操作了。</p>
+
+<h2 id="主处理逻辑">主处理逻辑</h2>
+
+<p>借助于Rust丰富的迭代器抽象和函数式风格支持，主处理逻辑可以用很<strong>直观的流式代码风格</strong>写成</p>
+<ol>
+  <li>在上述代码的预处理之后，将输出文件传入到CSV库中，</li>
+  <li>完成反序列化处理，并将反序列化后的记录收集到一个容器中</li>
+  <li>交于后续的解析和处理函数保存</li>
+</ol>
+
+<p>如下面的代码，含义基本上都是<strong>声明式而不言自明</strong>的；稍微有点晦涩的是那个<code class="highlighter-rouge">as_mut</code>转换，完全是因为后面的反序列化解析操作必须要一个可读写的对象才可以</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">analyze</span><span class="p">(</span><span class="n">fpath</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nd">info!</span><span class="p">(</span><span class="s">"Started to parse {}"</span><span class="p">,</span> <span class="n">fpath</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">fixer</span> <span class="o">=</span> <span class="nn">InputFixer</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">fpath</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">_result</span> <span class="o">=</span> <span class="n">fixer</span><span class="nf">.fix</span><span class="p">()</span><span class="nf">.map_err</span><span class="p">(|</span><span class="n">err</span><span class="p">|</span> <span class="nd">error!</span><span class="p">(</span><span class="s">"Truncting file failed by {}"</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="nf">.ok</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|</span><span class="n">fpath</span><span class="p">|</span> <span class="nn">Reader</span><span class="p">::</span><span class="nf">from_path</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fpath</span><span class="p">)</span><span class="nf">.as_mut</span><span class="p">()</span>
+            <span class="nf">.map</span><span class="p">(|</span><span class="n">rdr</span><span class="p">|</span> <span class="p">{</span> 
+                <span class="n">rdr</span><span class="py">.deserialize</span><span class="p">::</span><span class="o">&lt;</span><span class="n">Record</span><span class="o">&gt;</span><span class="p">()</span>
+                    <span class="nf">.filter_map</span><span class="p">(|</span><span class="n">it</span><span class="p">|</span> <span class="n">it</span><span class="nf">.ok</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">rec</span><span class="p">|</span> <span class="nn">ParsedRecord</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">rec</span><span class="p">)))</span>
+                    <span class="nf">.collect</span><span class="p">()</span>
+            <span class="p">})</span>
+            <span class="nf">.map</span><span class="p">(|</span><span class="n">records</span><span class="p">|</span> <span class="nf">parse_and_save</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fpath</span><span class="p">,</span> <span class="n">records</span><span class="p">))</span>
+            <span class="nf">.map_err</span><span class="p">(|</span><span class="n">err</span><span class="p">|</span> <span class="nd">error!</span><span class="p">(</span><span class="s">"CSV parsing failed by {}"</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="文本解析工具和流处理工具">文本解析工具和流处理工具</h2>
+
+<p>Rust的字符串分由<code class="highlighter-rouge">String</code>类型和<code class="highlighter-rouge">str</code>类型两者配合完成，一般在函数参数或者返回传递的过程中，多使用<code class="highlighter-rouge">&amp;str</code>类型，并且很多情况下，编译器也可以自动完成从<code class="highlighter-rouge">String</code>的引用到<code class="highlighter-rouge">&amp;str</code>的转换，
+在某些不能自动转换的情况下，可以调用<code class="highlighter-rouge">as_str()</code>函数来得到；只要<strong>通过了编译</strong>(毕竟是举起了编译器驱动开发的大旗)一般就没有什么问题了。</p>
+
+<p>正则表达式需要对应的<a href="https://docs.rs/regex/1.1.0/regex/">regex</a>库就可以了，使用的是类perl正则表达式语法，
+基本的元字符支持的也比较全，借助于语言本身提供的raw string语法，复杂的正则表达式也照样不需要担心可读性；
+当然官方文档的建议是最好不要使用不必要复杂的正则表达式，以免影响效率。
+同样出于效率的考虑，正则表达式最好要<strong>先编译再使用，并且保证只编译一次</strong>，考虑封装的情况下，单例模式是最自然的选择；
+好在可以用<code class="highlighter-rouge">lazy_static</code>方便地封装。</p>
+
+<p>考虑到一个字段可能有多个可能的模式需要提取，写出来的代码可能毕竟复杂；借用Rust本身的Option类型封装，
+可以用非常具有可读性的代码写出来，这里想从导出的修订历史信息中有导出多条记录，这些记录可能有不同的结构，对于的正则表达式如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//Parsing given R&amp;D information and filter out interested items</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">parse</span><span class="p">(</span><span class="n">revision</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">RevisionItem</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nd">lazy_static!</span> <span class="p">{</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_DELIMITER</span> <span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(, )?(201[789]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) "</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_STATECHANGE</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) The state of the problem changed from ([a-zA-Z ]+) [tT]o ([a-zA-Z ]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_STATECHANGE_EX</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) State changed from ([a-zA-Z ]+) to ([a-zA-Z ]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_TRANSFER</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) The group in charge changed from ([_A-Z0-9]+) [tT]o ([_A-Z0-9]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_STATE_REOPEN</span>  <span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) Reopened"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_ATTACHED</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) Problem attached to ([^. ]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_DETACHED</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) Problem detached. The problem report was detached from ([^., ]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+        <span class="k">static</span> <span class="k">ref</span> <span class="n">PATTERN_POSTPONE</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) ((Postponed)|(Reactivated))"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>里面用小括号括起来的字段是我们想提取的关键信息，可以用连接的方式一次解析几个正则表达式如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">PATTERN_DELIMITER</span>
+        <span class="nf">.replace_all</span><span class="p">(</span><span class="n">revision</span><span class="p">,</span> <span class="p">|</span><span class="n">caps</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Captures</span><span class="p">|</span><span class="nd">format!</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">{}|"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="nf">.split</span><span class="p">(</span><span class="sc">'\n'</span><span class="p">)</span>
+        <span class="nf">.filter_map</span><span class="p">(|</span><span class="n">line</span><span class="p">|</span> <span class="n">line</span><span class="nf">.find</span><span class="p">(</span><span class="sc">'|'</span><span class="p">)</span><span class="nf">.and_then</span><span class="p">(|</span><span class="n">pos</span><span class="p">|</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">rem</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="nf">.split_at</span><span class="p">(</span><span class="n">pos</span><span class="p">);</span>
+            <span class="k">let</span> <span class="n">rem</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">rem</span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">rem</span><span class="nf">.len</span><span class="p">()];</span>
+
+            <span class="n">PATTERN_STATECHANGE</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_STATECHANGE_EX</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">))</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">StateChange</span><span class="p">{</span>
+                            <span class="n">from</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">to</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">()}))</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_TRANSFER</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">GroupChange</span><span class="p">{</span>
+                            <span class="n">from</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">to</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">()})))</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_STATE_REOPEN</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">StateChange</span><span class="p">{</span>
+                            <span class="n">from</span><span class="p">:</span> <span class="s">"Finalized"</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">to</span><span class="p">:</span> <span class="s">"New"</span><span class="nf">.to_string</span><span class="p">()})))</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_ATTACHED</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">Attached</span> <span class="p">{</span><span class="n">to</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">()})))</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_DETACHED</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">Detached</span> <span class="p">{</span><span class="n">from</span><span class="p">:</span> <span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">()})))</span>
+                <span class="nf">.or</span><span class="p">(</span>
+                    <span class="n">PATTERN_POSTPONE</span><span class="nf">.captures</span><span class="p">(</span><span class="n">rem</span><span class="p">)</span>
+                        <span class="nf">.map</span><span class="p">(|</span><span class="n">caps</span><span class="p">|</span> <span class="p">(</span><span class="n">caps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="k">if</span> <span class="n">caps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nf">.find</span><span class="p">(</span><span class="s">"Postpone"</span><span class="p">)</span><span class="nf">.is_some</span><span class="p">()</span> <span class="p">{</span><span class="n">Postponed</span><span class="p">}</span> <span class="k">else</span> <span class="p">{</span><span class="n">ReActivated</span><span class="p">}</span> <span class="p">)))</span>
+                <span class="nf">.map</span><span class="p">(|(</span><span class="n">auth</span><span class="p">,</span> <span class="n">extra</span><span class="p">)|</span> <span class="n">RevisionItem</span> <span class="p">{</span> 
+                    <span class="n">author</span><span class="p">:</span> <span class="n">auth</span><span class="p">,</span> <span class="n">when</span><span class="p">:</span> <span class="n">when</span><span class="nf">.to_string</span><span class="p">(),</span> <span class="n">extra</span><span class="p">:</span> <span class="n">extra</span>
+                <span class="p">})</span>
+            <span class="p">}))</span><span class="nf">.collect</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="变换处理">变换处理</h3>
+
+<p>对于上述解析出来的原始记录，这里需要额外的处理，比如找到这个列表中的第一个组信息，
+因为历史记录读进来的顺序是按照时间书序从新到老读取的，我们需要从尾部拿到第一个组变更的信息返回，病需要考虑没有这种记录的可能，
+实现代码其实就是对<code class="highlighter-rouge">Iterator</code>这个抽象类型的操作的组合调用</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="p">[</span><span class="nf">derive</span><span class="p">(</span><span class="n">Debug</span><span class="p">)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Revisions</span> <span class="p">{</span>
+    <span class="n">revisions</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">RevisionItem</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">Revisions</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_first_group</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Revisions</span><span class="p">,</span> <span class="n">mygrp</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">String</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.revisions</span><span class="nf">.iter</span><span class="p">()</span>
+            <span class="nf">.rev</span><span class="p">()</span>
+            <span class="nf">.filter_map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.get_from_group</span><span class="p">())</span>
+            <span class="nf">.nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="nf">.unwrap_or</span><span class="p">(</span><span class="n">mygrp</span><span class="p">)</span>
+            <span class="nf">.to_string</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="c">//...</span>
+<span class="p">}</span>
+
+<span class="c">//definition of get_from_group in RevisionItem struct</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">get_from_group</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">(</span><span class="k">self</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="n">RevisionItem</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">match</span> <span class="k">self</span><span class="py">.extra</span> <span class="p">{</span>
+        <span class="n">GroupChange</span><span class="p">{</span><span class="k">ref</span> <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">:</span><span class="n">_</span><span class="p">}</span> <span class="k">=&gt;</span> <span class="nf">Some</span><span class="p">(</span><span class="o">&amp;</span><span class="n">from</span><span class="p">),</span>
+        <span class="n">_</span> <span class="k">=&gt;</span> <span class="nb">None</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">filter_map</code>是个很有用的组合函数，它可以完成过滤和转换的组合功能，并且能够处理<code class="highlighter-rouge">map</code>函数返回一个<code class="highlighter-rouge">Option</code>类型的能力</p>
+<ul>
+  <li>如果结果为<code class="highlighter-rouge">None</code>，则原来的元素就会被跳过</li>
+  <li>如果不是<code class="highlighter-rouge">None</code>，则把内部封装的元素取出作为后续的输入</li>
+</ul>
+
+<p><code class="highlighter-rouge">nth</code>又是一个毕竟特殊的函数，可以从结果里面取出第N个元素，如果不存在则会返回空，所以起结果本身是个<code class="highlighter-rouge">Option</code>类型；
+显然<strong>作为基础的<code class="highlighter-rouge">Option</code>类型已经充斥在标准库的各个角落</strong>里，同样也只有做到了这样，才能发挥函数式编程的巨大威力。</p>
+
+<h2 id="简单的图算法">简单的图算法</h2>
+
+<p>稍微复杂的一个处理是需要找出各个记录之间可能存在的关联关系，然后将具有相互关联的记录中，选择一个作为代表性的记录，
+而把其它的记录都设置为重复的记录，这个对于实际的报表汇报尤为重要；同时选择的方法需要是可以定制的。
+比如记录A关联到了B,C,D,而Ｃ又关联到了D,E;那么最终我们需要从A/B/C/D/E中按照外部传入的算法选择一个作为主记录，
+然后其它都作为辅记录。稍微有点复杂的是，因为系统原因，这些<strong>相互关系在原始输入数据中是不对称</strong>的，
+但是简化起见，不考虑这些错误（比如上例中就没有Ｃ到A／Ｂ的记录），认为关联关系是对称的，只要在处理中修复这种错误即可。</p>
+
+<p>这本来是一个非常典型的图算法，用无向图可以很容易地表示，可惜没有找到很简单的图算法库；
+不过用内置的集合结构来实现一个基本的图算法也不难，用两个数据结构，一个<code class="highlighter-rouge">HashSet</code>和<code class="highlighter-rouge">HashMap</code>就可以实现一个出来；
+这里的<strong>复杂性反而是由Rust的borrow checker引入</strong>的。</p>
+
+<p>基本的数据结构如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">AttachInfo</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">my_id</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">attached_list</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">AttachGraph</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">mapping</span><span class="p">:</span> <span class="n">HashMap</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="c">//A set of nodes that are associated with one given first id</span>
+    <span class="k">pub</span> <span class="n">components</span><span class="p">:</span> <span class="n">HashMap</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">HashSet</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>因为不想实际拷贝数据，所有的结构体都带入了一个外部传入的生命周期参数，以便编译器检查没有数据越界的情况发生；
+生命周期的管理是Rust一个比较复杂和高级的特性，官方的指导书里面写的毕竟详细，这里不赘述。
+外层的封装函数</p>
+<ul>
+  <li>接收解析好的数据记录集作为输入</li>
+  <li>外加一个可以作为主记录的集合以便选取主记录</li>
+  <li>返回构造好的图结构
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//Construct a graph to check attach association, returns a graph of attach information as defined above</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">get_attach_relations</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">ParsedRecord</span><span class="o">&gt;</span><span class="p">,</span> 
+                      <span class="n">interested</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="n">HashSet</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">AttachGraph</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">let</span> <span class="n">records</span> <span class="o">=</span> <span class="n">records</span><span class="nf">.into_iter</span><span class="p">()</span>
+              <span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="n">ParsedRecord</span><span class="p">|</span> <span class="n">AttachInfo</span><span class="p">{</span>
+                  <span class="n">my_id</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">x</span><span class="py">.raw.pr_id</span><span class="nf">.as_str</span><span class="p">(),</span>
+                  <span class="n">attached_list</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">x</span><span class="py">.raw.attached_list</span><span class="nf">.as_str</span><span class="p">(),</span>
+              <span class="p">})</span><span class="nf">.collect</span><span class="p">();</span>
+  <span class="nf">get_attach_mapping</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">interested</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>主要的处理逻辑在内部封装的这个函数里实现,首先是构造输入数据，然后读入所有的记录，把对应的非对称的关联关系自动修复然后放入到对应的哈希映射表中，这里有２个映射表</p>
+<ul>
+  <li>第一个结构保存两两关联</li>
+  <li>第二个结构则收集传递关系，将所有传递关联的记录放在映射中
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">get_attach_mapping</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">AttachInfo</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">interested</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="n">HashSet</span><span class="o">&lt;&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">AttachGraph</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">{</span>
+  <span class="k">let</span> <span class="k">mut</span> <span class="n">graph</span> <span class="o">=</span> <span class="n">AttachGraph</span> <span class="p">{</span>
+      <span class="n">mapping</span><span class="p">:</span> <span class="nn">HashMap</span><span class="p">::</span><span class="nf">new</span><span class="p">(),</span>
+      <span class="n">components</span><span class="p">:</span> <span class="nn">HashMap</span><span class="p">::</span><span class="nf">new</span><span class="p">(),</span>
+  <span class="p">};</span>
+
+  <span class="c">//construct attach relation ship mapping</span>
+  <span class="c">// A -&gt; B, B -&gt; C, C -&gt; D, E =&gt; A: A, B:A, C:A, D: A, E:E</span>
+  <span class="n">records</span><span class="nf">.iter</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">rec</span><span class="p">|</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="n">graph</span><span class="py">.mapping</span><span class="nf">.get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="py">.my_id</span><span class="p">)</span><span class="nf">.is_none</span><span class="p">()</span> <span class="p">{</span>
+          <span class="n">graph</span><span class="py">.mapping</span><span class="nf">.insert</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="py">.my_id</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rec</span><span class="py">.my_id</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="k">let</span> <span class="n">from</span> <span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">graph</span><span class="py">.mapping</span><span class="nf">.get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="py">.my_id</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+      <span class="k">if</span> <span class="o">!</span><span class="n">graph</span><span class="py">.components</span><span class="nf">.contains_key</span><span class="p">(</span><span class="n">from</span><span class="p">)</span> <span class="p">{</span>
+              <span class="c">//borrow mutable here!</span>
+              <span class="n">graph</span><span class="py">.components</span><span class="nf">.insert</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="nn">HashSet</span><span class="p">::</span><span class="nf">new</span><span class="p">());</span>
+              <span class="n">graph</span><span class="py">.components</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">from</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.insert</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="n">rec</span><span class="py">.attached_list</span>
+          <span class="nf">.split</span><span class="p">(</span><span class="s">", "</span><span class="p">)</span>
+          <span class="nf">.filter</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+          <span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
+              <span class="k">if</span> <span class="n">graph</span><span class="py">.mapping</span><span class="nf">.get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span><span class="nf">.is_none</span><span class="p">()</span> <span class="p">{</span>
+                  <span class="n">graph</span><span class="py">.mapping</span><span class="nf">.insert</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">,</span> <span class="n">from</span><span class="p">);</span> 
+              <span class="p">}</span>
+              <span class="n">graph</span><span class="py">.components</span><span class="nf">.get_mut</span><span class="p">(</span><span class="n">from</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.insert</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+          <span class="p">});</span>
+  <span class="p">});</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>基于上面这些输入数据，再考虑如何选取主记录，将所有的非主记录的索引都替换为符合条件的一个主记录；
+因为默认情况下记录无法修改，这里用一个新的结构来替换和插入，然后在最后的地方重新绑定；因为是浅拷贝所以虽然有效率损耗，影响应该不大；
+这本身也是函数式编程的一个无法忽视的问题。</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">let</span> <span class="k">mut</span> <span class="n">new_mapping</span> <span class="o">=</span> <span class="nn">HashMap</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+    <span class="n">graph</span><span class="py">.components</span><span class="nf">.iter</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|(</span><span class="n">from</span><span class="p">,</span> <span class="n">attached</span><span class="p">)|</span>
+            <span class="k">if</span> <span class="o">!</span><span class="n">interested</span><span class="nf">.contains</span><span class="p">(</span><span class="n">from</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">attached</span><span class="nf">.intersection</span><span class="p">(</span><span class="n">interested</span><span class="p">)</span>
+                    <span class="nf">.nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="nf">.map</span><span class="p">(|</span><span class="n">y</span><span class="p">|</span> <span class="p">(</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="n">attached</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="nf">.unwrap_or</span><span class="p">((</span><span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="n">attached</span><span class="p">))</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="p">(</span><span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="n">attached</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">)</span><span class="nf">.for_each</span><span class="p">(|(</span><span class="n">from</span><span class="p">,</span> <span class="n">attached</span><span class="p">)|</span> <span class="p">{</span>
+            <span class="n">attached</span><span class="nf">.iter</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
+                <span class="n">new_mapping</span><span class="nf">.insert</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">from</span><span class="p">);</span>
+            <span class="p">});</span>
+    <span class="p">});</span>
+
+    <span class="n">graph</span><span class="py">.mapping</span> <span class="o">=</span> <span class="n">new_mapping</span><span class="p">;</span>
+    <span class="n">graph</span>
+</code></pre></div></div>
+
+<h2 id="效率和打包">效率和打包</h2>
+
+<p>最终在<code class="highlighter-rouge">release</code>模式下处理数据总共耗时不到900毫秒，考虑有缓存的话，多运行几次还可以更短，已经远远超出我的预料了。在大量正则表达式处理的情况下，即使是几千条记录的数据量，
+因为很长的文本字段可能包好多个列表字段，需要几个正则表达式依次解析，即使是不考虑输入文件的复杂性，
+用传统的Unix工具也未必能达到这么好的性能，即便是Perl/Sed/Awk的正则表达式实现的非常高效。</p>
+
+<p>另外一个考虑的因素是如何共享最终编译好的程序给别人使用，本来考虑的是让别人安装VC++ Redistribute Tools然后试验了一下发现太繁琐了；
+于是想查找是否可以静态编译所有以来的方法，幸好这里以来的主要是微软的Ｃ运行时库，<code class="highlighter-rouge">Cargo</code>工具链已经提供了很好的封装；
+只需要在工程目录下放置一个特殊的配置文件 (<code class="highlighter-rouge">.cargo/config</code>)，告诉工具链需要静态编辑即可，里面的内容为</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[target.x86_64-pc-windows-msvc]</span>
+<span class="py">rustflags</span> <span class="p">=</span> <span class="s">["-Ctarget-feature=+crt-static"]</span>
+<span class="nn">[target.i686-pc-windows-msvc]</span>
+<span class="py">rustflags</span> <span class="p">=</span> <span class="s">["-Ctarget-feature=+crt-static"]</span>
+</code></pre></div></div>
+
+<p>另外看到Rust语言社区的第二个大版本已经出来了，以后可以再花时间琢磨一下里面有什么重大更新，毕竟目前用的版本还比官方的Rust2018早一个版本。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/12/30/modern-cpp-reflection/">现代C++语言是否走上了歧路?</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/12/15/parsing-big-csv-with-rust-serde/">用Rust来辅助报表解析</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/09/23/rust-parsing-jira-tickets/">用Rust实现一个高效的REST解析工具</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/05/20/production-ready-microservice/">标准化和生产环境就绪的微服务</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/26/cloud-native/">云原生应用</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/rust" class="page__taxonomy-item" rel="tag">rust</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/tools" class="page__taxonomy-item" rel="tag">tools</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/notes" class="page__taxonomy-item" rel="tag">notes</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/study" class="page__taxonomy-item" rel="tag">study</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/tools" class="page__taxonomy-item" rel="tag">tools</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-12-15T00:00:00+08:00">December 15, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=用Rust来辅助报表解析 https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2018/12/15/parsing-big-csv-with-rust-serde/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="parsing-big-csv-with-rust-serde">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

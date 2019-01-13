@@ -322,7 +322,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/tools/index.html">tools(21)</a>
+      <a href="/categories/tools/index.html">tools(22)</a>
   </span>
   </li>
   
@@ -376,7 +376,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/study/index.html">study(10)</a>
+      <a href="/categories/study/index.html">study(11)</a>
   </span>
   </li>
   
@@ -385,7 +385,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/notes/index.html">notes(23)</a>
+      <a href="/categories/notes/index.html">notes(24)</a>
   </span>
   </li>
   
@@ -394,7 +394,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/programming/index.html">programming(40)</a>
+      <a href="/categories/programming/index.html">programming(41)</a>
   </span>
   </li>
   
@@ -403,7 +403,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/language/index.html">language(15)</a>
+      <a href="/categories/language/index.html">language(16)</a>
   </span>
   </li>
   
@@ -630,13 +630,13 @@ HTTP协议的无状态保证和REST API的分页查询机制，使得我们只�
 唯一稍微让人觉得有些不一致的是它的请求消息的设计采用的是典型的函数式的不可变设计，需要<strong>用一个builder来构建</strong>，稍微熟悉一下即可。</p>
 
 <p>REST数据的处理上，有赖于REST本身强大的<code class="highlighter-rouge">Trait</code>抽象支持，即便是没有官方的基于class的多态支持，
-基于抽象数据类型的serde抽象还是提供了强大的代码复用能力；形形色色的第三方库只要声明对各种数据类型的<code class="highlighter-rouge">serde</code>支持，
+基于抽象数据类型的<strong>serde抽象还是提供了强大的代码复用能力</strong>；形形色色的第三方库只要声明对各种数据类型的<code class="highlighter-rouge">serde</code>支持，
 就可以<strong>方便地以非侵入的方式提供</strong>给用户。只是从语法上，用户需要定义自己的结构体，
 并且用头上加注解的方式添加声明让编译器知道该数据可以被放置在对应的数据解析的上下文中。</p>
 
 <p>Rust自身也默认规定了命名风格，并且对不符合它期望的命名一律报以警告处理；而第三方的API中的数据恰好和这一风格相悖；
 好在<code class="highlighter-rouge">serde_json</code>库也支持自己重命名另外一个名字，这样就可以绕开命名风格不一的问题，只是实际写出来的代码可能有些臃肿；
-还有一种简单的办法就是告诉编译器下面的名字不遵循默认的下划线分隔的命名风格，没有很强的强迫症或者赶时间的话到时可以务实一点跳过编译器的警告。</p>
+还有一种简单的办法就是告诉编译器下面的名字<strong>不遵循默认的下划线分隔的命名风格</strong>，没有很强的强迫症或者赶时间的话到时可以务实一点跳过编译器的警告。</p>
 
 <p>具体的绑定json的查询结果的结构如下</p>
 
@@ -752,6 +752,19 @@ serde_json库称自己是最快的JSON解析库，还真不是白吹的。</p>
 
         
             <li>
+                <a href="/post/2018/12/15/parsing-big-csv-with-rust-serde/">用Rust来辅助报表解析</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
                 <a href="/post/2018/09/23/rust-parsing-jira-tickets/">用Rust实现一个高效的REST解析工具</a>
             </li>
             
@@ -792,19 +805,6 @@ serde_json库称自己是最快的JSON解析库，还真不是白吹的。</p>
         
             <li>
                 <a href="/post/2018/04/04/spring-reactive/">Spring新版本的响应式编程</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2018/03/10/functional-reactive-programming/">函数式反应式编程</a>
             </li>
             
             
