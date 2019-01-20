@@ -1,4 +1,290 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-13T17:56:48+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">现代C++语言是否走上了歧路?</title><link href="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" rel="alternate" type="text/html" title="现代C++语言是否走上了歧路?" /><published>2018-12-30T00:00:00+08:00</published><updated>2018-12-30T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">&lt;p&gt;C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-20T12:54:16+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust2018版：生产力提升的开始</title><link href="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/" rel="alternate" type="text/html" title="Rust2018版：生产力提升的开始" /><published>2019-01-19T00:00:00+08:00</published><updated>2019-01-19T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/">&lt;p&gt;不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型，
+基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。
+社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产，
+之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在&lt;strong&gt;接近年底的时候迟到但是没有爽约&lt;/strong&gt;，官方将1.31版本宣布为正式的2018版本。&lt;/p&gt;
+
+&lt;p&gt;这个版本和其它小版本的不同在于，这种年份命名的版本的上一个还要追溯于2015年，所以在设计上有很多预留的考量，并且在工具上也给予了特殊照顾。
+&lt;!--more--&gt;
+正式的版本是于12月中旬发布的，前面因为时间关系并没有投入多大精力来仔细关注变更和改进之处。好在过了一个月，社区中的介绍文字也多了起来，
+可以在读官方文档的基础上，再查引其它作者的解读，并且尝试着按照文档的介绍，改写了自己之前缩写的代码，加深对这些改变的理解。&lt;/p&gt;
+
+&lt;h2 id=&quot;官方介绍&quot;&gt;官方介绍&lt;/h2&gt;
+
+&lt;p&gt;官方社区维护了一个关于年份版本的电子书，是用&lt;a href=&quot;https://rust-lang-nursery.github.io/edition-guide/introduction.html&quot;&gt;GitBook&lt;/a&gt;方式发布在语言项目的页面上，
+包含了三个部分的介绍&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;什么是“年份版本”以及它和每六周发布的常规版本的关系&lt;/li&gt;
+  &lt;li&gt;每个版本包含了那些内容，目前有２个版本，那么分别有两个章节介绍2015版本和2018版本&lt;/li&gt;
+  &lt;li&gt;如何做项目版本的迁移&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;年份版本的意义&quot;&gt;年份版本的意义&lt;/h2&gt;
+&lt;p&gt;年份版本的用意其实跟多是出于宣传的需要，相当于软件项目中的里程碑版本；如果没有这样吸引人眼球的打包处理方式，普通的用户可能或觉得无所适从，
+因为每六个星期就发布一个版本的方法虽然更加敏捷，不想跟着升级的用户或者新用户就会觉得无所适从，不知道该选择哪个版本做项目。&lt;/p&gt;
+
+&lt;p&gt;年份版本其实是通过将一段时间内发布的语言特性和工具、库等集中起来，用特殊的版本标识符展现出来，&lt;strong&gt;给用户提供一个选择的基准&lt;/strong&gt;。
+在这个新版本之前，其实只有一个2015版本，并且被设置为是默认的版本，因而如果抛去默认版本不算，2018版本可以算作是第一个新版本。
+从编译器的角度来看，所有在这个编译器版本对应的&lt;strong&gt;小版本被发布之前所提供的语言特性都是可以支持和编译&lt;/strong&gt;的，不同的依赖库也可以用不同的版本编译和链接，都没有问题。&lt;/p&gt;
+
+&lt;p&gt;从兼容性上来说，官方保证了所有的新版本都是后向兼容的，并且有些关键的语言特性也会向后加入到老的版本中。
+大部分情况下如果吃不准，总是&lt;strong&gt;用新的版本&lt;/strong&gt;就没错了。&lt;/p&gt;
+
+&lt;p&gt;新版本支持一个新的cargo属性，默认没有设置的情况下，编译器会按照2015版本来解析和编译代码；如果需要使用新版本，需要指定如下的属性&lt;/p&gt;
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;py&quot;&gt;edition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;2018&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;新版本的改进可以看做两个部分，一个是语言特性上的改进就是纯粹的语言改进，另一个是工具链和生态系统中重要软件和工具的改进。
+传统的编程语言版本更新往往只侧重于第一个方面，但是进入最近十几年的软件工程实践表明，一门语言要想维持和发展，
+&lt;strong&gt;生态系统中工具的支持是至关重要&lt;/strong&gt;的；Rust社区很明智的仔细考虑了这一趋势，并花了比较大的力气改进程序员的生产效率。&lt;/p&gt;
+
+&lt;h2 id=&quot;rust语言本身的改进&quot;&gt;Rust语言本身的改进&lt;/h2&gt;
+
+&lt;p&gt;语言特性本身的改进比较多，大的特性方面主要包括如下几个&lt;/p&gt;
+
+&lt;h3 id=&quot;非作用域生命周期-nll&quot;&gt;非作用域生命周期 (NLL)&lt;/h3&gt;
+
+&lt;p&gt;这个特性其实主要是用于解决&lt;strong&gt;变量访问的引用检查过于严格&lt;/strong&gt;引起的”误杀”的问题，提高引用检查的智能化水平，
+使一些人眼看起来完全没有问题的代码，也可以被编译器正确识别而编译通过，在不损失正确性的前提下，减少程序员取悦编译器的不方便之处，&lt;strong&gt;减少程序员的心智负担&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;具体来说，在老的语言版本中，下面的代码将无法通过编译器的引用声明周期检查&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//y not used any more&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;失败的原因在于，编译器的生存周期检查是和作用域绑定在一起的；在函数第二行的时候，我们声明了&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;是前面可变变量的一个不可变引用，
+编译器认为从这一行开始到当前作用域结束（这里是函数作用域，靠大括号约束）前，这个不可变引用总是存在的。
+因而在&lt;strong&gt;作用域没有结束之前，编译器又发现了对同一个变量的一个可变的引用&lt;/strong&gt;，那么编译器无法放置潜在的访问冲突，为了保证安全，编译器选择不让代码编译通过。&lt;/p&gt;
+
+&lt;p&gt;事实上，写代码的程序员却很清楚，这里的y已经不再使用了，因此再声明一个新的可变引用是没有问题的。
+因为编译器不知道，在老版本的编译环境中，程序员&lt;strong&gt;不得不想办法创建一个临时的作用域&lt;/strong&gt;，绕过这个问题&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;//y not used any more, out of scope here&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;对用户而言，这是一个比较麻烦的心智负担，新版本通过让编译器变得更聪明，来自动检测这一情况，
+自动判断这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt;两个引用是进水不犯河水的，编译仍然可以畅通无阻。&lt;/p&gt;
+
+&lt;p&gt;如果用户犯了错误，在新的可变引用之后，还想重新使用前面的不可变引用，那么编译器依然会正确的拦截这一做法，
+并且给出的编译错误也会更加直观一些，&lt;strong&gt;直接了当的告诉用户&lt;/strong&gt;，两个引用冲突的点在于实际产生冲突的地方，
+而不会像老版本一样给出相对混淆一些的标记于作用域结束处的错误信息。这样便极大地降低了新用户学习的门槛，
+即使他们没有完全掌握引用检查的原理和机制，也可以按照编译器的指示讲代码修改正确。&lt;/p&gt;
+
+&lt;p&gt;基于这个改进对用户的影响实在太大，同样的改进也会在后续加入到2015版本中。&lt;/p&gt;
+
+&lt;h3 id=&quot;减少不必要的重复&quot;&gt;减少不必要的&lt;code class=&quot;highlighter-rouge&quot;&gt;?&lt;/code&gt;重复&lt;/h3&gt;
+
+&lt;p&gt;这个主要是用于清理宏中的复杂的样板代码，比如如下的宏定义因为第二个表达式部分是可选的，必须重复地写成复杂的形式&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;macro_rules!&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b:expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//similar like above&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;新版本力争优化这一重复，通过可选部分的 &lt;code class=&quot;highlighter-rouge&quot;&gt;$(...)?&lt;/code&gt; 结构，让宏的设计者可以写出&lt;strong&gt;更干净&lt;/strong&gt;的代码&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;macro_rules!&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b:expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nv&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+            &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+         &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;不过宏的部分目前被很多人认为是语言设计中不太成熟的部分，不管写的很啰嗦，理解起来也很不直观，
+距离成熟还有不断的路程要走；且看后面会怎样进一步发展。&lt;/p&gt;
+
+&lt;h3 id=&quot;模块系统和库路径的简化&quot;&gt;模块系统和库路径的简化&lt;/h3&gt;
+
+&lt;p&gt;模块系统是Rust里面比较让新手感觉迷惑的一块知识；虽然它的基本规则还是比较清晰和直观的，
+但是当多个复杂的概念混合在一起的时候，滋生出来的一些&lt;strong&gt;复杂的情况却往往违反人的直觉&lt;/strong&gt;，
+这一块明显会成为新手学习的”拦路虎”，使很多人忘而退却。
+新版本通过引入一些小的变化来放松一些死板的规则带来的约束，宁可让编译器处理稍微复杂一点，对用户的要求更宽松一些，降低使用的门槛。&lt;/p&gt;
+
+&lt;p&gt;主要的变化在于&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;删除了大部分强制的&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate&lt;/code&gt;声明，大部分情况下，只要在配置文件中引入了依赖的模块，代码里面就可以直接使用了，不用再啰嗦地声明一大堆的&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;crate&lt;/code&gt;关键字指向当前的模块&lt;/li&gt;
+  &lt;li&gt;用&lt;strong&gt;模块名来标记其它引用模块的绝对路径&lt;/strong&gt;，而用｀crate`来标记当前模块&lt;/li&gt;
+  &lt;li&gt;模块嵌套子模块的情况下，同名文件夹和文件夹名字命名的模块声明文件可以同时存在，不需要在文件夹下面再专门声明一个&lt;code class=&quot;highlighter-rouge&quot;&gt;mod.rs&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;去除臃肿的外部模块声明&quot;&gt;去除臃肿的外部模块声明&lt;/h4&gt;
+&lt;p&gt;第一个改动非常直观，原来版本中繁琐而笨拙的一大堆&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate xxx&lt;/code&gt;可以全部删掉了，留下&lt;code class=&quot;highlighter-rouge&quot;&gt;use xxx::yyy&lt;/code&gt;;
+这里有两个例外情况,对应于系统模块中的&lt;code class=&quot;highlighter-rouge&quot;&gt;crates&lt;/code&gt;，分别是&lt;code class=&quot;highlighter-rouge&quot;&gt;std&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt;这两个模块；
+前者已经被编译器默认当做隐式包含而用户不需要指定（否则可以设想代码会变得臃肿不堪），而&lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt;模块大部分情况下也不会用到。
+还有一个例外情况是&lt;code class=&quot;highlighter-rouge&quot;&gt;proc_macro&lt;/code&gt;的使用，显然&lt;strong&gt;这些都是非常罕见&lt;/strong&gt;的情况。&lt;/p&gt;
+
+&lt;h4 id=&quot;模块和路径&quot;&gt;模块和路径&lt;/h4&gt;
+
+&lt;p&gt;对于复杂的库实现来说，为了封装内部的细节，往往需要借助于子模块嵌套的办法实现更好的逻辑拆分以提高可维护性；
+而旧版本的含糊的子模块规则往往会把初学者绕晕，尤其是当某个嵌套很深的子模块需要引用比较靠顶层的模块中的结构或者函数时，
+必须将库本身的名字填上来，或者用&lt;code class=&quot;highlighter-rouge&quot;&gt;super::super&lt;/code&gt;这样的方式来绕过&lt;strong&gt;重命名模块名带来的尴尬&lt;/strong&gt;。
+新版本通过指定&lt;code class=&quot;highlighter-rouge&quot;&gt;crate&lt;/code&gt;本身总是指向根路径来简化重命名操作带来的代码改动。&lt;/p&gt;
+
+&lt;p&gt;具体来说，假设我们有这样的模块结构&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;＃inside a libary named &lt;span class=&quot;s2&quot;&gt;&quot;mylib&quot;&lt;/span&gt;
+lib
+|-- top.rs
+|-- foo
+    |-- funfoo.rs
+    |-- bar
+        |-- funbar.rs
+        |-- sub
+            |-- foosub.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;当我们在最内层的&lt;code class=&quot;highlighter-rouge&quot;&gt;foosub.rs&lt;/code&gt;里面想引用&lt;code class=&quot;highlighter-rouge&quot;&gt;top.rs&lt;/code&gt;里面定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;top_func&lt;/code&gt;,则必须要在代码里面写做&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;//inside foosub.rs &lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;//old 2015 edition code, need to adapt for module renaming&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;mylib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;//or use super to indirect, no code change needed for renaming&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;而新的语言版本允许我们简单地写作&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;无需啰嗦的modrs&quot;&gt;无需啰嗦的&lt;code class=&quot;highlighter-rouge&quot;&gt;mod.rs&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;这个小改进也是一个使用上的简化，更符合人的直觉一点；反过来看，老的版本必须强制程序员在创建子模块的时候，
+在文件夹里面添加一个&lt;code class=&quot;highlighter-rouge&quot;&gt;modrs&lt;/code&gt;，并且上层目录里面不准有和文件夹同名的源代码文件出现，反而有点麻烦了。
+现在可以很愉快地写这样的目录结构了&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;lib&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.rs&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//same module and rs co-exist!&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.rs&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//no need to put dummy mod.rs here!&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;统一的use语法&quot;&gt;统一的&lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt;语法&lt;/h4&gt;
+&lt;p&gt;老版本允许一些含混的&lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt;声明，尤其是在某些情况下允许声明文件中定义的默写子模块函数，而&lt;strong&gt;新版本统一了&lt;/strong&gt;可以被声明使用的具体类型，只能是如下几者之一&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;正式的模块名字&lt;/li&gt;
+  &lt;li&gt;self用来表明是当前文件中的定义&lt;/li&gt;
+  &lt;li&gt;super用来指明是上一级文件目录中的子模块的定义&lt;/li&gt;
+  &lt;li&gt;crate用来指明是本模块顶层路径下的子模块&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;因此相应的代码变化是&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bar&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// use foo::Bar; //valid in 2015 but not valid in 2018&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//must specify top level &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在不引入更多麻烦的情况下，&lt;strong&gt;一致性总是好于过分混乱的简洁&lt;/strong&gt;；这样才能更好的减少用户的心智负担。&lt;/p&gt;
+
+&lt;h3 id=&quot;去除匿名trait类型的参数&quot;&gt;去除匿名&lt;code class=&quot;highlighter-rouge&quot;&gt;trait&lt;/code&gt;类型的参数&lt;/h3&gt;
+
+&lt;p&gt;这个小改动也是为了提高代码的一致性，虽然稍微复杂了一些。具体来说，就是老的版本允许这样写&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;新版本必须给一个参数名字，或者用&lt;code class=&quot;highlighter-rouge&quot;&gt;_&lt;/code&gt;来代替&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;baz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//use _:u8 if not used inside &lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;关键字上的改进&quot;&gt;关键字上的改进&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;dyn&lt;/code&gt;被提升为一个更严格的关键字，而之前的版本中它是一个弱关键字；这意味着编译器会做更多的检查，
+确保它没用被使用在不合适的上下文中，如变量和函数声明，结构属性定义，类型参数，生命周期限定，宏，模块等。&lt;/li&gt;
+  &lt;li&gt;预留了下面几个关键字，主要原因还是对应的功能没用实现完整，先占着再说
+    &lt;ol&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt; 用于异步编程的异步函数声明&lt;/li&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt; 用于异步等待，和前一个结合支持协程；这方面的机制在很多语言中都支持的比较完善了&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;try&lt;/code&gt; 这方面的处理还不是很成熟，还需要观察后续语言如何进一步演化&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;编译检查改进&quot;&gt;编译检查改进&lt;/h3&gt;
+
+&lt;p&gt;编译器检查列表中新加了２个默认的编译检查，如果不符合则会被编译器标记为拒绝&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;整数字面量越界（向上溢出）检查 -  简单来说，给出的整数值超出了类型所能表达的范围的时候编译器会明确的拒绝；
+这会破坏一些从C语言迁移过来的编程习惯，比如把-1赋值给一个无符号８位数，就会被认为是越界。&lt;/li&gt;
+  &lt;li&gt;未指明类型信息的裸指针解引用会被明确拒绝，避免一些低级而诡异的错误，使得底层编程更加安全&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;大部分日常使用中的程序都不会被上面的２个新的检查影响到。&lt;/p&gt;
+
+&lt;h2 id=&quot;工具的改进&quot;&gt;工具的改进&lt;/h2&gt;
+
+&lt;p&gt;新版本带来了不少新的工具来&lt;strong&gt;提高程序员的生产效率&lt;/strong&gt;；包括官方的打包工具，格式检查，新语言特性风格上的检查
+(类似于有名的质量检查工具&lt;code class=&quot;highlighter-rouge&quot;&gt;sonar&lt;/code&gt;),可惜的是不少工具还处于&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;阶段，距离正式推出还需要一些时间。&lt;/p&gt;
+
+&lt;h3 id=&quot;cargo工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cargo&lt;/code&gt;工具&lt;/h3&gt;
+
+&lt;p&gt;这一官方的打包和测试工具做了如下的改动&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;多&lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;发现机制在用户制定了&lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;属性的情况下，还会继续扫描和发现其它的平台架构&lt;/li&gt;
+  &lt;li&gt;没有给出&lt;code class=&quot;highlighter-rouge&quot;&gt;path&lt;/code&gt;属性的情况下，即使代码里面有&lt;code class=&quot;highlighter-rouge&quot;&gt;src/{target_name}.rs&lt;/code&gt;的存在，cargo也不会自动推断对应的路径；这个改动应该是修复一些已有的bug&lt;/li&gt;
+  &lt;li&gt;默认情况下，&lt;code class=&quot;highlighter-rouge&quot;&gt;install&lt;/code&gt;不会再安装于默认的当前路径，如果用户坚持想这么做，那么必须提供“&lt;code class=&quot;highlighter-rouge&quot;&gt;--path .&lt;/code&gt;”参数来显示指定。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;fmt工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;fmt工具&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;目前自动格式化代码的工具还处于预览阶段，没有放在正式的&lt;code class=&quot;highlighter-rouge&quot;&gt;rustup component&lt;/code&gt;中，需要通过添加&lt;code class=&quot;highlighter-rouge&quot;&gt;-preview&lt;/code&gt;后缀来获取。
+看起来&lt;strong&gt;新的编程语言都不约而同地强迫大家用同一种编程风格，减少对编码风格的争吵&lt;/strong&gt;，无疑是比较明智的；
+因为绝大部分人一开始在学习一门语言的时候，并没有很强烈的习惯支撑，而编码风格本身又无所谓好坏，
+先入为主是个很普遍的现象，减少这方面的无畏的精力消耗，没有什么不好。&lt;/p&gt;
+
+&lt;h3 id=&quot;clippy代码检查工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;clippy&lt;/code&gt;代码检查工具&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/rust-lang/rust-clippy&quot;&gt;clippy&lt;/a&gt; 是一个用于Rust的代码质量检查工具，目前也是处于&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;阶段，
+尤其是Windows上需要加&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;才可以下载使用。它本身已经提供了超过290个检查项，
+对于每个失败的检查项，它还会提供链接告诉你应该怎么去修改，不少检查是基于对语言更深入的理解才能做到的，
+因此运行的时候需要先编译项目的代码。&lt;/p&gt;
+
+&lt;p&gt;clippy自己定义了一些检查集供用户选择，包括&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;style 检查会检查是否遵循语言本身定义的一些惯用法&lt;/li&gt;
+  &lt;li&gt;complexity 则检查是否代码的复杂度可以降低却用了一些难以理解的代码&lt;/li&gt;
+  &lt;li&gt;perf 检查判断是否代码可以使用更为高效的方式来实现&lt;/li&gt;
+  &lt;li&gt;correctness 检查代码的行为是否总是正确的,其中如果发现无用的代码也会给出警告&lt;/li&gt;
+  &lt;li&gt;cargo 附带检查项目的cargo声明文件是否符合规范&lt;/li&gt;
+  &lt;li&gt;nursery开启一些尚未稳定下的检查项&lt;/li&gt;
+  &lt;li&gt;pedantic模式会开启所有的检查项&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;项目本身配置通过&lt;code class=&quot;highlighter-rouge&quot;&gt;clippy.toml&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;.clippy.toml&lt;/code&gt;来指定具体的开关，打开哪些检查项，配置复杂度阈值，
+设置黑名单等功能。用户也可以通过相应的代码属性，加入&lt;code class=&quot;highlighter-rouge&quot;&gt;allow/deny/warn&lt;/code&gt;宏的方式，按需开启或者跳过某段代码的检查。&lt;/p&gt;
+
+&lt;p&gt;该项目的文档可以从&lt;a href=&quot;https://rust-lang.github.io/rust-clippy/master/index.html&quot;&gt;这里&lt;/a&gt;找到。&lt;/p&gt;
+
+&lt;h2 id=&quot;一点遗憾&quot;&gt;一点遗憾&lt;/h2&gt;
+&lt;p&gt;新的2018版本带来的改动不光有语言特性上的增强，还有侧重于生产率方面的工具增强和一致性改进。
+略微有些美中不足的是，异步编程和协程的支持还没有很完备，不得不通过预留关键字的做法留待后续版本继续解决。&lt;/p&gt;
+
+&lt;p&gt;另外一个没有提到的方面是关于Windows上工具链的支持和某些大的IDE工具对Nightly版本的依赖。
+尤其是RLS/Racer这两个比较重要的工具时不时会出现循环的重启，还必须依赖于Nightly版本，继续社区加大bug改进力度，早日加到文档版本中去。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><category term="tools" /><summary type="html">不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型， 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。 社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产， 之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在接近年底的时候迟到但是没有爽约，官方将1.31版本宣布为正式的2018版本。</summary></entry><entry><title type="html">现代C++语言是否走上了歧路?</title><link href="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" rel="alternate" type="text/html" title="现代C++语言是否走上了歧路?" /><published>2018-12-30T00:00:00+08:00</published><updated>2018-12-30T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">&lt;p&gt;C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。
 进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。
 只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在&lt;a href=&quot;https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/&quot;&gt;这篇名为哀悼现代C++&lt;/a&gt;的博客文章。&lt;/p&gt;
 
@@ -2858,216 +3144,4 @@ Linkerd则会继续开发，并致力于产品级的支持和维护，支持ECS�
   &lt;li&gt;&lt;a href=&quot;https://buoyant.io/2017/04/25/whats-a-service-mesh-and-why-do-i-need-one/&quot;&gt;Buoyant blog - what’s a service mesh and why I need one?&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;http://philcalcado.com/2017/08/03/pattern_service_mesh.html&quot;&gt;Pattern: service mesh&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://pivotal.io/cloud-native&quot;&gt;Cloud Native Application&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="servicemesh" /><category term="microservice" /><summary type="html">API网关是微服务结构中的一个重要的边界组件，用于隔离外部用户和内部的服务部署，完成诸如安全、鉴权等集中化的功能。 边车代理则是服务网格架构中的一个重要概念，两者从逻辑上都是作为基础设施和业务的核心功能逻辑相分离的，有一定的相似性而又有很大的不同。</summary></entry><entry><title type="html">Kafka的设计为什么高效</title><link href="https://skyscribe.github.io/post/2017/11/18/kafka-design-study/" rel="alternate" type="text/html" title="Kafka的设计为什么高效" /><published>2017-11-18T00:00:00+08:00</published><updated>2017-11-18T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2017/11/18/kafka-design-study</id><content type="html" xml:base="https://skyscribe.github.io/post/2017/11/18/kafka-design-study/">&lt;p&gt;Kafka这一孵化于LinkedIn的开源项目正得到越来越多组织的关注和使用；其优雅的设计和对实时性处理的探索有很多值得学习的地方。
-本文试就个人学习过程中的一些思考和理解来分析为什么Kafka可以兼顾可靠性、一致性和尽可能强的实时处理能力。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;kafka的基本设计&quot;&gt;Kafka的基本设计&lt;/h2&gt;
-
-&lt;h3 id=&quot;设计目标&quot;&gt;设计目标&lt;/h3&gt;
-&lt;p&gt;Kafka的首要设计目标是一个高性能的分布式数据流处理平台，它需要处理巨大的数据量并且提供极强的可靠性约束和一致性保障；这在分布式设计中是一个巨大的难题，
-因为同时能满足CAP要求的数据管理系统从理论上来说是不可能的。这里主要的区别是，Kafka仅仅是一个数据中间处理平台，作为一个broker本身，
-它对数据的内容和模型范式是不关心的，其主要任务是作为一个可靠、易扩展、高性能的中间媒介，尽快消费生产者送过来的消息，
-按照消费者的数目、集群配置将收到的消息尽可能高效地分发个消费者。&lt;/p&gt;
-
-&lt;h3 id=&quot;基本概念&quot;&gt;基本概念&lt;/h3&gt;
-
-&lt;p&gt;作为一个中间媒介，Kafka将从生产者中收到的数据保存在其平台上的内部存储系统上，这些数据逻辑上被保存在不同的逻辑分区上。
-出于高可靠性的考虑，这些逻辑分区可能会被分别放置在不同的磁盘，或者是同一机架上的不同的物理机器上，或者是同一数据中心的不同机架上。
-这样的灵活性考量是为了方便用户订制不同的可靠性策略。&lt;/p&gt;
-
-&lt;h4 id=&quot;话题&quot;&gt;话题&lt;/h4&gt;
-&lt;p&gt;考虑到Kafka的核心是提供一个&lt;strong&gt;消息流处理平台&lt;/strong&gt;，并同时可以处理多个并发的消息流；从概念上它将一个独立的逻辑消息流抽象为一个话题 (Topic) 。
-话题才是Kafka基本的逻辑处理单元，所有的分发和调度，乃至集群处理等技术均以话题为基本处理单元。因为是话题是数据流的抽象，
-因而其中的单个数据记录可以认为&lt;strong&gt;总是按照时间顺序依次往后面追加&lt;/strong&gt;的。生产者和消费者均需要知道它所要操作的话题名称然后才可以做对应的流操作：
-生产数据追加到话题中，或者从话题中取数据消费。&lt;/p&gt;
-
-&lt;h4 id=&quot;生产者和消费者&quot;&gt;生产者和消费者&lt;/h4&gt;
-
-&lt;p&gt;生产者和消费者都可以认为是实际的用户应用程序；Kafka提供API的方式将对应的生产者、消费者代码嵌入到用户的程序中，实现对Kafka平台的访问。
-生产者和消费者是对主题而言的一个相对概念，即同一个应用程序既可以是生产者，也可以是消费者（对另外一个不同的主题）。&lt;/p&gt;
-
-&lt;p&gt;生产者产生数据记录并通过封装API发送到Kafka平台上，被内部存储和分发。消费者则通过订阅某个主题收到Kafka平台的数据推送。整个数据处理风格是 Pub/Sub 风格的，
-即生产者发布数据到Kafka，生产者从Kafka订阅数据的生成。&lt;/p&gt;
-
-&lt;p&gt;生产者和消费者&lt;strong&gt;从业务逻辑和物理部署上相解耦，二者的关联是纯粹逻辑上的&lt;/strong&gt;，可以在运行期随着负载而扩展，这一方式具有极大的灵活性；
-用户可以根据自己的需要订制和分发自己的工作负载。&lt;/p&gt;
-
-&lt;h3 id=&quot;分组式处理&quot;&gt;分组式处理&lt;/h3&gt;
-
-&lt;p&gt;从分布式可靠性的角度考虑，话题的内容需要被平台内部存储和调度；为了应对可能的硬件错误或者节点失效，Kafka内部将&lt;strong&gt;每一个话题切割为多个子部分&lt;/strong&gt;，每个子部分称为一个分区。
-逻辑上来说这些分区里面的数据记录的合集是生产者所生成的数据的整体，见下图&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://kafka.apache.org/10/images/log_anatomy.png&quot; alt=&quot;kafka_partition&quot; /&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;消费者分组&quot;&gt;消费者分组&lt;/h4&gt;
-
-&lt;p&gt;由于生产者和消费者可以是完全解耦的（微服务设计下的一个潜在假设），他们的处理能力及其实例的数量都可能是不同的（可以用Kubenetes或者MeSos等工具动态管理 )，
-Kafka从设计上将消费者分成逻辑的组，并且保证&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;一个分组中的多个消费者作为一个整体需要能够读到它关心的话题的所有数据记录&lt;/li&gt;
-  &lt;li&gt;同一个分组中的多个消费者的处理负载可以很容易的被Kafka自身做负载均衡&lt;/li&gt;
-  &lt;li&gt;对于多个不同的消费者分组而言，同一个分区对每一个分组都有一个唯一的消费者和其关联&lt;/li&gt;
-  &lt;li&gt;这种潜在的关联映射决定了任何一个消费者分组中&lt;strong&gt;消费者实例的数量不能超过话题本身所对应的分区的数目&lt;/strong&gt;，否则分区到消费者实例的关联关系则无法分配&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;譬如下面的例子&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://kafka.apache.org/10/images/consumer-groups.png&quot; alt=&quot;kafka_consumer_group&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这里的同一个话题被分隔到2个服务器集群上，第一个服务器上有2个分区被标记为P0和P3，第二个服务器上则存储剩下的2个分区P1和P2。
-对于2个消费者分组A （包含2个消费者 ）和 B （包含4个消费者 ）而言，P0 的数据最终会被Kafka分给各组中的第一个消费者，P1被分给第二个；P2被分给第一/第三个，P3被分给第二/第四个。
-注意默认情况下，Kafka分配数据的方式是轮询式的，并尽量将连续的数据流分配到不同的服务器上；当然每一个具体的分区内部也可以在多个Kafka实例之间做主从复制以应对可能的失效，
-这里只是简化起见仅仅描述了没有分区复制的情况。&lt;/p&gt;
-
-&lt;h4 id=&quot;轮询式记录分发&quot;&gt;轮询式记录分发&lt;/h4&gt;
-
-&lt;p&gt;可以看出默认的策略是按照轮询式分配分组中的消费者实例的，如果分区数超过消费者数量，则采用取模运算的方式，从第一个开始继续分配。
-处于均衡复杂的考虑，最好是设置主题中分区的数目是消费者数目的整数倍，即&lt;strong&gt;消费者数量可以整除于分区数量&lt;/strong&gt;。即上图的例子中，如果消费者的数目是3，
-那么默认的情况下，第一个消费者的负载会是其它两个消费者的2倍。&lt;/p&gt;
-
-&lt;h4 id=&quot;数据记录的顺序性&quot;&gt;数据记录的顺序性&lt;/h4&gt;
-
-&lt;p&gt;Kafka&lt;strong&gt;仅仅保证同一个分区的数据一定会按照顺序被某个消费者处理&lt;/strong&gt;，多个分组之间的顺序是不被Kafka自身所保证的。
-每个分组内部的单个记录，相对于第一个数据记录的偏移被Kafka内部保存并传递个消费者，消费者可以据此得知当前读到的记录在分区中的位置。
-如果应用程序需要额外的顺序性保证，则必须在消息记录中添加自定义的字段来处理，或者确保消费者组中仅仅有一个消费者（并不订制自己的消费者关联策略）。&lt;/p&gt;
-
-&lt;h2 id=&quot;数据存储&quot;&gt;数据存储&lt;/h2&gt;
-
-&lt;p&gt;作为一个中间处理平台，Kafka必须保证数据可以被持久化存储，因为生产者产生的数据的时候，对应的消费者可能还没有启动来接受数据，或者消费者可能在处理过程中被重启。
-同时Kafka被设计用来处理和存储大量的数据，因此数据必须被持久存储于磁盘中。记录中的数据可以被存储和保留多长时间，完全由系统配置所决定，默认情况下，
-数据会被保存2天时间，然后同一个分区中最早的数据记录会被删除，以保证数据记录的逻辑连续性和不可变性。&lt;/p&gt;
-
-&lt;p&gt;每一个新加入的消费者组在默认情况下，都会按照现有系统中已经保存的数据，从最老的开始依次被分发处理。如果此过程中，由于消费者处理速度太慢而生产者产生新数据过快而产生
-未读取的分区数据被删除，消费者侧会得到&lt;strong&gt;异常提醒和偏移量重置通知&lt;/strong&gt;。这种情况一直发生的时候，应用程序就需要考虑增加更多的消费者实例或者降低生产者微服务的处理速度；
-在采用微服务风格的系统中，通过云基础设施动态调整工作负载可以不修改代码动态应对这种突发的流量高峰。&lt;/p&gt;
-
-&lt;h3 id=&quot;内部分段式存储&quot;&gt;内部分段式存储&lt;/h3&gt;
-
-&lt;p&gt;由于具体记录的内容不是Kafka平台所关心的重点，内部数据存储上很容易按照二进制块的方式存储，并且记录的offset和分区分配策略信息很容易被内部单独存储和优化以提高处理性能。
-同时为了便于快速的删除过期的老数据（依具体的数据保存策略而定），数据记录必须按照易于检索的方式存储；考虑到这些因素其内部数据是将一个记录划分为多个段来分开存储的。
-这样可以让Kafka快速方便地找到那些块需要被删除。&lt;/p&gt;
-
-&lt;p&gt;写数据的时候，Kafka需要保持一个记录指向当前写入的段。如果段的大小超过了预先设定的值，那么Kafka会创建一个新的段；同时每一个段有一个基本偏移量。逻辑上可以认为，
-任何&lt;strong&gt;一个新的段的基础偏移量总是大于等于更老的段&lt;/strong&gt;的所有偏移量，并小于同段中所有的记录；如下图&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://cdn-images-1.medium.com/max/1600/1*bZ-fWeb2KG_KhYv2EKDvhA.png&quot; alt=&quot;kafka_segments&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;tree&lt;/code&gt;命令来查看Kafka在磁盘上留下的存储文件，任何一个分区的分段都有一个这些段索引的&lt;code class=&quot;highlighter-rouge&quot;&gt;.index&lt;/code&gt;文件和对应的段记录文件，后者以&lt;code class=&quot;highlighter-rouge&quot;&gt;.log&lt;/code&gt;后缀来标识。
-段记录文件中实际存放了记录的压缩编码值、时间戳、大小、版本号以及校验值等信息。&lt;/p&gt;
-
-&lt;p&gt;磁盘上的实际文件格式和Kafka从生产者那里接收的消息一下，从而Kafka可以&lt;strong&gt;直接不经拷贝即将对应的数据发送给消费者&lt;/strong&gt;，显著的降低IO的开销提高性能。&lt;/p&gt;
-
-&lt;h2 id=&quot;性能和可靠性考虑&quot;&gt;性能和可靠性考虑&lt;/h2&gt;
-
-&lt;h3 id=&quot;数据复制-replication&quot;&gt;数据复制 (Replication)&lt;/h3&gt;
-
-&lt;p&gt;Kafka内部以分区为基本单位提供数据复制，即同一个分区有多分不同的拷贝；这些拷贝可以按照配置的不同分散在同一机器的不同的磁盘、同一机架上的不同磁盘或者不同的机器上，
-从而应对不同的失效或者错误。复制策略可以按照不同的主题来配置，Kafka提供了丰富的配置选项来调整这些配置，方便根据实际应用场景提供不同的可靠性保证。&lt;/p&gt;
-
-&lt;p&gt;非失效情况下，每一个分区按照分布式一致性的概念区分为一个Leader，0个或者多个Followers的方式工作；实际Followers的个数依据具体的主题的设置而定。
-所有的数据读写都发生在Leader上面，而数据会同时复制给所有的Follower上。通常情况下，分区的数目多余实际Kafka集群机器的个数，建议将不同的主题的Leader平均地分布在多个Kafka实例上，
-最大程度地避免单点故障。&lt;/p&gt;
-
-&lt;p&gt;所有Follower上的数据和Leader上的数据保证一致，从而可以在&lt;strong&gt;Leader失效的情况下，采用一致性共识算法重新选举&lt;/strong&gt;出新的Leader。
-Follower节点消费数据的方式和外部消费者处理数据的方式是一致的。和其他的分布式系统一样，Leader和Follower之间需要维护保活信息，从而维持共识算法的运转。
-当前内部的一致性处理是采用ZooKeeper来实现的；任何一个节点必须定期和ZooKeeper发送心跳保活，并且如果它处于活跃状态并且是follower节点，则必须复制（消费 ) Leader节点上新写入的数据。&lt;/p&gt;
-
-&lt;h3 id=&quot;数据写入保证&quot;&gt;数据写入保证&lt;/h3&gt;
-
-&lt;p&gt;生产者写入数据的时候，可以选择某个特定的策略来决定写入是否完成，具体策略的选择需要依据性能和时延方面的考量做权衡&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;要么是不关心Leader和Follower之间的复制，一旦写入Leader节点就直接返回认为数据提交。这样做的风险是，万一此时Kafka集群中的Leader节点发生故障而数据没有被同步到其他Follower节点上，
-那么数据可能被丢弃导致消费者收不到该数据&lt;/li&gt;
-  &lt;li&gt;要么等到数据被所有的Follower所复制后才返回，这样即使Leader节点发生错误，也可以保证消费者在新的Leader生效后一定可以获取到消息记录&lt;/li&gt;
-  &lt;li&gt;或者等待至少一个副本写入成功&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;显然这里&lt;strong&gt;任然逃不开CAP定理&lt;/strong&gt;的约束，要么保证绝对可靠性和持久性，但损失性能和吞吐率，要么保证数据处理性能但丢失一定的可靠性、持久性。&lt;/p&gt;
-
-&lt;p&gt;同时Kafka对任何一个主题，还支持一个最小必须同步的复制实例个数的设置以提高灵活性；显然这个配置应该小于该主题的副本个数。
-当生产者要求获取消息写入确认的时候，Kafka会检查是否超过给定设置的Follower实例已经得到了该消息，如果没有，则写入操作会被阻塞直到满足要求的副本复制完毕。&lt;/p&gt;
-
-&lt;p&gt;第三个选项则依赖于一个Kafka所提供的保证，&lt;strong&gt;只要有超过一个副本在数据写入过程中是活跃的（心跳未丢失可以消费数据 ) , 那么该消息就不会被Kafka丢弃&lt;/strong&gt;，即使设置的最小同步副本数超过一个。&lt;/p&gt;
-
-&lt;h4 id=&quot;leader失效情况下的选举算法&quot;&gt;Leader失效情况下的选举算法&lt;/h4&gt;
-
-&lt;p&gt;如果Leader节点从来不会失效，那么我们根本不需要Follower节点；问题是分布式计算中任何一个节点都有可能是不可靠的，网络也可能时不时失效，所以软件系统必须设计好处理这种失效。
-问题的复杂性在于，当Leader失效的时候，Follower中的有些节点可能已经crash，或者有的节点的数据老友的节点数据新一些；最大的&lt;strong&gt;挑战是我们需要选出持有最新数据的节点&lt;/strong&gt;作为新的Leader，
-否则上述的消息不丢失担保就无法满足。&lt;/p&gt;
-
-&lt;h5 id=&quot;基于多数的选举算法&quot;&gt;基于多数的选举算法&lt;/h5&gt;
-&lt;p&gt;最常用的算法是一种基于投票的方法，一般地Follower的个数必须是奇数以便于进行基于多数的投票和选举：即如果有 2N+1 个副本，那么必须有 N+1 个节点确认收到数据后，Leader节点才能确认数据写入成功。
-这样当Leader失效的时候，我们仅仅需要从 N+1 个节点中选取出持有最新数据的节点即可。具体的选举算法细节这里不详细展开，
-一个明显的好处是，&lt;strong&gt;基于多数的选举算法可以保证处理延迟仅仅依赖于最快的节点&lt;/strong&gt;，可以大大提高系统的可用性。&lt;/p&gt;
-
-&lt;p&gt;这一处理算法有很多中实现，包括ZooKeeper的Zab、Raft乃至&lt;a href=&quot;http://pmg.csail.mit.edu/papers/vr-revisited.pdf&quot;&gt;Viewtamped Replication&lt;/a&gt;等。
-该方法的弊端也是显而易见的：我们需要更多的节点和存储空间，譬如为处理单一节点的可能失效，我们需要3份数据拷贝，这在实际情况在往往是不过的；而对于有大量数据的系统中，
-增加系统的存储空间到5倍乃至更多倍以上则资源浪费也是相当惊人的。实际的场景中，这一策略仅仅适宜于维护轻量级的数据（如系统配置信息）而不是应用的实际数据。&lt;/p&gt;
-
-&lt;h5 id=&quot;kafka的处理策略&quot;&gt;Kafka的处理策略&lt;/h5&gt;
-
-&lt;p&gt;Kafka应用的方法有些略微的不同，它内部动态维护了一个保持同步的副本集合，该集合中的副本虚保证其处理速度和Leader是匹配的。&lt;strong&gt;只有该集合中的副本才会参与Leader的选举&lt;/strong&gt;。
-所谓的动态，以为这这个副本集会在运行期中被修改刷新并保存于ZooKeepr中去；并且其数量小于实际的节点数量。
-写入某个分区数据的操作仅仅在这个集合中的所有节点都消费了该数据的时候才会被认为是写入提交完毕的。基于该算法，同步副本集中的任何一个副本都可以在出错的情况下被选举为新的Leader。&lt;/p&gt;
-
-&lt;p&gt;当然前述的数据不丢失保证是在至少有一个副本不失效的情况下才可以达成的。如果所有的副本都失效了又怎么办？一旦这种情况发生，Kafka本身其实无能为力，应用系统的设计者必须考虑好如何应对&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;一种方法是等待同步副本集中的一个恢复正常，然后设置该副本为新的Leader并祈祷它没有丢数据 （考虑到墨菲定律，一定有某些情况下数据是丢失的）&lt;/li&gt;
-  &lt;li&gt;另外一种办法选择第一个恢复正常的副本作为Leader，然后继续运行&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这里的选择任然是从一致性和可用性中间二选一，毕竟&lt;strong&gt;CAP问题理论上无解&lt;/strong&gt; ！Kafka默认情况下会采用后一种策略，即尽快从先活过来的节点中选一个恢复可用性。&lt;/p&gt;
-
-&lt;h3 id=&quot;均匀分布leader角色&quot;&gt;均匀分布Leader角色&lt;/h3&gt;
-
-&lt;p&gt;Kafka提供的一个有意思的机制是尽可能得均衡Leader角色的分区，使得&lt;strong&gt;集群中的每一个机器上的Leader角色的分区数量大致相同&lt;/strong&gt;，从而最大程度地提高整个系统的可用性。
-因为Leader角色是按照分区来设置的，而一个主题可能被切分为多个分区，同时Kafka系统中可能处理成百上千个主题；总体分摊角色的结果是，
-任何一个机器节点的失效都尽量不引入系统性的故障。&lt;/p&gt;
-
-&lt;p&gt;同时Kafka内部会将其中的一个节点设置为controller角色，这样可以处理Kafka节点层面的失效，当controller节点检测到其他的机器节点失效时，
-Kafka可以尽量主动切换这些设置故障节点为Leader角色的所有分区，避免被动的Leader选举算法影响整体可用性，可谓是一种主动优化措施。&lt;/p&gt;
-
-&lt;h2 id=&quot;流处理和外部工具整合&quot;&gt;流处理和外部工具整合&lt;/h2&gt;
-
-&lt;p&gt;Kafka自身的流式处理设计更适合于作为大数据处理中的一个中间环节，可靠的实现数据的收集和即使传递。如果消费者工具是一些基于微服务的应用层工具，
-很容易在准实时的情况下即使分析实时数据完成一些传统的ELK框架无法完成的基于即时反馈的自适应软件系统。
-传统的ELK框架依赖于线下的数据分析和处理，等到产生一些有意义的结果来作为依据对原系统进行调整的时候，可能具体情况以及发生了变化。
-Kafka的准实时特性则允许我们更快地对系统的运行产生影响。&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://kafka.apache.org/documentation/streams/&quot;&gt;Kafka Streams&lt;/a&gt; 提供了一种新的方式构建实时分析微服务应用；
-我们仅仅需要依赖于存放在Kafka集群中的数据作为输入，在自己的微服务应用中实现反馈控制逻辑，并将分析结果再放入Kafka集群中；
-同时修改原系统中使其反过来从Kafka集群中订阅这些反馈，实时对系统行为作出调整即可。&lt;/p&gt;
-
-&lt;p&gt;一个简单的统计流中的文本并计算字数的插件式微服务应用如下&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WordCountApplication&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;c1&quot;&gt;//Construct config&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;Properties&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Properties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StreamsConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;APPLICATION_ID_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;wordcount-application&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StreamsConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;BOOTSTRAP_SERVERS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafka-broker1:9092&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StreamsConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;DEFAULT_KEY_SERDE_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Serdes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StreamsConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;DEFAULT_VALUE_SERDE_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Serdes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-
-        &lt;span class=&quot;n&quot;&gt;StreamsBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StreamsBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;KStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;textLines&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;TextLinesTopic&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;KTable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Long&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wordCounts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;textLines&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;flatMapValues&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;textLine&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Arrays&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;asList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;textLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toLowerCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;\\W+&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)))&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;groupBy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Materialized&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Long&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KeyValueStore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bytes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;byte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;as&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;counts-store&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;wordCounts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;WordsWithCountsTopic&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Produced&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Serdes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Serdes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Long&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()));&lt;/span&gt;
-        
-        &lt;span class=&quot;c1&quot;&gt;//Build and start stream&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;KafkaStreams&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;streams&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KafkaStreams&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;streams&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;参考资料&quot;&gt;参考资料&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;https://kafka.apache.org/documentation/&quot;&gt;Kafka documentation&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://thehoard.blog/how-kafkas-storage-internals-work-3a29b02e026&quot;&gt;How Kafka’s Storge Internals Work&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;&quot;&gt;Kafka Streams Documentation&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="performance" /><category term="database" /><category term="concurrency" /><category term="microservice" /><summary type="html">Kafka这一孵化于LinkedIn的开源项目正得到越来越多组织的关注和使用；其优雅的设计和对实时性处理的探索有很多值得学习的地方。 本文试就个人学习过程中的一些思考和理解来分析为什么Kafka可以兼顾可靠性、一致性和尽可能强的实时处理能力。</summary></entry></feed>
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="servicemesh" /><category term="microservice" /><summary type="html">API网关是微服务结构中的一个重要的边界组件，用于隔离外部用户和内部的服务部署，完成诸如安全、鉴权等集中化的功能。 边车代理则是服务网格架构中的一个重要概念，两者从逻辑上都是作为基础设施和业务的核心功能逻辑相分离的，有一定的相似性而又有很大的不同。</summary></entry></feed>
