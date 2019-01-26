@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-26T16:52:52+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust2018版：生产力提升的开始</title><link href="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/" rel="alternate" type="text/html" title="Rust2018版：生产力提升的开始" /><published>2019-01-19T00:00:00+08:00</published><updated>2019-01-19T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/">&lt;p&gt;不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型，
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-26T17:39:26+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust2018版：生产力提升的开始</title><link href="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/" rel="alternate" type="text/html" title="Rust2018版：生产力提升的开始" /><published>2019-01-19T00:00:00+08:00</published><updated>2019-01-19T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/">&lt;p&gt;不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型，
 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。
 社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产，
 之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在&lt;strong&gt;接近年底的时候迟到但是没有爽约&lt;/strong&gt;，官方将1.31版本宣布为正式的2018版本。&lt;/p&gt;
@@ -1615,7 +1615,8 @@ Controller的基本逻辑可以简化为如下的循环&lt;/p&gt;
 传统的基于REST API通信的应用要实现双向的通信往往不得不借助间接的双向REST调用或者引入消息队列并不得不处理复杂的应用程序逻辑，
 而gRPC不但省去了不必要的HTTP协议头开销，而且支持服务端在一条底层连接上同时向服务使用方（客户端）推送请求，可以极大地提高传输效率降低通信延迟。&lt;/p&gt;
 
-&lt;p&gt;很多流行的开源项目都加入了支持gRPC接口的行列，甚至一些微服务基础设施内部就是用gRPC进行通信的；具体的细节可以参看&lt;a href=&quot;/post/2018/02/10/http2-and-grpc/&quot;&gt;前面这篇文章&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;很多流行的开源项目都加入了支持gRPC接口的行列，甚至一些微服务基础设施内部就是用gRPC进行通信的；具体的细节可以参看[前面这篇文章]
+(/post/2018/02/10/http2-and-grpc/)。&lt;/p&gt;
 
 &lt;h3 id=&quot;其它一些热门的项目&quot;&gt;其它一些热门的项目&lt;/h3&gt;
 &lt;p&gt;还有一些处于孵化期的项目，相当一部分都和云计算的基础设施平台有关，譬如用于服务网格的边车代理服务乃至提供无服务器架构平台的FaaS、BaaS设施等。
@@ -1660,7 +1661,8 @@ rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com
 
 &lt;h3 id=&quot;服务网格项目&quot;&gt;服务网格项目&lt;/h3&gt;
 
-&lt;p&gt;目前Linkerd和Envoy都处于孵化状态，二者本身也是服务网格领域的佼佼者；更多细节可以参考之前的&lt;a href=&quot;/post/2018/01/20/api-gw-to-servicemesh/&quot;&gt;这篇服务网格的文章&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;目前Linkerd和Envoy都处于孵化状态，二者本身也是服务网格领域的佼佼者；更多细节可以参考之前的[这篇服务网格的文章]
+( /post/2018/01/20/api-gw-to-servicemesh/)。&lt;/p&gt;
 
 &lt;h3 id=&quot;opentracing&quot;&gt;OpenTracing&lt;/h3&gt;
 
@@ -1676,7 +1678,8 @@ rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com
   &lt;li&gt;&lt;a href=&quot;https://www.cncf.io/projects/graduation-criteria/&quot;&gt;CNCF graduation criteria&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://containerd.io/&quot;&gt;Containerd&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry><entry><title type="html">Spring新版本的响应式编程</title><link href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/" rel="alternate" type="text/html" title="Spring新版本的响应式编程" /><published>2018-04-04T00:00:00+08:00</published><updated>2018-04-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/04/spring-reactive</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">&lt;p&gt;流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(&lt;a href=&quot;/post/2018/03/10/functional-reactive-programming/&quot;&gt;前文有一些简单探讨&lt;/a&gt;)
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry><entry><title type="html">Spring新版本的响应式编程</title><link href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/" rel="alternate" type="text/html" title="Spring新版本的响应式编程" /><published>2018-04-04T00:00:00+08:00</published><updated>2018-04-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/04/spring-reactive</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">&lt;p&gt;流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注([前文有一些简单探讨]
+( /post/2018/03/10/functional-reactive-programming/ ))
 ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。
 Spring最新的&lt;a href=&quot;https://spring.io/blog/2018/02/19/spring-framework-5-0-4-available-now&quot;&gt;5.0版本&lt;/a&gt;更新也顺应这一潮流，加入了原生支持FRP的行列。&lt;/p&gt;
 
@@ -1980,7 +1983,7 @@ Spring框架会自动帮我们完成参数校验到请求分发这一系列背�
         &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注(前文有一些简单探讨) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry><entry><title type="html">函数式反应式编程</title><link href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" rel="alternate" type="text/html" title="函数式反应式编程" /><published>2018-03-10T00:00:00+08:00</published><updated>2018-03-10T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">&lt;p&gt;流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
+&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注([前文有一些简单探讨] ( /post/2018/03/10/functional-reactive-programming/ )) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry><entry><title type="html">函数式反应式编程</title><link href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" rel="alternate" type="text/html" title="函数式反应式编程" /><published>2018-03-10T00:00:00+08:00</published><updated>2018-03-10T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">&lt;p&gt;流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
 由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，
 一般人们将二者的结合称为函数式反应式编程或者FRP。
 FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的&lt;a href=&quot;http://conal.net/papers/icfp97/icfp97.pdf&quot;&gt;论文&lt;/a&gt;,&lt;/p&gt;
@@ -2820,7 +2823,9 @@ gRPC则抽象了这些底层细节，用protobuf的格式来定义过程请求�
 &lt;p&gt;gRPC框架本身是跨平台、跨语言的，这使得它很容易成为微服务架构下服务之间的接口。它的服务交互方式是基于RPC的，
 和传统的SOA中的Web Service的方式有些相近而和基于RESTful的架构风格截然不同。两者没有绝对的有略，而是各自有其适用的场景。
 从性能上来看，gRPC采用更紧凑的编码和领域相关的逻辑来描述服务接口，和传统的SOA中的WSDL也有明显的不同；
-前者和微服务架构的基本设计哲学是匹配的，而后者的接口仍然是哑接口，仅仅侧重于消息交换而不是领域逻辑（之前&lt;a href=&quot;/post/2017/08/29/thinking-on-service-architecture/&quot;&gt;一篇文字&lt;/a&gt;探讨了微服务设计）。&lt;/p&gt;
+前者和微服务架构的基本设计哲学是匹配的，而后者的接口仍然是哑接口，仅仅侧重于消息交换而不是领域逻辑（之前[一篇文字]
+( /post/2017/08/29/thinking-on-service-architecture/)
+探讨了微服务设计）。&lt;/p&gt;
 
 &lt;p&gt;gRPC其实定义了一种自己的&lt;a href=&quot;https://en.wikipedia.org/wiki/Domain-specific_language&quot;&gt;DSL&lt;/a&gt;来描述服务语义，只是它的语法和概念比WSDL要简化的多。
 因为protobuf本身就是定位于跨语言之间的信息交换的中间格式，gRPC仅在protobuf语法的基础上增加了&lt;code class=&quot;highlighter-rouge&quot;&gt;service&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;rpc&lt;/code&gt;关键字。
