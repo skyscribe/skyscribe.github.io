@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-26T18:52:43+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">读Uncle Bob新书之Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书之Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-27T12:17:33+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">读Uncle Bob新书之Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书之Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。
 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。&lt;/p&gt;
 
@@ -61,7 +61,7 @@ Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是�
 &lt;p&gt;想通过分析和推倒来写出严格的没有问题的程序虽然没有指望了，我们仍然可以通过降低测试的成本，改进测试的手段和方法，
 通过持续、自动化的测试和即时反馈的方法提高工作效率。这方面的思考对于架构师而言是不可或缺的。&lt;/p&gt;
 
-&lt;h2 id=&quot;设计原则和solid&quot;&gt;设计原则和SOLID&lt;/h2&gt;
+&lt;h2 id=&quot;模块设计的原则和solid&quot;&gt;模块设计的原则和SOLID&lt;/h2&gt;
 
 &lt;p&gt;架构师所关心的应该是更高层次的抽象实体而不再是一样一行具体的实现代码，因为&lt;strong&gt;唯有关注于这些做过良好分离的抽象，才能做到纵览全局心中有数&lt;/strong&gt;。
 这些抽象实体之间的关系是架构师需要重点考量的；这个过程中需要用到的设计原则并不拘泥于某种编程语言或者编程范式，尽管这些设计原则是在长期的面向对象思想中被提炼总结出来的&lt;/p&gt;
@@ -74,14 +74,104 @@ Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是�
 &lt;/ul&gt;
 
 &lt;p&gt;这些设计原则以前一直被成为是面向对象的设计原则，一个很重要的原因应该是面向对象设计曾经风靡二十年之久；可惜的是&lt;strong&gt;大部分死背概念的架构师并没有真正的理解这些&lt;/strong&gt;设计原则。
-Bob大叔则旗帜鲜明地说这些原则其实都需要仔细地来揣摩和理解，单单是粗浅的重复字面意思而不能灵活地应用，无异于是买椟还珠，空入宝山徒手而还了。&lt;/p&gt;
+Bob大叔则旗帜鲜明地说&lt;strong&gt;这些原则其实都需要仔细地来揣摩和理解&lt;/strong&gt;，单单是粗浅的重复字面意思而不能灵活地应用，无异于是买椟还珠，空入宝山徒手而还了。&lt;/p&gt;
 
-&lt;p&gt;这些设计原则的目的是帮助我们实现简装的软件组件或者组系统，使得&lt;/p&gt;
+&lt;h3 id=&quot;设计原则的目标和场景&quot;&gt;设计原则的目标和场景&lt;/h3&gt;
+&lt;p&gt;这些设计原则的目的是帮助我们实现简单而又可靠的软件模块乃至子系统，使得&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;改变它们的成本很低，因为软件系统总是要添加新功能才更有生命力，修改困难的软件就会被慢慢放弃了&lt;/li&gt;
-  &lt;li&gt;理解起来毕竟容易，因为维护软件总是需要人来做，而参与其中的人总是在流动的&lt;/li&gt;
-  &lt;li&gt;可以被轻易地重用在合适的地方&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;变更它们的成本很低&lt;/strong&gt;，因为软件系统总是要添加新功能才更有生命力，修改困难的软件就会被慢慢放弃了&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;理解起来容易&lt;/strong&gt;，因为维护软件总是需要人来做，而参与其中的人总是在流动的&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;可以被轻易地重用在合适的地方&lt;/strong&gt;，因为永远也没有人可以预测未来的软件项目需求；重头再写类似的代码的代价又过于高昂&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;上述的五大设计原则往往被认为是处理复杂软件系统内处于&lt;strong&gt;中等抽象的实体结构和相互关系&lt;/strong&gt;的指导性方法论。
+这些中等粒度的抽象就是一般意义上所说的模块或者子模块；不同的模块或者子模块之间会按照这些原则来聚合而形成基本的可执行单元。
+在不太复杂的软件系统中，做到这一层就可以满足所有需要了；更复杂的大型的软件系统可能需要更高层次的组合，即组件。&lt;/p&gt;
+
+&lt;h3 id=&quot;关于设计原则的简单概括和去谬&quot;&gt;关于设计原则的简单概括和去谬&lt;/h3&gt;
+
+&lt;p&gt;简称为SOLID的五大设计原则对于现金的架构师而言都不是什么秘密了，然而对他们的认识上的谬误还是随处可见。作者又不惜花费一个大的章节来详细阐述其中关键的思想。&lt;/p&gt;
+
+&lt;h4 id=&quot;单一职责&quot;&gt;单一职责&lt;/h4&gt;
+&lt;p&gt;最简单却又被误解最深的一个原则非单一职责原则莫属了；很多人的第一印象解读就是，一个模块应该只做一件事儿并讲这件事儿做好。
+粗看起来这个解释很切合题中之义，也能在Unix编程哲学中找到KISS原则的呼应。只是这一原则的提出其实有更深刻的考虑因为&lt;strong&gt;怎么去界定前面所说的一件事儿&lt;/strong&gt;会非常困难。
+单一职责的真正含义是:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;一个模块&lt;strong&gt;被改变的原因应该有并且只有一个&lt;/strong&gt;；或者说一个模块的&lt;strong&gt;利益相关者应该有并且只有一个&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;不幸的是，这里面的原因也好，利益相关者也好，都还是有含糊而解释不清的地方，因此作者毋宁说：
+&lt;strong&gt;一个模块和他相关联交互的Actor只有一个&lt;/strong&gt;，这样用UML描述模块关系的时候就比较清楚的看出这一原则有没有呗违反了。&lt;/p&gt;
+
+&lt;h4 id=&quot;开闭原则&quot;&gt;开闭原则&lt;/h4&gt;
+
+&lt;p&gt;开放闭合原则倒是没有那么多的误解，因为它本身就是事关怎样划分子系统、子模块乃至基本单元的。它所要求的系统应该对修改闭合对扩展开放某种程度上可以看做是对模块高内聚的要求。
+要做到这一点，需要讲系统划分为不同的抽象层次的模块、子模块，并且实现良好的约束使得高层的模块不要以来于低层的实现，而&lt;strong&gt;扩展系统的方式总是维持核心模块的稳定性再增加新的低层模块&lt;/strong&gt;来完成。&lt;/p&gt;
+
+&lt;h4 id=&quot;李氏替换原则&quot;&gt;李氏替换原则&lt;/h4&gt;
+
+&lt;p&gt;李氏替换原则原本是来源于类型系统的定义；一般也不太会被理解错误，只是在软件设计和架构中，这里的&lt;strong&gt;类型被替换成了设计中的抽象&lt;/strong&gt;并加以深入考量。
+对于有类型的静态语言来说，这意味着接口或者基类的抽象需要有足够好的普适性，扩展出来的子类必须完全遵守事前定义好的契约，因为这里的&lt;strong&gt;耦合是非常强&lt;/strong&gt;的。
+对于弱类型的动态语言而言，这些约束可能是隐式的，虽然因为不必有源代码依赖上的麻烦而变得更加灵活，但是同样因为没有这些检查而使得所有违反约束的错误代码都只能在运行时才能发现。&lt;/p&gt;
+
+&lt;p&gt;某种程度上说，缺少了编译器的检查，&lt;strong&gt;动态语言易于修改代码的优势其实带来了维护设计一致性的额外麻烦&lt;/strong&gt;；这一点不可不察。&lt;/p&gt;
+
+&lt;h4 id=&quot;接口隔离原则&quot;&gt;接口隔离原则&lt;/h4&gt;
+
+&lt;p&gt;接口隔离原则强调的是模块化软件关于耦合方面的分离；它的最基本的思想可以认为是：&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;除了你必须要以来来完成模块定义的功能之外的东西，额外的依赖都不要引入进来。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;这里的要求是两个方面的&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;提供功能的模块在对外提供的接口上必须保证是高度内聚的，在对应的抽象等级、粒度上给出的接口需要职责明确&lt;/li&gt;
+  &lt;li&gt;使用接口的模块需要保证只引入自己使用的功能，而不能引入不必要的依赖&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;依赖倒置原则&quot;&gt;依赖倒置原则&lt;/h4&gt;
+
+&lt;p&gt;这个原则可以看作是传统的面向对象设计里面最为烧脑的一个原则，正确理解起来一直有些不容易，因为必须&lt;strong&gt;同时考虑到代码结构的组织和实际运行时的依赖来看&lt;/strong&gt;才能体会其中的精妙。
+它的核心是将程序组织的依赖和运行时的依赖跟分离开来看，构造代码的时候，从抽象角度来说需要保证&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;抽象层次高的代码必须依赖于抽象而不是具体实现；&lt;/li&gt;
+  &lt;li&gt;实际的具体实现的代码就只能看到这些抽象而看不到抽象背后所隐藏的实现；&lt;/li&gt;
+  &lt;li&gt;核心模块的业务规则只能看到其它外围模块的概念抽象，而看不到具体实现这些抽象的实体；这样当需要扩展新的实现方式的时候，只需要添加新的实现代码，而&lt;strong&gt;核心的业务规则可以保持稳定&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;可以看出依赖导致原则其实潜在地暗含了其它几个原则。实际实现中还需要考虑下面一些因素&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;操作系统和平台软件的一来是不可避免的；但是这里的关键是期望减小系统的维护成本，
+而这些底层的稳定的部分很少变化，所以直接依赖他们的具体实现倒是也问题不大；
+如果是自己内部搭建的通用平台软件，那么则需要另外分析和斟酌；这方面的讨论也有很多。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;核心业务逻辑层的稳定提炼需要依赖于领域知识&lt;/strong&gt;，因为什么是稳定的什么是可变的跟具体的目标业务场景息息相关，没有放之四海而皆准的模板可以套用。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;组件设计原则&quot;&gt;组件设计原则&lt;/h2&gt;
+
+&lt;p&gt;组件化技术已经成为搭建大型复杂软件系统的基础技术，如何组织系统的组件子系统，安排好这些子系统之间的接口、依赖和交互关系是软件系统架构师的主要工作职责。
+需要留意的是，这些技术是&lt;strong&gt;构建在基本的模块化设计开发方法之上的，因此很多模块设计的原则也被自然而然地升华和适配&lt;/strong&gt;；如果不能深刻地理解基础的模块化设计方法和里面的痛点，
+生搬硬套组件设计的方法弄不好就会弄巧成拙，变成浮沙之上筑高台的游戏就很容易招徕失败。&lt;/p&gt;
+
+&lt;h3 id=&quot;组件化技术的探索和演化历史&quot;&gt;组件化技术的探索和演化历史&lt;/h3&gt;
+&lt;p&gt;组件作为复杂的软件系统发布和部署的基本单元，其形式随编程语言和平台的研究和发展而呈现不同的具体形式，可能是Java环境中的Jar打包文件，
+或者是.NET环境中的动态库文件，也可能是Ruby中的Gem，Rust中的模块，NPM中的模块等。
+它们的共同特征就是&lt;strong&gt;可以独立打包、发布，并且和其它组件有形形色色的依赖共生&lt;/strong&gt;关系。&lt;/p&gt;
+
+&lt;p&gt;最早期的家算计程序不支持这些概念，所有人开发的源代码必须安置好在内存中被加载的位置，多人协作的场景下，
+大家协商好自己负责的部分的加载地址，但是这种很快就变得难以为继；
+于是新的可以支持重定位加载地址的技术就被发明出来，使得不同的程序可以在加载的时候，加载器通过计算给它安差一个位置，防止冲突。
+这种情况下，编译出来的程序的实际加载位置是未知的，而加载器需要根据它的算法为一个可执行文件中的所有的动态加载地址计算一个没有冲突的方案来。
+链接器则被用来对编译的程序安插一些可重定位的段和符号表，以便加载器在程序实际载入内存的时候安插实际的内存地址。&lt;/p&gt;
+
+&lt;p&gt;摩尔定律和墨菲定律的交替作用始终影响着计算机软件行业的发展和演进，程序的规模变得越来越大，业务系统越来越复杂，而新技术的出现总是被现实中遇到的限制所驱动。
+传统的静态语言中，用连接器和加载器技术组织的组件化技术依然有各种各样的优势和不足，间接催生了采用不同技术决策的技术的繁荣共存；
+同时希望绕开这一限制的先驱们则通过创建新的编程语言（如动态语言）或者平台技术（跨越多种语言的中间语言来促进互操作）来简化组件化开发的种种问题。&lt;/p&gt;
+
+&lt;p&gt;现在我们可以支持在程序执行的过程中，&lt;strong&gt;不重启主要系统，而将新开发的功能插入运行的系统中的办法&lt;/strong&gt;来实现功能的实时更新和扩展，
+这种插件化技术甚至在很多开发环境中成为默认的扩展方式；这一技术能够工作的前提是系统的架构必须有良好的考虑和组织。&lt;/p&gt;
+
+&lt;h3 id=&quot;组件内聚原则&quot;&gt;组件内聚原则&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市； 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。</summary></entry><entry><title type="html">Rust2018版：生产力提升的开始</title><link href="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/" rel="alternate" type="text/html" title="Rust2018版：生产力提升的开始" /><published>2019-01-19T00:00:00+08:00</published><updated>2019-01-19T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/">&lt;p&gt;不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型，
 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。
