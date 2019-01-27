@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-27T12:17:33+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">读Uncle Bob新书之Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书之Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-01-27T14:20:53+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">读Uncle Bob新书之Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书之Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。
 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。&lt;/p&gt;
 
@@ -1790,8 +1790,8 @@ Controller的基本逻辑可以简化为如下的循环&lt;/p&gt;
 传统的基于REST API通信的应用要实现双向的通信往往不得不借助间接的双向REST调用或者引入消息队列并不得不处理复杂的应用程序逻辑，
 而gRPC不但省去了不必要的HTTP协议头开销，而且支持服务端在一条底层连接上同时向服务使用方（客户端）推送请求，可以极大地提高传输效率降低通信延迟。&lt;/p&gt;
 
-&lt;p&gt;很多流行的开源项目都加入了支持gRPC接口的行列，甚至一些微服务基础设施内部就是用gRPC进行通信的；具体的细节可以参看[前面这篇文章]
-(/post/2018/02/10/http2-and-grpc/)。&lt;/p&gt;
+&lt;p&gt;很多流行的开源项目都加入了支持gRPC接口的行列，甚至一些微服务基础设施内部就是用gRPC进行通信的；
+具体的细节可以参看&lt;a href=&quot;//post/2018/02/10/http2-and-grpc/&quot;&gt;前面这篇文章&lt;/a&gt;。&lt;/p&gt;
 
 &lt;h3 id=&quot;其它一些热门的项目&quot;&gt;其它一些热门的项目&lt;/h3&gt;
 &lt;p&gt;还有一些处于孵化期的项目，相当一部分都和云计算的基础设施平台有关，譬如用于服务网格的边车代理服务乃至提供无服务器架构平台的FaaS、BaaS设施等。
@@ -1836,8 +1836,8 @@ rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com
 
 &lt;h3 id=&quot;服务网格项目&quot;&gt;服务网格项目&lt;/h3&gt;
 
-&lt;p&gt;目前Linkerd和Envoy都处于孵化状态，二者本身也是服务网格领域的佼佼者；更多细节可以参考之前的[这篇服务网格的文章]
-( /post/2018/01/20/api-gw-to-servicemesh/)。&lt;/p&gt;
+&lt;p&gt;目前Linkerd和Envoy都处于孵化状态，二者本身也是服务网格领域的佼佼者；更多细节可以参考之前的
+&lt;a href=&quot;//post/2018/01/20/api-gw-to-servicemesh/&quot;&gt;这篇服务网格的文章&lt;/a&gt;。&lt;/p&gt;
 
 &lt;h3 id=&quot;opentracing&quot;&gt;OpenTracing&lt;/h3&gt;
 
@@ -1853,8 +1853,8 @@ rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com
   &lt;li&gt;&lt;a href=&quot;https://www.cncf.io/projects/graduation-criteria/&quot;&gt;CNCF graduation criteria&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://containerd.io/&quot;&gt;Containerd&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry><entry><title type="html">Spring新版本的响应式编程</title><link href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/" rel="alternate" type="text/html" title="Spring新版本的响应式编程" /><published>2018-04-04T00:00:00+08:00</published><updated>2018-04-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/04/spring-reactive</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">&lt;p&gt;流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注([前文有一些简单探讨]
-( /post/2018/03/10/functional-reactive-programming/ ))
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry><entry><title type="html">Spring新版本的响应式编程</title><link href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/" rel="alternate" type="text/html" title="Spring新版本的响应式编程" /><published>2018-04-04T00:00:00+08:00</published><updated>2018-04-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/04/spring-reactive</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">&lt;p&gt;流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注
+(&lt;a href=&quot;//post/2018/03/10/functional-reactive-programming/&quot;&gt;前文有一些简单探讨&lt;/a&gt;)
 ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。
 Spring最新的&lt;a href=&quot;https://spring.io/blog/2018/02/19/spring-framework-5-0-4-available-now&quot;&gt;5.0版本&lt;/a&gt;更新也顺应这一潮流，加入了原生支持FRP的行列。&lt;/p&gt;
 
@@ -2158,7 +2158,7 @@ Spring框架会自动帮我们完成参数校验到请求分发这一系列背�
         &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注([前文有一些简单探讨] ( /post/2018/03/10/functional-reactive-programming/ )) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry><entry><title type="html">函数式反应式编程</title><link href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" rel="alternate" type="text/html" title="函数式反应式编程" /><published>2018-03-10T00:00:00+08:00</published><updated>2018-03-10T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">&lt;p&gt;流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
+&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注 (前文有一些简单探讨) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry><entry><title type="html">函数式反应式编程</title><link href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" rel="alternate" type="text/html" title="函数式反应式编程" /><published>2018-03-10T00:00:00+08:00</published><updated>2018-03-10T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">&lt;p&gt;流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
 由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，
 一般人们将二者的结合称为函数式反应式编程或者FRP。
 FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的&lt;a href=&quot;http://conal.net/papers/icfp97/icfp97.pdf&quot;&gt;论文&lt;/a&gt;,&lt;/p&gt;
@@ -2307,7 +2307,7 @@ FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的&lt;a hre
 一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;stream&lt;/code&gt;对象可以用包括静态的&lt;code class=&quot;highlighter-rouge&quot;&gt;of&lt;/code&gt;方法、&lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;辅助类构造出来，同时JDK提供的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;类大多支持一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;stream()&lt;/code&gt;方法用以构造一个新的stream对象。&lt;/p&gt;
 
 &lt;p&gt;需要注意的是Java8语言本身的函数式支持是通过面向对象的方法来模拟的，只是从FRP编程的角度来看，可以认为Java8的流是用函数式思维组织设计，用OO的方法来提供实现。
-更多Java8的函数式特性和流实现细节记录在&lt;a href=&quot;/post/2016/10/14/fp-support-in-java8/&quot;&gt;这篇文章&lt;/a&gt;中。&lt;/p&gt;
+更多Java8的函数式特性和流实现细节记录在&lt;a href=&quot;/ /post/2016/10/14/fp-support-in-java8/&quot;&gt;这篇文章&lt;/a&gt;中。&lt;/p&gt;
 
 &lt;h2 id=&quot;rxjava扩展&quot;&gt;RxJava扩展&lt;/h2&gt;
 
@@ -2419,7 +2419,7 @@ RxJava 则允许我们仅仅关注于需要解决的问题逻辑，其实现可�
 
 &lt;h2 id=&quot;kafka-streams&quot;&gt;Kafka Streams&lt;/h2&gt;
 
-&lt;p&gt;Kafka本身（可以参考&lt;a href=&quot;/post/2017/11/18/kafka-design-study/&quot;&gt;前一篇文字&lt;/a&gt;）就可以看作是一个流式处理平台。同时它还提供了专门的流处理API，其特性如下&lt;/p&gt;
+&lt;p&gt;Kafka本身（可以参考&lt;a href=&quot;//post/2017/11/18/kafka-design-study/&quot;&gt;前一篇文字&lt;/a&gt;）就可以看作是一个流式处理平台。同时它还提供了专门的流处理API，其特性如下&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;
     &lt;p&gt;Kafka Streams 本身是一个客户端的库，可以看作是一个用户端程序而不是其平台核心部分；它本身被设计为可以&lt;strong&gt;很容易地嵌入到用户端的Java程序&lt;/strong&gt;中，方便部署和集成。
@@ -2747,7 +2747,8 @@ HTTP协议采用TCP可靠流传输协议以确保上层发送的消息总是能�
 &lt;p&gt;HTTP/1.0以及1.1在当时的互联网应用场景下是合适而成功的设计；它简单的基于文本的协议定义和容易理解的请求/响应模型取得了巨大的成功，
 大量的企业系统架构采用了HTTP协议并取得了市场上的成功；基于HTTP协议加上应用架构的演进，后续出现了依次为基础的复杂技术，
 如致力于优化前端逻辑的AJAX、基于XML+SOAP+WSDL的SOA技术（也成为Big Web Service）；以及回归HTTP协议原本并增加丰富媒体资源描述访问的
-RESTful API，后者成为了微服务设计的基本通信协议(更多思考见&lt;a href=&quot;/post/2017/08/29/thinking-on-service-architecture/&quot;&gt;这篇文字&lt;/a&gt;)。&lt;/p&gt;
+RESTful API，后者成为了微服务设计的基本通信协议(
+更多思考见&lt;a href=&quot;/ /post/2017/08/29/thinking-on-service-architecture/&quot;&gt;这篇文字&lt;/a&gt;)。&lt;/p&gt;
 
 &lt;p&gt;任何事物在长期的发展过程中都会呈现两面性；随着构建于HTTP之上的应用逻辑和架构变得日益复杂，HTTP协议的一些不适应的地方也
 引起了社区的诟病。&lt;/p&gt;
@@ -2998,8 +2999,8 @@ gRPC则抽象了这些底层细节，用protobuf的格式来定义过程请求�
 &lt;p&gt;gRPC框架本身是跨平台、跨语言的，这使得它很容易成为微服务架构下服务之间的接口。它的服务交互方式是基于RPC的，
 和传统的SOA中的Web Service的方式有些相近而和基于RESTful的架构风格截然不同。两者没有绝对的有略，而是各自有其适用的场景。
 从性能上来看，gRPC采用更紧凑的编码和领域相关的逻辑来描述服务接口，和传统的SOA中的WSDL也有明显的不同；
-前者和微服务架构的基本设计哲学是匹配的，而后者的接口仍然是哑接口，仅仅侧重于消息交换而不是领域逻辑（之前[一篇文字]
-( /post/2017/08/29/thinking-on-service-architecture/)
+前者和微服务架构的基本设计哲学是匹配的，而后者的接口仍然是哑接口，仅仅侧重于消息交换而不是领域逻辑（
+之前&lt;a href=&quot;/ /post/2017/08/29/thinking-on-service-architecture/&quot;&gt;一篇文字&lt;/a&gt;
 探讨了微服务设计）。&lt;/p&gt;
 
 &lt;p&gt;gRPC其实定义了一种自己的&lt;a href=&quot;https://en.wikipedia.org/wiki/Domain-specific_language&quot;&gt;DSL&lt;/a&gt;来描述服务语义，只是它的语法和概念比WSDL要简化的多。
