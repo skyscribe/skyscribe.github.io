@@ -337,6 +337,10 @@
 <lastmod>2019-01-26T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/</loc>
+<lastmod>2019-02-23T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/about/</loc>
 </url>
 <url>
@@ -536,6 +540,9 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/tags/rust/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/architecture/</loc>
 </url>
 <url>
 <loc>https://skyscribe.github.io/categories/cpp/</loc>
