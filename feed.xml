@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-02-25T22:51:11+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-02-27T21:47:21+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。
 甚至有一种说法是：&lt;strong&gt;如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书&lt;/strong&gt;以吸收新的灵感，
 然后才能知道你工作中的面性对象设计用错在了什么地方。&lt;/p&gt;
@@ -240,13 +240,87 @@
 &lt;p&gt;Event Sagas的方式要求我们&lt;strong&gt;必须拥抱最终一致性模型，并且妥善处理好超时和重试处理&lt;/strong&gt;，尽量补偿可能出现的异常情况，甚至在情况复杂的时候尽量引入工作流来降低领域问题的复杂性。&lt;/p&gt;
 
 &lt;h4 id=&quot;event-sourcing&quot;&gt;Event Sourcing&lt;/h4&gt;
+&lt;p&gt;一般情况下使用Event Sagas就可以追踪和记录系统中发生的事件，只是在某些业务场景下我们想更进一步地追踪每一个时刻系统发生的所有事件，而不仅仅是某个实体最后一次被修改后的状态和时间戳。
+Event Sourcing技术通过&lt;strong&gt;记录实体上所发生的所有事件信息，并将其放置在单独的存储实体上&lt;/strong&gt;来满足这一需求，
+用户甚至可以通过简单的提供实体的唯一标识来查询和定位具体的事件，甚至还原某一个时刻领域实体的状态。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这样的做法在很多时候可以&lt;strong&gt;提供足够灵活性的同时，满足极大的性能和扩展性需求&lt;/strong&gt;。这一方法能工作的前提是依赖于上述提过的最终一致性行为。
+同时使用Event Sourcing技术构建的系统往往是满足CQRS的要求或者可以认为是在CQRS基础上的进一步定制。&lt;/p&gt;
 
 &lt;h2 id=&quot;领域实体&quot;&gt;领域实体&lt;/h2&gt;
 
 &lt;p&gt;开发人员一种常见的错误倾向就是过分地关注主题的数据模型，这也许于我们过多地关注于数据库技术有关。
-然而领域驱动开发的核心是关于领域的行为和特征，而不是数据的获取和读取。&lt;/p&gt;
+然而&lt;strong&gt;领域驱动开发的核心是关于领域的行为和特征，而不是数据的获取和读取&lt;/strong&gt;。
+之所以要用领域实体的概念来封装业务特征，而不是直接在数据集的基础上采用CRUD来直接实现业务规则，主要是因为系统的业务复杂度不断提高的时候，直接CRUD的方式带来了软件复杂度的急剧上升。&lt;/p&gt;
+
+&lt;p&gt;领域实体和另外一个DDD术语Value Object有很多方面比较接近；两者的一个最显著的区别是：
+领域实体具有一个唯一的标识符，它可以区分不同的领域实体，而值对象可以直接复制并且复制的对象和原来的对象完全表述同样的领域抽象信息。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域实体标识符&quot;&gt;领域实体标识符&lt;/h3&gt;
+
+&lt;p&gt;领域实体标识符的一个最重要的要求就是&lt;strong&gt;需要保证在具体的领域内是唯一的，并且这个唯一性不受时间的改变而改变&lt;/strong&gt; - 即使程序退出重启了，如果这些信息被持久化保存，重新加载的时候这个唯一性仍然需要保留；
+否则就会带来很严重的不一致问题。&lt;/p&gt;
+
+&lt;p&gt;有很多技术手段来产生唯一的领域实体标识符，这些方法实现有简有繁，并且每一种都有它们自己的优点和不足。&lt;/p&gt;
+
+&lt;h4 id=&quot;用户保证的唯一性&quot;&gt;用户保证的唯一性&lt;/h4&gt;
+&lt;p&gt;一种最简单的思路是，让用户提供输入来保证领域实体的唯一性；这种方法简单直接并且在很多场景下是一种不错的解决方案。
+这样的做法有一个显而易见的不足就是扩展性和性能可能不高；甚至需要考虑好用户可能输入非法的标识符的情况，
+如果这是可能发生的，设计一个&lt;strong&gt;健壮的校验系统或者工作流验证系统&lt;/strong&gt;也是有意义的。&lt;/p&gt;
+
+&lt;h4 id=&quot;应用程序自动产生&quot;&gt;应用程序自动产生&lt;/h4&gt;
+
+&lt;p&gt;有很多技术手段可以让应用程序在需要的时候自动产生一个唯一的实体标识符，比如常见的UUID、GUID技术可以保证产生一个在绝大多数情况下都不会重复的唯一标识符。
+&lt;strong&gt;这些技术方法也有一些明显的陷阱&lt;/strong&gt;需要我们选择的时候留意&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;分布式节点的ID产生可能需要防止意外的ID碰撞，这个和选择使用的算法参数密切相关。&lt;/li&gt;
+  &lt;li&gt;直接用String对象来表述这些ID可能不是一个好主意，最好是用一个值对象来表示它，尤其是这样的ID里面包含了其它比如机器地址等信息的时候。&lt;/li&gt;
+  &lt;li&gt;如果有些领域对象需要知道这些基于随机数算法产生的标识符，会有额外的挑战需要我们应对。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;使用数据库系统产生的标识符&quot;&gt;使用数据库系统产生的标识符&lt;/h4&gt;
+
+&lt;p&gt;直接使用数据库系统来产生标识符有一个额外的好处是我们不需要考虑它的唯一性，&lt;strong&gt;存储系统自己封装了如何保证唯一性的重要细节&lt;/strong&gt;我们直接拿来使用就好了。
+常见的关系数据库系统比如Oracle、MySQL都提供了这样的设施；其不足之处是性能可能不能我们的需要；这一点尤其在大型分布式系统中格外明显。&lt;/p&gt;
+
+&lt;h4 id=&quot;请求另外一个绑定上下文来提供标识符&quot;&gt;请求另外一个绑定上下文来提供标识符&lt;/h4&gt;
+
+&lt;p&gt;这种方式的思想也很直接，需要唯一标识符的时候，请求上游的绑定上下文（领域）要求对方分配一个标识符。
+这样做的一个天然的问题是，如果上游的绑定上下文发生了变化该如何处理？我们可以使用事件驱动架构的办法，监控上游领域的领域事件，然后根据变化做出响应。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;这也是一种最复杂的策略，因为领域内的实体不仅仅依赖于领域边界上的适配器翻译，还依赖于外部绑定上下文的领域事件更新&lt;/strong&gt;。
+因而在大部分情况下，我们必须谨慎选择采用该策略来决定领域实体的标识符。&lt;/p&gt;
+
+&lt;h4 id=&quot;何时产生实体标识符&quot;&gt;何时产生实体标识符&lt;/h4&gt;
+
+&lt;p&gt;一般来说我们有两种时机来决定领域实体的唯一标识符：一种是在领域实体对象被创建的时候，自动分配一个标识符；另外一种策略则是只有当实际需要讲实体放置在一个Repsoitory中的时候，才实际分配标识符。&lt;/p&gt;
+
+&lt;p&gt;第二种方法有一个显然的好处是，在&lt;strong&gt;实际放入Repostory之前我们依然可以像操作值对象一样操作这个领域实体&lt;/strong&gt;。
+潜在的问题是，如果系统架构风格是事件驱动的，那么实体对象被创建的时候，所发布的领域事件的实体标识符就无法拿到了。
+要处理这个问题，我们要么只能回到第一种方式做预先分配，要么我们在比较对象的时候，采用基于属性比较的方式而不是比较领域实体标识符。&lt;/p&gt;
+
+&lt;p&gt;当然第一种方式的情况下，我们实现对象的比较或者取hash的时候，可以直接用领域实体而无须关心其它的内部属性值。&lt;/p&gt;
+
+&lt;h4 id=&quot;多套标识符的协调和映射&quot;&gt;多套标识符的协调和映射&lt;/h4&gt;
+
+&lt;p&gt;如果我们采用存储系统提供的标识符，这些标识符可能和我们自己设计的领域实体的标识符中间产生不协调；比如ORM系统产生的标识符是一个数字串而领域模型需要提供另外一种表示方法。
+这种情况下，一般的做法是&lt;strong&gt;隐藏这些实际来自于其它地方的标识符，而仅仅对外暴露领域模型抽象出来的实体&lt;/strong&gt;标识符。
+这种情况下，如果需要讲标识符当做数据的键来使用，那么也不需要使用领域模型抽象的实体标识符。&lt;/p&gt;
+
+&lt;h4 id=&quot;实体标识符的稳定性&quot;&gt;实体标识符的稳定性&lt;/h4&gt;
+
+&lt;p&gt;大部分情况下出于标识符稳定性的要求，我们选择&lt;strong&gt;将标识符设计为不可变的，即在创建或者分配的时候可以设置一次，
+而一旦创建就不允许修改&lt;/strong&gt;了。这种设计策略和标识符合适创建没有直接关系。
+如果领域内部需要做标识符的修改，需要务必小心做好封装和信息隐藏，隔离对其它绑定上下文的影响。&lt;/p&gt;
+
+&lt;h3 id=&quot;挖掘实体的角色和职责&quot;&gt;挖掘实体的角色和职责&lt;/h3&gt;
+
+&lt;p&gt;角色和职责的挖掘是传统的面性对象设计方法中最困难的部分，也是最有价值的部分。
+我们需要使用的底层技术还是一样的，用接口来抽象实体所需要扮演的角色，然后用类来建模实际的领域实体。
+不论怎样选择这里的角色抽象，需要始终牢记的是&lt;strong&gt;跨职能团队根据领域业务逻辑而统一的领域语言才是决定这些角色和实体类的职责的最重要的因素&lt;/strong&gt;，
+而实际实现这些抽象的面性对象技术应该作为具体实现的支撑细节。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域实体的创建校验和变更记录&quot;&gt;领域实体的创建、校验和变更记录&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry><entry><title type="html">读Uncle Bob新书-Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书-Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。
