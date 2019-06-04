@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-02-27T21:52:46+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-04T22:09:10+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。
 甚至有一种说法是：&lt;strong&gt;如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书&lt;/strong&gt;以吸收新的灵感，
 然后才能知道你工作中的面性对象设计用错在了什么地方。&lt;/p&gt;
@@ -320,9 +320,210 @@ Event Sourcing技术通过&lt;strong&gt;记录实体上所发生的所有事件�
 不论怎样选择这里的角色抽象，需要始终牢记的是&lt;strong&gt;跨职能团队根据领域业务逻辑而统一的领域语言才是决定这些角色和实体类的职责的最重要的因素&lt;/strong&gt;，
 而实际实现这些抽象的面性对象技术应该作为具体实现的支撑细节。&lt;/p&gt;
 
-&lt;h3 id=&quot;领域实体的创建校验和变更记录&quot;&gt;领域实体的创建、校验和变更记录&lt;/h3&gt;
+&lt;h3 id=&quot;领域实体的创建校验&quot;&gt;领域实体的创建、校验&lt;/h3&gt;
 
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry><entry><title type="html">读Uncle Bob新书-Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书-Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
+&lt;p&gt;从面向对象编程的角度来看，领域实体本身是一个对象，因此需要调用对应的类的构造方法来生成实体对象。
+该实体类内部封装的属性之间可能存在一些&lt;strong&gt;非空值之外的一些相互约束关系，这些约束关系称之为Invariant&lt;/strong&gt;，它对应的参数需要在外部构造的时候，把对应的参数传入，并且在类的内部实现上加以隐藏。
+负责更新这些单个属性参数的内部操作方法不应该暴露给外部。&lt;/p&gt;
+
+&lt;p&gt;如果构造的过程比较复杂，可以用基于工厂模式的设计方法将实体对象的构造过程封装起来，方便外部用户更简单地生成实体对象；
+这一方法本身是设计模式的直接应用，实现起来并不麻烦。&lt;/p&gt;
+
+&lt;p&gt;另一个相关的常见的实体处理约束是关于实体对象的校验 - 其背景是我们往往需要处理多个对象的组合的情况；此时&lt;strong&gt;每一个子对象是合法的并不意味着这些对象的组合也依然是合乎领域实体模型约束&lt;/strong&gt;，因此需要合理的校验和判断。
+我们需要的是基于整个对象的校验；需要实现整对象校验的前提是，&lt;strong&gt;每一个子对象（可能是一个实体或者值对象）自身需要满足自身的校验约束&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;一种常见的处理方法是使用自封装，即在实体类内部提供多个Accessor方法，并且要求实体类内部的访问也需要使用这些自封装方法。
+这种处理方法也是“防御式编程”所推荐的处理方法。与此相反的一种反模式是，期望于用存储系统提供的校验工具来实现实体对象校验，这在某些情况下可能有一些比较大的缺陷；
+典型地如在MySQL数据库中，单个行记录最多只能包含65535个字符，如果超出此限制，数据库的校验则无法处理了。
+因而重要的是应该更好地关注与关注点分离，这也是计算机科学的基本处理思路。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域实体变更跟踪&quot;&gt;领域实体变更跟踪&lt;/h3&gt;
+&lt;p&gt;大部分情况下，领域实体对象的状态变化不需要被特别关注；而当这一&lt;strong&gt;需要的确被领域专家所确认&lt;/strong&gt;的时候，我们可以&lt;strong&gt;用领域事件这一方法来满足，或者使用事件存储&lt;/strong&gt;机制来达成目的。
+有时候我们纯粹是出于一些技术上的原因而不是领域专家的意见需要关注领域实体的每一个变更，这种情况下解决之道是使用Event Sourcing方法。&lt;/p&gt;
+
+&lt;h2 id=&quot;值对象&quot;&gt;值对象&lt;/h2&gt;
+
+&lt;p&gt;值对象在很多方面和领域实体对象非常想象，然而两者有一些至关重要的不同。所谓的值对象它所表述的是一些&lt;strong&gt;没有唯一标识的类似纯粹数值&lt;/strong&gt;的概念。
+值对象本身在DDD方法中占据重要的位置；我们可能感到惊讶的是，在DDD方法中我们总是应该&lt;strong&gt;力求多使用值对象而不是领域实体对象&lt;/strong&gt;；并且即使我们决定了使用领域实体来描述一些聚合概念，
+那么该实体内部如果可以用值对象的集合来表示，就尽量少用子领域实体的集合来表示。&lt;/p&gt;
+
+&lt;h3 id=&quot;值对象的特征&quot;&gt;值对象的特征&lt;/h3&gt;
+&lt;p&gt;值对象一般需要满足下面一些特征&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;描述领域中的一种数值，度量或者其它类似的概念&lt;/li&gt;
+  &lt;li&gt;可以用不可变对象来表示&lt;/li&gt;
+  &lt;li&gt;可以用&lt;strong&gt;等价关系来比较&lt;/strong&gt;另外一个完全不同的对象&lt;/li&gt;
+  &lt;li&gt;可以被另外一个对象替换而不影响语义和行为&lt;/li&gt;
+  &lt;li&gt;当被其它的协作对象使用的时候，能满足无副作用的行为约束&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;不可变性&quot;&gt;不可变性&lt;/h3&gt;
+&lt;p&gt;值对象可以表述为一个不可变对象的想法具有重要的简化意义；满足不可变对象意味着，一旦值对象被构造完成之后，
+其自身的方法调用并不会改变内部封装的属相值。这种情况下，&lt;strong&gt;如果需要变更，最好的办法是替换产生一个新的对象&lt;/strong&gt;。这样的处理方式和值对象本身的领域语义直接对应，该值对象才能和其它DDD概念更好地协作。
+当我们需要对构造好的值对象变更某些属性的时候，需要思考能否用替换的方法来达到同样的效果。&lt;/p&gt;
+
+&lt;h3 id=&quot;整对象概念&quot;&gt;整对象概念&lt;/h3&gt;
+
+&lt;p&gt;值对象需要能表述为一个完整对象的概念，而不是一堆属性之间的无意义拼凑；这些&lt;strong&gt;属性之间应该满足相互之间的高内聚&lt;/strong&gt;；有可能的话则讲没有内聚的属性移除到其它地方。
+同时时刻谨记值对象需要和绑定上下文中的领域概念相匹配，值对象本身所表述的概念整体上要能和领域通用语言协调一致；因此用一个基本的原始字符串类型来描述值对象远远不如用一个自定义的类类型来描述对应的领域概念要来的自然。&lt;/p&gt;
+
+&lt;h3 id=&quot;可替换性和等价判断&quot;&gt;可替换性和等价判断&lt;/h3&gt;
+
+&lt;p&gt;我们期望它能够满足不可变性的同时就意味着可替换性是显而易见的；因为当我们需要变更一个值对象的时候，
+只需要构造一个新的值对象并返回出去即可。同时可替换性也要求我们能够基于值的语义来判别两个值对象是否相当。
+这里的相等依赖于它所封装的内部属性是否都相等，其处理方式和领域实体有着明显的不同&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;领域实体对象的相等比较往往基于其唯一标识即可&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;值对象的想等下判断需要基于各个属性的等价性&lt;/strong&gt;来判别&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;无副作用&quot;&gt;无副作用&lt;/h3&gt;
+
+&lt;p&gt;无副作用本身要求对象的方法调用中不能修改对象自身的内部状态；值对象的无副作用其实是在满足了上面的不可变性和可替换性之后的自然可得的特征，因为除了构造方法除外，任何其它方法都不能违反不可变属性。
+如果发现某个值对象的方法必须要修改内部的状态，我们需要停下来挑战一下自己：能否用替换的方法而不是变更内部属性的方法达到同样的目的。&lt;/p&gt;
+
+&lt;h3 id=&quot;实现最小化集成&quot;&gt;实现最小化集成&lt;/h3&gt;
+
+&lt;p&gt;稍微复杂一点的DDD系统中都会有很多个需要被集成在一起的多个绑定上下文；此时使用值对象来完成他们之间的相互集成往往是最简单的：
+在下游的绑定上下文中，只需要&lt;strong&gt;用一个值对象来集成上游绑定上下文中传入的对象&lt;/strong&gt;即可。&lt;/p&gt;
+
+&lt;h3 id=&quot;将领域标准类型表述为值对象&quot;&gt;将领域标准类型表述为值对象&lt;/h3&gt;
+
+&lt;p&gt;在很多系统中，我们需要处理关于某些信息的有限种的分类信息，比如货币种类、HTTP协议的MIME类型等；这些用于表示事物的类型的信息如果用值对象来描述看起来简单易于理解。
+只是在实际实现上，可能用枚举类型来表示会是一个更自然的选择，尤其是如&lt;strong&gt;Java的枚举值类型允许实现抽象和多态行为&lt;/strong&gt;，即允许在枚举类本身中定义抽象行为，
+然后在具体的一个一个的值中提供具体实现；这种方法其实是状态模式的一个语言层面的简化实现。&lt;/p&gt;
+
+&lt;p&gt;这些标准类型的值对象定义最好是拿出来放在一个共享的绑定上下文中被多个其它的领域上下文所使用；同时需要计划好对这些标准类型值对象的更新和维护，因为实际上会有多个下游的共享上下文受此影响。
+如果系统中的此类定义很多，可以考虑使用代码生成的方法来减小人工维护的负担。&lt;/p&gt;
+
+&lt;h3 id=&quot;持久化值对象&quot;&gt;持久化值对象&lt;/h3&gt;
+
+&lt;p&gt;值对象的持久化有很多种不同的做法，我们可以使用&lt;strong&gt;Repository概念来完成具体的持久化&lt;/strong&gt;。基于值对象的上述特征，
+现在&lt;strong&gt;更流行的方法是使用NoSQL数据存储&lt;/strong&gt;来持久化值对象，但是更传统的基于ORM的持久化方法依然是有广泛的使用。&lt;/p&gt;
+
+&lt;p&gt;在基于ORM的方法中，如果值对象的属性中包含有聚合属性，当我们考虑将多个值序列化到一个列中的时候，就必须考虑存储系统的本身的限制。
+比如上述的&lt;strong&gt;MySQL最大行宽的限制&lt;/strong&gt;不仅会影响到单个属性列还对整个行记录的可用空间产生直接的约束。
+另外一个值得主意的情况是当&lt;strong&gt;将多个对象写入一个数据库列&lt;/strong&gt;的时候，就不能指望使用SQL查询的方法来实现高效检索。&lt;/p&gt;
+
+&lt;h2 id=&quot;服务&quot;&gt;服务&lt;/h2&gt;
+&lt;p&gt;DDD中的服务用来描述实现领域特定的任务的&lt;strong&gt;无状态的操作&lt;/strong&gt;的概念，
+它和和一般的软件架构理论（比如SOA或者微服务）中所谓的服务或者组件这些粗粒度的软件隔离实体的含义截然不相同，
+不能简单地将后者的概念拿来对比，否则会产生更多的混淆和误解。&lt;/p&gt;
+
+&lt;p&gt;DDD服务本身描述的还是一个&lt;strong&gt;和领域相关的概念&lt;/strong&gt;而不是一个抽象的通用的概念。
+当我们需要将一大块和实体或者值对象有些关系而又没有状态的职责剥离出来的时候，服务就派上用场了。通常来说我们出于这些目的来决定引入服务&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;业务逻辑操作比较复杂&lt;/li&gt;
+  &lt;li&gt;需要将某种领域逻辑的组合从一种形式转换为另外一种&lt;/li&gt;
+  &lt;li&gt;需要从多个领域对象的输入中通过某种运算产生出新的值对象&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;确保仅在必要的时候创建服务&quot;&gt;确保仅在必要的时候创建服务&lt;/h3&gt;
+
+&lt;p&gt;一种常见的使用服务的误区是&lt;strong&gt;滥用了服务的概念导致本该由领域对象或者值对象表达的概念都泄露&lt;/strong&gt;到了服务对象中。
+这也是上面提到的&lt;strong&gt;服务需要保证是无状态&lt;/strong&gt;的原因；如果需要保留状态，那么显然使用服务是一种误用。
+同时需要谨记的是服务仍然是一种领域知识相关的设施，如果想表述和领域通用语言不相关的概念，那么可能需要用到应用服务。&lt;/p&gt;
+
+&lt;h3 id=&quot;是否需要用分离的接口来描述服务&quot;&gt;是否需要用分离的接口来描述服务&lt;/h3&gt;
+
+&lt;p&gt;是否应该采用一个隔离的接口来描述服务并没有一个清晰的界定，因为它的好处和不足同样明显。
+采用分离的接口可以提高软件系统的可测试性，但是只有唯一实现的服务类再加上一个接口定义会显得比较怪异和画蛇添足。&lt;/p&gt;
+
+&lt;h2 id=&quot;领域事件&quot;&gt;领域事件&lt;/h2&gt;
+
+&lt;p&gt;Evans将领域事件描述为领域内发生的一部分完整的事实，它可以用来描述某个时间&lt;strong&gt;绑定上下文中发生的某些事情的表述&lt;/strong&gt;。
+如何决定什么是领域事件而什么不是？最好的策略是&lt;strong&gt;倾听领域专家的声音&lt;/strong&gt;，并从中发现这些事件的蛛丝马迹，比如领域专家的口中说出”当xxx发生的时候“或者”如果YYY发生“，这里的XXX和YYY就是清晰的领域事件。
+这些时间的出现往往意味着由某些地方需要关注这些事件出现的后果并做出反应。&lt;/p&gt;
+
+&lt;p&gt;使用领域事件的概念往往&lt;strong&gt;默认我们需要采用最终一致性模型&lt;/strong&gt;，这一隐含的假设我们应该始终铭记于心。
+使用领域事件的方法可以达到很高的并发处理性能和较低的系统耦合；当然不利之处是我们需要考虑它带来的&lt;strong&gt;系统行为的额外复杂性&lt;/strong&gt;，因为依赖从显示的调用变成了异步的发布/通知模型。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域事件的建模&quot;&gt;领域事件的建模&lt;/h3&gt;
+
+&lt;p&gt;我们总是用某个发生的事件来表述领域事件，比如somethingHappened，这个概念描述的是一件事实已经发生过；
+有时候我们还需要描述事件发生的上下文信息，比如发生的时间，出现次数等。
+不论如何建模，我们还需要保证&lt;strong&gt;领域事件总是不可变的&lt;/strong&gt;，就如已经发生的事情不可更改一样；
+同时参照前面所述的值对象的语义，保证领域事件没有副作用也是一项隐含的要求。&lt;/p&gt;
+
+&lt;h3 id=&quot;领域事件标识符&quot;&gt;领域事件标识符&lt;/h3&gt;
+&lt;p&gt;大部分情况下，当领域事件仅仅被一个绑定上下文消化、处理的时候，没有必要给领域事件指定一个唯一的标识符；
+然而当&lt;strong&gt;领域事件可能被从一个绑定上下文中通过底层的事件转发基础设施被发送到另外一个领域中&lt;/strong&gt;去的时候，
+我们就不得不为领域事件准备一个唯一的标识符，使得不同的事件可以在其被处理的范围内可以被唯一识别。
+同样的当一个领域事件需要被持久化存储或者从存储介质中恢复到内存的时候，事件标识符也必不可少。&lt;/p&gt;
+
+&lt;h3 id=&quot;从领域模型中发布事件&quot;&gt;从领域模型中发布事件&lt;/h3&gt;
+&lt;p&gt;当事件需要发送到某个远程的领域中去的时候，我们需要尽量把领域事件的细节与底层的事件分发中间件或者框架相解耦，&lt;strong&gt;避免将领域事件的细节泄露给基础设施中间件&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;发布事件的时候，最终一致性模型带来的副作用和&lt;strong&gt;它本身的一致性保证机制&lt;/strong&gt;值得详细考虑。
+当通过一个中间件或者事件转发设施来分发事件的时候，&lt;strong&gt;领域逻辑对事件延迟的容忍性&lt;/strong&gt;也需要根据领域业务要求进详细分析。
+有时候我们甚至需要对历史发生的事件做一些后续处理和分析，这种情况下，我们可以采用事件存储的方式，设置一个完成事件序列化保存的特殊的事件监听者。&lt;/p&gt;
+
+&lt;h2 id=&quot;模块&quot;&gt;模块&lt;/h2&gt;
+&lt;p&gt;一些现代的变成语言或者框架都自带了模块机制，因而模块的概念和这些语言框架中的模块的用法并没有特别本质的区别。
+唯一需要留意的是DDD中的模块的命名和使用是&lt;strong&gt;以领域模型的内聚为依据&lt;/strong&gt;的，它并不一定和代码的具体部署和运行方式强绑定。&lt;/p&gt;
+
+&lt;h2 id=&quot;聚合&quot;&gt;聚合&lt;/h2&gt;
+&lt;p&gt;聚合是一种用于&lt;strong&gt;将实体或者值对象仔细汇聚在一起并形成清晰的边界&lt;/strong&gt;的领域设计概念。从描述来看聚合好像很简单直接，然而它也许是DDD中最没有被准确理解和实施的概念。&lt;/p&gt;
+
+&lt;p&gt;聚合的设计实现上很容易落入（需要尽力避免）如下的两个极端&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;为了组合的方便而将聚合的引用关系设计的非常复杂和庞大&lt;/li&gt;
+  &lt;li&gt;或者将聚合的关系拆分地太独立以至于没有办法真正地维护领域逻辑中的不变式&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;在一致性边界内的不变式上建模聚合&quot;&gt;在一致性边界内的不变式上建模聚合&lt;/h3&gt;
+
+&lt;p&gt;为了发现领域模型中的聚合，我们需要仔细&lt;strong&gt;甄别领域边界内的业务规则的内在不变式&lt;/strong&gt;。
+这些不变式属于一些业务规则，并且这些业务规则必须总是一致的。这样的一致性由很多种形式，
+一种是传统的原子性的一致性，他们是即使生效的，并且是原子不可变更的；这种也往往被成为事务一致性；还有一种新的一致性模型是最终一致性。
+&lt;strong&gt;聚合不变式种考虑的是传统的事务一致性&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;设计良好的聚合可以保证每次修改的时候其内在的领域逻辑的一致性总是在修改后被保留，也就是说它的&lt;strong&gt;不变式在修改前后总是可以被满足&lt;/strong&gt;。
+这也意味着，从用户界面来的修改每次仅仅能够在一个聚合上被执行，否则事务一致性就很难满足。&lt;/p&gt;
+
+&lt;h3 id=&quot;保持聚合设计尽量的小&quot;&gt;保持聚合设计尽量的小&lt;/h3&gt;
+&lt;p&gt;因为我们需要保证聚合的事务一致性语义，考虑到&lt;strong&gt;性能和可扩展性&lt;/strong&gt;，自然而然地我们想要将聚合的设计保持足够的小，因为庞大的事务处理会带来明显的性能瓶颈。
+想象具有复杂的关联关系的聚合，当我们需要更新一个很小的属性的时候，为了维护一致性，
+我们可能不得不将所有有关联的记录都从其它的地方加载的内存中完成处理。&lt;/p&gt;
+
+&lt;p&gt;小规模的聚合带来的一个额外的好处是&lt;strong&gt;产生冲突的概率大大地降低&lt;/strong&gt;了，从而使得系统的可用性自然得以提高；因而不论任何情况，都要想办法降低聚合的体量保持它足够可能的小。&lt;/p&gt;
+
+&lt;h3 id=&quot;组合聚合对象的时候用标识符来引用之&quot;&gt;组合聚合对象的时候用标识符来引用之&lt;/h3&gt;
+&lt;p&gt;一个很常见的想法是可以组合多个聚合，在这种场景下，我们需要&lt;strong&gt;抵制住如下的诱惑：将引用的聚合想象为是在同一个一致性保证的边界&lt;/strong&gt;内。
+其实这样的做法会得不偿失，因为如果那么做了，聚合的规模就不可能保持的很小，性能惩罚就会悄悄地潜入进来，危及系统扩展性和可用性。&lt;/p&gt;
+
+&lt;p&gt;更好的处理方法是不在引用外部聚合对象（指针或者引用），而是在使用的地方&lt;strong&gt;用对方的全局唯一标识符来替代&lt;/strong&gt;。
+显然地得益于&lt;strong&gt;对象标识符本身保证了对象自己并不会被自动加载入内存&lt;/strong&gt;中；不管是静态的内存分配还是垃圾收集器的负担都得以大大减小。&lt;/p&gt;
+
+&lt;h3 id=&quot;在聚合边界之外采纳最终一致性模型&quot;&gt;在聚合边界之外采纳最终一致性模型&lt;/h3&gt;
+&lt;p&gt;对于跨越多个聚合的业务运算，业务处理用例其实&lt;strong&gt;跨越了多个领域上下文，这种情况下我们需要考虑最终一致性&lt;/strong&gt;模型保证而不是聚合本身默认的事务一致性模型。
+在大部分业务场景下，领域专家对最终一致性模型的容忍程度往往要高于开发人员的想象。&lt;/p&gt;
+
+&lt;p&gt;某些领域场景可能有一些额外的挑战，因为是&lt;strong&gt;采用最终一致性模型还是采用事务一致性模型并不容易得到一个清晰的答案&lt;/strong&gt;。
+熟悉传统的事务模型的DDD实践者可能更倾向于采用强一致性的事务保证，而喜欢CQRS模型的开发者则更喜欢最终一致性模型。
+问题的&lt;strong&gt;核心在于深入理解领域模型的不变式要求&lt;/strong&gt;，因为DDD开发的首要思想就是始终考虑领域的实际需求而不是具体的软件实现技术设施。&lt;/p&gt;
+
+&lt;h3 id=&quot;例外规则&quot;&gt;例外规则&lt;/h3&gt;
+&lt;p&gt;凡事都难免有例外，某些情况下我们处于特殊的需要会主动选择打破上述这些聚合规则，譬如&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;用户接口操作的遍历，比如在批量创建一系列聚合对象操作和创建一个聚合对象来操作所有处理没有很大区别的时候，我们可以选择打破上述的规则&lt;/li&gt;
+  &lt;li&gt;缺乏&lt;strong&gt;最终一致性要求的基础设施&lt;/strong&gt;，比如计时器、后台线程调度、消息传递设施；此时强行采用最终一致性会有额外的挑战，我们不得不妥协&lt;/li&gt;
+  &lt;li&gt;全局事务或者一些&lt;strong&gt;遗留技术的影响&lt;/strong&gt;，譬如我们不得不于其它依赖于两阶段提交的分布式事务系统打交道的时候，最终一致性处理的引入可能得不偿失&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;查询性能需要优化&lt;/strong&gt;的时候，我们不得不缓存外部聚合对象的指针而不是每次在需要的时候加载进内存做查询，当然性能的影响需要仔细掂量权衡&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;避免使用依赖注入&quot;&gt;避免使用依赖注入&lt;/h3&gt;
+
+&lt;p&gt;使用依赖注入技术来自动传入一个聚合类所依赖的服务或者仓库对象应该被认为是一个糟糕的想法，
+原因很简单：&lt;strong&gt;我们期望用对象标识符的方法来引用其它的聚合对象而不是用对象引用自身&lt;/strong&gt;而依赖注入技术会自动将对象的引用传递进来。&lt;/p&gt;
+
+&lt;h2 id=&quot;其它一些ddd方法和术语&quot;&gt;其它一些DDD方法和术语&lt;/h2&gt;
+&lt;p&gt;除了上面探讨的DDD方法和术语，还有如下一些比较容易理解的设施&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;工厂类，工厂方法、抽象工厂等，这些概念在传统的设计模式中已经得到了广泛的研究，DDD只是拿来使用。&lt;/li&gt;
+  &lt;li&gt;仓库概念和传统的数据库中的DAO或者对象集合的技术很接近，可以用传统的Hibernate技术也可以用NoSQL的方法来实现仓库，Spring等开源库已经提供了很好的封装手段。&lt;/li&gt;
+  &lt;li&gt;集成领域上下文的技术，可以是用基于传统的RPC的方式，也可以采用基于REST API的方法来完成，相关的软件架构技术已经探讨的比较充分了。&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry><entry><title type="html">读Uncle Bob新书-Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书-Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。
 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。&lt;/p&gt;
 
