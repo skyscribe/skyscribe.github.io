@@ -1,4 +1,146 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-04T22:09:10+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-23T21:41:46+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">C++正则表达式比Python慢？</title><link href="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/" rel="alternate" type="text/html" title="C++正则表达式比Python慢？" /><published>2019-06-22T00:00:00+08:00</published><updated>2019-06-22T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/">&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/C%2B%2B17&quot;&gt;C++17&lt;/a&gt; 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。
+程序员们的一个大福利就是终于不用外挂第三方库（无论是准标准的boost还是其它形形色色的其它第三方库）就可以直接方便地使用标准库自带的&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;regex&amp;gt;&lt;/code&gt;来写代码；
+这显然比直接使用原始而笨拙的&lt;code class=&quot;highlighter-rouge&quot;&gt;string::find_first_of&lt;/code&gt;外加一堆边界检查和判断&lt;strong&gt;要轻松和干净&lt;/strong&gt;很多。&lt;/p&gt;
+
+&lt;p&gt;然而&lt;a href=&quot;https://stackoverflow.com/questions/14205096/c11-regex-slower-than-python&quot;&gt;stackoverflow上&lt;/a&gt;的一位&lt;strong&gt;注重性能&lt;/strong&gt;的&lt;a href=&quot;https://stackoverflow.com/users/239007/locojay&quot;&gt;程序员&lt;/a&gt;**很快就发现有些地方不对：好像这个新的regex标准库API是长的漂亮了不少，但是性能似乎和C++的“零成本的抽象”格格不入？&lt;/p&gt;
+
+&lt;h2 id=&quot;python版本比c快很多&quot;&gt;Python版本比C++快很多？&lt;/h2&gt;
+
+&lt;p&gt;locojay给出来一个非常简单的使用正则表达式来分隔字符串的代码，并且比较了C++版本和Python版本的运行时间（自然Python语言在C++社区特别受欢迎不是空穴来风），发现C++版本慢的不可理喻。&lt;/p&gt;
+
+&lt;p&gt;C++代码比较简单：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;regex&amp;gt;
+#include &amp;lt;vector&amp;gt;
+#include &amp;lt;string&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;a b c&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;刨去&lt;code class=&quot;highlighter-rouge&quot;&gt;main&lt;/code&gt;函数种的调用，实现的代码是典型的使用迭代器来生成新的split子迭代器，并构造为&lt;code class=&quot;highlighter-rouge&quot;&gt;vector&amp;lt;string&amp;gt;&lt;/code&gt;返回。&lt;/p&gt;
+
+&lt;p&gt;对应的python版本如下&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;re&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;' +'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'a b c'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;运行的结果却让人大跌眼镜，即使在使用了最大可能的优化选项-O3（C/C++&lt;strong&gt;性能很好的重要来源之一就是几十年间积累的形形色色的编译器后端优化能力&lt;/strong&gt;）之后，两者居然&lt;strong&gt;相差了50%之多并且是C++版本慢&lt;/strong&gt;！&lt;/p&gt;
+
+&lt;p&gt;注：下面的结果是我自己虚拟机里面跑出来的结果，&lt;strong&gt;原问题回答者的结果似乎还要慢了不少几乎是Python版本的运行时间的两倍&lt;/strong&gt;，也许是因为我的机器里面的GCC版本已经比较新了的原因。&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;time &lt;/span&gt;python3 test.py  
+real	0m2.194s
+user	0m2.117s
+sys	    0m0.004s
+
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;time&lt;/span&gt; ./test
+real	0m3.179s
+user	0m3.152s
+sys	    0m0.012s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;第一反应当然会质疑这个结果，但是计算机又不会撒谎，所以一定是代码实现的问题，要么是标准库的regex实现有问题，要么是代码写的有问题？&lt;/p&gt;
+
+&lt;h2 id=&quot;优化掉无意义的临时对象构造和析构&quot;&gt;优化掉无意义的临时对象构造和析构&lt;/h2&gt;
+&lt;p&gt;显然这里有一个&lt;strong&gt;无意义的临时string/vector对象的构造和析构&lt;/strong&gt;，这些过程都会伴随着内存的分配和释放，而Python版本由于其内在的string优化压根就没有这些开销。&lt;/p&gt;
+
+&lt;p&gt;去掉这个构造并尽力复用对象而不改变程序的语义后，代码会成为这样&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;regex&amp;gt;
+#include &amp;lt;vector&amp;gt;
+#include &amp;lt;string&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;a b c&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;通过将需要使用的字符串和vector挪到循环的外部，运行之后，性能提高了一倍多！稍微麻烦一点的时候，内部的代码因为需要清理容器的内容而变得不太干净了。&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;real    0m1.254s
+user    0m1.238s
+sys     0m0.012s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;原答题者的版本里，他的结果还是比Python版本要慢，而我本地机器的运行结果已经超出了python版本不少了！一个自然而然的想法是我们释放可以做的更好？&lt;/p&gt;
+
+&lt;h2 id=&quot;彻底去掉源字符串的内存分配和释放&quot;&gt;彻底去掉源字符串的内存分配和释放&lt;/h2&gt;
+
+&lt;p&gt;注意到这里的第一个参数每次都是同一个，我们根本就不需要将一个&lt;code class=&quot;highlighter-rouge&quot;&gt;const char*&lt;/code&gt;在传递参数的时候构造出来一个新的string对象，直接传递这个指针就可以，代码几乎不需要改动&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;不幸的是这样做的结果并不比前一个版本的更快，显然这里的无效字符串已经被编译器给优化掉了。&lt;/p&gt;
+
+&lt;h2 id=&quot;使用string_view&quot;&gt;使用string_view&lt;/h2&gt;
+&lt;p&gt;由于注意到这里的结果里面并不需要分配新的字符串，如果我们可以使用C++17,标准库里面已经有一个新的速度更快的&lt;code class=&quot;highlighter-rouge&quot;&gt;string_view&lt;/code&gt;类，不会引起任何的内存分配和释放。&lt;/p&gt;
+
+&lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;string_view&lt;/code&gt;版本的代码如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;regex&amp;gt;
+#include &amp;lt;vector&amp;gt;
+#include &amp;lt;string&amp;gt;
+#include &amp;lt;string_view&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string_view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;emplace_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;second&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string_view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;a b c&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;可惜这个版本的性能和&lt;code class=&quot;highlighter-rouge&quot;&gt;-O3&lt;/code&gt;的前面版本并没有太大的差异。显然性能问题从来就没有想当然而然的部分，必须依照测试情况是实验结果来分析。
+另外一个显然的教训是，&lt;strong&gt;内存分配的代价在很多时候比想象的要大很多&lt;/strong&gt;！&lt;/p&gt;
+
+&lt;p&gt;当然这是一个过分简化了的例子，实际的代码往往比这个要复杂很多，这里的性能结果和结论往往不能适用实际的复杂场景，因为每一个程序的运行环境和执行情况可能都是独一无二的，必须一句实际情况来分析。&lt;/p&gt;
+
+&lt;p&gt;更复杂的情况，这里的计算时间的方法显然也太过原始了；可以借助强大的profile工具，生成perf可以解析的数据，从而进一步生成&lt;a href=&quot;https://github.com/brendangregg/FlameGraphhttps://github.com/brendangregg/FlameGraph&quot;&gt;火焰图&lt;/a&gt;或者直接查看&lt;code class=&quot;highlighter-rouge&quot;&gt;perf report&lt;/code&gt;的命令行界面来分析性能的热点在哪里。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="engineering" /><category term="performance" /><category term="cpp" /><category term="python" /><category term="regex" /><summary type="html">C++17 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。 程序员们的一个大福利就是终于不用外挂第三方库（无论是准标准的boost还是其它形形色色的其它第三方库）就可以直接方便地使用标准库自带的&amp;lt;regex&amp;gt;来写代码； 这显然比直接使用原始而笨拙的string::find_first_of外加一堆边界检查和判断要轻松和干净很多。</summary></entry><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。
 甚至有一种说法是：&lt;strong&gt;如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书&lt;/strong&gt;以吸收新的灵感，
 然后才能知道你工作中的面性对象设计用错在了什么地方。&lt;/p&gt;
@@ -2967,508 +3109,4 @@ Spring框架会自动帮我们完成参数校验到请求分发这一系列背�
         &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注 (前文有一些简单探讨) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry><entry><title type="html">函数式反应式编程</title><link href="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/" rel="alternate" type="text/html" title="函数式反应式编程" /><published>2018-03-10T00:00:00+08:00</published><updated>2018-03-10T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/03/10/functional-reactive-programming/">&lt;p&gt;流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。
-由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰，
-一般人们将二者的结合称为函数式反应式编程或者FRP。
-FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的&lt;a href=&quot;http://conal.net/papers/icfp97/icfp97.pdf&quot;&gt;论文&lt;/a&gt;,&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;基本概念&quot;&gt;基本概念&lt;/h2&gt;
-
-&lt;p&gt;从基本思想上看，FRP本质上是以函数式编程思想为基础的。&lt;/p&gt;
-
-&lt;h3 id=&quot;函数式编程的简单历史&quot;&gt;函数式编程的简单历史&lt;/h3&gt;
-
-&lt;p&gt;函数式编程早不是一个新鲜的概念，&lt;a href=&quot;http://www.cse.psu.edu/~gxt29//historyOfFP/historyOfFP.html&quot;&gt;在计算机历史的早期阶段就被提出&lt;/a&gt;和实现，
-可能是由于它和数学理论概念更接近，即使是有&lt;a href=&quot;http://haskell.cs.yale.edu/wp-content/uploads/2011/02/history.pdf&quot;&gt;Haskell这样的致力于提升影响力的开源项目&lt;/a&gt;在上个世纪八十年代被提出以解决不同的语言语义分裂的问题，
-也长期不能带其脱离“叫好不叫座”的尴尬境地，毕竟Unix/C的影响力太大了，以至于大部分人更喜欢面向过程的具体化思维，即使是一度流行的面向对象技术
-也得和传统的面向过程技术相结合才取得了长足的发展。&lt;/p&gt;
-
-&lt;p&gt;进入21世纪以来，传统的依赖单核CPU频率提升的“摩尔定律”慢慢失效，软件的复杂性又与日俱增对计算能力的需求有增无减，
-原本用于大型机的多处理器核心被引入以应对商业软件领域的挑战。不幸的是传统的面向对象技术并不能很好地应对这些挑战;
-自然而然可以优雅地应对这些挑战的函数式编程技术重新引起人们的关注。&lt;/p&gt;
-
-&lt;p&gt;微服务架构的兴起则为两者的结合提供了更好的舞台，因为&lt;strong&gt;无状态是微服务的潜在要求&lt;/strong&gt;也是最重要的一个要求之一；
-函数式编程相较于其他编程范式更强调无副作用的编程思维，和微服务的基本要求自然契合的很好。&lt;/p&gt;
-
-&lt;h3 id=&quot;函数式编程的基本概念&quot;&gt;函数式编程的基本概念&lt;/h3&gt;
-
-&lt;p&gt;函数式编程的基本思路是将&lt;strong&gt;程序的执行看作是一堆函数的组合处理和求值&lt;/strong&gt;过程；纯粹的函数式编程要求数据是不可变的，
-同样的数值输入在流经同样的函数处理的时候必须得到确定的输出，不容许有预料之外的副作用产生。程序员的任务可以想象为两个过程&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;声明运算过程所需要的函数及其组合算法；程序的主要逻辑是组合这些函数算法来完成运算&lt;/li&gt;
-  &lt;li&gt;实现这些函数的内部逻辑实现，这个过程内部仍然是以声明式的写法为主&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;由于声明式的代码更接近于实际的问题领域逻辑，一个明显的好处是函数式代码具有很高的可读性和可维护性。&lt;/p&gt;
-
-&lt;h3 id=&quot;流及反应式抽象&quot;&gt;流及反应式抽象&lt;/h3&gt;
-
-&lt;p&gt;流的抽象在计算机编程语言和计算机基础技术中非常常见。&lt;/p&gt;
-
-&lt;p&gt;C++语言的早期STL标准库就提出了IO流的概念，它将输入输出设备进行抽象，
-外部用户仅仅需要关心自己的数据可以写入流中或者从流中读取，具体怎么实现底层的输入输出控制的细节则被标准IO流库所封装和隐藏。&lt;/p&gt;
-
-&lt;p&gt;TCP协议的设计是另外一个例子，逻辑上看TCP服务的提供者和使用者之间在通信之前需要先建立一个虚拟的数据流，
-然后发送方可以&lt;strong&gt;按照严格而固定的顺序&lt;/strong&gt;将数据写入这个数据流中，对方则可以保证按照发送发的写入顺序读取到数据。
-这里一个明显的共同特征是，流用于表述一种允许&lt;strong&gt;生产者顺序往后追加，消费者可以依据同样顺序读取出数据&lt;/strong&gt;的逻辑抽象通道。
-只要逻辑通道处于连接状态，发送方就可以持续不断地向数据流中填充数据，接收方则可以得到保证不管中间经过多少节点（路由器或者交换机），
-数据总是以相同的顺序被放置在本地的协议栈缓冲中以便读取（这里暂不考虑网卡驱动丢包等异常情况）。&lt;/p&gt;
-
-&lt;p&gt;Unix 的管道也满足类似的特征，管道的输入端进程可以源源不断地将自己的标准输出信息重定向到给定的管道中，
-而管道另外一侧的进程则按照同样的顺序从管道里读取数据。&lt;/p&gt;
-
-&lt;p&gt;这些例子中，流中的数据是一经产生即不会被修改的，并且多个不同的流其实可以或多或少按照某种方式去组合；譬如可以组合多个进程，
-让前一个进程的输出作为下一个进程的收入，管道的长度可以达到任意长度（当然实际的长度会受制于计算机的处理能力 ）。
-同时这种采用组合来扩展程序的能力虽然简单却有着巨大的威力，管道的思想被认为是 Unix 编程哲学的核心要义之一。&lt;/p&gt;
-
-&lt;p&gt;在这种抽象语义下，除了流的开端出的处理逻辑，&lt;strong&gt;其它相连的中间处理过程或者结束过程都是反应式&lt;/strong&gt;的，即遵循被动式的处理逻辑：
-从输入中拿到内容 (可以是消息或者应用数据 ) , 按照业务领域意图做转换处理，然后将产生的结果放入流中，以便下游可以继续处理。&lt;/p&gt;
-
-&lt;h3 id=&quot;将两者相结合&quot;&gt;将两者相结合&lt;/h3&gt;
-
-&lt;p&gt;上述&lt;strong&gt;流的抽象其实和函数式编程的基本要素可以无缝地融合&lt;/strong&gt;在一起，因为流的运算特征满足不可变性的特征，并且易于组合。&lt;/p&gt;
-
-&lt;p&gt;简单地说，FRP的核心思维方式是将&lt;strong&gt;异步的数据流&lt;/strong&gt;作为基本的数据抽象，异步是为了解耦处理流的处理和参与者；
-作为编程模型的基本抽象，它支持用各种各样的方式来创建数据流，可以是一个外部的变量，也可以是图形界面点击事件，
-缓冲更新等等。&lt;/p&gt;
-
-&lt;p&gt;基于该基本抽象，FRP还提供给使用者灵活的工具箱来处理流，使我们可以创建新的流、过滤已有的流、组合或者终结流的数据；
-显然这些操作手法是典型的函数式的，所不同的是&lt;strong&gt;流被当作了基本的数据处理单元&lt;/strong&gt;，
-上述的这些操作都可以看作是作用于流的函数或者高阶函数。&lt;/p&gt;
-
-&lt;p&gt;FRP的实现基本都依赖于基本的函数式编程特性，尽管各种编程语言不约而同地慢慢从函数式编程语言中汲取营养加入到新的版本中，
-或者没有历史兼容包袱（适合于一些新语言）地直接在语言核心加入函数式编程支持，&lt;/p&gt;
-
-&lt;p&gt;在不同的编程语言中实现FRP面临的挑战也是不一样的。最有名的FRP实现是 &lt;a href=&quot;http://reactivex.io/&quot;&gt;ReactiveX&lt;/a&gt;,
-下面我们来粗略看下不同的编程语言中的RFP实现和基本特征。&lt;/p&gt;
-
-&lt;h2 id=&quot;javascript&quot;&gt;Javascript&lt;/h2&gt;
-
-&lt;p&gt;Javascript从早期版本开始就支持函数作为语言基本设施这一重要的函数式编程入门条件，在Javascript中实现FRP也比较清晰容易。&lt;/p&gt;
-
-&lt;p&gt;想象一个简单的功能：我们需要在启动的时候从github中读取三个账户数据，用过程式的方法也很简单，
-但是我们这里想用FRP的方法来实现并顺便看下它的基本语义。&lt;/p&gt;
-
-&lt;p&gt;首先我们需要先产生一个流，毕竟这是一切运算的基础，用ReactiveX 的说法我们需要一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;，我们可以简单认为它就是一个流&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;requestStream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Observable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;just&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'https://api.github.com/users'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;这时候我们得到的还仅仅是一个字符串流；我们需要给它加上一些动作，当对应的数据被推送给流的时候，后续的运算可以继续进行下去&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;requestStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// execute the request&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;responseStream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Observable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;jQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;jqXHR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;always&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onCompleted&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
-    &lt;span class=&quot;nx&quot;&gt;responseStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// do something with the response&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;上述代码中，我们用 &lt;code class=&quot;highlighter-rouge&quot;&gt;subscribe&lt;/code&gt; 函数作为组合函数，对应的参数是一个函数，该函数会取到 &lt;code class=&quot;highlighter-rouge&quot;&gt;requestStream&lt;/code&gt; 中的字符串URL，
-执行AJAX回调，并基于处理结果决定如何处理流，这里的 &lt;code class=&quot;highlighter-rouge&quot;&gt;create&lt;/code&gt; 函数用于创建一个自定义的流，传入的 &lt;code class=&quot;highlighter-rouge&quot;&gt;observer&lt;/code&gt; 为下游的stream (ReactiveX叫他&lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;)。
-当AJAX异步执行成功或者出错的时候，上面的实现将对应的相应结果通知给下游，分别是&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;onNext&lt;/code&gt; 通知下一个数据需要被处理&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;onError&lt;/code&gt; 通知异常情况发生，遇到错误需要被处理&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;onCompleted&lt;/code&gt; 标记流的结束&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;需要处理这些响应数据的代码写在第二个 &lt;code class=&quot;highlighter-rouge&quot;&gt;subscribe&lt;/code&gt; 代码块中。&lt;/p&gt;
-
-&lt;p&gt;上面的代码中，我们在一个流的处理中嵌套了另外一个流的处理，写的多了很容易掉入 &lt;a href=&quot;http://callbackhell.com/&quot;&gt;Callback Hell&lt;/a&gt; 的陷阱。
-所幸的是，我们可以使用流变换的技术来简化它，重写为如下的版本&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;responseMetastream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;requestStream&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Observable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fromPromise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;jQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;这是函数式编程中基本的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;函数 - 将一种数据经过运算后编程另外一种数据，这里麻烦的是我们的&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;默认就会将内部的返回类型封装为一个Stream,
-加上里面的返回值本身已经是一个 Stream，最终我们得到了一个封装了两次的stream，好在&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;可以帮我们轻松解开一层封装&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;responseStream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;requestStream&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;flatMap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Observable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fromPromise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;jQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;实现的流处理过程如下图&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://camo.githubusercontent.com/0b0ac4a249e1c15d7520c220957acfece1af3e95/687474703a2f2f692e696d6775722e636f6d2f4869337a4e7a4a2e706e67&quot; alt=&quot;js_rx_flatmap&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;更复杂的功能可以参考&lt;a href=&quot;https://gist.github.com/staltz/868e7e9bc2a7b8c1f754&quot;&gt;这篇gist&lt;/a&gt;，文字和视频都很清晰易懂。&lt;/p&gt;
-
-&lt;h2 id=&quot;java8-基本流&quot;&gt;Java8 基本流&lt;/h2&gt;
-
-&lt;p&gt;Java8在JDK中提供了丰富的 stream API，其定义是一个泛型的接口，支持最基本的流操作，包括 &lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;skip&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;sorted&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;等方法。
-一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;stream&lt;/code&gt;对象可以用包括静态的&lt;code class=&quot;highlighter-rouge&quot;&gt;of&lt;/code&gt;方法、&lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;辅助类构造出来，同时JDK提供的&lt;code class=&quot;highlighter-rouge&quot;&gt;Collection&lt;/code&gt;类大多支持一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;stream()&lt;/code&gt;方法用以构造一个新的stream对象。&lt;/p&gt;
-
-&lt;p&gt;需要注意的是Java8语言本身的函数式支持是通过面向对象的方法来模拟的，只是从FRP编程的角度来看，可以认为Java8的流是用函数式思维组织设计，用OO的方法来提供实现。
-更多Java8的函数式特性和流实现细节记录在&lt;a href=&quot;/ /post/2016/10/14/fp-support-in-java8/&quot;&gt;这篇文章&lt;/a&gt;中。&lt;/p&gt;
-
-&lt;h2 id=&quot;rxjava扩展&quot;&gt;RxJava扩展&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/ReactiveX/RxJava&quot;&gt;RxJava&lt;/a&gt; 项目用库的方式对JVM平台进行扩展，提供易于组合、异步、事件驱动的反应式编程支持。
-它的基本思路是扩展&lt;a href=&quot;http://en.wikipedia.org/wiki/Observer_pattern&quot;&gt;观察者模式&lt;/a&gt; 以方便地支持数据、事件流，并提供高层抽象，
-将核心业务逻辑和底层的线程、同步、并发数据结构这些计算机底层的具体技术所隔离，使得应用程序开发者可以更关注于业务逻辑，提高开发效率。&lt;/p&gt;
-
-&lt;p&gt;由于反应式编程天然和函数式编程的关系密切，并且Java8才支持Lamba表达式和Stream这些抽象，所以在Java8平台上使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;RxJava&lt;/code&gt; 会更清晰自然。
-一个最简单的回显 &lt;code class=&quot;highlighter-rouge&quot;&gt;Hello World&lt;/code&gt; 的流程序的例子如下&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;io.reactivex.*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HelloWorld&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;just&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello world&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;这个最简单的例子中, 我们先使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;Flowable.just&lt;/code&gt; 方法产生一个流并初始化为传入的数据 &lt;code class=&quot;highlighter-rouge&quot;&gt;Hello World&lt;/code&gt;，并且当给定的数据传入流之后，流即终止。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;subscribe&lt;/code&gt;方法则提供一个流数据的消费者，这里是一个lambda表达式，将实际数据传给 &lt;code class=&quot;highlighter-rouge&quot;&gt;System.out.println&lt;/code&gt; 打印在控制台上。
-当然这个例子是在实际应用中没多大意义，没有人会写出这样的实际代码来增加无畏的复杂性。&lt;/p&gt;
-
-&lt;h3 id=&quot;更复杂一点的例子&quot;&gt;更复杂一点的例子&lt;/h3&gt;
-
-&lt;p&gt;更常见一点的任务是，我们想根据输入数据做一些运算，这些运算本身可能比较复杂而耗时所以我们希望它在一些后台进程上做，做完之后，再将结果汇聚起来放在界面上显示出来。
-如果我们采用Java7提供的并发包中的工具来做，则需要仔细考虑一下线程之类的东西 （或者使用ForkJoinPool来做）；
-RxJava 则允许我们仅仅关注于需要解决的问题逻辑，其实现可以如下&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fromCallable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Thread&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//  imitate expensive computation&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Done&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;subscribeOn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Schedulers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;io&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;observeOn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Schedulers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;single&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;Throwable:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;printStackTrace&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;该例中，每一个语句调用结果都会产生一个新的不可变的 &lt;code class=&quot;highlighter-rouge&quot;&gt;Flowable&lt;/code&gt;对象出来，整个代码的书写方式是链式调用的风格；如果将每个调用写在单独的一样上，
-应用处理逻辑则一目了然。&lt;/p&gt;
-
-&lt;p&gt;RxJava并不直接使用Java8的线程或者 &lt;code class=&quot;highlighter-rouge&quot;&gt;ExecutorService&lt;/code&gt; 接口，而是用 &lt;code class=&quot;highlighter-rouge&quot;&gt;Scheduler&lt;/code&gt; 抽象和底层的JVM线程库做交互；&lt;code class=&quot;highlighter-rouge&quot;&gt;Scheduler&lt;/code&gt; 负责和底层的线程或者
-&lt;code class=&quot;highlighter-rouge&quot;&gt;ExecutorService&lt;/code&gt;实例做绑定；遵循常用的Java命名约定，&lt;code class=&quot;highlighter-rouge&quot;&gt;Schedulers&lt;/code&gt; 工具类封装了一些常用的静态 &lt;code class=&quot;highlighter-rouge&quot;&gt;Scheduler&lt;/code&gt; 实例方便编程使用。&lt;/p&gt;
-
-&lt;h3 id=&quot;使用并发&quot;&gt;使用并发&lt;/h3&gt;
-
-&lt;p&gt;RxJava 允许并发的运行计算以提高处理能力，然而当流中的输入数据是线性传入的时候，默认情况下则无法并发，下面的例子&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;observeOn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Schedulers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;computation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;blockingSubscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;虽然使用了默认共享的计算线程池（假设我们有多个处理器核心），但是因为输入的数据是线性传入的，中间的计算并不会自动地派发到多个计算线程上。
-为了打开并发处理，我们需要额外下一番功夫，使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt; 方法显示地展开流并在运算完毕后自动合并流数据：&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;flatMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;just&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-      &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;subscribeOn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Schedulers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;computation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-      &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;blockingSubscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;新一点的版本中，RxJava还加入了 &lt;code class=&quot;highlighter-rouge&quot;&gt;parallel()&lt;/code&gt; 方法以生成一个并发的流对象 &lt;code class=&quot;highlighter-rouge&quot;&gt;ParallelFlowable&lt;/code&gt; 从而更大地简化代码&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Flowable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;parallel&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;runOn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Schedulers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;computation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;sequential&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-  &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;blockingSubscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;需要注意的是，&lt;code class=&quot;highlighter-rouge&quot;&gt;Flowable&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;ParallelFlowable&lt;/code&gt; 是完全不同的类型，二者都是泛型类，但没有共同的接口。&lt;code class=&quot;highlighter-rouge&quot;&gt;ParallelFlowable&lt;/code&gt;提供了丰富的接口可以得到一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Flowable&lt;/code&gt;&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt; 可以用一个调用者指定的函数来得到一个顺序的流&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sequential&lt;/code&gt; 可以显示地从每个流的尾部用轮询的方式得到一个顺序流&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sorted&lt;/code&gt; 则可以排序并发流并合并的恶道一个顺序流&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;toSortedList&lt;/code&gt; 则得到一个排序列表的流&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;合理的设计和使用&quot;&gt;合理的设计和使用&lt;/h3&gt;
-
-&lt;p&gt;RxJava 建议最好的使用方式是 :&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;创建产生数据的可被流感知的对象(&lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;)，作为流的输入数据&lt;/li&gt;
-  &lt;li&gt;创建对数据进行运算的处理逻辑，它们自己本身可以对流推送过来的数据做适当运算，产生新的结果写入流中&lt;/li&gt;
-  &lt;li&gt;完成处理所关心的数据的处理逻辑，将数据汇聚归并成最终关心的形式&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;RxJava 支持从已有的数据结构中创建 &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;, 我们可以很方便的使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;from&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;just&lt;/code&gt; 或者 &lt;code class=&quot;highlighter-rouge&quot;&gt;create&lt;/code&gt;方法创建出来，
-他们可以同步地一次调用&lt;code class=&quot;highlighter-rouge&quot;&gt;onNext&lt;/code&gt;方法通知感兴趣的订阅者；在所有的数据都通知完毕的情况下，则会调用 &lt;code class=&quot;highlighter-rouge&quot;&gt;onCompleted()&lt;/code&gt; 方法通知订阅者。&lt;/p&gt;
-
-&lt;h4 id=&quot;组合和变化-observable&quot;&gt;组合和变化 &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;&lt;/h4&gt;
-
-&lt;p&gt;RxJava 支持我们方便地连接或者组合多个&lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;, 考虑如下的 groovy 代码&lt;/p&gt;
-&lt;div class=&quot;language-groovy highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;simpleComposition&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;customObservableNonBlocking&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;take&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;({&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stringValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stringValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;_xform&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;({&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;println&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;onNext =&amp;gt; &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;它的处理流程其实是如下的流水线处理&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://github.com/Netflix/RxJava/wiki/images/rx-operators/Composition.1.png&quot; alt=&quot;groovy_pipeline&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;kafka-streams&quot;&gt;Kafka Streams&lt;/h2&gt;
-
-&lt;p&gt;Kafka本身（可以参考&lt;a href=&quot;//post/2017/11/18/kafka-design-study/&quot;&gt;前一篇文字&lt;/a&gt;）就可以看作是一个流式处理平台。同时它还提供了专门的流处理API，其特性如下&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Kafka Streams 本身是一个客户端的库，可以看作是一个用户端程序而不是其平台核心部分；它本身被设计为可以&lt;strong&gt;很容易地嵌入到用户端的Java程序&lt;/strong&gt;中，方便部署和集成。
-除了Kafka平台本身，它不依赖于其他的库或者系统；同事又能依托于Kafka平台提供的可伸缩性和一致性保证提供高可靠的实时处理能力。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;支持流处理中插入自定义的本地状态，从而结合传统的过程式编程的本地状态的便利；当然破坏了纯函数性编程无状态的假设会带来复杂的问题，以提高性能；
-各种取舍需要用户自己去选择。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Stream&lt;/code&gt;是Kafka Streams提供的最重要的抽象，它表示无边界、持续更新的数据流；一个流是有序而可重放的，其中的数据是由按时间顺序的不可变的数据序列组成；
-其中的一条数据或者记录被定为为一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;Key, Value&lt;/code&gt; 对。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;建立在stream之上的应用程序可以看作是由一个或者流处理对象（stream processor）组成；这些流处理对象是高度可组合的，它们可以将一个或者多个流作为输入，
-经过一定的函数变换产生一个或者多个流对象输出。
-这里的两种例外情况是被称之为 &lt;code class=&quot;highlighter-rouge&quot;&gt;Source&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;Sink&lt;/code&gt; 的处理对象；&lt;code class=&quot;highlighter-rouge&quot;&gt;Source&lt;/code&gt;可以从Kafka平台中读取某个&lt;code class=&quot;highlighter-rouge&quot;&gt;Topic&lt;/code&gt;作为输入经过处理后，产生新的数据流，
-而&lt;code class=&quot;highlighter-rouge&quot;&gt;Sink&lt;/code&gt;可以从上游的流中拿到数据，作处理之后，将结果写入一个特定的&lt;code class=&quot;highlighter-rouge&quot;&gt;Topic&lt;/code&gt;上。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Kafka Stream的流处理拓扑结构如下图&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://kafka.apache.org/10/images/streams-architecture-topology.jpg&quot; alt=&quot;kafka_streams_topo&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;两种流处理技术&quot;&gt;两种流处理技术&lt;/h3&gt;
-
-&lt;p&gt;Kafka Streams提供了两种方法来操作流处理逻辑&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;专门的&lt;a href=&quot;https://kafka.apache.org/10/documentation/streams/developer-guide/#streams_dsl&quot;&gt;领域语言(DSL)&lt;/a&gt; 提供了基于Steams的高级API来转换流；用户可以用这些API的组合来完成自己的应用程序逻辑。&lt;/li&gt;
-  &lt;li&gt;相对底层一些的 Processor API，适用于用户想自己定义自己的流处理逻辑的情况；这里我们只粗略看看DSL的特性和使用。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;DSL支持基于Streams和Table的抽象，有三个主要的接口&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;KStream&lt;/code&gt;是基本的数据流对象&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;KTable&lt;/code&gt;是一个二维表，可以方便地用在需要数据连接或者分组的情况&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;GlobalKTable&lt;/code&gt;是一个全局的表，其本身可以和Kafka的数据分块等能力结合起来用&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;KStream&lt;/code&gt;用来表述流的概念，而后两者用来对应于数据表结构。基于 &lt;code class=&quot;highlighter-rouge&quot;&gt;StreamsBuilder&lt;/code&gt; 类，我们可以很方便地将Kafka中的某个topic数据读加载到流中或者数据表中。
-这些接口提供了丰富的变换操作（方法），其中一些变换方法会产生一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;KStream&lt;/code&gt;而另外一些则会产生新的&lt;code class=&quot;highlighter-rouge&quot;&gt;KTable&lt;/code&gt;。
-从实现上看，这些接口都是用泛型技术实现的，并且是强类型的。&lt;/p&gt;
-
-&lt;p&gt;所谓的流变换可以分为两类：无状态的后有状态的。无状态的变换支持诸如 &lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;flatMap&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;filterNot&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;foreach&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;groupByKey&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;selectByKey&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;toStream&lt;/code&gt;等操作；
-其中&lt;code class=&quot;highlighter-rouge&quot;&gt;toStream&lt;/code&gt;可以实现从&lt;code class=&quot;highlighter-rouge&quot;&gt;KTable&lt;/code&gt;到&lt;code class=&quot;highlighter-rouge&quot;&gt;KStream&lt;/code&gt;的转换；而&lt;code class=&quot;highlighter-rouge&quot;&gt;groupBy&lt;/code&gt;则返回分组过的流或者数据表。
-有状态的变换除了将传入的流作为输入外，还需要一个额外的状态数据存储参与到变换处理过程中；
-比如一个&lt;code class=&quot;highlighter-rouge&quot;&gt;window&lt;/code&gt;操作会在处理过程中读取&lt;code class=&quot;highlighter-rouge&quot;&gt;window&lt;/code&gt;信息来确定输入流中的哪些数据应该被处理并将其结果放置在输出流中。&lt;/p&gt;
-
-&lt;p&gt;有状态的流变换包含如下几种&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;聚合&lt;/li&gt;
-  &lt;li&gt;连接操作(Join)，可以将其想象为SQL的表连接&lt;/li&gt;
-  &lt;li&gt;上述的window操作&lt;/li&gt;
-  &lt;li&gt;自定义的流处理变换操作，由于是自定义的所以可能是有状态的&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;它们之间的关系可以参考下图&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://kafka.apache.org/10/images/streams-stateful_operations.png&quot; alt=&quot;kafka_stateful_transformation_relation&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;一个简单的例子&quot;&gt;一个简单的例子&lt;/h3&gt;
-
-&lt;p&gt;下面是一个简答的Java8的程序，用于统计某个文本行中的词出现的次数&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Assume the record values represent lines of text.  For the sake of this example, you can ignore&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;// whatever may be stored in the record keys.&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;KStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;textLines&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...;&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;KStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Long&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wordCounts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;textLines&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// Split each text line, by whitespace, into words.  The text lines are the record&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// values, i.e. you can ignore whatever data is in the record keys and thus invoke&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// `flatMapValues` instead of the more generic `flatMap`.&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;flatMapValues&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Arrays&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;asList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toLowerCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;\\W+&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)))&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// Group the stream by word to ensure the key of the record is the word.&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;groupBy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// Count the occurrences of each word (record key).&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// This will change the stream type from `KGroupedStream&amp;lt;String, String&amp;gt;` to&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// `KTable&amp;lt;String, Long&amp;gt;` (word -&amp;gt; count).&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// Convert the `KTable&amp;lt;String, Long&amp;gt;` into a `KStream&amp;lt;String, Long&amp;gt;`.&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;rxcpp&quot;&gt;RxCpp&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/Reactive-Extensions/RxCpp&quot;&gt;RxCpp&lt;/a&gt; 提供类似了和 &lt;a href=&quot;https://github.com/ericniebler/range-v3&quot;&gt;Ranges-v3&lt;/a&gt; 库类似的管线操作，其处理方式本质上也是反应式的。
-由于C++支持运算符重载，&lt;code class=&quot;highlighter-rouge&quot;&gt;|&lt;/code&gt; 操作符可以天然地作为管道操作符拿来用，而现代C++语言对函数式编程和Lambda表达式的丰富的表达能力使得写出可读性好的代码不算什么难事。&lt;/p&gt;
-
-&lt;p&gt;下面是其项目文档中的一个例子,实现如下一个解析任务&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;给定一个二进制文件作为输入，其中存放的是一段不等长字符串构成的二进制表示，可以有多行；每行用之间回车符号隔开 ；输入长度被分割为固定长度的行&lt;/li&gt;
-  &lt;li&gt;要求解析给定的输入，将二进制数表示的字符打印出来，并且每一行对应于原输入中的一行&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;输入的格式如下（假设一行有17个字符的二进制数表示 )&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 66 
-13 67 67 67 67 67 67 67 67 67 67 67 13 68 68 68 68 
-68 68 68 68 13 69 69 69 69 69 69 69 69 69 13
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;对应的输出应该为&lt;/p&gt;
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BBBBBBBBBBBBBBBBB
-CCCCCCCCCCC
-DDDDDDDD
-EEEEEEEEE
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;产生一段随机的字符输入可以用RxCpp的方式写为如下的函数式代码&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;random_device&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// non-deterministic generator
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mt19937&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;uniform_int_distribution&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// for testing purposes, produce byte stream that from lines of text
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flat_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'A'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; 
-                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repeat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; 
-                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;as_dynamic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delim&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'\r'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
-                &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flat_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;observable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; 
-            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-                    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-                &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;as_dynamic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-            &lt;span class=&quot;c1&quot;&gt;// print input packet of bytes
-&lt;/span&gt;            &lt;span class=&quot;n&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ostream_iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;这里虽然有多个管道操作，不习惯函数式编程风格代码的程序员可能看起来有些头晕，好在只要我们加上恰当的缩进，在熟悉RxCpp库的命名的情况下，代码的逻辑还是比较简单明了的&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;range(0, 10)&lt;/code&gt; 先生称一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;对象作为流的起点，内部会一次产生0,1,2,…,10发布给流，通知其后的 &lt;code class=&quot;highlighter-rouge&quot;&gt;subscriber&lt;/code&gt;, 后边的管道操作符连接了流处理的下一个环节。
-接下来，用给定的字符得到一个对应ASCII码，然后用 &lt;code class=&quot;highlighter-rouge&quot;&gt;repeat&lt;/code&gt;函数经给定的字符做重复，产生4~18个重复的字符，&lt;code class=&quot;highlighter-rouge&quot;&gt;as_dynamic&lt;/code&gt;则是一个特殊的函数用于解决C++类型安全方面的一些问题。
-这是一个字符行的二进制串，然后我们还需要用换行符将其连接起来，&lt;code class=&quot;highlighter-rouge&quot;&gt;from&lt;/code&gt; 的双参数形式可以产生一行新的 &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt; 对象，用第二个参数作为分隔符连接第一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;,
-进而这里的多个行便被连接成一个整体的 &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;对象给后续处理了。&lt;/p&gt;
-
-&lt;p&gt;由于我们希望每一行的输入仅有17个二进制串，紧接着的 &lt;code class=&quot;highlighter-rouge&quot;&gt;window&lt;/code&gt;函数就是用来将输入的流按照固定的长度分隔为固定长度的行的；需要留意的是每一个字符的长度可能是4~18的一个随机值，
-这个在前面&lt;code class=&quot;highlighter-rouge&quot;&gt;repeat&lt;/code&gt;的时候便确定了。&lt;code class=&quot;highlighter-rouge&quot;&gt;flat_map&lt;/code&gt;可以将lambda表达式封装的实际的 &lt;code class=&quot;highlighter-rouge&quot;&gt;observable&lt;/code&gt; 提出出来。
-有了上面这些按行分割好的集合，接下来的任务是需要将这些记录保存到一个容器中，便于后续解析处理，因而后续的一个&lt;code class=&quot;highlighter-rouge&quot;&gt;flat_map()&lt;/code&gt;调用针对前面的集合，
-采用&lt;code class=&quot;highlighter-rouge&quot;&gt;reduce&lt;/code&gt;算法收集一个一个的字符并以行为单位放入容器中，最终的流会每次产生一个&lt;code class=&quot;highlighter-rouge&quot;&gt;vector&amp;lt;uint8_t&amp;gt;&lt;/code&gt;待后续处理。
-出于调试的便利，我们同时用&lt;code class=&quot;highlighter-rouge&quot;&gt;tap&lt;/code&gt;函数安插一个方便调试的打印操作，该函数本身不会修改流的数据内容。&lt;/p&gt;
-
-&lt;p&gt;下面的代码则完成一些变换逻辑，用更多的中间变量会使得代码更容易理解一些，当然代码就不如上面的输入部分那么紧凑了。&lt;/p&gt;
-
-&lt;p&gt;首先我们需要一个工具函数删除给定字符串中的空格字符，用一个lambda表达式可以很容易的写出来&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;removespaces&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;erase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;remove_if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isspace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;接下来我们就可以针对上面已经生成好的bytes流，按照回车符号进行拆分,过滤掉输入中的空格字符，拆分过程可以用C++标准库的&lt;code class=&quot;highlighter-rouge&quot;&gt;cregex_token_iterator&lt;/code&gt;来完成，
-并将结果用迭代器封装访问，而C++11的移动语义可以额外的减少临时字符串的开销。&lt;code class=&quot;highlighter-rouge&quot;&gt;concat_map&lt;/code&gt;将所有的去掉了换行符的字符串连接起来，交给流的下游，
-然后完成过滤空格字符串的操作。&lt;/p&gt;
-
-&lt;p&gt;最后我们需要将处理好的串再加上回车符号，并最终输出，加上&lt;code class=&quot;highlighter-rouge&quot;&gt;publish&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;ref_count&lt;/code&gt;可以使得我们写2个单独的订阅者，第一个自动建立流的连接，
-最后一个订阅者处理完毕后自动关闭流. 代码如下&lt;/p&gt;
-
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-&lt;span class=&quot;c1&quot;&gt;// create strings split on \r
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strings&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;concat_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint8_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;R&quot;/(\r)/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;cregex_token_iterator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;splits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;iterate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;splits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([](&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ref_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;由于最后一行不像前边的行一样有一个额外的回车符，我们需要将其分拣出来，使用&lt;code class=&quot;highlighter-rouge&quot;&gt;filter&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;window_toggle()&lt;/code&gt;可以很方便地将二者进行分组，
-然后再将结果用&lt;code class=&quot;highlighter-rouge&quot;&gt;sum&lt;/code&gt;连接起来并删除中间的空格字符。&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// filter to last string in each line
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;closes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strings&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\r'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([](&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;});&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// group strings by line
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linewindows&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strings&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;window_toggle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;closes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;start_with&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;closes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;});&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// reduce the strings for a line into one string
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lines&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linewindows&lt;/span&gt; 
-    &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flat_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;observable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; 
-            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;start_with&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
-            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; 
-            &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Rx&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;removespaces&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;最后一段代码用于接产生好的流打印出来，直接传递给&lt;code class=&quot;highlighter-rouge&quot;&gt;println&lt;/code&gt;即可&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// print result
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lines&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;看这里的代码，可以明显看到里面没有一个传统的过程式控制逻辑，没有分支、循环和判断，有的只是函数定义、调用和流连接操作。
-如果熟悉Rx系列库的API，处理逻辑还是比较清晰明了的。&lt;/p&gt;
-
-&lt;h2 id=&quot;reactive-spring&quot;&gt;Reactive Spring&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.infoq.com/news/2015/09/spring-43-5&quot;&gt;Spring 5.0 框架&lt;/a&gt;的一个重心就是增加对FRP风格的架构的支持。
-Spring框架之所以流行，一个很重要的原因就是其易用而又性能极好的MVC框架可以很好地替代传统的servelet-API，虽然Spring MVC可以很好地解耦一部的HTTP请求，
-但是在不破坏既有框架的前提下增强非阻塞的IO模型却碰到了不少困难。另一方面，基于注解的MVC工具带来了更具可读性的代码和清晰的业务逻辑，
-Spring 5.0在尽力不破坏既有注解的前提下，实现了一个底层的Reactive Engine。&lt;/p&gt;
-
-&lt;p&gt;同时Spring还发布了一个基于JVM平台的&lt;a href=&quot;https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#specification&quot;&gt;反应式流处理规格说明&lt;/a&gt;，尝试将改编程范式在JVM平台上实现标准化。
-目前该规格致力于实现多种异步组件驱动在JVM平台之上的互操作性，&lt;a href=&quot;https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html&quot;&gt;Flow接口&lt;/a&gt;已经加入到Java9的中;
-它由4个接口，一些rule 以及一个TCK组成&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Publisher&lt;/code&gt; 用于产生可以无固定边界的元素的序列，这些元素可以被发布给特定的订阅者&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Subscribe&lt;/code&gt; 用于从&lt;code class=&quot;highlighter-rouge&quot;&gt;Publisher&lt;/code&gt;中接收数据更新&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Subscription&lt;/code&gt; 用于表述&lt;code class=&quot;highlighter-rouge&quot;&gt;Publisher&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;Subscriber&lt;/code&gt;之间的订阅关系并可以对数据的处理做控制，有&lt;code class=&quot;highlighter-rouge&quot;&gt;request&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;cancel&lt;/code&gt;方法&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Processor&lt;/code&gt; 用于表述流处理的中间状态&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;其它语言和平台&quot;&gt;其它语言和平台&lt;/h2&gt;
-&lt;p&gt;对于其它编程语言环境和平台，微软的开源项目&lt;a href=&quot;https://github.com/Reactive-Extensions&quot;&gt;Reactive Extensions&lt;/a&gt;提供了丰富的支持。&lt;/p&gt;
-
-&lt;h2 id=&quot;参考材料&quot;&gt;参考材料&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/staltz/868e7e9bc2a7b8c1f754&quot;&gt;The introduction to reactive programming you’ve been missing&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/1028250/what-is-functional-reactive-programming/1030631#1030631&quot;&gt;Conal’s reply on “what’s (functional) reactive programming&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/Reactive-Extensions/RxJS&quot;&gt;RxJs&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/ReactiveX/RxJava&quot;&gt;RxJava&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://kafka.apache.org/10/documentation/streams/core-concepts&quot;&gt;Kafka Streams: concepts&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="concurrency" /><category term="microservice" /><summary type="html">流式编程或者响应式编程则是一个不断进入我们视线的设计概念；它采用声明式编程范式，并将数据流和数据更新的处理作为程序运算的核心。 由于函数式编程本身即强调声明式编程，这使得用函数式编程的语言或者工具来实现响应式编程更自然清晰， 一般人们将二者的结合称为函数式反应式编程或者FRP。 FRP最早可以追溯到微软和耶鲁的两位先驱在97年发表的论文,</summary></entry></feed>
+&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注 (前文有一些简单探讨) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry></feed>
