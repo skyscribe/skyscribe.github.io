@@ -1,4 +1,428 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-23T21:41:46+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">C++正则表达式比Python慢？</title><link href="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/" rel="alternate" type="text/html" title="C++正则表达式比Python慢？" /><published>2019-06-22T00:00:00+08:00</published><updated>2019-06-22T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/">&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/C%2B%2B17&quot;&gt;C++17&lt;/a&gt; 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-29T13:40:38+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">C++20 - 下一个大版本功能确定</title><link href="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/" rel="alternate" type="text/html" title="C++20 - 下一个大版本功能确定" /><published>2019-06-23T00:00:00+08:00</published><updated>2019-06-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/">&lt;p&gt;C++20的功能特性已经于3月份冻结，显然&lt;strong&gt;这次终于来了一波大的改进&lt;/strong&gt;，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;核心语言特性终于有了大变化&quot;&gt;核心语言特性终于有了大变化&lt;/h2&gt;
+&lt;p&gt;新的版本之所以被认为是下一个大的版本，主要原因还是来自于核心语言特性的扩充和简化。看起来好像两个目标有些互相矛盾，但是内在的逻辑其实还是统一的：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;扩充新的特性可以弥补之前一些遗留已久的功能限制，&lt;strong&gt;方便提高程序员的生产力&lt;/strong&gt;，减少社区中长期存在的奇技淫巧侵蚀程序员宝贵的心智空间；&lt;/li&gt;
+  &lt;li&gt;简化的方向主要是出于“照顾”新手程序员，帮助他们&lt;strong&gt;更快地上手产生生产力&lt;/strong&gt;而不是匍匐在陡峭的学习曲线上靠长期的实践积累来摸索，从而培养下一代的新鲜血液，否则语言就会因为失去活力而慢慢消亡；这显然不是标准委员会愿意看到的。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;从这两个角度看，也许片面地评价标准委员会的资深专家们为“学院派”或者“老学究”，总归是有些不合适的；因为C++一开始在90年代上半段的风靡完全是因为它是一门实用的程序语言。
+只是随着时间的推进，很多&lt;strong&gt;早期做出的设计决策多多少少被整个产业界的各色各样的业务需求催生的奇技淫巧所侵蚀&lt;/strong&gt;；&lt;/p&gt;
+
+&lt;p&gt;尤其是&lt;strong&gt;模板元编程的流行和语言特性本身的滞后&lt;/strong&gt;带来的矛盾一直没有得到合适的处理，背后的原因正是标准委员会需要照顾已有的软件代码的兼容性（当然背后也有很多大公司的利益考量），妥协再妥协；最终演变成不得不变的地步。&lt;/p&gt;
+
+&lt;h2 id=&quot;concepts&quot;&gt;Concepts&lt;/h2&gt;
+&lt;p&gt;像concept这样可以&lt;strong&gt;明显提升程序员生活质量&lt;/strong&gt;的特性(想象一下用错了一个容器的成员函数之后GCC打印出来的”成吨”的编译错误，很多程序员形容是恨不得捏着鼻子绕着走)，愣是从C++03定稿之后就被提出出来，却活生生被推迟了一次又一次，甚至GCC的版本库上的concepts分支都经历了加上来又移除掉的曲折过程 - &lt;strong&gt;速度和质量&lt;/strong&gt;始终是一对很难权衡的矛盾。&lt;/p&gt;
+
+&lt;p&gt;幸好，经历了&lt;strong&gt;十几年的再三讨论&lt;/strong&gt;，concept这一模板元大杀器终于被投票送进了C++20标准的正式列表里。&lt;/p&gt;
+
+&lt;p&gt;关于Concepts最好的介绍当然是Bjarne自己的这篇&lt;a href=&quot;http://www.stroustrup.com/good_concepts.pdf&quot;&gt;Concepts: The Future of Generic Programming&lt;/a&gt;的文章，
+另外一个比较好的描述来自于&lt;a href=&quot;https://en.cppreference.com/w/cpp/concepts&quot;&gt;cppreference&lt;/a&gt;；简单来说，它完成的事情就是用来描述泛型定义中，关于&lt;strong&gt;类型参数的约束和校验&lt;/strong&gt;；
+出于零成本的考虑，我们需要做到这个校验可以&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;在&lt;strong&gt;编译期间完成&lt;/strong&gt;检查，对生成的实际代码没有影响（就像手写的代码一样）&lt;/li&gt;
+  &lt;li&gt;具备&lt;strong&gt;定义良好的接口&lt;/strong&gt;形式，可以方便地进行组合&lt;/li&gt;
+  &lt;li&gt;尽量地保持通用性&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;使用concepts&quot;&gt;使用Concepts&lt;/h3&gt;
+
+&lt;p&gt;通过使用concepts，传统的模板元编程方面关于编译错误的痛点可以得到极大改善，编译器可以给出更加符合人类直觉的错误提示。
+比如标准库中的&lt;a href=&quot;https://en.cppreference.com/w/cpp/algorithm/find&quot;&gt;std::find&lt;/a&gt;算法的声明如下：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;InputIt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;InputIt&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;InputIt&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;InputIt&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里的&lt;strong&gt;两个模板参数其实有更多额外的要求&lt;/strong&gt;用传统的语法是没法表达的，第一个类型参数&lt;code class=&quot;highlighter-rouge&quot;&gt;Input&lt;/code&gt;我们期望它是一个可遍历的迭代器类型，并且其中的元素类型需要和&lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;类型匹配，并且该类型能够用来做相等比较。
+这些&lt;strong&gt;约束条件在现有的语言标准中都是隐性&lt;/strong&gt;的，一旦用错，编译器就会拿海量的错误信息来招呼你，因为编译器背后会使用SFINAE这样的语言特性来比较各种重载并给出一个常常的candidate列表，然后告诉你任何一个尝试都没有成功，所以失败了。&lt;/p&gt;
+
+&lt;p&gt;Concepts相当于将这些要求用一种显而易见的方式给出来，比如我们想表述一个在序列容器上查找的类似算法，可以用concepts来描述为&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Equality_comparable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Iterator_of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//using alias
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Value_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Iterator_of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iterator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这时候如果使用不满足条件的输入参数，编译器会直观地告诉我们错误的具体原因&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;waldo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//okay
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//error! - can't compare string and double
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//okay
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;waldo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//error! - can't compare double and string
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;显然这里的例子有点啰嗦，出于&lt;strong&gt;节约键盘敲击次数&lt;/strong&gt;的考虑（Java太啰嗦了？原来的模板元函数的写法也已经够啰嗦的了！），可以进一步简化这个写法，将简单的concepts约束直接嵌入到声明的地方：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sequence&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Equality_comparable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Iterator_of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;S&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;自定义concepts&quot;&gt;自定义concepts&lt;/h3&gt;
+&lt;p&gt;对于上面的简单的concepts，标准库已经提供了一个开箱可用的封装，不过&lt;strong&gt;出于学习目的自己动手做一个轮子&lt;/strong&gt;也很简单。比如用上面的比较为例，可以写作&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;concept&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Equality_comparable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//compar with ==, and should return a bool
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//compare with !=, and should return a bool
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;语法上和定义一个模板元函数很想象，所不同的地方是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;这里我们定义的对象是一个关于类型的检查约束&lt;/li&gt;
+  &lt;li&gt;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;requires&lt;/code&gt;部分引申出具体的检查约束，必须同时实现操作符相等和不相等，两个操作符都需要返回bool类型&lt;/li&gt;
+  &lt;li&gt;整个concept本身可以用在逻辑表达式中&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;简化concept的格式负担&quot;&gt;简化concept的格式负担&lt;/h3&gt;
+&lt;p&gt;如果能将简单的事情变得更简单，为什么不更进一步呢？这个设计哲学是C++的核心设计思想之一（参见Bjarne的D&amp;amp;E CPP），考虑下面的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sortable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;Sortable&lt;/code&gt;表示某个可以被排序的容器类型；因为concept也是用于限制类型，而函数的参数也是用来限定类型，一个自然的想法就是逐步简化它&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//应用上述的简化方式，concept描述放在模板参数声明中
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sortable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;进一步地，去掉&lt;code class=&quot;highlighter-rouge&quot;&gt;template&lt;/code&gt;部分的声明会更加简单，&lt;strong&gt;就像是一个普通的函数声明&lt;/strong&gt;，只不过参数类型是一个编译器可以检查的泛型类型&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sortable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这样一来，就和其它语言中的接口很类似了，没错就和Java的JDK中的泛型接口很相似了；只是底层的实现技术是完全不一样的，Java由于根深蒂固的OO设计而不得不借助于类型擦除术；当然这个扯的稍微远了一点。&lt;/p&gt;
+
+&lt;h3 id=&quot;auto类型的参数&quot;&gt;auto类型的参数&lt;/h3&gt;
+&lt;p&gt;其实C++14里面已经允许了&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;作为函数参数的类型这一用法，显然它和&lt;code class=&quot;highlighter-rouge&quot;&gt;concept&lt;/code&gt;的简化写法完全不矛盾。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// x实际上可以是任意类型!
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//x和y可以是任意的类型，可以不相同
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在多个参数的情况下， 如果我们想限定两个参数的类型必须总是一样，有一种很简单的机巧做到&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;concept&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Any&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//任何类型都是Any
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Any&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Any&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//x和y的类型必须相同，尽管他们可以是任意类型
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;标准库中的预定义concepts&quot;&gt;标准库中的预定义concepts&lt;/h3&gt;
+&lt;p&gt;C++20的标准库中预备了很多开箱即用的concepts，通过库的方式提供，用户只需要包含&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;concepts&amp;gt;&lt;/code&gt;库即可。
+详细的列表可以参考&lt;a href=&quot;https://en.cppreference.com/w/cpp/header/concepts&quot;&gt;concepts header&lt;/a&gt;;从大的分来来看，包括&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;核心语言相关的concepts，比如判断类型是否相同，是否是由继承关系，是否可以赋值/拷贝/构造/析构/转换等。&lt;/li&gt;
+  &lt;li&gt;比较相关的concepts，如&lt;code class=&quot;highlighter-rouge&quot;&gt;Boolean&lt;/code&gt;用来判断是否可以用在逻辑判断上下文中，&lt;code class=&quot;highlighter-rouge&quot;&gt;EquallyComparable&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;EquallyComparableWith&lt;/code&gt;声明了&lt;code class=&quot;highlighter-rouge&quot;&gt;==&lt;/code&gt;运算符是否表述等价关系；&lt;code class=&quot;highlighter-rouge&quot;&gt;StrictTotallyOrdered&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;StrictTotallyOrderedWith&lt;/code&gt;声明了比较运算符是否产生一个完全有序的结果&lt;/li&gt;
+  &lt;li&gt;关于对象的concepts，包括&lt;code class=&quot;highlighter-rouge&quot;&gt;Movable&lt;/code&gt;，&lt;code class=&quot;highlighter-rouge&quot;&gt;Copyable&lt;/code&gt;，分别声明可移动和可拷贝（包含了可以swap），而&lt;code class=&quot;highlighter-rouge&quot;&gt;Semiregular&lt;/code&gt;声明对象是否可以被移动/拷贝/交换/默认构造；&lt;code class=&quot;highlighter-rouge&quot;&gt;Regular&lt;/code&gt;则等价于&lt;code class=&quot;highlighter-rouge&quot;&gt;Semiregular&lt;/code&gt;加上&lt;code class=&quot;highlighter-rouge&quot;&gt;EquallyComparable&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;关于函数调用的concepts，包含&lt;code class=&quot;highlighter-rouge&quot;&gt;Invocable&lt;/code&gt;(声明对应的类型可以想函数一样调用并用给定的一系列参数来作为输入参数)，&lt;code class=&quot;highlighter-rouge&quot;&gt;Predicate&lt;/code&gt;指定可调用的对象符合断言约束并返回bool，&lt;code class=&quot;highlighter-rouge&quot;&gt;Relation&lt;/code&gt;指定对应的可调用函数是一个二元函数；&lt;code class=&quot;highlighter-rouge&quot;&gt;StrictWeakOrdering&lt;/code&gt;则表明对应的函数满足&lt;a href=&quot;https://en.cppreference.com/w/cpp/concepts/StrictWeakOrder&quot;&gt;弱排序&lt;/a&gt;(具体细节需要一些逻辑数学知识)&lt;/li&gt;
+  &lt;li&gt;用于range库的对象交换要求&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;应该可以预期后续的版本将会加入更多的支持。&lt;/p&gt;
+
+&lt;h3 id=&quot;编译器的支持情况&quot;&gt;编译器的支持情况&lt;/h3&gt;
+&lt;p&gt;GCC目前仍然是通过TS的方式来支持，编译时候需要加上&lt;code class=&quot;highlighter-rouge&quot;&gt;-fconcepts&lt;/code&gt;开关；
+Clang的全功能支持已经在将近一年前&lt;a href=&quot;https://www.reddit.com/r/cpp/comments/958sj9/clang_concepts_is_now_featurecomplete/&quot;&gt;在redit上宣布完工&lt;/a&gt;，只是其&lt;a href=&quot;https://clang.llvm.org/cxx_status.html&quot;&gt;官方的列表&lt;/a&gt;上依然没有更新。
+MSVC则于更早一点宣布了完整的concept支持，只是我们需要Visual Studio 2017 15.7版本。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;The MSVC compiler toolset in Visual Studio version 15.7 conforms with the C++ Standard!
+&lt;br /&gt; https://devblogs.microsoft.com/cppblog/announcing-msvc-conforms-to-the-c-standard/&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;总体上看来，GCC的开发进度有些迟缓，clange的也不算很透明，只有MSVC比较领先。&lt;/p&gt;
+
+&lt;h2 id=&quot;模块化支持&quot;&gt;模块化支持&lt;/h2&gt;
+&lt;p&gt;模块支持被写入新的语言核心，这一新的封装方式甚至可以认为是&lt;strong&gt;C++诞生35年以来最大&lt;/strong&gt;的一个新功能；
+也是语言标准化以来，第一次通过修改核心语法允许程序员用一种&lt;strong&gt;全新的方式来描述带命名的信息封装边界&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;信息封装手法的更新&quot;&gt;信息封装手法的更新&lt;/h3&gt;
+&lt;p&gt;传统的封装手段基本上都是采用如下的方式：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;将用户自定义的结构或者类取一个名字&lt;/li&gt;
+  &lt;li&gt;将相关联的细节都隐藏在这个名字的后面&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不管是变量声明，函数定义，自定义的类，结构体，无一例外都满足这个模式。即使是模板元编程方法，其实也是通过类型绑定的方法间接地使用上述的封装手段。&lt;/p&gt;
+
+&lt;h3 id=&quot;头文件的不完美封装&quot;&gt;头文件的不完美封装&lt;/h3&gt;
+&lt;p&gt;除了上述的基本信息封装单元，C++中屈指可数的封装办法&lt;strong&gt;就剩下了从古老的C语言继承下来的头文件包含&lt;/strong&gt;的方式了。
+在软件规模还局限在数万行代码一下的时代，使用头文件的方式一股脑将需要的东西都大包大揽在一个编译单元中，然后使用诸如唯一定义规则的方法让链接器在生成最终可执行代码或者库的时候做冲突检测是一个&lt;strong&gt;简单而优雅&lt;/strong&gt;的方案。
+因为对于它想解决的问题规模来说，这样的解决方案就足够了。&lt;/p&gt;
+
+&lt;p&gt;然而随着行业中软件项目的复杂性与日俱增，越来越多的商业项目&lt;strong&gt;需要数百甚至上千的头文件&lt;/strong&gt;被包含在一个编译单元中，这个时候既有的方式就越来越捉襟见肘&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;编译时间长&lt;/strong&gt;成为了一个突出的痛点，以至于实际项目中出于减少编译时间的考虑，聪明的工程师发明了如IWYU的&lt;strong&gt;头文件检测工具来缓解&lt;/strong&gt;这一问题&lt;/li&gt;
+  &lt;li&gt;像pimp惯用法这样的技术手段可以减少放在头文件中的依赖，但是程序员却不得不&lt;strong&gt;承担额外内存申请&lt;/strong&gt;的开销（可能没有这么个指针很多对象本身就可以在栈上完成快速构造和析构），即使有了&lt;code class=&quot;highlighter-rouge&quot;&gt;unique_ptr&lt;/code&gt;来环境内存泄露的隐忧&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;模板方式提供的抽象代码无法声明，必须放置在头文件中内联实现&lt;/strong&gt;，否则对应的cpp文件在编译单元进行代码生成的时候会因为找不到定义而无法通过编译；之前提出的一些export声明也因为种种缺陷和编译器支持不力而被废弃&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;简单来看，&lt;strong&gt;现代的编程语言都或多或少带有模块化系统&lt;/strong&gt;；缺乏现代的模块化支持成为了C++语言的一种硬伤，严重制约了C++开发大项目的能力。&lt;/p&gt;
+
+&lt;h3 id=&quot;模块化系统需要的核心功能&quot;&gt;模块化系统需要的核心功能&lt;/h3&gt;
+
+&lt;p&gt;模块化是一个很自然的逻辑信息隐藏手段，一个良好的模块化系统应该允许&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;良好的信息隔离&lt;/strong&gt;，可以方便的指定哪些可以被外部访问，哪些应该不允许被外部访问&lt;/li&gt;
+  &lt;li&gt;支持&lt;strong&gt;嵌套的隔离机制&lt;/strong&gt;，即可以在模块中嵌套子模块&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;细粒度的访问权限&lt;/strong&gt;控制，尤其是能提供模块内部/模块外部/子模块不同的访问权限则更好&lt;/li&gt;
+  &lt;li&gt;和&lt;strong&gt;操作系统的文件访问系统保持一致的视图&lt;/strong&gt;，比如期望子文件夹可以对应子模块是一个非常符合直觉的方法&lt;/li&gt;
+  &lt;li&gt;支持&lt;strong&gt;类似命名空间的隔离和访问&lt;/strong&gt;，比如支持重新导出一些模块中公开的可访问部分到另外一个空间中或者嵌套的命名、重命名模块等&lt;/li&gt;
+  &lt;li&gt;和&lt;strong&gt;构建系统、打包系统&lt;/strong&gt;具有清晰易懂的交互接口；支持语言本身和IDE、语法检查等生态系统工具设施的无缝融合&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;要同时实现这些目标，并没有想象中的容易；其它一些流行的编程语言其实都小心仔细地对这些可能“讨好”程序员的目标做取舍，并在定义中详细地描述好限制。
+比如Java一开始用Jar打包的方式来模拟模块，但是却由于不支持嵌套子模块中复杂的访问控制而遭到很多用户的不满；而Go语言中的模块和文件系统中文件名的纠葛同样也是Go语言中一个晦涩的知识点。
+NodeJS通过NPM机制来提供模块化支持，然而其嵌套的打包方式和让人窒息的依赖树结构导致打包的时候需要依赖其它的第三方工具才能避免中招。&lt;/p&gt;
+
+&lt;h3 id=&quot;后向兼容的艰难挑战&quot;&gt;后向兼容的艰难挑战&lt;/h3&gt;
+&lt;p&gt;C++的模块机制是奔着替换旧有的头文件包含机制的目标来的，同时又因为需要照顾庞大的既有代码库不被破坏而&lt;strong&gt;不得不同时兼容头文件包含机制&lt;/strong&gt;。
+和已有的其它语言特性一样，这种向后兼容带来的额外复杂性是否是必要的还又不小不同的声音，不过主流的声音还是决定走兼容的道路。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本语法&quot;&gt;基本语法&lt;/h3&gt;
+&lt;p&gt;如果我们希望声明一个模块，可以用如下的语法&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//声明一个模块名字为example
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//可以导出的函数
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;因为我们丢弃了头文件的方法，可以将该模块定义保存在&lt;code class=&quot;highlighter-rouge&quot;&gt;example.cppm&lt;/code&gt;的文件中。这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;cppm&lt;/code&gt;后缀用于告诉编译器这是一个模块定义文件。&lt;/p&gt;
+
+&lt;p&gt;假设我们希望使用该模块，则用如下的代码&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//导入上述定义的模块
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//调用example模块中的函数
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;分离模块接口和实现&quot;&gt;分离模块接口和实现&lt;/h4&gt;
+&lt;p&gt;如果我们想&lt;strong&gt;分离模块的声明和实现，将他们放在不同的文件&lt;/strong&gt;中，这样更符合传统的接口定义和实现分离的编写代码方法（其实可以看作是C++比Java更干净的一个地方），我们可以对上面的&lt;code class=&quot;highlighter-rouge&quot;&gt;example.cppm&lt;/code&gt;做如下的修改&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;然后创建一个源代码文件，放置模块函数的实现&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//当前模块是example
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;出于灵活起见，C++20支持将一个模块中声明的&lt;strong&gt;函数放在多个模块实现单元中分别实现&lt;/strong&gt;，这样更容易实现干净的代码，并提高编译速度。&lt;/p&gt;
+
+&lt;h4 id=&quot;隔离权限指定&quot;&gt;隔离权限指定&lt;/h4&gt;
+&lt;p&gt;模块访问权是通过&lt;code class=&quot;highlighter-rouge&quot;&gt;export&lt;/code&gt;声明来指定的，&lt;strong&gt;没有声明的类或者函数等默认是不能被外部代码访问&lt;/strong&gt;的；基于声明的语法也决定了如果分离声明和实现，可见性在实现单元中其实是忽略的。&lt;/p&gt;
+
+&lt;p&gt;为了避免代码变得过于啰嗦，语法层面上也支持通过括号作用于一次性声明多个导出函数或者类，比如&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doAnother&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;internalImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//外部不可访问
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;模块和namespace是正交的语言设施&quot;&gt;模块和namespace是正交的语言设施&lt;/h4&gt;
+
+&lt;p&gt;旧的C++标准早就支持通过namespace来实现信息封装和隔离，而新的module机制可以和namespace结合使用，提供清晰的隔离结构，比如&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;example&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doSth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doAnother&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;语言机制上提供了灵活的手段，但是程序员却要自己&lt;strong&gt;做好权衡，保持模块的粒度适中&lt;/strong&gt;，匹配实际的应用场景。&lt;/p&gt;
+
+&lt;h4 id=&quot;模块重新导出&quot;&gt;模块重新导出&lt;/h4&gt;
+&lt;p&gt;实际应用中，复杂的软件项目可能有很多形形色色的模块，它们可能处于不同的抽象单元；和应用代码比较近的上层模块可能&lt;strong&gt;需要将某些它自己可见的模块开放给上层代码直接使用&lt;/strong&gt;，提供重新导出的功能可以极大地提高信息封装的能力，提高模块的内聚度减少不必要的耦合。&lt;/p&gt;
+
+&lt;p&gt;一个简单的方法就是将import的部分重新放在export块中，即下面的代码例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low_module1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low_module2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myFunc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;标准库中的模块&quot;&gt;标准库中的模块&lt;/h3&gt;
+&lt;p&gt;标准库中提供的工具函数和类显然应该被模块化，只需要使用&lt;code class=&quot;highlighter-rouge&quot;&gt;import std.xxx&lt;/code&gt;即可导入。
+现代的WG21委员会的工作方式是有很多并行开发但是还没有进入主干库的”准标准库”，编译器可以选择实现，等到对应的规范成熟的时候，它们才会被正式地移入标准库中。&lt;/p&gt;
+
+&lt;p&gt;Visual C++的封装方式如下&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std.filesystem&lt;/code&gt;提供文件系统的库，相当于&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;experimental/filesystem&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std.memory&lt;/code&gt; 提供智能指针的库，相当于&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;memory&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std.regex&lt;/code&gt;提供对正则表达式库的封装，相当于&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;regex&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std.threading&lt;/code&gt;提供对线程库的支持（已经于C++11中正式支持），相当于&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;atomic&amp;gt;/&amp;lt;future&amp;gt;/&amp;lt;mutex&amp;gt;/&amp;lt;thread&amp;gt;/&amp;lt;shared_mutex&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std.core&lt;/code&gt;包含了其它所有的标准库设施&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;潜在的争议&quot;&gt;潜在的争议？&lt;/h3&gt;
+
+&lt;p&gt;作为一门有着30多年历史的语言，模块化机制的一个设计难点就是&lt;strong&gt;保持和古老的include机制（本质上是代码的复制）兼容该如何实现&lt;/strong&gt;。
+好在WG21经过漫长的讨论终于实现了起码在理论上完美的兼容 - 用户可以自由混用两者，只要不产生重复和链接问题即可。
+Redit的cpp频道里面有人发起了一个&lt;a href=&quot;https://www.reddit.com/r/cpp/comments/agcw7d/c_modules_a_chance_to_clean_up_the_language/&quot;&gt;是否提供一种机制让用户强制在某一个模块中清理旧有的include模式的讨论&lt;/a&gt;，采用的思路正式类似Rust语言的版本指定的思路。&lt;/p&gt;
+
+&lt;p&gt;这个想法其实有很重要的现实意义，因此有很多自身CPP用户发表了自己的看法，大概标准定义成现在这个样子应该主要是两个方面的原因&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;委员会中的代表有很多来自于大公司，这些公司有海量的遗留代码；因此出于&lt;strong&gt;自身利益的考虑&lt;/strong&gt;他们不会选择一种不兼容的方案和自己过不去。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;社区分裂的风险&lt;/strong&gt;，这个其实从C++03诞生依赖就有人开始质疑，乃至于早期的D语言就是冲着这一点不满才决定选择单干，可惜有评论认为现在的D语言的分裂情况和C++比较起来完全是不遑多让的。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;这些问题其实都是很现实的问题&lt;/strong&gt;，个人觉得WG21选择向后兼容的思路并没有什么问题，因为从新发明轮子的时候都是简单的，真正&lt;strong&gt;复杂的是如何长期稳定地维护和更新&lt;/strong&gt;。
+C++的使用领域一直在缩小（或者有人说它是退回到了适合的领域）是个不争的事实，然而在适合的领域，它的优势不光在于语言本身还依赖于这些遗留系统的支撑。&lt;/p&gt;
+
+&lt;h2 id=&quot;协程支持&quot;&gt;协程支持&lt;/h2&gt;
+&lt;p&gt;协程并不是一个新鲜的概念，甚至在现代编程语言出现之前很久就被提出出来，并在其它一些编程语言中被实现了很长时间了；它的基本思想是要求一个函数或者过程可以在执行过程中被操作系统或者调度器临时中止，然后在适合的时机（获取CPU计算资源等）再被恢复执行。详细的描述可以参考&lt;a href=&quot;https://en.wikipedia.org/wiki/Coroutine&quot;&gt;这里&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;为什么需要协程&quot;&gt;为什么需要协程&lt;/h3&gt;
+&lt;p&gt;协程最明显的一个好处是允许我们书写&lt;strong&gt;看起来顺序执行但是其实背后却异步执行的代码&lt;/strong&gt;，这样技能协调人大脑擅长顺序逻辑和计算机处理擅长异步执行的矛盾，兼顾效率和心智负担。
+同时协程还可以支持惰性赋值和初始化的逻辑，进一步提高程序的运行效率（仅仅在需要的时候做运算）但是又不对程序员的大脑产生太多的额外负担。&lt;/p&gt;
+
+&lt;p&gt;协程是一个比进程和线程更轻量级一点的概念，具体实现上来说可以分为有栈协程和无栈协程；技术上来说前者可以通过第三方库实现就可以，但是性能开销比较大也容易出问题；而&lt;strong&gt;无栈协程更加轻量级但是需要语言特性上做出改动&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;C++20引入的协程属于无栈协程。&lt;/p&gt;
+
+&lt;h3 id=&quot;基本语法定义&quot;&gt;基本语法定义&lt;/h3&gt;
+&lt;p&gt;C++中的协程首先要是一个函数，它满足如下特性&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;可以被中止，保存状态然后在合适的时机恢复执行 - 这也是协程的基本要求&lt;/li&gt;
+  &lt;li&gt;本身是不需要额外的栈的，即stackless&lt;/li&gt;
+  &lt;li&gt;当被暂时中止的时候，执行权被交回了调用者&lt;/li&gt;
+  &lt;li&gt;它的定义语法满足下述的特征&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;协程函数语法和关键字&quot;&gt;协程函数语法和关键字&lt;/h4&gt;
+&lt;p&gt;协程函数定义可以又如下一些特征：&lt;/p&gt;
+
+&lt;h5 id=&quot;co_await操作符等待另外一个协程的完成&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;co_await&lt;/code&gt;操作符等待另外一个协程的完成&lt;/h5&gt;
+&lt;p&gt;比如如下的从网络读取数据并写回对方的echo代码，从逻辑上看循环内部的两行代码是顺序执行的，但是&lt;code class=&quot;highlighter-rouge&quot;&gt;co_awit&lt;/code&gt;关键字却标明了逻辑上它是&lt;strong&gt;通过”等待“另外一个协程完成&lt;/strong&gt;才继续往下执行的。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;task&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tcp_echo_server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(;;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;co_await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;async_read_some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;co_await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async_write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;co_yield-可以直接挂起当前的协程执行并返回一个值&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;co_yield&lt;/code&gt; 可以直接挂起当前的协程执行并返回一个值&lt;/h5&gt;
+&lt;p&gt;比如下面的循环中，每次到&lt;code class=&quot;highlighter-rouge&quot;&gt;yield&lt;/code&gt;操作的时候，当前的协程便被暂时中止执行并返回一个整数&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;generator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;co_yield&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这种用法在其它语言中也叫generator函数或者生成器。&lt;/p&gt;
+
+&lt;h5 id=&quot;co_return用于直接返回&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return&lt;/code&gt;用于直接返回&lt;/h5&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;lazy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;co_return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;返回类型要求&quot;&gt;返回类型要求&lt;/h5&gt;
+&lt;p&gt;因为协程的返回值并不是普通的值而是一个可以和另外一个协程相互协作的对象，因此C++标准对协程的返回值有如下要求：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;不能使用可变参数&lt;/li&gt;
+  &lt;li&gt;不能使用普通的&lt;code class=&quot;highlighter-rouge&quot;&gt;return&lt;/code&gt;语句&lt;/li&gt;
+  &lt;li&gt;不能返回自动推导的类型，如&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;concept&lt;/code&gt;类型等&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;同时如下的函数也不能是协程&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr&lt;/code&gt;函数因为需要在编译器运算，不能是协程&lt;/li&gt;
+  &lt;li&gt;构造函数和析构函数用于普通对象的构造，也不能被延迟执行进而不能是协程&lt;/li&gt;
+  &lt;li&gt;主函数不能是协程，否则操作系统无从启动程序&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;协程的执行&quot;&gt;协程的执行&lt;/h3&gt;
+
+&lt;p&gt;任何一个协程其实由如下这些要素构成&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;promise&lt;/code&gt;对象需要充当一个桥梁&lt;/strong&gt;，由协程内部改变其状态，将值提交给另外一方等待该promise的协程&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;外部协程操控另外一个协作协程的句柄&lt;/strong&gt;，外部协程需要借助该句柄来决定是否挂起对方的协程或者将其协程帧销毁&lt;/li&gt;
+  &lt;li&gt;隐式的&lt;strong&gt;协程状态对象&lt;/strong&gt;，该对象需要能够
+    &lt;blockquote&gt;
+      &lt;ul&gt;
+        &lt;li&gt;保存内嵌的promise对象&lt;/li&gt;
+        &lt;li&gt;用值拷贝方法传递的参数值对象 - 显然出于内存安全的考虑不能由引用或者指针&lt;/li&gt;
+        &lt;li&gt;当前执行到哪个阶段的状态标识，从而外部协程知道下一步是否应该迁移状态还是需要销毁帧数据&lt;/li&gt;
+        &lt;li&gt;其它一些生存期超越当前挂起点的局部变量&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;协程执行的流程&quot;&gt;协程执行的流程&lt;/h4&gt;
+&lt;p&gt;当一个协程执行的时候，它的实际运行顺序如下&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;operator new&lt;/code&gt;来分配上述的状态对象&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;拷贝所有的函数参数&lt;/strong&gt;到这个对象中（因为协程本身也是个函数），值类型直接拷贝，如果由&lt;strong&gt;引用或者指针类型，其安全性需要程序员自己保证有效性&lt;/strong&gt;，因为在协程中他们同样使引用和指针&lt;/li&gt;
+  &lt;li&gt;构造promise对象，这里先查找它&lt;strong&gt;是否支持对应协程所有传入参数为参数签名的构造函数&lt;/strong&gt;并调用，如果没有则调用默认构造函数来构造&lt;/li&gt;
+  &lt;li&gt;调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.get_return_object&lt;/code&gt;函数，将结果放在一个局部变量中；这样&lt;strong&gt;第一次协程被挂起的时候，该局部变量就可以被返回给调用者&lt;/strong&gt;。如果在第一次执行到挂起之前发生了异常，对应的结果都不会放置在promise中，而是通过该局部变量返回&lt;/li&gt;
+  &lt;li&gt;调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.initial_suspsed&lt;/code&gt;函数，并使用&lt;code class=&quot;highlighter-rouge&quot;&gt;co_await&lt;/code&gt;等待它的结果。通常情况下，promise类型要么返回&lt;code class=&quot;highlighter-rouge&quot;&gt;suspend_always&lt;/code&gt;,要么返回&lt;code class=&quot;highlighter-rouge&quot;&gt;suspend_never&lt;/code&gt;;前者对应的使延迟启动的协程，后者则对应提前启动的协程&lt;/li&gt;
+  &lt;li&gt;当&lt;code class=&quot;highlighter-rouge&quot;&gt;co_await promise.initial_suspend&lt;/code&gt;恢复的时候，协程的函数体才开始别执行&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;当该协程函数执行到一个挂起点，返回对象将会通过必要的类型转换返回给外部协程的等待方。&lt;/p&gt;
+
+&lt;h5 id=&quot;返回&quot;&gt;返回&lt;/h5&gt;
+&lt;p&gt;如果协程函数执行到一个&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return&lt;/code&gt;语句，则执行如下的操作&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;如果返回类型是如下的几种，则调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.return_void&lt;/code&gt;
+    &lt;blockquote&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return;&lt;/code&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return expr;&lt;/code&gt; 但是&lt;code class=&quot;highlighter-rouge&quot;&gt;expr&lt;/code&gt;的类型其实是void&lt;/li&gt;
+        &lt;li&gt;直接跳过了可能的&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return&lt;/code&gt;语句而执行到了函数的结果；如果promise对象恰好定义了&lt;code class=&quot;highlighter-rouge&quot;&gt;Promise::return_void()&lt;/code&gt;函数，那么&lt;strong&gt;行为就是未定义&lt;/strong&gt;的，需要格外留意！&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/blockquote&gt;
+  &lt;/li&gt;
+  &lt;li&gt;否则将调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.return_value(expr)&lt;/code&gt;返回需要的类型&lt;/li&gt;
+  &lt;li&gt;销毁协程开始阶段创建的所有的局部自由变量，销毁的顺序和构造顺序相反&lt;/li&gt;
+  &lt;li&gt;调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.final_suspend&lt;/code&gt;函数，并等待其&lt;code class=&quot;highlighter-rouge&quot;&gt;co_awit&lt;/code&gt;结果&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h5 id=&quot;协程异常处理&quot;&gt;协程异常处理&lt;/h5&gt;
+&lt;p&gt;如果协程中抛出了&lt;strong&gt;未捕获异常&lt;/strong&gt;，它的行为如下&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;捕获异常，并调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.unhandled_exception&lt;/code&gt;函数&lt;/li&gt;
+  &lt;li&gt;调用&lt;code class=&quot;highlighter-rouge&quot;&gt;promise.final_suspend&lt;/code&gt;函数，并等待其&lt;code class=&quot;highlighter-rouge&quot;&gt;co_awit&lt;/code&gt;结果&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h5 id=&quot;状态对象的销毁&quot;&gt;状态对象的销毁&lt;/h5&gt;
+&lt;p&gt;当协程状态对象因为&lt;code class=&quot;highlighter-rouge&quot;&gt;co_return&lt;/code&gt;或者异常情况需要销毁的时候，其执行过程如下&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;调用promise对象本身的析构函数&lt;/li&gt;
+  &lt;li&gt;调用协程参数对象的析构函数&lt;/li&gt;
+  &lt;li&gt;调用&lt;code class=&quot;highlighter-rouge&quot;&gt;operator delete&lt;/code&gt;来完成对状态对象本身的销毁&lt;/li&gt;
+  &lt;li&gt;将执行权交回外部调用者&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;堆内存分配&quot;&gt;堆内存分配&lt;/h3&gt;
+&lt;p&gt;协程的状态&lt;strong&gt;必须要通过&lt;/strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;operator new&lt;/code&gt;来分配，因为标准要求这里必须是无栈协程。分配过程遵循如下两条规则&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;如果&lt;code class=&quot;highlighter-rouge&quot;&gt;Promise&lt;/code&gt;类型定义了一个类级别的&lt;code class=&quot;highlighter-rouge&quot;&gt;operator new&lt;/code&gt;，则&lt;strong&gt;优先选择此分配方法&lt;/strong&gt;，否则会调用全局的&lt;code class=&quot;highlighter-rouge&quot;&gt;operator new&lt;/code&gt;来完成内存分配&lt;/li&gt;
+  &lt;li&gt;如果&lt;code class=&quot;highlighter-rouge&quot;&gt;Promise&lt;/code&gt;类型定义了自定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;operator new&lt;/code&gt;，并且&lt;strong&gt;其函数签名和协程的函数参数签名一致，这些参数将会被一并传递&lt;/strong&gt;给该函数，这样的目的是为了和leading allocator convention的行为保持一致，即签名一致的分配器有优先权&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;可能的分配优化&quot;&gt;可能的分配优化&lt;/h4&gt;
+&lt;p&gt;如果有办法事先确认协程状态对象的生存周期一定比调用方的生存周期短，并且该协程的帧大小在调用的时候可以明确得到。
+该优化即使对用户自定义的内存分配器也可以使用。
+这种情况下，&lt;strong&gt;被调用的协程的栈帧其实是内嵌在了调用方的函数栈帧&lt;/strong&gt;中，就像一个迷你的内联函数调用一样。&lt;/p&gt;
+
+&lt;h3 id=&quot;promise类型&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Promise&lt;/code&gt;类型&lt;/h3&gt;
+&lt;p&gt;实际的promise类型则由&lt;strong&gt;编译器根据实际协程声明中的签名类型&lt;/strong&gt;结合&lt;code class=&quot;highlighter-rouge&quot;&gt;std::corountine_traits&lt;/code&gt;模板推到得出。&lt;/p&gt;
+
+&lt;p&gt;比如当一个协程的类型被定义为 &lt;code class=&quot;highlighter-rouge&quot;&gt;task&amp;lt;float&amp;gt; foo(std::string x, bool flag)&lt;/code&gt;，那么编译器推导出来的类型为&lt;code class=&quot;highlighter-rouge&quot;&gt;std::coroutine_traits&amp;lt;task&amp;lt;float&amp;gt;, std::string, bool&amp;gt;::promise_type&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;如果协程被定义为非static的成员函数，比如&lt;code class=&quot;highlighter-rouge&quot;&gt;task&amp;lt;void&amp;gt; my_class::method1(int x) const&lt;/code&gt;,对应的推导出来的Promise类型为&lt;code class=&quot;highlighter-rouge&quot;&gt;std::coroutine_traits&amp;lt;task&amp;lt;void&amp;gt;, const my_class&amp;amp;, int&amp;gt;::promise_type&lt;/code&gt;,同时对象类型会被放置在第一个参数模板了行中。&lt;/p&gt;
+
+&lt;h3 id=&quot;编译器支持情况&quot;&gt;编译器支持情况&lt;/h3&gt;
+
+&lt;p&gt;Visual Studio是这个提案的主推者之一，所以早在2013年MSVC就提供了自己的协程实现；并且在&lt;a href=&quot;https://devblogs.microsoft.com/cppblog/yield-keyword-to-become-co_yield-in-vs-2017/&quot;&gt;VS2017中正式将关键字向标准提案靠拢&lt;/a&gt;。
+Clang也提供了支持，尽管&lt;a href=&quot;https://clang.llvm.org/cxx_status.html&quot;&gt;其C++ Status页面&lt;/a&gt;显示的还是partial支持。
+遗憾的是GCC的corountine支持还处于比较早期的阶段，目前仍然在一个&lt;a href=&quot;https://gcc.gnu.org/wiki/cxx-coroutines&quot;&gt;分支上开发&lt;/a&gt;。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="engineering" /><category term="language" /><category term="cpp" /><summary type="html">C++20的功能特性已经于3月份冻结，显然这次终于来了一波大的改进，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。</summary></entry><entry><title type="html">C++正则表达式比Python慢？</title><link href="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/" rel="alternate" type="text/html" title="C++正则表达式比Python慢？" /><published>2019-06-22T00:00:00+08:00</published><updated>2019-06-22T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/22/regular-expression-optimize/">&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/C%2B%2B17&quot;&gt;C++17&lt;/a&gt; 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。
 程序员们的一个大福利就是终于不用外挂第三方库（无论是准标准的boost还是其它形形色色的其它第三方库）就可以直接方便地使用标准库自带的&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;regex&amp;gt;&lt;/code&gt;来写代码；
 这显然比直接使用原始而笨拙的&lt;code class=&quot;highlighter-rouge&quot;&gt;string::find_first_of&lt;/code&gt;外加一堆边界检查和判断&lt;strong&gt;要轻松和干净&lt;/strong&gt;很多。&lt;/p&gt;
 
@@ -2804,309 +3228,4 @@ rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com
   &lt;li&gt;&lt;a href=&quot;https://www.cncf.io/projects/graduation-criteria/&quot;&gt;CNCF graduation criteria&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://containerd.io/&quot;&gt;Containerd&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry><entry><title type="html">Spring新版本的响应式编程</title><link href="https://skyscribe.github.io/post/2018/04/04/spring-reactive/" rel="alternate" type="text/html" title="Spring新版本的响应式编程" /><published>2018-04-04T00:00:00+08:00</published><updated>2018-04-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/04/spring-reactive</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/04/spring-reactive/">&lt;p&gt;流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注
-(&lt;a href=&quot;//post/2018/03/10/functional-reactive-programming/&quot;&gt;前文有一些简单探讨&lt;/a&gt;)
-，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。
-Spring最新的&lt;a href=&quot;https://spring.io/blog/2018/02/19/spring-framework-5-0-4-available-now&quot;&gt;5.0版本&lt;/a&gt;更新也顺应这一潮流，加入了原生支持FRP的行列。&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h2 id=&quot;最大的版本改动源于设计范式选择的增加&quot;&gt;最大的版本改动源于设计范式选择的增加&lt;/h2&gt;
-
-&lt;p&gt;Spring的官方博客声称该版本的改动是项目从2014年创立以来最大的一次版本更新；主要的考虑是，
-增加对异步流式编程范式的支持在Java语言平台下是一个思维方式上的巨大变化。&lt;/p&gt;
-
-&lt;p&gt;传统的Java编程范式是基于面向对象设计的实现，具体到底层上还是命令式的同步、阻塞调用思维；
-你调用一个对象提供的方法，则调用者默认必须等待操作完毕之后，用返回值（或者异常）的方式通知调用者。
-即使有异步编程技术的辅助，这些细节也被认为是抽象接口下面的实现细节，很少被作为主要的设计决策。
-FRP的方式就显著地不同，它的主要设计对象变为异步的流，所以对流的操作、变换等都是异步发生的，
-程序的&lt;strong&gt;主要逻辑不需要再关注底层的操作是怎么被调度的，而仅仅关心一个一个具体的操作应该做什么，互相配合&lt;/strong&gt;完成系统目标。
-这个角度来说，FRP的方式是声明式的；而声明式的代码相对传统的过程式代码有更好的可读性和可维护性。&lt;/p&gt;
-
-&lt;p&gt;经典的面向对象设计方法容易入门却不易精通，设计者很容易掉入过度设计的陷进而滥用继承（接口也是类似）而带来不必要的过度抽象；
-当然抽象不足也是另外一个问题这里略去不提。GoF在设计模式里面特别声明了我们需要考虑优先使用组合而不是继承，
-不幸的是这一忠告从来就没有被人们认真对待；生搬硬套这些模式的设计者很容易就掉入叠床架屋的花花架子中无法自拔。
-FRP的思维方式完全不提继承的事儿，但是封装依然是必要的；组合则被提到了首要的位置，因为函数式编程的主要复用方式就是组合。&lt;/p&gt;
-
-&lt;p&gt;Spring其实采用了一种相对中庸的态度，给你提供了FRP的支持，但是决定权仍然在用户自己手里；
-你可以选择用传统的OOD方式，这样更熟悉也没有什么额外的迁移成本；也可以根据项目的实际情况，
-选用异步的函数式编程，当你决定这样选择的时候，Spring的基础设施已经做到足够的完善，你可以仅仅关注于你的程序逻辑就行了。&lt;/p&gt;
-
-&lt;h2 id=&quot;和其他jvm上的frp的对比&quot;&gt;和其他JVM上的FRP的对比&lt;/h2&gt;
-
-&lt;p&gt;如果将视角扩大到整个JVM平台上，那么Spring显然不是唯一的选择，也不是最强大的FRP选择。
-类似于Akka这样的框架本身就是基于Actor模型来实现更高层次的函数式编程设施的，尽管Actor的模型和FRP并不是完全目标一致。
-Scala语言则提供完整的函数式编程语言支持，更复杂的FP抽象也不在话下，在Java8之前甚至被认为是JVM平台下最好的选择。
-RxJava以语言扩展的方式也出现了比较长的时间。&lt;/p&gt;
-
-&lt;p&gt;Spring 5.0的核心FRP抽象逻辑和上述这些高层的框架的核心概念是一致的；它独特的地方在于其本身作为一个开源平台的灵活性；
-你可以选择用Spring Boot，也可以不用；可以选择微服务架构来使用FRP，也可以完全不使用微服务架构。
-正如Netflix在其Zuul2项目的重构过程中所总结的，尽管使用异步的方式来构建程序可以极大地提高性能和资源使用的有效性，提高自动扩展的能力；
-运维的难度和调试挑战也被急剧放大。如果用来解决正确的问题，收效就会比较大，然而如果用来解决错误的问题，情况反而会更加糟糕。
-关键的是，我们需要&lt;strong&gt;用正确的工具来解决正确的问题&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h2 id=&quot;springmvc和webflux&quot;&gt;SpringMVC和WebFlux&lt;/h2&gt;
-
-&lt;p&gt;Spring-webmvc是Spring中的一个经典MVC模块，它最初是作为一种基于Servelet技术的Web后端框架提供给后端程序员使用的。传统的Spring MVC框架工作机制如下&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherServelet&lt;/code&gt; 会搜索&lt;code class=&quot;highlighter-rouge&quot;&gt;WebApplicationContext&lt;/code&gt;来查找DI容器中注册的Controller以处理进来的HTTP请求&lt;/li&gt;
-  &lt;li&gt;本地化解析的Bean在这一过程中也会被一并查找并关联起来以便后续渲染View的时候使用来本地化View中的显示内容&lt;/li&gt;
-  &lt;li&gt;主题解析的Bean则被用来关联后续要使用的View模板,以进行CSS渲染等额外处理&lt;/li&gt;
-  &lt;li&gt;如果HTTP请求包含多部分媒体内容，那么请求会被封装在一个&lt;code class=&quot;highlighter-rouge&quot;&gt;MultipartHttpServeletRequest&lt;/code&gt;中处理&lt;/li&gt;
-  &lt;li&gt;Dispatcher会搜索对应的Handler，找到之后，handler对应的controller以及其前置处理、后续处理会被按照顺序依次处理以准备模型返回，或者被用于后续View渲染&lt;/li&gt;
-  &lt;li&gt;如果一个模型被返回，对应的View就会被渲染并返回响应的HTTP消息
-整体的处理逻辑是一个线性的同步处理逻辑。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;传统的Sping MVC框架的接口都定义在 &lt;code class=&quot;highlighter-rouge&quot;&gt;org.springframework.web.servlet&lt;/code&gt;包中，而支持响应式编程的Web框架被命名为WebFlux,对应的接口和注解放在一个新的Java包中：
-&lt;code class=&quot;highlighter-rouge&quot;&gt;org.springframework.web.reactive&lt;/code&gt;。它是全异步、非阻塞的，可以很方便的使用在基于事件循环的异步编程模型中，仅仅需要很少个线程就可以高效地处理大量的请求。
-其功能不仅支持传统的Servelet容器，也支持诸如Netty、Undertow这些不是基于Servelet的编程框架上。&lt;/p&gt;
-
-&lt;h3 id=&quot;mono和flux&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;对象概念有些类似于Java8中的&lt;code class=&quot;highlighter-rouge&quot;&gt;CompletableFuture&lt;/code&gt;,自身支持类似的lambda表达式组合来实现流式操作。
-这两个类型本质上实现了Reactive Stream中的&lt;code class=&quot;highlighter-rouge&quot;&gt;Publish&lt;/code&gt;的概念，可以认为它是流的发布者。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;用来表示可以最多产生一个结果或者产生一个错误的流发布者概念。
-改类型提供了丰富的构造方法来产生&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;对象，我们可以通过&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;just&lt;/code&gt; 方法就地构造出一个会产生传入类型对象的值的封装对象&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;justOrEmpty&lt;/code&gt;方法可以从一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Optional&lt;/code&gt;对象中获取值作为发布的对象，如果里面没有值则不产生实际的事件&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;fromXXX&lt;/code&gt;方法从各种各样的事件源中获取一个对象，譬如一个&lt;code class=&quot;highlighter-rouge&quot;&gt;CompletableFuture&lt;/code&gt;对象，或者&lt;code class=&quot;highlighter-rouge&quot;&gt;Supplier&lt;/code&gt;函数对象，或者线程执行结果，乃至另外一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Publisher&lt;/code&gt;接口的实现对象等&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;never&lt;/code&gt;则用于模拟永远不会终止的事件，下游的流订阅者永远不会得到通知&lt;/li&gt;
-  &lt;li&gt;组合多个发布者对象的聚合操作，如&lt;code class=&quot;highlighter-rouge&quot;&gt;when&lt;/code&gt;用于在给定的多个发布者中任何一个产生事件的时候，其结果时间被作为单一的输出事件的情况；
-&lt;code class=&quot;highlighter-rouge&quot;&gt;first&lt;/code&gt;用于等待传入的多个发布者中的第一个发布者产生输出事件的时候，将其作为整体的输出事件，更高级的&lt;code class=&quot;highlighter-rouge&quot;&gt;zipXXX&lt;/code&gt;方法则支持更复杂的语义&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;and&lt;/code&gt;方法则用于合并本身和传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;中的事件，在两者都结束的时候，产生一个空的事件作为输出&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/mono.png&quot; alt=&quot;mono_publisher&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zip&lt;/code&gt;本身支持多种不同的语法，一种是带转换函数的方法，声明为&lt;code class=&quot;highlighter-rouge&quot;&gt; zip(Iterable&amp;lt;? extends Mono&amp;lt;?&amp;gt;&amp;gt; monos, Function&amp;lt;? super    Object[],? extends R&amp;gt; combinator)&lt;/code&gt;,
-作用机制是，对传入的多个事件发布者，当他们的事件结果都被产生的时候，调用传入的聚合函数，对这些事件的结果进行函数运算，并将其返回值作为最终的事件输出。
-另一种用法是将结果返回为元组而不做额外的运算；因为Java本身不支持不同类型的变长模板参数，对应的声明需要对不同的参数个数单独写出来，最多可以支持6个事件的元组组合，即&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Tuple6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; 
-&lt;span class=&quot;nf&quot;&gt;zip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;的不同是，它本身会产生0到N个事件输出到流中；然后才最终完成或者报错。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/flux.png&quot; alt=&quot;flux_class&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;由于&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;本身就会产生多个事件，多个&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;之间的组合处理就会变得更加复杂和灵活；它本身支持如下一些API&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;combineLatest&lt;/code&gt; 会组合多个发布者中的最近发生的事件，依照事件顺序依次将其作为输出事件，最终产生的事件序列会按照时间交错&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;concat&lt;/code&gt;方法会将多个发布者的事件一一串起来而不管各自发生的时间&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;merge&lt;/code&gt;方法会将单一的事件发布者的事件交叉串成一个新的&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;发布出来&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zip&lt;/code&gt;的逻辑和&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;类似，只是这里的合并函数需要处理多个&lt;code class=&quot;highlighter-rouge&quot;&gt;Tuple&lt;/code&gt;对象&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;如&lt;code class=&quot;highlighter-rouge&quot;&gt;combineLatest&lt;/code&gt;的事件发布逻辑如下
-&lt;img src=&quot;https://raw.githubusercontent.com/reactor/reactor-core/v3.1.3.RELEASE/src/docs/marble/combinelatest.png&quot; alt=&quot;combinelatest_flux&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;webclient&quot;&gt;WebClient&lt;/h3&gt;
-
-&lt;p&gt;传统的Spring MVC中，我们可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;RestTemplate&lt;/code&gt;来组装发起HTTP客户端请求，对应的Reactive版本的概念是&lt;code class=&quot;highlighter-rouge&quot;&gt;WebClient&lt;/code&gt;。
-一个最简单的异步发起HTTP请求的例子如下&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;WebClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;person&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://localhost:8080/persons/42&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MediaType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;exchange&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;这里例子依然是使用&lt;code class=&quot;highlighter-rouge&quot;&gt;WebClient&lt;/code&gt;俩创建一个流。&lt;code class=&quot;highlighter-rouge&quot;&gt;WebClient&lt;/code&gt;提供了丰富的API来操纵HTTP客户端行为；
-默认情况下HTTP的连接通过Netty来完成，有需要的情况下，用户也可以自己指定一个&lt;code class=&quot;highlighter-rouge&quot;&gt;ClientHttpConnector&lt;/code&gt;用插件的方式配置进来。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;WebClient&lt;/code&gt;的API提供了fluent风格的链式调用，并在需要输出的情况下返回一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;对象。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;exchange()&lt;/code&gt;方法无法处理服务端返回的非2XX响应，如果需要处理，可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;retrieve()&lt;/code&gt;方法来做，譬如&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/persons/{id}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MediaType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;retrieve&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;HttpStatus:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is4xxServerError&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;HttpStatus:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is5xxServerError&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;上述的&lt;code class=&quot;highlighter-rouge&quot;&gt;onStatus&lt;/code&gt;方法的第二个参数可以用lambda表达式书写，以得到更好的可读性。&lt;/p&gt;
-
-&lt;h4 id=&quot;封装http的body&quot;&gt;封装HTTP的Body&lt;/h4&gt;
-
-&lt;p&gt;如果不需要关心操作的返回，我们也可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;Void&lt;/code&gt;类型来填充流发布者(&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;)的模板参数。同时在POST方法中，
-我们往往需要填充具体的HTTP请求的消息体，它往往也是用JSON的格式来发送给服务器端的；实现的方法是，可以直接将一个对象填进去即可。
-如下面的创建一个REST资源的例子&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Flux&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;personFlux&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;createSomePerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/person/{id}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MediaType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;APPLICATION_STREAM_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;personFlux&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;retrieve&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;如果对应的资源对象可以直接得到而不需要通过流异步获取，那么可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;syncBody&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;person&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;constructPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/persons/{id}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MediaType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;syncBody&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;retrieve&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;服务端的支持&quot;&gt;服务端的支持&lt;/h3&gt;
-
-&lt;p&gt;服务端的支持有两个层，一个是用于处理HTTP方法请求的&lt;code class=&quot;highlighter-rouge&quot;&gt;HttpHandler&lt;/code&gt;，一个是WebHandler。&lt;/p&gt;
-
-&lt;p&gt;HttpHandler 在Web服务器启动的时候，需要和对应的服务地址和端口相绑定；不同的服务实现都需要和业务代码自己写的HttpHandler绑定起来组合使用。
-Spring的闪亮指出一方面在于其高度的灵活性，不同的第三方Web Server实现都可以通过几行代码绑定使用起来。
-比如使用Netty的方式如下&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;HttpHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ReactorHttpHandlerAdapter&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;adapter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ReactorHttpHandlerAdapter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;HttpServer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;newHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;adapter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;另外一个流行的Web框架&lt;code class=&quot;highlighter-rouge&quot;&gt;Jetty&lt;/code&gt;的使用方法如下&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;HttpHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;Servlet&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;servlet&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JettyHttpHandlerAdapter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;handler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;Server&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;ServletContextHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;contextHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServletContextHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;contextHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addServlet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServletHolder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;servlet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;contextHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;ServerConnector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;connector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;connector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setHost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;connector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setPort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;基于HttpHandler, WebHandler提供了更高层次的处理链，包括诸如异常处理，过滤器，以及目标的&lt;code class=&quot;highlighter-rouge&quot;&gt;WebHandler&lt;/code&gt;。所有的组件都是在&lt;code class=&quot;highlighter-rouge&quot;&gt;ServerWebExchange&lt;/code&gt;之上工作的，
-所有这些处理链都可以用一个&lt;code class=&quot;highlighter-rouge&quot;&gt;WebHttpHandlerBuilder&lt;/code&gt;来组装，最终组装的结果是一个上述的&lt;code class=&quot;highlighter-rouge&quot;&gt;HttpHandler&lt;/code&gt;,并最终运行在不同的WebServer实现上。&lt;/p&gt;
-
-&lt;h4 id=&quot;dispatcherhandler&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;&lt;/h4&gt;
-&lt;p&gt;和SpringMVC的基本概念一样，居于中心地位的是一个&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;，它本身是一个Bean，可以被Spring的DI容器框架自动发现并加入到上述的&lt;code class=&quot;highlighter-rouge&quot;&gt;WebHttpHandlerBUilder&lt;/code&gt;中，
-载入服务器实现中最终提供对外服务。&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;的Bean名字被设置为&lt;code class=&quot;highlighter-rouge&quot;&gt;webHandler&lt;/code&gt;,并实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;ApplicationContextAware&lt;/code&gt;接口，以便它可以访问DI容器上下文。&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;是通过委托给一些实现定义的Spring的Bean来完成对HTTP请求的处理，并渲染对应的HTTP响应消息的。
-Spring-WebFlux框架提供了默认的实现以保证这些Bean是开箱即用的，同时用户也可以根据需要来扩展、定制这些组件。
-这些Bean包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;HandlerMapping 负责经对应的请求派发给某个Handler实现&lt;/li&gt;
-  &lt;li&gt;HandlerAdapter帮助&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;依据注解解析等手段将Handler调用的细节和&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;的逻辑解耦&lt;/li&gt;
-  &lt;li&gt;HandlerResultHnaler用于处理上一个&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerAdapter&lt;/code&gt;返回的结果&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;DispatcherHandler&lt;/code&gt;的处理流程如下&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;查询所有的&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerMapping&lt;/code&gt;，并选择第一个匹配的Handler&lt;/li&gt;
-  &lt;li&gt;如果找到，则使用对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerAdapter&lt;/code&gt;来触发Handler调用，它会发挥一个&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerResult&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;上述的Result会被&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerResultHandler&lt;/code&gt;所处理以便产生Response并将Response送给View层去渲染，或者直接返回给客户端&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;controller&quot;&gt;Controller&lt;/h4&gt;
-&lt;p&gt;传统的Spring MVC框架下应用程序仅仅需要按照业务逻辑划分，分别写好Controller，并用注解来指明某个方法需要处理的方法，带入请求作为参数，即可指定自己的参数校验Bean，
-Spring框架会自动帮我们完成参数校验到请求分发这一系列背后的复杂处理。这些已有的注解在Reactive方式下仍然被完美地支持。&lt;/p&gt;
-
-&lt;p&gt;传统的这些注解都继续被用同样的方式所支持&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;@RestController&lt;/code&gt; 标注一个POJO是一个controller类&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;@PostMapping/@PutMapping/@GetMapping...&lt;/code&gt;可以加注在方法上，Spring可以自动发现他们用来处理对应的Web方法请求，注解中的参数可以用于携带URL等&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;@ResponseStatus&lt;/code&gt;可以用来指定HTTP返回的状态码&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;@PathVariable&lt;/code&gt;可以用于将URL中的参数传入进来绑定到Java类型的参数上，甚至正则表达式也可以被处理&lt;/li&gt;
-  &lt;li&gt;媒体类型的注解也可以放置在方法注解的参数中
-这些注解的用法和意图都和传统的Sping MVC没什么两样，这里无需赘述。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;函数式的端点&quot;&gt;函数式的端点&lt;/h4&gt;
-
-&lt;p&gt;Spring WebFlux提供了新的基于函数变换的Web处理端点，它的基本逻辑是基于函数式的不可变设计的。虽然和上述传统的基于注解的方式看起来有很多差异，
-两者却是可以完美地运行在同样的底层服务实现上的。&lt;/p&gt;
-
-&lt;p&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;HandlerFunction&lt;/code&gt;相对应的处理HTTP请求的handler函数通常接收一个HTTP请求作为输入，并产生一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Mono&amp;lt;ServerResponse&amp;gt;&lt;/code&gt;作为处理的输出。这样的一个函数
-作用上和一个声明了&lt;code class=&quot;highlighter-rouge&quot;&gt;@RequestMapping&lt;/code&gt;的方法类似，不同的是&lt;code class=&quot;highlighter-rouge&quot;&gt;ServerRequest&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;ServerResponse&lt;/code&gt;都被设计为是符合不可变对象的约束。
-访问一个请求中的内容的方法通过&lt;code class=&quot;highlighter-rouge&quot;&gt;bodyToXXX&lt;/code&gt;的方式来实现，比如&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;就可以返回一个将会产生一个字符串作为输出事件的发布者。&lt;/p&gt;
-
-&lt;p&gt;类似地，我们也可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;bodyToFlux&lt;/code&gt;返回一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Flux&lt;/code&gt;的封装，两者在底层上都是通过一个更灵活的&lt;code class=&quot;highlighter-rouge&quot;&gt;body(BodyExtractor)&lt;/code&gt;方法来实现的。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;bodyToMono&lt;/code&gt;其实等价于&lt;code class=&quot;highlighter-rouge&quot;&gt;body(BodyExtractors.toMono(String.class)&lt;/code&gt;。&lt;/p&gt;
-
-&lt;p&gt;如果需要叠加对响应消息的额外处理，使用流的方式则可以用一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;对象来完成，因为&lt;code class=&quot;highlighter-rouge&quot;&gt;ServerResponse&lt;/code&gt;本身是不可变的。
-用lambda表达式的方式写一个简单的Hello程序，可以是&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;HandlerFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helloWorld&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fromObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello World&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当然这样的书写方式有潜在的可读性丢失的损耗。另外一种推荐的做法是，将不同的handler仍然聚合到一个controller类中，然后用不同的方法来组合实现不同的处理，
-下面是一个更复杂的例子&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;PersonHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PersonRepository&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PersonHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PersonRepository&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;repository&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;listPeople&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerRequest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; 
-        &lt;span class=&quot;n&quot;&gt;Flux&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;people&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;allPeople&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;people&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;createPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerRequest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; 
-        &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;person&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bodyToMono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;savePerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerRequest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; 
-        &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;personId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;valueOf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;pathVariable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;notFound&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;notFound&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;Mono&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;personMono&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;personId&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;personMono&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;flatMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;person&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fromObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)))&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;switchIfEmpty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;notFound&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h4 id=&quot;路由处理函数&quot;&gt;路由处理函数&lt;/h4&gt;
-
-&lt;p&gt;通常情况下，我们不需要自己写路由函数，仅仅需要调用&lt;code class=&quot;highlighter-rouge&quot;&gt;RouterFunctions.route(RequestPredicate, HandlerFunction)&lt;/code&gt;做分发就可以了。
-如果第一个参数指定的谓词判断匹配进来的HTTP请求，那么第二个参数指定的HandlerFunction就会被调用，并将请求传入，正如上面例子中一个一个的public方法所做的那样。
-如果没有找到匹配的，则直接返回404(即上例中的&lt;code class=&quot;highlighter-rouge&quot;&gt;notFound&lt;/code&gt;)。&lt;/p&gt;
-
-&lt;p&gt;多个路由函数可以通过函数式编程的组合方法构造出新的路由函数来。匹配的时候，先比对第一个函数，如果没有匹配再一次往下顺序比对和处理。
-我们可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;RouterFunction.and(routeFunction)&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;or&lt;/code&gt;来组合多个条件判断，用&lt;code class=&quot;highlighter-rouge&quot;&gt;andRoute&lt;/code&gt;来组合多个路由函数，写出的代码是比较清晰易懂的流畅风格。
-基于上面的例子，使用路由函数的组合如下&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;PersonRepository&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;PersonHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PersonHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;repository&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;RouterFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;personRoute&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;route&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/person/{id}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;handler:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;andRoute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/person&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;handler:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;listPeople&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;andRoute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;POST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/person&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;APPLICATION_JSON&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;handler:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;createPerson&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;每一行一个路由函数的方式具有很强的不言自明性，不需要稳定仅仅通过读这段代码就可以知道每个URL是怎样被某个函数所处理了。&lt;/p&gt;
-
-&lt;p&gt;由于这里的主要编程范式是函数式的，Spring库提供的大部分组合函数都是静态函数，这里的方法引用逻辑借助于Java8的语法特性进一步提高了lambda表达式的表达能力。
-这也许是这些新特性都仅仅在Java8平台下才能工作的原因。&lt;/p&gt;
-
-&lt;h4 id=&quot;启动server和过滤器&quot;&gt;启动Server和过滤器&lt;/h4&gt;
-
-&lt;p&gt;启动一个后端Web服务器的方法和前面的类似，只是我们需要构造一个&lt;code class=&quot;highlighter-rouge&quot;&gt;HttpHandler&lt;/code&gt;出来；实现的方法是通过&lt;code class=&quot;highlighter-rouge&quot;&gt;RouterFunctions.toHttpHandler(routerFunction)&lt;/code&gt;;
-构造出来的HttpHandler就可以被用相同的方法调用特定的后端服务器实现了。&lt;/p&gt;
-
-&lt;p&gt;过滤器可以用在&lt;code class=&quot;highlighter-rouge&quot;&gt;routerFunction&lt;/code&gt;组合之间，提供额外的安全控制和拦截器处理。譬如如下的使用&lt;code class=&quot;highlighter-rouge&quot;&gt;SecurityManager&lt;/code&gt;的例子&lt;/p&gt;
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;RouterFunction&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filteredRoute&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;route&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;securityManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;allowAccessTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ServerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UNAUTHORIZED&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当给定的请求可以被安全策略放行的时候，我们可以直接调用&lt;code class=&quot;highlighter-rouge&quot;&gt;next.handle(request)&lt;/code&gt;将其交给下游，否则直接构造一个授权错误的响应，结束该请求的处理流程。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="programming" /><category term="microservice" /><category term="spring" /><summary type="html">流式编程在微服务架构风格越来越流行的背景下日益引起开发者的关注 (前文有一些简单探讨) ，新的Java语言规范加入了流的概念从语言库上添加了对FRP的支持。 Spring最新的5.0版本更新也顺应这一潮流，加入了原生支持FRP的行列。</summary></entry></feed>
+&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry></feed>
