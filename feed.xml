@@ -1,4 +1,273 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-06-29T13:42:43+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">C++20 - 下一个大版本功能确定</title><link href="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/" rel="alternate" type="text/html" title="C++20 - 下一个大版本功能确定" /><published>2019-06-23T00:00:00+08:00</published><updated>2019-06-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/">&lt;p&gt;C++20的功能特性已经于3月份冻结，显然&lt;strong&gt;这次终于来了一波大的改进&lt;/strong&gt;，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-03T11:00:43+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">微服务开发：C++语言是否真的不适用？</title><link href="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" rel="alternate" type="text/html" title="微服务开发：C++语言是否真的不适用？" /><published>2019-10-01T00:00:00+08:00</published><updated>2019-10-01T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">&lt;p&gt;微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着
+&lt;a href=&quot;/ /post/2018/04/26/cloud-native/&quot;&gt;云原生架构&lt;/a&gt;　的逐渐火热而日益呈现星火燎原之势。
+抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否&lt;strong&gt;该用&lt;/strong&gt;C++语言或者&lt;strong&gt;是否能用&lt;/strong&gt;C++语言呢？&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;乍一看似乎这个问题没有什么深入探讨的必要，因为&lt;strong&gt;微服务开发本身是编程语言中立&lt;/strong&gt;的，它本身倡导的思想就是用尽量和具体语言无关的技术来解耦业务复杂性，通过智能的API来串联各个可以分布式开发的服务单元。
+然而一个不容忽视的现实是，很多谈论微服务开发的书籍或者博客文章&lt;strong&gt;要么不谈落地仅仅谈理论&lt;/strong&gt;（也许这样的贩卖理论的书籍大多多乏味至极没有多少营养）；
+要么谈到的时候也是无外乎用流行的几个大的技术栈&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Java 生态圈的基于JVM的技术，使用Spring Boot/Spring Cloud等一些&lt;strong&gt;现成的服务&lt;/strong&gt;，或者稍微时髦一些的会用到Scala或者Kotlin来实现新潮的&lt;strong&gt;函数式编程乃至流计算技巧&lt;/strong&gt;或者&lt;strong&gt;事件驱动&lt;/strong&gt;机制&lt;/li&gt;
+  &lt;li&gt;新生代的Golang技术，这个在&lt;strong&gt;特别强调Cloud的部署环境中&lt;/strong&gt;讨论的格外多一些，因为Golang语言在很多云计算的基础设施项目中有极大的应用&lt;/li&gt;
+  &lt;li&gt;还有一些则用流行的NodeJs技术栈来举例，这方面多多少少&lt;strong&gt;得益于NPM这一强大的第三方包管理工具&lt;/strong&gt;所支持起来的庞大的开源软件分发管理系统&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;看起来并没有多少人谈论用C++语言来实现微服务；然后是否是因为C++就不适合来实施微服务？
+回答这个问题其实并不难，只要从简单的微服务架构的实现要求来看一下就清楚明了了。&lt;/p&gt;
+
+&lt;h2 id=&quot;微服务实现的技术要求&quot;&gt;微服务实现的技术要求&lt;/h2&gt;
+
+&lt;p&gt;微服务架构的软件系统的最基本思想其实就是&lt;strong&gt;分治和解耦&lt;/strong&gt;；其它的技术需求都可以认为是因此而衍生出来用于解决它所带来的具体问题的。&lt;/p&gt;
+
+&lt;p&gt;因为系统被拆分为多个松耦合的粒度较小的服务，并且服务之间需要能够松耦合，因此每个拆分的服务需要提供和其它服务的通信来协作完成端到端的业务场景。
+这样的业务交互是通过某些广泛可用的上层&lt;strong&gt;应用程序编程接口&lt;/strong&gt;来完成的；目前来说这样的接口定义有两种&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;基于HTTP协议的REST风格API，本身是基于存在了二十年以上的HTTP协议来实现的&lt;/li&gt;
+  &lt;li&gt;基于Google Protobuf编码的GRPC远程过程调用协议,该协议相对较新，由Google提出&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;rest-api&quot;&gt;REST API&lt;/h3&gt;
+&lt;p&gt;基于REST风格的API其实要求服务提供方需要按照资源化的风格封装它对外曝露的接口，每一个接口都需要作用域某个资源之上，并且针对该资源提供创建、读取、修改、删除等操作。
+这些操作方法通过&lt;strong&gt;遵循既有的HTTP协议的方法动词&lt;/strong&gt;来表达，而实际资源的&lt;strong&gt;内容则通过HTTP消息体&lt;/strong&gt;来传递和交换。&lt;/p&gt;
+
+&lt;p&gt;实际的资源内容的定义和校验则&lt;strong&gt;依托现有的JSON或者XML容器来封装&lt;/strong&gt;；API的请求和相应中可以依据需要来提供或者返回具体资源负载；这些资源的定义本身用OpenAPI来定义，客户端和服务端都可以根据这一独立于代码实现的API定义规范来解析和处理。&lt;/p&gt;
+
+&lt;p&gt;当然在比较高级的基于HATEOS的用法中，实际消息中封装的资源可能会按照媒体内容互相关联的方式来组织，
+使得客户端可以无需在代码中写死资源的URI，而是通过一次请求关联资源并根据返回的链接来动态发现的方式来降低服务之间的耦合。&lt;/p&gt;
+
+&lt;p&gt;HTTP协议的实现自然是和语言无关的技术，而JSON的封装对具有几十年历史积淀的C++语言来说也完全不是问题。
+至于OpenAPI规范的定义更加是和语言无关的技术。&lt;/p&gt;
+
+&lt;h3 id=&quot;grpc&quot;&gt;GRPC&lt;/h3&gt;
+&lt;p&gt;GRPC是相对比较新一点的服务之间的API调用接口实现方式；详细的探讨可以参考&lt;a href=&quot;/ /post/2018/04/26/cloud-native/&quot;&gt;这篇文字&lt;/a&gt;。
+从上层架构上来看，GRPC的设计思路可能更加&lt;strong&gt;契合传统的程序员的思路&lt;/strong&gt;，它的直接思路其实就是要求各个服务之间通过远程过程调用的方式来实现相互交互。&lt;/p&gt;
+
+&lt;p&gt;GRPC和传统的基于方法调用的RCP所不同的地方在于它&lt;strong&gt;在传统的请求／响应模型之上还提供了客户端和服务端之间的全双工的数据流推送&lt;/strong&gt;，因而它需要和HTTP/2在一起才能配合完好。
+在这种接口范式下，服务提供者需要按照Proto Buffer的语法规范定义自己的服务声明定义文件，然后该文件会被protoc编译器检查解析并生成样板代码。&lt;/p&gt;
+
+&lt;p&gt;基于GRPC技术实现的服务&lt;strong&gt;需要根据上述的服务样板代码来二次开发，扩展实现自己的业务逻辑&lt;/strong&gt;；客户端则可以响应的使用生成的客户端样板代码来发起远程调用请求。&lt;/p&gt;
+
+&lt;h3 id=&quot;这些技术本身有强烈的语言偏爱吗&quot;&gt;这些技术本身有强烈的语言偏爱吗？&lt;/h3&gt;
+
+&lt;p&gt;基于这些讨论，单纯看微服务落地实现的技术栈要求，它并&lt;strong&gt;没有特意对编程语言提出很硬的约束&lt;/strong&gt;，即理论上任何能够完成中等复杂度任务的编程语言都可以来实现微服务。
+无论是REST/JSON还是GRPC/ProtoBuffer，它们本身都具有多语言支持的能力，尤其是GRPC自带的代码生成工具有个很微妙的限制就是&lt;strong&gt;不同的编程语言的支持能力是不同的，但是C++语言是功能最完善的&lt;/strong&gt;之一。&lt;/p&gt;
+
+&lt;p&gt;显然我们可以在需要的情况下，豪不犹豫地选用C++语言来实现微服务，只要我们弄清楚了我们确实需要使用C++语言来实现微服务。&lt;/p&gt;
+
+&lt;h2 id=&quot;什么时候需要使用c来实现&quot;&gt;什么时候需要使用C++来实现&lt;/h2&gt;
+&lt;p&gt;回答这样的问题并没有一个放之四海而皆准的经验，因为微服务架构的其中一个关键要素就是需要考虑到具体的开发团队的因素，以及业务领域问题的具体需求。
+很多时候这样的决策和选择需要不少深思熟虑和权衡才能找到最适合自己情况的那个选项。&lt;/p&gt;
+
+&lt;h3 id=&quot;业务场景需求&quot;&gt;业务场景需求&lt;/h3&gt;
+&lt;p&gt;从业务场景需求的角度来说，可能&lt;strong&gt;性能需求以及扩展性需求&lt;/strong&gt;是需要被着重考虑的。对于CPU密集型的微服务来说，选用一个以性能见长的编程语言可能是一个明智的选择，
+这方面正是C++语言比较擅长的地方，也许只有Rust语言可以与之比肩，但是C++长期的历史积淀和成熟稳定的特性短期之内Rust还无法匹及。&lt;/p&gt;
+
+&lt;h3 id=&quot;开发团队技能&quot;&gt;开发团队技能&lt;/h3&gt;
+&lt;p&gt;从开发团队的方面来考虑，则必须要认识到&lt;strong&gt;C++语言对成员的编程水平总体上还是要求比较高&lt;/strong&gt;，尽管现代的C++语言标准一直在努力尝试往简化语言门槛的方向迈进。
+如果既有的团队有很好的C/C++语言背景和丰富的系统编程知识，使用C++语言来做微服务是很自然的选择。
+反之期望一个没有什么C/C++背景的团队来临时抱佛脚开发C++为主要语言的微服务很容易给项目的按序推进带来巨大的挑战。&lt;/p&gt;
+
+&lt;h2 id=&quot;技术和工具&quot;&gt;技术和工具&lt;/h2&gt;
+
+&lt;p&gt;假设这些因素我们都以及考虑周详，具体到实现上，是否就万事大吉可以马上撸起袖子开工写代码了呢？
+&lt;strong&gt;不幸的是事情并没有那么简单&lt;/strong&gt;，稍微详细看一下这些技术栈就清楚了。
+下面假设我们决定采用随处可见的流行的REST API + JSON的方式来实现微服务。&lt;/p&gt;
+
+&lt;h3 id=&quot;rest框架&quot;&gt;REST框架&lt;/h3&gt;
+&lt;p&gt;如前所述，REST技术栈本质上是基于HTTP协议之上的一些二次发挥；而选择C++实现的时候第一个现实的因素是&lt;strong&gt;C++标准库里面并没有提供HTTP协议的实现&lt;/strong&gt;，
+这也是C++生态系统目前比较大的一个问题：标准库里面的东西实在是太少了，这里面一个很大的原因应该是能放到标准库里面的东西必须要经过委员会的仔细审查，加上过去近四十年的各种技术积累和包袱，加入新的库总要面临重口难调的窘境。
+甚至于在Reddit上还有这么帖子就是在探讨&lt;a href=&quot;https://www.reddit.com/r/cpp/comments/7ghn75/defactoindustry_standard_restful_serverlibraryapi/&quot;&gt;是否有一个事实标准的REST框架实现&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;boostbeast&quot;&gt;Boost.Beast&lt;/h4&gt;
+&lt;p&gt;如果是将标准稍微放开一些，或者可以访问比较新的boost库，那么&lt;a href=&quot;https://www.boost.org/doc/libs/1_71_0/libs/beast/doc/html/index.html&quot;&gt;Beast&lt;/a&gt; 可以算一个比较冒险的选择，因为它也是在1.66版本才被加入进去。
+要是你所在的公司或者组织由其它方面的考虑停留在了一个比较老的版本的Boost上，那么引入这么一个库就显得比较麻烦。&lt;/p&gt;
+
+&lt;p&gt;Beast的主要特点如下&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;保持了header only的方式，最小化编译和链接依赖；副作用就是冗长模板元编译开销&lt;/li&gt;
+  &lt;li&gt;采用Boost.asio的&lt;strong&gt;异步网络编程&lt;/strong&gt;模型和协程来实现高性能和高并发，熟悉这些库的话上手会比较容易&lt;/li&gt;
+  &lt;li&gt;库本身提供的&lt;strong&gt;抽象层次比较高&lt;/strong&gt;，实际上手可能需要写比较多的代码，或者需要二次封装&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;文档并不是很完备&lt;/strong&gt;，也许需要一些时间才能更加成熟&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;rest-sdk&quot;&gt;REST SDK&lt;/h4&gt;
+&lt;p&gt;微软平台上的C++程序员可能会更偏爱微软出品的&lt;a href=&quot;https://github.com/microsoft/cpprestsdk&quot;&gt;开源在GitHub上的REST SDK&lt;/a&gt;，同样的它也采用了异步编程模型。&lt;/p&gt;
+
+&lt;p&gt;虽然是一个微软官方提供的开源库，它本身还是可以在多个平台上运行的，并且提供了流行Linux环境的二级制发布包，如果没有交叉编译的需求，可以直接下载安装。&lt;/p&gt;
+
+&lt;h4 id=&quot;pistache-framework&quot;&gt;Pistache Framework&lt;/h4&gt;
+&lt;p&gt;这是一个功能相当完善并且性能也很出色的REST框架，它本身的特色是&lt;strong&gt;能够和swagger的代码生成工具无缝结合&lt;/strong&gt;，可以用open API的声明来生成模型代码，极大简化了用户的编码负担。&lt;/p&gt;
+
+&lt;p&gt;Pistache使用epoll机制来完成高性能的传输层，并提供了&lt;strong&gt;流式的API给用户使用&lt;/strong&gt;，用户可以在REST方法回调中使用异步API将内容写入流，就像操作一个标准输入输出流那样方便。&lt;/p&gt;
+
+&lt;p&gt;但是由于这个&lt;strong&gt;epoll机制和核心的部分耦合比较紧密&lt;/strong&gt;，并且没有很好的办法来用epoll来模拟IOCP机制，因此如果需要在Windows上（甚至符合POSIX的Cygwin环境也是一样）使用该库则会碰上&lt;strong&gt;跨平台可移植性的难题&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;性能评估&quot;&gt;性能评估&lt;/h4&gt;
+&lt;p&gt;C++程序的一个很大的关注点就是性能，
+&lt;a href=&quot;https://blog.binaryspaceship.com/2017/cpp-rest-api-frameworks-benchmark/&quot;&gt;这篇博文&lt;/a&gt;
+提供了一个性能评估数据，总体而言&lt;strong&gt;Pistache的性能明显占据上风&lt;/strong&gt;。
+可惜这个对比的报告时间有些老，好在代码是开源的，拉取三个仓库自己的最新版本在本地虚拟机上跑一下，可以得到如下的结果：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;框架&lt;/th&gt;
+      &lt;th&gt;98%请求完成的时间(ms)&lt;/th&gt;
+      &lt;th&gt;每秒处理的请求数&lt;/th&gt;
+      &lt;th&gt;示例代码的行数&lt;/th&gt;
+      &lt;th&gt;Github星标&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;cpprestsdk/default&lt;/td&gt;
+      &lt;td&gt;107&lt;/td&gt;
+      &lt;td&gt;12.23&lt;/td&gt;
+      &lt;td&gt;47&lt;/td&gt;
+      &lt;td&gt;4478&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;cpprestsdk/RapidJSON&lt;/td&gt;
+      &lt;td&gt;85&lt;/td&gt;
+      &lt;td&gt;14.28&lt;/td&gt;
+      &lt;td&gt;46&lt;/td&gt;
+      &lt;td&gt;4478&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;restbed&lt;/td&gt;
+      &lt;td&gt;41&lt;/td&gt;
+      &lt;td&gt;32.54&lt;/td&gt;
+      &lt;td&gt;39&lt;/td&gt;
+      &lt;td&gt;1078&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;pistache&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+      &lt;td&gt;182.85&lt;/td&gt;
+      &lt;td&gt;33&lt;/td&gt;
+      &lt;td&gt;1683&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;此外，因为最新的库代码以及发生了变更，因此原来repo中的&lt;strong&gt;示例代码或者CMakeLists.txt文件需要做些微调&lt;/strong&gt;，基本上按照对应项目的最新文档适度改动即可。我自己的虚拟机只分了２个CPU核，所以绝对数据比原作者的要低。&lt;/p&gt;
+
+&lt;p&gt;稍微有点奇怪的是，从项目的流行度上来看，来自微软的开源项目cpprestsdk表现的更加热门一些，无论是星标数还是fork数字都非常亮眼；
+但是这里的性能比较却是三者之中最差的一个，是否和微软的自带明星光环有关有待进一步详查。&lt;/p&gt;
+
+&lt;h3 id=&quot;json解析和处理&quot;&gt;JSON解析和处理&lt;/h3&gt;
+
+&lt;p&gt;传统的REST微服务实现用JSON来编码消息中的资源内容，因而&lt;strong&gt;JSON解析能力&lt;/strong&gt;是实现REST服务的一个重要的考量因素。
+从使用的角度来看，JSON表述的文档结构常常可以简单地看作是一颗树结构，里面的具体节点元素只要符合
+&lt;a href=&quot;https://datatracker.ietf.org/doc/rfc8259/&quot;&gt;RFC8259规范要求&lt;/a&gt;(更老一点的版本是&lt;a href=&quot;https://datatracker.ietf.org/doc/rfc4627/&quot;&gt;RFC4627&lt;/a&gt;)
+就可以了。&lt;/p&gt;
+
+&lt;p&gt;本质上来说，JSON的解析就是文本文件的解析，其语法规则比较简单直接，自己手工实现一个满足自己使用场景的也并非难事。
+只是考虑到性能、跨平台、编码、代码大小等各种各样的要素带来的复杂性，直接&lt;strong&gt;复用已有的库&lt;/strong&gt;是更为明智的做法。&lt;/p&gt;
+
+&lt;h3 id=&quot;开源实现比较&quot;&gt;开源实现比较&lt;/h3&gt;
+
+&lt;p&gt;JSON处理的开源库非常多，目前就职于腾讯的&lt;a href=&quot;https://datatracker.ietf.org/doc/rfc4627/&quot;&gt;MiloYip&lt;/a&gt;做了一个很好的比较总结，开源在&lt;a href=&quot;https://github.com/miloyip/nativejson-benchmark&quot;&gt;GitHub&lt;/a&gt;这里，
+我们直接拿来参考就是了。&lt;/p&gt;
+
+&lt;h4 id=&quot;比较对象&quot;&gt;比较对象&lt;/h4&gt;
+&lt;p&gt;作者从如下几个方面考察了常见的数十个JSON库&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;功能兼容性&lt;/strong&gt;，包括校验，双精度数字的解析处理，字符串解析和压缩JSON文档的序列化反序列化；这在&lt;strong&gt;跨语言的微服务场景下尤为重要&lt;/strong&gt;，因为客户端可能是用另外一种完全不同的编程语言开发的&lt;/li&gt;
+  &lt;li&gt;各种操作下的性能表现，包含
+    &lt;ul&gt;
+      &lt;li&gt;运行时间（越短越好）&lt;/li&gt;
+      &lt;li&gt;处理过程中的内存占用&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;最大内存&lt;/strong&gt;占用情况（越少越好）&lt;/li&gt;
+      &lt;li&gt;内存分配器调用次数多少，经验表明很多时候CPU的耗费时间有很大一部分花费在不必要的内存分配和释放操作上。&lt;strong&gt;更少的内存分配操作往往意味着更好的性能&lt;/strong&gt;，即便这个结论并不是绝对准确，否则也不会有各种各样优化小对象分配的内存分配器出现了&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;可执行文件的大小 - 在微服务的容器化场景下，这也是一个很重要的要素。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;比较结果&quot;&gt;比较结果&lt;/h4&gt;
+&lt;p&gt;各项的比较结果如下 - 因为&lt;strong&gt;JSONCPP是一个很早就出现并且得到广泛使用的JSON解析库&lt;/strong&gt;，这里将其单独放在一列做比较。&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;比较项目&lt;/th&gt;
+      &lt;th&gt;最高得分项目&lt;/th&gt;
+      &lt;th&gt;第二名得分项目&lt;/th&gt;
+      &lt;th&gt;第三名得分项目&lt;/th&gt;
+      &lt;th&gt;jsoncpp&lt;/th&gt;
+      &lt;th&gt;说明　&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;功能兼容性　　&lt;/td&gt;
+      &lt;td&gt;taocpp/json(100%)&lt;/td&gt;
+      &lt;td&gt;RapidJSON_pre(100%)&lt;/td&gt;
+      &lt;td&gt;configuru(99%)&lt;/td&gt;
+      &lt;td&gt;85%&lt;/td&gt;
+      &lt;td&gt;前三基本达到&lt;strong&gt;100%&lt;/strong&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;解析时间&lt;/td&gt;
+      &lt;td&gt;RapidJSON(8ms)&lt;/td&gt;
+      &lt;td&gt;gason(8ms)&lt;/td&gt;
+      &lt;td&gt;json4c(9ms)&lt;/td&gt;
+      &lt;td&gt;166ms&lt;/td&gt;
+      &lt;td&gt;前三和后面的相差巨大&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;内存占用　　　&lt;/td&gt;
+      &lt;td&gt;RapidJSON(4.8MB)&lt;/td&gt;
+      &lt;td&gt;strdup(6.6MB)&lt;/td&gt;
+      &lt;td&gt;Jvar(7.56MB)&lt;/td&gt;
+      &lt;td&gt;24.56MB&lt;/td&gt;
+      &lt;td&gt;Qt的数据不准确&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;序列化时间　　&lt;/td&gt;
+      &lt;td&gt;RapidJSON(11ms)&lt;/td&gt;
+      &lt;td&gt;ujson(25ms)&lt;/td&gt;
+      &lt;td&gt;jzon(28ms)&lt;/td&gt;
+      &lt;td&gt;94ms&lt;/td&gt;
+      &lt;td&gt;部分纯C实现表现较好&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;美化输出　　　&lt;/td&gt;
+      &lt;td&gt;RapidJSON(17ms)&lt;/td&gt;
+      &lt;td&gt;ujson(29ms)&lt;/td&gt;
+      &lt;td&gt;SchederdomJson(29ms)&lt;/td&gt;
+      &lt;td&gt;NA&lt;/td&gt;
+      &lt;td&gt;jsoncpp未提供　　　　&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;可执行文件大小&lt;/td&gt;
+      &lt;td&gt;pjson(15KB)&lt;/td&gt;
+      &lt;td&gt;Qt(18KB)&lt;/td&gt;
+      &lt;td&gt;RESTSDK(18.3KB)&lt;/td&gt;
+      &lt;td&gt;243KB&lt;/td&gt;
+      &lt;td&gt;C实现毫无疑问靠前，RapidJSON31KB&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;从结果来看，RapidJSON在多项比较重都名列前茅，称之为&lt;strong&gt;性能最好功能最全的JSON库&lt;/strong&gt;也毫不为过。&lt;/p&gt;
+
+&lt;p&gt;需要额外指出的是&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;RapidJSON提供了几个版本变种，默认情况下的版本提供了93%的标准兼容性，却能够在其它性能比拼中拔得头筹。
+提供完全兼容的版本&lt;strong&gt;性能稍差一些或者毫无损失但在各项比较中依然排在前列&lt;/strong&gt;，这里没有列出它的其它变种的排名情况而是将它们合并在一起展示。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;C版本的实现并没有特别明显的优势&lt;/strong&gt;，除了最后一向需要考虑可执行文件大小的场合，而C++的实现并没有落后太多。
+这一项里RapidJSON的得分在C++里面居于第六，绝对大小依然远好于jsoncpp&lt;/li&gt;
+  &lt;li&gt;某些REST库自身也提供了自己的JSON实现，比如来自&lt;strong&gt;微软的REST SDK，只是本身并不特别出彩&lt;/strong&gt;，在上述的REST比较重以及可以看到一些端倪，这里不赘述&lt;/li&gt;
+  &lt;li&gt;RapidJSON的最初实现也来自于这个benchmark的作者，只是两三年前以及被重命名&lt;strong&gt;成为腾讯开源库的一部分&lt;/strong&gt;；目前在GitHub上有超过8000个👍&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+&lt;p&gt;基于微服务的架构设计正在席卷几乎所有的软件开发组织，形形色色的开源的REST和JSON框架使得能否用C++来开发微服务这一简单问题的&lt;strong&gt;答案不言自明&lt;/strong&gt;。
+在业务场景需要、团队技术能力匹配的情况下，使用上述的这些工具和框架库实现高性能的微服务不应该有任何障碍。
+腾讯开源的FastJSON给了我们不少的惊喜，这也许是国内的大技术公司给开源社区的巨大贡献。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="cpp" /><category term="design" /><category term="tools" /><summary type="html">微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着 云原生架构　的逐渐火热而日益呈现星火燎原之势。 抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否该用C++语言或者是否能用C++语言呢？</summary></entry><entry><title type="html">C++20 - 下一个大版本功能确定</title><link href="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/" rel="alternate" type="text/html" title="C++20 - 下一个大版本功能确定" /><published>2019-06-23T00:00:00+08:00</published><updated>2019-06-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/">&lt;p&gt;C++20的功能特性已经于3月份冻结，显然&lt;strong&gt;这次终于来了一波大的改进&lt;/strong&gt;，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -3003,229 +3272,4 @@ serde_json库称自己是最快的JSON解析库，还真不是白吹的。&lt;/p
 
 &lt;h2 id=&quot;文档&quot;&gt;文档&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="microservice" /><category term="standardization" /><summary type="html">微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定； 然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。 其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展； 微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了， 走的人多了，必然有些更容易走的”直路”显现出来。</summary></entry><entry><title type="html">云原生应用</title><link href="https://skyscribe.github.io/post/2018/04/26/cloud-native/" rel="alternate" type="text/html" title="云原生应用" /><published>2018-04-26T00:00:00+08:00</published><updated>2018-04-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/04/26/cloud-native</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/04/26/cloud-native/">&lt;p&gt;云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。&lt;/p&gt;
-
-&lt;p&gt;由于传统的应用期望其运行在可靠而又昂贵的硬件或者基础设施之上，软件本身的设计便没有对云计算的基础设施做很好的针对性设计。
-云原生应用的思路是，既然云计算平台无处不在了，能否从设计之初就仅仅考虑软件默认就是运行在不可靠的云基础设施上？&lt;/p&gt;
-
-&lt;!-- more --&gt;
-&lt;p&gt;按照传统的应用软件开发思路，软件被运行在可靠性很高的硬件设施之上，存储设备可能本身有提供基于RAID的硬件级别的高可用特性，
-网络接口上可能有基于bond的双以太网连接互为主从备份的机制保证大部分情况下并不为真正出错；应用的架构采用相对简单的三层架构，
-数据库管理软件本身提供了复杂而又可靠的事务属性保证，从而应用程序设计上并不需要太多可能的异常情况；出现问题的时候，简单重启程序即可。&lt;/p&gt;
-
-&lt;p&gt;云计算的提出和被快速采纳促进了&lt;strong&gt;更复杂而又去中心化的微服务架构&lt;/strong&gt;的流行，它结合了运算能力、存储、网络虚拟化的特性，
-将软件底层所运行的物理资源做了隔离，应用程序不得不假设底层硬件可能是不可靠的；事实上云计算的数据中心处于成本考虑往往搭建在相对廉价的X86机器上。&lt;/p&gt;
-
-&lt;h2 id=&quot;云原生应用和一些基础问题&quot;&gt;云原生应用和一些基础问题&lt;/h2&gt;
-&lt;p&gt;云原生应用开发的设想是，既然云计算已经无处不在了，我们为什么不忘记传统企业应用软件的这些昂贵而又奢侈的硬件基础设施，
-从软件&lt;strong&gt;设计上就做好防范考虑好可能的异常情况&lt;/strong&gt;，天然假定这些可靠的基础设施都不存在，虚拟的处理器可能被重启、磁盘可能会丢数据、网络也可能随时失效。
-这样写出来的软件自然也很容易在传统的可靠平台上运行，因为大部分应用的复杂度都被精心设计了。&lt;/p&gt;
-
-&lt;p&gt;云原生应用天然地和分布式软件架构绑定在一起，它必须解决Sun的科学家提出的&lt;a href=&quot;https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing&quot;&gt;分布式计算&lt;/a&gt;几个陷阱&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;计算机网络是不可靠的，应用软件必须随之准备好可能的网络失效、超时等&lt;/li&gt;
-  &lt;li&gt;网络的延时不等于零，在多个分布式应用之间转移数据必然导致整个业务流的处理时间变长，甚至使得整个业务流失效&lt;/li&gt;
-  &lt;li&gt;网络带宽永远是受限的，浪费网络带宽可能带来严重的系统性能问题&lt;/li&gt;
-  &lt;li&gt;网络的安全威胁始终不容忽视，跨越多个网络节点的通信会带来复杂的恶意用户监听、偷听、掉包、窃取等威胁&lt;/li&gt;
-  &lt;li&gt;网络拓扑结构的变化可能带来整个系统行为的变化，尤其是基于IP网络的数据包可能在发送和接收方向经过完全不同的路由&lt;/li&gt;
-  &lt;li&gt;跨越网络节点的传输、封装包和解析包的开销必须经常被仔细考虑，某些时候这些开销都不应该被忽略&lt;/li&gt;
-  &lt;li&gt;网络结构可能不是同构的，这一条反过来会影响前面一些因素，包括带宽、时延、安全等&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;cncf基金会&quot;&gt;CNCF基金会&lt;/h2&gt;
-
-&lt;p&gt;随着微服务软件架构的深入发展和演进，人们发现上述的很多底层的问题有一定的通用性，适合用一些共有的基础设施来解决，而不是选择各自实现自己的一套。
-譬如服务如果需要提供多个实例的软件层面的高可靠，就往往需要服务发现、路由和负载均衡；如果需要避免局部服务失败引起的系统拥塞，则可能需要连接层面的断路器，
-以便在服务不可用的时候即使返回错误，避免浪费资源等待；分布式的服务需要公共的仪表盘查看整个系统的处理动态和健康状况，也往往需要良好的诊断和日志工具，
-以方便在问题的情况下及时追踪、诊断并解决问题。&lt;/p&gt;
-
-&lt;p&gt;CNCF是Linux基金会旗下的一个&lt;strong&gt;致力于集合开源社区的力量来提高云原生应用可用性和可持续性&lt;/strong&gt;的开源组织，它聚合了一大批基于开源模式开发的微服务应用程序栈，
-利用已经成熟的容器技术，将这些微服务各自打包为独立的容器以便分发和使用，并支持动态地配置和编排这些服务以更有效地使用虚拟化的云资源。
-通过这一努力，应用软件开发程序员可以通过聚焦于自己的业务领域问题更快地开发和交付软件产品。&lt;/p&gt;
-
-&lt;p&gt;它的项目大多专注于上述的一些云原生应用开发的基础设施，大概可以分为两大类&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;云计算平台本身相关的一些开源项目，包括OpenStack，Kubernetes，容器，AWS等;这里也包含了一些商业组织提供的开源项目，如阿里、华为的云平台等&lt;/li&gt;
-  &lt;li&gt;微服务开发的一些基础软件服务，包括gRPC、Linkerd、Fluentd、Promethus等&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;kubernetes&quot;&gt;Kubernetes&lt;/h2&gt;
-
-&lt;p&gt;Kubernetes又称K8s，近来已经确切地赢得了容器云平台的战争，成为事实上的开源容器调度、编排平台的事实标准;它的主要功能包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;自动化方式完成基于容器的应用程序的打包、动态扩展和管理&lt;/li&gt;
-  &lt;li&gt;极高的扩展性，这方面给基于google内部已经使用了十几年的庞大的基础设施集群，可支持管理和自动伸缩扩展数十亿数量级的容器应用&lt;/li&gt;
-  &lt;li&gt;极高的部署灵活性，不仅适用于内部测试环境也可以自动适应管理生产环境的需要&lt;/li&gt;
-  &lt;li&gt;强大的周围生态系统，可以和已有的各种公有云、私有云乃至混合云平台无缝融合&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;cncf项目孵化毕业模型&quot;&gt;CNCF项目孵化毕业模型&lt;/h3&gt;
-
-&lt;p&gt;CNCF内部将其项目按照成熟度模型分为以下几类&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;进入沙箱的项目必须满足几个关键的标准，包括为云原生计算的核心内容 - 容器化、编排、微服务或者一些几者的结合增加价值并遵循CNCF的&lt;a href=&quot;https://www.cncf.io/about/charter/&quot;&gt;章程&lt;/a&gt;；
-代码符合ASIL的版权要求或者对应的版权协议被CNCF治理委员会接纳；同意将相关商标移交给基金会并同意协助完成可能的新商标注册；每12个月委员会需要投票
-决定是否仍然可以停留在沙箱阶段或者可以变成孵化项目&lt;/li&gt;
-  &lt;li&gt;孵化阶段的项目除了满足上述标准，还应该用显式的文档说明该项目被成功应用在三个以上的成熟产品中，这些应用场景需要被委员会认可满足特定的质量和场景；
-拥有健康的代码提交者；具备持续的代码提交和合并贡献行为；这些数据本身可能是非常动态的，因此委员会有最终的裁决权来决定是否某个项目可以进入孵化阶段&lt;/li&gt;
-  &lt;li&gt;如果想达到毕业成熟的状态，除了上述标准，项目还必须满足至少拥有来自两个组织的代码提交者；获取或者维持满足&lt;a href=&quot;https://bestpractices.coreinfrastructure.org/en&quot;&gt;Linux基金会核心基础设施的最佳实践徽章&lt;/a&gt;,
-目前这一徽章的获得者包括OpenSSL/Curl/GNUMake/GNUPG等明星项目；采纳CNCF的&lt;a href=&quot;https://github.com/cncf/foundation/blob/master/code-of-conduct.md&quot;&gt;行为准则&lt;/a&gt;;
-显式地定义项目的治理和提交贡献流程，并提供GOVERANCE.md和ONWERS.md文件，指明目前的项目治理和提交贡献名单；至少要在主项目的库上提供公开的项目采纳者名单；
-最终需要收到投票委员会确认的毕业许可。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;目前K8S于2018年3月份成功从孵化阶段毕业成为首个CNCF毕业的项目。&lt;/p&gt;
-
-&lt;h3 id=&quot;k8s的基本架构&quot;&gt;K8s的基本架构&lt;/h3&gt;
-
-&lt;p&gt;K8s从资源管理角度，将最小的容器调度单元抽象为一个pod；一个pod可能包含一个或者多个容器应用；这些应用总是按照预先制定的部署、扩展规则被同时部署和调度，
-运行在一个共享的包括存储、网络、计算等共享资源的上下文环境中。从概念上来说，一个pod可以认为是一个逻辑的机器，在这台逻辑机器上，多个容器应用程序从部署的角度
-紧密地耦合在一起。从传统的非云计算环境或者基于虚拟机的环境来看，一个pod等同于一个物理机或者虚拟机。&lt;/p&gt;
-
-&lt;p&gt;从最广泛的实现支持角度看，可以认为一个pod包含了多个docker实例，它们会共享同一个内核的命名空间，进程cgroups，以及其它一些Linux内核所支持的资源隔离策略。
-他们也会共享相同的ip地址空间和端口，可以通过localhost互相访问彼此，并可以使用传统的UNIX IPC设施。而多个pod之间的应用程序在没有经过特殊配置的情况下则不能访问彼此，
-他们往往需要通过pod暴露的地址和端口尽快互操作。&lt;/p&gt;
-
-&lt;p&gt;K8s通过APIServer来获取用户的容器配置信息并通过这些信息来管理用户的容器；通常情况下应用程序需要提供一个YAML配置文件来声明具体的细节信息，
-用户可以通过将对应的状态修改通过API的方式发送给APIServer来完成容器状态的变更和维护，包括诸如需要运行的程序工作负载，对应应用程序的容器镜像信息，
-需要分配的网络和磁盘资源信息等等。背后的APIServer其实仅仅是一个网关，K8s内部的实现上使用了etcd来提供高可用和负载均衡，
-大部分情况下用户只需要看到这个逻辑的API网关即可。&lt;/p&gt;
-
-&lt;p&gt;另外一个配合管理容器的组件是Controller，它负责完成对应的集群的控制，使期望的容器最终达到预先设定的运行或者终止状态。默认情况下，
-K8s的controller进程是&lt;code class=&quot;highlighter-rouge&quot;&gt;kube-controller-manager&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;cloud-controller-manager&lt;/code&gt;，它也允许高级用户自定义自己的controller。
-Controller的基本逻辑可以简化为如下的循环&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;当前集群的状态是多少？假定为X&lt;/li&gt;
-  &lt;li&gt;期望的目标集群的状态是什么，假定是Y&lt;/li&gt;
-  &lt;li&gt;如果两者相等，则什么也不做。否则 &lt;code class=&quot;highlighter-rouge&quot;&gt;X!=Y&lt;/code&gt;那么执行内部的调动认为比如启动新的容器或者终止容器或者扩展容器实例的个数等；然后继续回到第一步。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;K8s也提供了一个叫&lt;code class=&quot;highlighter-rouge&quot;&gt;kubectl&lt;/code&gt;的命令行工具来简化API调用的操作，用户也可以使用自己定义的客户端来直接操作这些REST API，或者使用K8s官方支持的客户端来管理容器应用。&lt;/p&gt;
-
-&lt;h2 id=&quot;prometheus&quot;&gt;Prometheus&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt;是一个服务于微服务生态系统的开源基础组件，它的核心功能是提供对微服务实例的运行时监控和参数触发告警。
-它的核心数据模型构建于一个基于时间序列的多维数据模型之上；每一项数据除了所关联的时间戳之外，另外包含了参数名（关注的监控参数）和一系列Key-Value对的关联参数。
-用户可以根据自己的业务模型需要，定义自己的标签，这样当多个微服务产生大量的参数信息的时候，用户可以根据预先定义好的这些标签过滤自己感兴趣的参数随时间变化的情况；
-方便对微服务系统的运行状况进行实时监控、诊断和分析。&lt;/p&gt;
-
-&lt;h3 id=&quot;四种参数信息&quot;&gt;四种参数信息&lt;/h3&gt;
-&lt;p&gt;Prometheus提供了四种类型的参数信息供客户端使用&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;计数(Counter)信息，往往用来表述单调增加的基于正整数的统计信息，譬如对应的请求被处理了多少次、完成的任务个数、发生错误的数量等。&lt;/li&gt;
-  &lt;li&gt;纯计量(Gauge)信息，可能增加也可能减小的数值信息，譬如微服务中正在运行的gorountine数量，当前CPU使用率等。&lt;/li&gt;
-  &lt;li&gt;直方图(Histogram)信息，往往用于基于固定时间段的统计抽样信息，譬如5分钟内处理的响应个数随时间变化的直方图统计等；每一个时间段的信息往往是累加的。&lt;/li&gt;
-  &lt;li&gt;概要(Summary)信息，和上面的直方图有些类似，所不同的是它还提供了所有观测值的总和，以及给定时间窗口内可配置的百分比统计信息，譬如给定参数的90%统计值，99%范围内的统计值等。
-该类型信息在统计某些性能参数的时候特别有用。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;实例信息和查询&quot;&gt;实例信息和查询&lt;/h3&gt;
-&lt;p&gt;当Prometheus抓取同一个微服务的多个运行实例的时候（逻辑上是一个微服务，通过一个负载均衡器分摊运行期负载），它会自动为抓取到的数据分配2个标签：&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Job名字，用户配置的抓取给定服务的一个名字，譬如设置为微服务的名字&lt;/li&gt;
-  &lt;li&gt;实例信息，截取URL中的&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;host&amp;gt;:&amp;lt;port&amp;gt;&lt;/code&gt;信息，方便识别是哪个实例上报的参数
-同时它还可以提供额外的参数信息，如给定的抓取Job是否正常运行，抓取的持续时间，参数被重新打标签的时候还剩余的未抓取的采样时间，目标服务提供的参数的总个数等。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Prometheus提供了强大的参数查询和可视化功能，用户可以在它自身的仪表盘上输入查询表达式，生成实时更新的参数采样信息监控图标，方便地知道服务的运行情况，
-比如CPU使用情况，API请求的负载情况等信息。用户可以选择将自己定义的查询以rules的方式添加到Prometheus的配置文件中，让它自动生成自定义的参数信息。&lt;/p&gt;
-
-&lt;h3 id=&quot;自动告警管理&quot;&gt;自动告警管理&lt;/h3&gt;
-&lt;p&gt;依据配置的规则自动向特定的目标放发送报警是Prometheus提供的又一个重要的功能。该功能由两个部分协作完成&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;报警规则(Alerting rules) 允许用户指定基于查询表达式的告警触发条件，当给定条件满足的时候，Prometheus会自动向AlertManager发送告警&lt;/li&gt;
-  &lt;li&gt;告警管理器(Alert Manager) 接收来自Prometheus服务器的告警通知，完成诸如去重复、分组、路由到集成的第三方工具的功能；
-用户可以配置邮件客户端，在线服务群或者其它在线运维渠道。同时它也可以提供抑制告警的功能。
-告警管理器不是默认Prometheus的部分，而是作为一个单独的服务存在。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;告警管理器提供的管理功能包括如下几种&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;分组功能将接收到的多个本质上相似的通知信息转换成一个告警，减少噪音；这在大的系统中多个微服务实例同时出错的情况下格外有用；
-比如当发生网络分隔故障的时候，被隔离的微服务集群如果有数百个实例在同时运行，依据配置它们将发送大量的数据库无法访问的告警信息，
-进而出现上百个不同的微服务发送的数据库无法访问的告警通知；用户在这种情况下可能仅仅想看到是哪一个服务受到影响而不是该服务的多少个实例受到影响。
-分组功能则在不丢失原有通知的情况下，提供一个单独的告警通知用户数据库访问出了故障。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;告警抑制功能可以在某些告警已经出发的情况下，自动过滤掉另外一些次生的告警。&lt;/li&gt;
-  &lt;li&gt;静默告警功能提供一种直接的告警静默功能；基于预先配置的匹配规则（正则表达式等），当接收到的告警满足给定的规则时，该告警则完全不可见。&lt;/li&gt;
-  &lt;li&gt;高可用方面，它支持用户通过配置将多个AlertManager配置为一个网格；关键之处是官方不建议用户将AlertManager配置在一个负载均衡器的背后，
-而是将其列表直接暴露给Prometheus服务。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;部署和集成扩展&quot;&gt;部署和集成扩展&lt;/h3&gt;
-&lt;p&gt;Prometheus本身是用Go语言写成并静态编译和打包，因而其部署非常简单；生成的包也比较小巧紧凑，docker镜像只有20MB左右。
-它的这些参数信息用自己定制的格式同时存放在内存和磁盘中；本身的扩展可以使用其他已有的数据存储扩展方式。
-微服务作为客户端可以使用它提供的REST API向Prometheus报告数据；官方提供了超过十种编程语言的客户端，方便微服务侧根据自己的需求选择。&lt;/p&gt;
-
-&lt;h2 id=&quot;grpc&quot;&gt;gRPC&lt;/h2&gt;
-
-&lt;p&gt;gRPC正在慢慢成为微服务领域除了REST API之外的一个新的服务间接口语言。和REST不同的是，它基于传统的RPC模型而非资源抽象模型，更适合于符合显示命令语义的场景；
-其依托于Protobuf和HTTP/2协议的高效的协议编码和双向通信机制对很多追求高性能的微服务应用而言有巨大的吸引力。
-传统的基于REST API通信的应用要实现双向的通信往往不得不借助间接的双向REST调用或者引入消息队列并不得不处理复杂的应用程序逻辑，
-而gRPC不但省去了不必要的HTTP协议头开销，而且支持服务端在一条底层连接上同时向服务使用方（客户端）推送请求，可以极大地提高传输效率降低通信延迟。&lt;/p&gt;
-
-&lt;p&gt;很多流行的开源项目都加入了支持gRPC接口的行列，甚至一些微服务基础设施内部就是用gRPC进行通信的；
-具体的细节可以参看&lt;a href=&quot;//post/2018/02/10/http2-and-grpc/&quot;&gt;前面这篇文章&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;其它一些热门的项目&quot;&gt;其它一些热门的项目&lt;/h3&gt;
-&lt;p&gt;还有一些处于孵化期的项目，相当一部分都和云计算的基础设施平台有关，譬如用于服务网格的边车代理服务乃至提供无服务器架构平台的FaaS、BaaS设施等。
-这里仅侧重看一下容器生态相关的一些项目，虽然基于Docker技术的容器应用已经在大部分环境中被顺利部署，但是为了避免所谓的vendor lockin、降低迁移成本，
-还是有一些开源项目致力于标准化这些容器生态关键的接口和规范，防止被某个特定的平台提供商所锁定。&lt;/p&gt;
-
-&lt;h3 id=&quot;containerd&quot;&gt;Containerd&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://containerd.io/&quot;&gt;Containerd&lt;/a&gt;是一个开源社区提供的工业标准的容器运行时服务，它的设计目标是简单、鲁棒又可移植。
-作为一个容器运行时管理工具，它可以在容器的宿主机环境中完成容器生命周期的完整管理，包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;容器镜像的转移和存储管理&lt;/li&gt;
-  &lt;li&gt;容器的运行和状态监控&lt;/li&gt;
-  &lt;li&gt;底层网络资源和存储资源的叠加和控制&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;作为一个后台运行管理服务，它的目标就不是被普通服务开发者直接使用的，而是被设计为潜入到一个更大的系统中去。
-Containerd的架构设计上选择了暴露一个基于gRPC的API接口，该接口工作与本地的UNIX Socket上而不是TCP/IP网络因为它工作的对象是一个单机环境；
-该API仅仅提供比较底层的功能，更高层的服务可以基于此进行扩展和进一步封装。它也提供了一个用于调试的CLI接口，并使用基于OCI规范的runC来运行容器。&lt;/p&gt;
-
-&lt;p&gt;Containerd本身来自于成熟的Docker Engine项目的一部分，基于Docker本身成熟的生态环境，它可以提供更开放并同时具有时间检验的成熟的功能特性。
-较新的Docker 17.12版本也已经将原有的私有实现提供为基于Containerd的后台实现。
-目前Docker仅仅使用Containerd完成容器运行和进程管理的功能；其它大部分诸如网络、分发、存储管理的功能依然是Docker Engine自己的私有实现。&lt;/p&gt;
-
-&lt;p&gt;长期来说Containerd打算重构更多的Docker Engine代码并将合适的处理逻辑剥离出来，
-贡献给开源社区，并同时重写Docker Engine自己的基于开源Containerd的实现，其未来目标如下
-&lt;img src=&quot;https://containerd.io/images/chart-d.png&quot; alt=&quot;dockerd_future_arch&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;rkt&quot;&gt;rkt&lt;/h3&gt;
-
-&lt;p&gt;rkt是CoreOS提供的一个功能上和Docker有些类似而架构完全不同的、原生支持pod概念的容器管理工具。
-rkt除了支持docker镜像之外，还支持&lt;a href=&quot;https://github.com/appc/spec&quot;&gt;AppC规范&lt;/a&gt;定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;App Container Image&lt;/code&gt;，它的设计目标侧重于以下一些要素&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;pod-native&lt;/code&gt;将Pod作为基本的执行单元，自动将其他资源链接在一个执行环境中&lt;/li&gt;
-  &lt;li&gt;安全，默认提供对SELinux的支持，并可以将应用程序容器运行在&lt;a href=&quot;https://github.com/rkt/rkt/blob/master/Documentation/running-kvm-stage1.md&quot;&gt;硬件隔离的虚拟环境&lt;/a&gt;中&lt;/li&gt;
-  &lt;li&gt;可组合，提供对已有的初始化系统的原生支持，支持包括systemd、upstart等初始化服务的集成，支持和K8s的集成&lt;/li&gt;
-  &lt;li&gt;支持开放标准AppC和CNI规范，可以运行docker和ACI镜像&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;rkt的进程模型以及和Docker的比较见下图
-&lt;img src=&quot;https://coreos.com/rkt/docs/latest/rkt-vs-docker-process-model.png&quot; alt=&quot;rkt_docker_process_model&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;服务网格项目&quot;&gt;服务网格项目&lt;/h3&gt;
-
-&lt;p&gt;目前Linkerd和Envoy都处于孵化状态，二者本身也是服务网格领域的佼佼者；更多细节可以参考之前的
-&lt;a href=&quot;//post/2018/01/20/api-gw-to-servicemesh/&quot;&gt;这篇服务网格的文章&lt;/a&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;opentracing&quot;&gt;OpenTracing&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://opentracing.io/documentation/&quot;&gt;OpenTracing&lt;/a&gt;是一个开源的服务于微服务应用架构的服务跟踪应用。它本身期望解决的是，
-多个微服务实例在运行时服务运行状态跟踪、诊断及故障分析困难的问题。这在传统的单体应用情况下根本不是问题，而微服务的高度分布式、自适应的扩展性给跟踪带来了额外的困难。&lt;/p&gt;
-
-&lt;p&gt;同领域的一些跟踪系统还有Zipkin、Dapper等项目可以完成类似的任务，OpenTracing的独特之处是它提供提供商中立的API，有效地减小Vendor-Lock的风险。
-它已经提供了对9种主流编程语言的支持，并支持诸如gRPC、Flask、django、MOTAN等知名开源框架。&lt;/p&gt;
-
-&lt;h2 id=&quot;引用资料&quot;&gt;引用资料&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;https://landscape.cncf.io/&quot;&gt;CNCF landscape&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.cncf.io/projects/graduation-criteria/&quot;&gt;CNCF graduation criteria&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://containerd.io/&quot;&gt;Containerd&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="cloud" /><category term="microservice" /><category term="cncf" /><summary type="html">云原生应用试图从思想层面对我们编写和发布软件的方式来一次深刻的革命；这一设想其实是基于目前的大部分云计算平台上运行的应用都是从传统的非云平台环境上移植过来的。</summary></entry></feed>
+&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="microservice" /><category term="standardization" /><summary type="html">微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定； 然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。 其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展； 微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了， 走的人多了，必然有些更容易走的”直路”显现出来。</summary></entry></feed>

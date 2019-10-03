@@ -1,0 +1,1111 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>微服务开发：C++语言是否真的不适用？ - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着云原生架构　的逐渐火热而日益呈现星火燎原之势。抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否该用C++语言或者是否能用C++语言呢？">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="微服务开发：C++语言是否真的不适用？">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">
+
+
+
+  <meta property="og:description" content="微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着云原生架构　的逐渐火热而日益呈现星火燎原之势。抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否该用C++语言或者是否能用C++语言呢？">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="微服务开发：C++语言是否真的不适用？">
+  <meta name="twitter:description" content="微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着云原生架构　的逐渐火热而日益呈现星火燎原之势。抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否该用C++语言或者是否能用C++语言呢？">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2019-10-01T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(15)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(23)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(14)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(27)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(45)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(20)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(24)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(3)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="微服务开发：C++语言是否真的不适用？">
+    <meta itemprop="description" content="微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着云原生架构　的逐渐火热而日益呈现星火燎原之势。抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否该用C++语言或者是否能用C++语言呢？">
+    <meta itemprop="datePublished" content="October 01, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">微服务开发：C++语言是否真的不适用？
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+
+
+本文有 6356 字，大约需要 15 分钟可以读完, 创建于 2019-10-01
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着
+<a href="/ /post/2018/04/26/cloud-native/">云原生架构</a>　的逐渐火热而日益呈现星火燎原之势。
+抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否<strong>该用</strong>C++语言或者<strong>是否能用</strong>C++语言呢？</p>
+
+<!--more-->
+
+<p>乍一看似乎这个问题没有什么深入探讨的必要，因为<strong>微服务开发本身是编程语言中立</strong>的，它本身倡导的思想就是用尽量和具体语言无关的技术来解耦业务复杂性，通过智能的API来串联各个可以分布式开发的服务单元。
+然而一个不容忽视的现实是，很多谈论微服务开发的书籍或者博客文章<strong>要么不谈落地仅仅谈理论</strong>（也许这样的贩卖理论的书籍大多多乏味至极没有多少营养）；
+要么谈到的时候也是无外乎用流行的几个大的技术栈</p>
+<ul>
+  <li>Java 生态圈的基于JVM的技术，使用Spring Boot/Spring Cloud等一些<strong>现成的服务</strong>，或者稍微时髦一些的会用到Scala或者Kotlin来实现新潮的<strong>函数式编程乃至流计算技巧</strong>或者<strong>事件驱动</strong>机制</li>
+  <li>新生代的Golang技术，这个在<strong>特别强调Cloud的部署环境中</strong>讨论的格外多一些，因为Golang语言在很多云计算的基础设施项目中有极大的应用</li>
+  <li>还有一些则用流行的NodeJs技术栈来举例，这方面多多少少<strong>得益于NPM这一强大的第三方包管理工具</strong>所支持起来的庞大的开源软件分发管理系统</li>
+</ul>
+
+<p>看起来并没有多少人谈论用C++语言来实现微服务；然后是否是因为C++就不适合来实施微服务？
+回答这个问题其实并不难，只要从简单的微服务架构的实现要求来看一下就清楚明了了。</p>
+
+<h2 id="微服务实现的技术要求">微服务实现的技术要求</h2>
+
+<p>微服务架构的软件系统的最基本思想其实就是<strong>分治和解耦</strong>；其它的技术需求都可以认为是因此而衍生出来用于解决它所带来的具体问题的。</p>
+
+<p>因为系统被拆分为多个松耦合的粒度较小的服务，并且服务之间需要能够松耦合，因此每个拆分的服务需要提供和其它服务的通信来协作完成端到端的业务场景。
+这样的业务交互是通过某些广泛可用的上层<strong>应用程序编程接口</strong>来完成的；目前来说这样的接口定义有两种</p>
+<ol>
+  <li>基于HTTP协议的REST风格API，本身是基于存在了二十年以上的HTTP协议来实现的</li>
+  <li>基于Google Protobuf编码的GRPC远程过程调用协议,该协议相对较新，由Google提出</li>
+</ol>
+
+<h3 id="rest-api">REST API</h3>
+<p>基于REST风格的API其实要求服务提供方需要按照资源化的风格封装它对外曝露的接口，每一个接口都需要作用域某个资源之上，并且针对该资源提供创建、读取、修改、删除等操作。
+这些操作方法通过<strong>遵循既有的HTTP协议的方法动词</strong>来表达，而实际资源的<strong>内容则通过HTTP消息体</strong>来传递和交换。</p>
+
+<p>实际的资源内容的定义和校验则<strong>依托现有的JSON或者XML容器来封装</strong>；API的请求和相应中可以依据需要来提供或者返回具体资源负载；这些资源的定义本身用OpenAPI来定义，客户端和服务端都可以根据这一独立于代码实现的API定义规范来解析和处理。</p>
+
+<p>当然在比较高级的基于HATEOS的用法中，实际消息中封装的资源可能会按照媒体内容互相关联的方式来组织，
+使得客户端可以无需在代码中写死资源的URI，而是通过一次请求关联资源并根据返回的链接来动态发现的方式来降低服务之间的耦合。</p>
+
+<p>HTTP协议的实现自然是和语言无关的技术，而JSON的封装对具有几十年历史积淀的C++语言来说也完全不是问题。
+至于OpenAPI规范的定义更加是和语言无关的技术。</p>
+
+<h3 id="grpc">GRPC</h3>
+<p>GRPC是相对比较新一点的服务之间的API调用接口实现方式；详细的探讨可以参考<a href="/ /post/2018/04/26/cloud-native/">这篇文字</a>。
+从上层架构上来看，GRPC的设计思路可能更加<strong>契合传统的程序员的思路</strong>，它的直接思路其实就是要求各个服务之间通过远程过程调用的方式来实现相互交互。</p>
+
+<p>GRPC和传统的基于方法调用的RCP所不同的地方在于它<strong>在传统的请求／响应模型之上还提供了客户端和服务端之间的全双工的数据流推送</strong>，因而它需要和HTTP/2在一起才能配合完好。
+在这种接口范式下，服务提供者需要按照Proto Buffer的语法规范定义自己的服务声明定义文件，然后该文件会被protoc编译器检查解析并生成样板代码。</p>
+
+<p>基于GRPC技术实现的服务<strong>需要根据上述的服务样板代码来二次开发，扩展实现自己的业务逻辑</strong>；客户端则可以响应的使用生成的客户端样板代码来发起远程调用请求。</p>
+
+<h3 id="这些技术本身有强烈的语言偏爱吗">这些技术本身有强烈的语言偏爱吗？</h3>
+
+<p>基于这些讨论，单纯看微服务落地实现的技术栈要求，它并<strong>没有特意对编程语言提出很硬的约束</strong>，即理论上任何能够完成中等复杂度任务的编程语言都可以来实现微服务。
+无论是REST/JSON还是GRPC/ProtoBuffer，它们本身都具有多语言支持的能力，尤其是GRPC自带的代码生成工具有个很微妙的限制就是<strong>不同的编程语言的支持能力是不同的，但是C++语言是功能最完善的</strong>之一。</p>
+
+<p>显然我们可以在需要的情况下，豪不犹豫地选用C++语言来实现微服务，只要我们弄清楚了我们确实需要使用C++语言来实现微服务。</p>
+
+<h2 id="什么时候需要使用c来实现">什么时候需要使用C++来实现</h2>
+<p>回答这样的问题并没有一个放之四海而皆准的经验，因为微服务架构的其中一个关键要素就是需要考虑到具体的开发团队的因素，以及业务领域问题的具体需求。
+很多时候这样的决策和选择需要不少深思熟虑和权衡才能找到最适合自己情况的那个选项。</p>
+
+<h3 id="业务场景需求">业务场景需求</h3>
+<p>从业务场景需求的角度来说，可能<strong>性能需求以及扩展性需求</strong>是需要被着重考虑的。对于CPU密集型的微服务来说，选用一个以性能见长的编程语言可能是一个明智的选择，
+这方面正是C++语言比较擅长的地方，也许只有Rust语言可以与之比肩，但是C++长期的历史积淀和成熟稳定的特性短期之内Rust还无法匹及。</p>
+
+<h3 id="开发团队技能">开发团队技能</h3>
+<p>从开发团队的方面来考虑，则必须要认识到<strong>C++语言对成员的编程水平总体上还是要求比较高</strong>，尽管现代的C++语言标准一直在努力尝试往简化语言门槛的方向迈进。
+如果既有的团队有很好的C/C++语言背景和丰富的系统编程知识，使用C++语言来做微服务是很自然的选择。
+反之期望一个没有什么C/C++背景的团队来临时抱佛脚开发C++为主要语言的微服务很容易给项目的按序推进带来巨大的挑战。</p>
+
+<h2 id="技术和工具">技术和工具</h2>
+
+<p>假设这些因素我们都以及考虑周详，具体到实现上，是否就万事大吉可以马上撸起袖子开工写代码了呢？
+<strong>不幸的是事情并没有那么简单</strong>，稍微详细看一下这些技术栈就清楚了。
+下面假设我们决定采用随处可见的流行的REST API + JSON的方式来实现微服务。</p>
+
+<h3 id="rest框架">REST框架</h3>
+<p>如前所述，REST技术栈本质上是基于HTTP协议之上的一些二次发挥；而选择C++实现的时候第一个现实的因素是<strong>C++标准库里面并没有提供HTTP协议的实现</strong>，
+这也是C++生态系统目前比较大的一个问题：标准库里面的东西实在是太少了，这里面一个很大的原因应该是能放到标准库里面的东西必须要经过委员会的仔细审查，加上过去近四十年的各种技术积累和包袱，加入新的库总要面临重口难调的窘境。
+甚至于在Reddit上还有这么帖子就是在探讨<a href="https://www.reddit.com/r/cpp/comments/7ghn75/defactoindustry_standard_restful_serverlibraryapi/">是否有一个事实标准的REST框架实现</a>。</p>
+
+<h4 id="boostbeast">Boost.Beast</h4>
+<p>如果是将标准稍微放开一些，或者可以访问比较新的boost库，那么<a href="https://www.boost.org/doc/libs/1_71_0/libs/beast/doc/html/index.html">Beast</a> 可以算一个比较冒险的选择，因为它也是在1.66版本才被加入进去。
+要是你所在的公司或者组织由其它方面的考虑停留在了一个比较老的版本的Boost上，那么引入这么一个库就显得比较麻烦。</p>
+
+<p>Beast的主要特点如下</p>
+<ul>
+  <li>保持了header only的方式，最小化编译和链接依赖；副作用就是冗长模板元编译开销</li>
+  <li>采用Boost.asio的<strong>异步网络编程</strong>模型和协程来实现高性能和高并发，熟悉这些库的话上手会比较容易</li>
+  <li>库本身提供的<strong>抽象层次比较高</strong>，实际上手可能需要写比较多的代码，或者需要二次封装</li>
+  <li><strong>文档并不是很完备</strong>，也许需要一些时间才能更加成熟</li>
+</ul>
+
+<h4 id="rest-sdk">REST SDK</h4>
+<p>微软平台上的C++程序员可能会更偏爱微软出品的<a href="https://github.com/microsoft/cpprestsdk">开源在GitHub上的REST SDK</a>，同样的它也采用了异步编程模型。</p>
+
+<p>虽然是一个微软官方提供的开源库，它本身还是可以在多个平台上运行的，并且提供了流行Linux环境的二级制发布包，如果没有交叉编译的需求，可以直接下载安装。</p>
+
+<h4 id="pistache-framework">Pistache Framework</h4>
+<p>这是一个功能相当完善并且性能也很出色的REST框架，它本身的特色是<strong>能够和swagger的代码生成工具无缝结合</strong>，可以用open API的声明来生成模型代码，极大简化了用户的编码负担。</p>
+
+<p>Pistache使用epoll机制来完成高性能的传输层，并提供了<strong>流式的API给用户使用</strong>，用户可以在REST方法回调中使用异步API将内容写入流，就像操作一个标准输入输出流那样方便。</p>
+
+<p>但是由于这个<strong>epoll机制和核心的部分耦合比较紧密</strong>，并且没有很好的办法来用epoll来模拟IOCP机制，因此如果需要在Windows上（甚至符合POSIX的Cygwin环境也是一样）使用该库则会碰上<strong>跨平台可移植性的难题</strong>。</p>
+
+<h4 id="性能评估">性能评估</h4>
+<p>C++程序的一个很大的关注点就是性能，
+<a href="https://blog.binaryspaceship.com/2017/cpp-rest-api-frameworks-benchmark/">这篇博文</a>
+提供了一个性能评估数据，总体而言<strong>Pistache的性能明显占据上风</strong>。
+可惜这个对比的报告时间有些老，好在代码是开源的，拉取三个仓库自己的最新版本在本地虚拟机上跑一下，可以得到如下的结果：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>框架</th>
+      <th>98%请求完成的时间(ms)</th>
+      <th>每秒处理的请求数</th>
+      <th>示例代码的行数</th>
+      <th>Github星标</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>cpprestsdk/default</td>
+      <td>107</td>
+      <td>12.23</td>
+      <td>47</td>
+      <td>4478</td>
+    </tr>
+    <tr>
+      <td>cpprestsdk/RapidJSON</td>
+      <td>85</td>
+      <td>14.28</td>
+      <td>46</td>
+      <td>4478</td>
+    </tr>
+    <tr>
+      <td>restbed</td>
+      <td>41</td>
+      <td>32.54</td>
+      <td>39</td>
+      <td>1078</td>
+    </tr>
+    <tr>
+      <td>pistache</td>
+      <td>9</td>
+      <td>182.85</td>
+      <td>33</td>
+      <td>1683</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>此外，因为最新的库代码以及发生了变更，因此原来repo中的<strong>示例代码或者CMakeLists.txt文件需要做些微调</strong>，基本上按照对应项目的最新文档适度改动即可。我自己的虚拟机只分了２个CPU核，所以绝对数据比原作者的要低。</p>
+
+<p>稍微有点奇怪的是，从项目的流行度上来看，来自微软的开源项目cpprestsdk表现的更加热门一些，无论是星标数还是fork数字都非常亮眼；
+但是这里的性能比较却是三者之中最差的一个，是否和微软的自带明星光环有关有待进一步详查。</p>
+
+<h3 id="json解析和处理">JSON解析和处理</h3>
+
+<p>传统的REST微服务实现用JSON来编码消息中的资源内容，因而<strong>JSON解析能力</strong>是实现REST服务的一个重要的考量因素。
+从使用的角度来看，JSON表述的文档结构常常可以简单地看作是一颗树结构，里面的具体节点元素只要符合
+<a href="https://datatracker.ietf.org/doc/rfc8259/">RFC8259规范要求</a>(更老一点的版本是<a href="https://datatracker.ietf.org/doc/rfc4627/">RFC4627</a>)
+就可以了。</p>
+
+<p>本质上来说，JSON的解析就是文本文件的解析，其语法规则比较简单直接，自己手工实现一个满足自己使用场景的也并非难事。
+只是考虑到性能、跨平台、编码、代码大小等各种各样的要素带来的复杂性，直接<strong>复用已有的库</strong>是更为明智的做法。</p>
+
+<h3 id="开源实现比较">开源实现比较</h3>
+
+<p>JSON处理的开源库非常多，目前就职于腾讯的<a href="https://datatracker.ietf.org/doc/rfc4627/">MiloYip</a>做了一个很好的比较总结，开源在<a href="https://github.com/miloyip/nativejson-benchmark">GitHub</a>这里，
+我们直接拿来参考就是了。</p>
+
+<h4 id="比较对象">比较对象</h4>
+<p>作者从如下几个方面考察了常见的数十个JSON库</p>
+<ul>
+  <li><strong>功能兼容性</strong>，包括校验，双精度数字的解析处理，字符串解析和压缩JSON文档的序列化反序列化；这在<strong>跨语言的微服务场景下尤为重要</strong>，因为客户端可能是用另外一种完全不同的编程语言开发的</li>
+  <li>各种操作下的性能表现，包含
+    <ul>
+      <li>运行时间（越短越好）</li>
+      <li>处理过程中的内存占用</li>
+      <li><strong>最大内存</strong>占用情况（越少越好）</li>
+      <li>内存分配器调用次数多少，经验表明很多时候CPU的耗费时间有很大一部分花费在不必要的内存分配和释放操作上。<strong>更少的内存分配操作往往意味着更好的性能</strong>，即便这个结论并不是绝对准确，否则也不会有各种各样优化小对象分配的内存分配器出现了</li>
+    </ul>
+  </li>
+  <li>可执行文件的大小 - 在微服务的容器化场景下，这也是一个很重要的要素。</li>
+</ul>
+
+<h4 id="比较结果">比较结果</h4>
+<p>各项的比较结果如下 - 因为<strong>JSONCPP是一个很早就出现并且得到广泛使用的JSON解析库</strong>，这里将其单独放在一列做比较。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>比较项目</th>
+      <th>最高得分项目</th>
+      <th>第二名得分项目</th>
+      <th>第三名得分项目</th>
+      <th>jsoncpp</th>
+      <th>说明　</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>功能兼容性　　</td>
+      <td>taocpp/json(100%)</td>
+      <td>RapidJSON_pre(100%)</td>
+      <td>configuru(99%)</td>
+      <td>85%</td>
+      <td>前三基本达到<strong>100%</strong></td>
+    </tr>
+    <tr>
+      <td>解析时间</td>
+      <td>RapidJSON(8ms)</td>
+      <td>gason(8ms)</td>
+      <td>json4c(9ms)</td>
+      <td>166ms</td>
+      <td>前三和后面的相差巨大</td>
+    </tr>
+    <tr>
+      <td>内存占用　　　</td>
+      <td>RapidJSON(4.8MB)</td>
+      <td>strdup(6.6MB)</td>
+      <td>Jvar(7.56MB)</td>
+      <td>24.56MB</td>
+      <td>Qt的数据不准确</td>
+    </tr>
+    <tr>
+      <td>序列化时间　　</td>
+      <td>RapidJSON(11ms)</td>
+      <td>ujson(25ms)</td>
+      <td>jzon(28ms)</td>
+      <td>94ms</td>
+      <td>部分纯C实现表现较好</td>
+    </tr>
+    <tr>
+      <td>美化输出　　　</td>
+      <td>RapidJSON(17ms)</td>
+      <td>ujson(29ms)</td>
+      <td>SchederdomJson(29ms)</td>
+      <td>NA</td>
+      <td>jsoncpp未提供　　　　</td>
+    </tr>
+    <tr>
+      <td>可执行文件大小</td>
+      <td>pjson(15KB)</td>
+      <td>Qt(18KB)</td>
+      <td>RESTSDK(18.3KB)</td>
+      <td>243KB</td>
+      <td>C实现毫无疑问靠前，RapidJSON31KB</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>从结果来看，RapidJSON在多项比较重都名列前茅，称之为<strong>性能最好功能最全的JSON库</strong>也毫不为过。</p>
+
+<p>需要额外指出的是</p>
+<ol>
+  <li>RapidJSON提供了几个版本变种，默认情况下的版本提供了93%的标准兼容性，却能够在其它性能比拼中拔得头筹。
+提供完全兼容的版本<strong>性能稍差一些或者毫无损失但在各项比较中依然排在前列</strong>，这里没有列出它的其它变种的排名情况而是将它们合并在一起展示。</li>
+  <li><strong>C版本的实现并没有特别明显的优势</strong>，除了最后一向需要考虑可执行文件大小的场合，而C++的实现并没有落后太多。
+这一项里RapidJSON的得分在C++里面居于第六，绝对大小依然远好于jsoncpp</li>
+  <li>某些REST库自身也提供了自己的JSON实现，比如来自<strong>微软的REST SDK，只是本身并不特别出彩</strong>，在上述的REST比较重以及可以看到一些端倪，这里不赘述</li>
+  <li>RapidJSON的最初实现也来自于这个benchmark的作者，只是两三年前以及被重命名<strong>成为腾讯开源库的一部分</strong>；目前在GitHub上有超过8000个👍</li>
+</ol>
+
+<h2 id="总结">总结</h2>
+<p>基于微服务的架构设计正在席卷几乎所有的软件开发组织，形形色色的开源的REST和JSON框架使得能否用C++来开发微服务这一简单问题的<strong>答案不言自明</strong>。
+在业务场景需要、团队技术能力匹配的情况下，使用上述的这些工具和框架库实现高性能的微服务不应该有任何障碍。
+腾讯开源的FastJSON给了我们不少的惊喜，这也许是国内的大技术公司给开源社区的巨大贡献。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/23/cpp-20-modules-concepts-coroutine/">C++20 - 下一个大版本功能确定</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/22/regular-expression-optimize/">C++正则表达式比Python慢？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/02/23/domain-driven-development-impl/">实现领域驱动设计</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/01/26/clean-architecture-notes/">读Uncle Bob新书-Clean Archtiecture</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/01/19/rust-2018-edition-overview/">Rust2018版：生产力提升的开始</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2018/12/30/modern-cpp-reflection/">现代C++语言是否走上了歧路?</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/tools" class="page__taxonomy-item" rel="tag">tools</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-01T00:00:00+08:00">October 01, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=微服务开发：C++语言是否真的不适用？ https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="microservice-with-cpp">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
