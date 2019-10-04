@@ -349,6 +349,10 @@
 <lastmod>2019-06-23T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/</loc>
+<lastmod>2019-08-24T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/</loc>
 <lastmod>2019-10-01T00:00:00+08:00</lastmod>
 </url>
@@ -562,6 +566,12 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/tags/regex/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/kubernetes/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/container/</loc>
 </url>
 <url>
 <loc>https://skyscribe.github.io/categories/cpp/</loc>
