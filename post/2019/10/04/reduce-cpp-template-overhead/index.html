@@ -1,0 +1,1391 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>reduce-cpp-template-overhead - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言Zero Cost Abstraction的目标；可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="reduce-cpp-template-overhead">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">
+
+
+
+  <meta property="og:description" content="新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言Zero Cost Abstraction的目标；可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="reduce-cpp-template-overhead">
+  <meta name="twitter:description" content="新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言Zero Cost Abstraction的目标；可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2019-10-04T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(23)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(14)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(27)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(46)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(25)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(3)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="reduce-cpp-template-overhead">
+    <meta itemprop="description" content="新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言Zero Cost Abstraction的目标；可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。">
+    <meta itemprop="datePublished" content="October 04, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">reduce-cpp-template-overhead
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+
+
+本文有 17980 字，大约需要 44 分钟可以读完, 创建于 2019-10-04
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言<strong>Zero Cost Abstraction</strong>的目标；
+可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。</p>
+
+<p>之前除了一些社区的抱怨
+(参考这篇<a href="//post/2018/12/30/modern-cpp-reflection/">反思文章</a>)
+很少有正面解决问题的实用思路和技术出现。
+好在最近结束的<a href="https://cppcon.org/cppcon-2019-program/">CppCon2019大会</a>上，来自Google的软件工程师做了一个非常有趣而实用的如何优化编译器运行时模板元编程负担的演讲(原文链接在<a href="https://cppcon.org/cppcon-2019-program/">这里</a>)，</p>
+
+<!--more-->
+
+<p>由于官方<a href="https://github.com/CppCon/CppCon2019">放出来的材料</a>里没有包含这一部分内容，本文不妨从作者的演讲视频中截取其要点详细探讨一番。</p>
+
+<h2 id="基本背景知识">基本背景知识</h2>
+<p>模板元编程使现代C++编程的一个<strong>至关重要却又极其烧脑</strong>的子领域，传统的C++程序员要么使从C背景转换而来，
+要么是出于<strong>用不着就不需要了解”的心理有意绕开</strong>这部分，导致讲述一些稍微复杂的技巧的时候，他们往往由于缺乏这些基本的背景知识而无法理解，进而给C++语言扣上了一个太复杂的帽子。</p>
+
+<p>然而这些知识是理解优化编译技巧的基础，试想如果不能大概理解编译器如何来解析和生成模板元的代码，又怎么能发掘出有效的方法来做针对性的优化；
+毕竟<strong>知其所以然是深入理解一项技术的基本要求</strong>，没有理解其机制而盲目地抱怨设计的差是很无知的。</p>
+
+<p>Jorg从一个基本的例子来展开他的介绍的。</p>
+
+<h3 id="如何用模板元方法计算斐波那契数">如何用模板元方法计算斐波那契数</h3>
+<p>斐波那契数列是映射自然增长规律的一个数学序列，用传统的非泛型方法求取它非常容易，用最简单的数学定义和现代的C++语言可以写为如下的形式</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">constexpr</span> <span class="kt">int</span> <span class="nf">fib</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">?</span> <span class="n">n</span> <span class="o">:</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="c1">// fib(30) = 832040
+</span></code></pre></div></div>
+<p>当然这个写法是编程入门教材中介绍的做法，虽然形式简单却不使用，因为输入的数字稍微大一点，就需要很长时间的运算才能计算出来，并且由于递归深度的限制，很容易遇到栈溢出的难题。
+从编译器优化的角度来看，<strong>非尾递归形式的递归函数调用需要和递归深度相同的嵌套的栈帧</strong>，很容易触碰到栈空间的上限而引起程序崩溃。</p>
+
+<p>引用模板元泛型的写法，我们可以用一个结构体加运行期计算的变量的方式来表达同样的算法</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">n</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">Fib</span><span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="n">Fib</span><span class="o">&lt;</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">+</span> <span class="n">Fib</span><span class="o">&lt;</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">///This is unfortunately required for C++11/14
+</span><span class="k">template</span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span> <span class="n">Fib</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;&gt;</span>
+<span class="k">struct</span> <span class="n">Fib</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span>  <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>这个例子描述了基本的泛型算法特点</p>
+<ul>
+  <li>将<strong>动态运算的变量当作模板参数</strong>，并且递归地调用自身，但是模板参数的数值在缩小</li>
+  <li>对于模板中止条件，采用<strong>模板特化的方法，具体实现之</strong>，这里即对0/1直接返回</li>
+</ul>
+
+<h4 id="c17新语法">C++17新语法</h4>
+
+<p>上述的写法虽然不失清晰，但是却略微显臃肿，相比于最初的非模板写法，需要引入三个不同的结构体定义。
+C++17新引入的<code class="highlighter-rouge">constexpr if</code>语法则轻而易举地去掉了这些臃肿，我们可以通过在if表达式中加入<code class="highlighter-rouge">constexr</code>修饰来<strong>告知编译器对应的部分可以在模板元编程实例化的时候来参与</strong>判断</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">n</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">FibConstexprIf</span><span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="p">[](){</span>
+        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">FibConstexprIf</span><span class="o">&lt;</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">+</span> <span class="n">FibConstexprIf</span><span class="o">&lt;</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">n</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}();</span>
+<span class="p">};</span>
+
+<span class="c1">//FibConstexprIf&lt;30&gt;::value
+</span></code></pre></div></div>
+<p>附带的一个小技巧是，通过显示地调用传入的lambda表达式来给一个static变量赋值，因为函数内部的操作全部是经由编译器运算完成的，最终效果是编译器可以无缝地将在编译器计算完成。</p>
+
+<p>这个简单的算法逻辑上的操作大概是这样</p>
+<ol>
+  <li>根据传入的参数30,生成FibConstexprIf&lt;30&gt;::value</li>
+  <li>生成一个临时的lambda函数，并即使调用，在函数执行中
+    <ol>
+      <li>比较模板参数值，如果小于等于１，则直接返回自身</li>
+      <li>否则需要实例化两个新的结构(<strong>递归步骤</strong>),这里对应是FibConstexprIf&lt;29&gt;和FibConstexprIf&lt;28&gt;</li>
+      <li>计算求得两者的value变量，然后相加返回</li>
+    </ol>
+  </li>
+</ol>
+
+<p>显然这个算法也是递归的，这里我们需要关心模板元函数生成过程中，第二步里面的第二小步是否会生成<strong>结构体定义</strong>，引起目标可执行文件的膨胀。
+我们可以用如下的命令来检验之</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nm &lt;exe&gt; | c++filt | <span class="nb">grep </span>FibConstexprIf
+</code></pre></div></div>
+<p>好在编译器比较完美地去掉了所有这些中间符号，给我们返回了实际计算得到的值。看起来因为这里的结构体是空结构并且只有一个静态变量声明，编译器可以<strong>自动记忆对应的中间计算的模板元值</strong>，
+并且可以<strong>自动地内联lambda函数的定义</strong>。</p>
+
+<h4 id="另一种形式的探索">另一种形式的探索</h4>
+<p>如果我们想采用一种更直接的方式，直接让<code class="highlighter-rouge">constexpr if</code>这一特性应用到参数上，而不适用结构体的静态成员这一常见的模板元技巧而直接采用普通函数定义，可以得到如下的形式</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">N</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="k">auto</span> <span class="n">fib</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">N</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">fib</span><span class="o">&lt;</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">+</span> <span class="n">fib</span><span class="o">&lt;</span><span class="n">N</span><span class="o">-</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">N</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">/// fib&lt;30&gt;()
+</span></code></pre></div></div>
+<p>这一形式能工作的原因是我们用递归调用自身的方式加上 <code class="highlighter-rouge">constexpr if</code>判断来终止递归，思路和最初的运行期动态计算的思路一样。
+可惜当我们再次检查生成的目标可执行文件的时候，发现<strong>可执行文件明显增大</strong>了不少。</p>
+
+<p><code class="highlighter-rouge">nm</code>命令查看生成的符号表（当然需要用c++filt做demangle处理）会找到如下的定义</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0000000000000d15 W auto fib&lt;30&gt;<span class="o">()</span>
+0000000000000cf7 W auto fib&lt;29&gt;<span class="o">()</span>
+0000000000000cd9 W auto fib&lt;28&gt;<span class="o">()</span>
+0000000000000cbb W auto fib&lt;27&gt;<span class="o">()</span>
+0000000000000c9d W auto fib&lt;26&gt;<span class="o">()</span>
+0000000000000c7f W auto fib&lt;25&gt;<span class="o">()</span>
+0000000000000c61 W auto fib&lt;24&gt;<span class="o">()</span>
+0000000000000c43 W auto fib&lt;23&gt;<span class="o">()</span>
+0000000000000c25 W auto fib&lt;22&gt;<span class="o">()</span>
+0000000000000c07 W auto fib&lt;21&gt;<span class="o">()</span>
+0000000000000be9 W auto fib&lt;20&gt;<span class="o">()</span>
+0000000000000bcb W auto fib&lt;19&gt;<span class="o">()</span>
+0000000000000bad W auto fib&lt;18&gt;<span class="o">()</span>
+0000000000000b8f W auto fib&lt;17&gt;<span class="o">()</span>
+0000000000000b71 W auto fib&lt;16&gt;<span class="o">()</span>
+0000000000000b53 W auto fib&lt;15&gt;<span class="o">()</span>
+0000000000000b35 W auto fib&lt;14&gt;<span class="o">()</span>
+0000000000000b17 W auto fib&lt;13&gt;<span class="o">()</span>
+0000000000000af9 W auto fib&lt;12&gt;<span class="o">()</span>
+0000000000000adb W auto fib&lt;11&gt;<span class="o">()</span>
+0000000000000abd W auto fib&lt;10&gt;<span class="o">()</span>
+0000000000000a9f W auto fib&lt;9&gt;<span class="o">()</span>
+0000000000000a81 W auto fib&lt;8&gt;<span class="o">()</span>
+0000000000000a63 W auto fib&lt;7&gt;<span class="o">()</span>
+0000000000000a45 W auto fib&lt;6&gt;<span class="o">()</span>
+0000000000000a27 W auto fib&lt;5&gt;<span class="o">()</span>
+0000000000000a09 W auto fib&lt;4&gt;<span class="o">()</span>
+00000000000009eb W auto fib&lt;3&gt;<span class="o">()</span>
+00000000000009cd W auto fib&lt;2&gt;<span class="o">()</span>
+00000000000009c2 W auto fib&lt;0&gt;<span class="o">()</span>
+00000000000009b7 W auto fib&lt;1&gt;<span class="o">()</span>
+</code></pre></div></div>
+
+<p>显然这种用法虽然看起来更加自然，<strong>编译器却无法自动地替我们内联这些中间状态</strong>的函数。</p>
+
+<h3 id="新的语言特性和函数签名">新的语言特性和函数签名</h3>
+<p>从签名的例子输出我们发现这些中间函数的签名中间多了个<code class="highlighter-rouge">auto</code>,从编译器实现角度来看，C++11扩展用法中的<code class="highlighter-rouge">auto</code>关键字要求编译器自己做类型推到，而目前的<strong>编译器实现却毫不犹豫地将auto加到了函数签名前面</strong>。</p>
+
+<p>更一般地看，如下的代码</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="n">string</span> <span class="n">add1</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span> <span class="n">b</span><span class="p">){</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">add2</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">,</span> <span class="n">T</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">add1</span><span class="p">(</span><span class="n">string</span><span class="p">{</span><span class="s">"hello}, string{"</span><span class="n">world</span><span class="err">\</span><span class="n">n</span><span class="s">"});</span><span class="err">
+</span><span class="s">    cout &lt;&lt; add2(string{"</span><span class="n">hello</span><span class="s">"}, string{"</span><span class="n">world</span><span class="err">\</span><span class="n">n</span><span class="s">"});</span><span class="err">
+</span><span class="s">}</span><span class="err">
+</span></code></pre></div></div>
+<p>两个地方编译器为我们实例化的函数签名如下(可以很方便地从nm命令输出来检查)</p>
+<ol>
+  <li><code class="highlighter-rouge">std::string add1(std::string, std::string)</code></li>
+  <li><code class="highlighter-rouge">auto add2&lt;std::string&gt;(std::string, std::string)</code></li>
+</ol>
+
+<h4 id="sfinae和enable_if_t">SFINAE和<code class="highlighter-rouge">enable_if_t</code></h4>
+<p>模板元编程会大量地使用SFINAE技巧来利用编译器选择函数重载过程中遇到不匹配的重载会跳过寻找下一个可能的匹配这一事实，来提供多个针对不同类型的模板实现，提供编译器的分支运算。
+较新的C++标准则显示地引入了<code class="highlighter-rouge">enable_if</code>和<code class="highlighter-rouge">enable_if_t</code>来简化编写SFINAE函数的负担。</p>
+
+<p>可惜的时候<strong>这种简化并不是特别彻底，起码函数的签名中还是带上了</strong>这些痕迹；考虑如下的例子:</p>
+
+<p>对于一个普通的模板元函数处理</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="n">T</span> <span class="n">process</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"processing "</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>如果我们想加上类型判断，让对应的处理仅仅使用于非空类型，那么可以写作</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;!</span><span class="n">std</span><span class="o">::</span><span class="n">is_same</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="kt">void</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">processIf</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"processingif "</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>更进一步地，我们可以使用<code class="highlighter-rouge">static_assert</code>技巧来做类型检查，但是不显示地使用SFINAE,则可以写作</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">processIf1</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="o">!</span><span class="n">std</span><span class="o">::</span><span class="n">is_same</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="kt">void</span><span class="o">&gt;::</span><span class="n">value</span><span class="p">);</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"processWithAssert..."</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>如果我们触发上面的函数调用，然后就可以检查编译器实际生成的函数签名</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int main(){
+    auto test = string{"test"};
+    process(test);
+
+    processIf(test);
+    processIf1(test);
+}
+</code></pre></div></div>
+<p>对于同样的逻辑实现，编译器生成的函数调用分别是</p>
+<ol>
+  <li>第一个版本对应的为<code class="highlighter-rouge">std::string process(std::string)</code></li>
+  <li>第二个版本对应的签名比较复杂，是<code class="highlighter-rouge">std::enable_if&lt;!std::is_same&lt;std::string, void&gt;::value, std::string&gt;::type processIf(std::string)</code></li>
+  <li>第三个版本和第一个版本相比，仅仅加上了<code class="highlighter-rouge">auto</code>的前缀和类型信息：<code class="highlighter-rouge">auto processIf&lt;std::string&gt;(std::string)</code></li>
+</ol>
+
+<p>因此我们应该多利用新的语言特性，优先选择用<code class="highlighter-rouge">static_assert</code>做类型判断，而逐渐减少使用<code class="highlighter-rouge">std::enable_if_t</code>类型。</p>
+
+<p>##　优化一个自定义的Tuple类
+<code class="highlighter-rouge">Tuple</code>数据结构是一个非常简单的数据聚集结构，很多讲述现代模板元编程的书籍文章都会拿它做举例；在现代的编程语言中也非常常见；
+其概念非常容易理解，一个<code class="highlighter-rouge">tuple</code>就是一堆有序的类型各异的数据的集合，我们可以用索引的方式访问某个元素，对它进行赋值。</p>
+
+<p>因为元素的类型可能各不相同，因此这是一个非常适合用模板元编程技巧来表达的数据结构的例子，当然另外一个因素是我们想看下怎么样能简化它的开销，包括运行时的开销和<strong>编译器生成目标代码时候中间数据表达</strong>的开销。</p>
+
+<p>###　最简单的形式
+实现tuple最简单的形式是采用递归包含的方式来定义，代码如下</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">MyTuple</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">MyTuple</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">T</span> <span class="n">first</span><span class="p">;</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span>  <span class="n">N</span><span class="p">,</span> <span class="k">typename</span> <span class="n">TN</span><span class="o">&gt;</span> <span class="k">friend</span> <span class="k">class</span> <span class="nc">Getter</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">MyTuple</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">More</span><span class="p">...</span><span class="o">&gt;</span><span class="p">{</span>
+    <span class="n">T</span> <span class="n">first</span><span class="p">;</span>
+    <span class="n">MyTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;</span> <span class="n">more</span><span class="p">;</span>
+
+    <span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span>  <span class="n">N</span><span class="p">,</span> <span class="k">typename</span> <span class="n">TN</span><span class="o">&gt;</span> <span class="k">friend</span> <span class="k">class</span> <span class="nc">Getter</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>这里我们先定义了一个泛化版本的携带任意多个参数的类型，然后再逐步特化</p>
+<ol>
+  <li>带有一个类型参数的类，仅仅只有一个唯一的元素，并明明为<code class="highlighter-rouge">first</code></li>
+  <li>携带两个以上参数的类型，它除了第一一个<code class="highlighter-rouge">firt</code>外，还内嵌了一个剩余元素的数据成员，注意两者的类型不相同</li>
+  <li>我们需要一个辅助的类来访问特定的元素实现<code class="highlighter-rouge">get</code>操作</li>
+</ol>
+
+<h4 id="getter实现"><code class="highlighter-rouge">Getter</code>实现</h4>
+<p>使用类似的技巧，辅助类可以实现如下</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">N</span><span class="p">,</span> <span class="k">typename</span> <span class="n">TN</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">Getter</span><span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T0</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">MoreN</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="n">TN</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">MyTuple</span><span class="o">&lt;</span><span class="n">T0</span><span class="p">,</span> <span class="n">MoreN</span><span class="p">...</span><span class="o">&gt;&amp;</span><span class="n">tup</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Getter</span><span class="o">&lt;</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">TN</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">(</span><span class="n">tup</span><span class="p">.</span><span class="n">more</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T0</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">Getter</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span> <span class="n">T0</span><span class="o">&gt;</span><span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="n">T0</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">MyTuple</span><span class="o">&lt;</span><span class="n">Ts</span><span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">tup</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">tup</span><span class="p">.</span><span class="n">first</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>它的两个模板参数第一个制定对应的下表索引，第二个则对应该下标对应的元素类型。
+泛化的实现采用<strong>递归的思路依次减小下标，并访问内嵌的第二个元素对应的tuple</strong>,而特化的版本则对应为下标是0的情况，此时访问的其实是最后一个元素，直接返回对应的<code class="highlighter-rouge">first</code>元素即可。</p>
+
+<h5 id="实现一个get函数">实现一个<code class="highlighter-rouge">get</code>函数</h5>
+<p>显然上面的<code class="highlighter-rouge">Getter</code>类很不好用，因为我们需要每次都指定下标对应的类型，这样非常容易出错并且出错的时候，编译器给出的<strong>诊断信息明显不足或者不好理解</strong>。
+为了摆脱这种窘境，我们可以采用稍微有点作弊的手法定义一个封装函数</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">N</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">get</span><span class="p">(</span><span class="n">MyTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">tup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple_element</span><span class="o">&lt;</span><span class="n">N</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;&gt;::</span><span class="n">type</span><span class="o">&amp;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">Getter</span><span class="o">&lt;</span><span class="n">N</span><span class="p">,</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple_element</span><span class="o">&lt;</span><span class="n">N</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;&gt;::</span><span class="n">type</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">(</span><span class="n">tup</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这里之所以说有点作弊，是因为我们无法得知具体的参数N对应的是什么类型，不得已我们必须借助标准库提供的类型定义，用<code class="highlighter-rouge">std::tuple_element&lt;N, std::tuple&lt;More...&gt;&gt;::type</code>的方式来计算返回值的类型。</p>
+
+<h4 id="代码生成的开销">代码生成的开销</h4>
+<p>当然这个不是我们最终的目标，因为稍微检查一下就会发现这个实现会引起编译器代码生成上的急剧膨胀。
+假设我们有如下的例子</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">testMyTuple</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">T</span> <span class="o">=</span> <span class="n">MyTuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">char</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="n">T</span> <span class="n">tup</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="s">"somthing"</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="sc">'c'</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="mf">12.34</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>检查符号表会发现，简单的<code class="highlighter-rouge">get&lt;4&gt;</code>操作会引起连锁反应，生成如下的符号</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  cmake-build-debug git:<span class="o">(</span>master<span class="o">)</span> ✗ nm myTuple|c++filt | <span class="nb">grep </span>MyTuple | <span class="nb">grep </span>Getter | cut <span class="nt">-d</span> <span class="s2">" "</span> <span class="nt">-f2-100</span> | sed <span class="s2">"s/__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;/string/gp"</span> | uniq    
+W bool&amp; Getter&lt;0ul, bool&gt;::get&lt;bool, std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;bool, std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W char&amp; Getter&lt;0ul, char&gt;::get&lt;char, double&gt;<span class="o">(</span>MyTuple&lt;char, double&gt;&amp;<span class="o">)</span>
+W double&amp; Getter&lt;0ul, double&gt;::get&lt;double&gt;<span class="o">(</span>MyTuple&lt;double&gt;&amp;<span class="o">)</span>
+W int&amp; Getter&lt;0ul, int&gt;::get&lt;int, char, double&gt;<span class="o">(</span>MyTuple&lt;int, char, double&gt;&amp;<span class="o">)</span>
+W std::string&amp; Getter&lt;0ul, std::string <span class="o">&gt;</span>::get&lt;std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W char&amp; Getter&lt;1ul, char&gt;::get&lt;int, char, double&gt;<span class="o">(</span>MyTuple&lt;int, char, double&gt;&amp;<span class="o">)</span>
+W double&amp; Getter&lt;1ul, double&gt;::get&lt;char, double&gt;<span class="o">(</span>MyTuple&lt;char, double&gt;&amp;<span class="o">)</span>
+W int&amp; Getter&lt;1ul, int&gt;::get&lt;std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W std::string&amp; Getter&lt;1ul, std::string <span class="o">&gt;</span>::get&lt;bool, std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;bool, std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W char&amp; Getter&lt;2ul, char&gt;::get&lt;std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W double&amp; Getter&lt;2ul, double&gt;::get&lt;int, char, double&gt;<span class="o">(</span>MyTuple&lt;int, char, double&gt;&amp;<span class="o">)</span>
+W int&amp; Getter&lt;2ul, int&gt;::get&lt;bool, std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;bool, std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W char&amp; Getter&lt;3ul, char&gt;::get&lt;bool, std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;bool, std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W double&amp; Getter&lt;3ul, double&gt;::get&lt;std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;std::string, int, char, double&gt;&amp;<span class="o">)</span>
+W double&amp; Getter&lt;4ul, double&gt;::get&lt;bool, std::string, int, char, double&gt;<span class="o">(</span>MyTuple&lt;bool, std::string, int, char, double&gt;&amp;<span class="o">)</span>
+</code></pre></div></div>
+<p>显然这里单独是Getter函数就生成了15个之多，因为随着每次N的减小，新的Tuple总是会被生成。
+考虑到目标文件中留下的仅仅是唯一类型的函数定义，中间重复的计算并没有包含在内。
+对于每一个给定N个类型的Tuple，它同时<strong>还需要生成所有小于N的子Tuple类型内嵌于自身中</strong>，实际编译器生成的算法的<strong>时间复杂度其实是三次幂指数</strong>O(N^3)的。</p>
+
+<h3 id="采用继承的方式优化">采用继承的方式优化</h3>
+<p>一种简单的思路是采用继承的方法来优化这个定义，避免嵌套。这里我们定义一个用于被具体类型继承的基类如下；
+为防止其<code class="highlighter-rouge">get</code>函数被调用，我们将其声明为<code class="highlighter-rouge">=delete</code>:</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">NewTuple</span> <span class="p">{</span>
+    <span class="c1">//serves as a base type only
+</span>    <span class="nl">public:</span>
+        <span class="kt">void</span> <span class="n">get</span><span class="p">(...)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>这里的基类其实是一个空元素的Tuple，它本身其实并没有任何意义。</p>
+
+<h4 id="逐级继承">逐级继承</h4>
+<p>基于此，我们让每一个更复杂的Tuple类型从比它少了头部元素的一个维度更低的tuple上去继承。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">NewTuple</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">More</span><span class="p">...</span><span class="o">&gt;</span> <span class="o">:</span> <span class="n">NewTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">T</span> <span class="n">first</span><span class="p">;</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">using</span> <span class="n">NewTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">...(</span><span class="n">More</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">first</span><span class="p">;}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h5 id="get成员函数的实现"><code class="highlighter-rouge">get</code>成员函数的实现</h5>
+
+<p>为了实现<code class="highlighter-rouge">get</code>函数对不同的索引取调用不同的类型，我们需要根据索引值触发对应的类型定义。
+好在<code class="highlighter-rouge">std::integral_constant</code>类型提供了<strong>将任何一个类型的某个具体值转换成一个唯一的编译器可以识别的类型的能力</strong>，即</p>
+<ul>
+  <li><code class="highlighter-rouge">std::integral_constant&lt;size_t, 1&gt;</code>表述的是某个特殊的总是取值为1的编译器可识别的唯一类型</li>
+  <li><code class="highlighter-rouge">std::integral_constant&lt;size_t, 2&gt;</code>表述的是取值为2的唯一类型</li>
+  <li><code class="highlighter-rouge">std::integral_constant&lt;size_t, 3&gt;</code>表示的是另外一个类型，它和算数加法没有任何关联</li>
+</ul>
+
+<p>我们可以利用它将每个整数索引变换成一个具体的类型从而来书写<code class="highlighter-rouge">get</code>函数</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">using</span> <span class="n">NewTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">...(</span><span class="n">More</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">first</span><span class="p">;}</span>
+</code></pre></div></div>
+<p>它的定义依赖于下面的技巧</p>
+<ul>
+  <li>当目前的tuple具有N个元素的时候，其直接基类就有N-1个元素</li>
+  <li>当前类的<code class="highlighter-rouge">get(type&lt;N-1&gt; t)</code>返回的是<strong>当前tuple的头部</strong>元素，而<strong>比<code class="highlighter-rouge">N-1</code>更小的索引的<code class="highlighter-rouge">get</code>函数则由这些基类来提供</strong>的</li>
+  <li>而所有的基类的<code class="highlighter-rouge">get</code>函数具有不同的参数类型，并且都可以被子类所访问，因为他们都被声明为是<code class="highlighter-rouge">public</code>的</li>
+</ul>
+
+<p>这里的<code class="highlighter-rouge">use</code>声明引入了比当前类型少一个元素的直接基类的类型声明。</p>
+
+<h5 id="实现全局的get函数">实现全局的<code class="highlighter-rouge">get</code>函数</h5>
+<p>全局函数的实现可以依赖上面的具体类中的<code class="highlighter-rouge">get</code>函数的组合来实现：</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">N</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">NewTuple</span><span class="o">&lt;</span><span class="n">More</span><span class="p">...</span><span class="o">&gt;&amp;</span> <span class="n">tup</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">tup</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">...(</span><span class="n">More</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">N</span><span class="o">&gt;</span><span class="p">{});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>即对当前有M个元素的tuple取第N个元素，等价于访问继承体系中的<strong>参数类型的整数值为<code class="highlighter-rouge">M-1-N</code>的</strong>某个基类的成员函数的<code class="highlighter-rouge">get</code>的访问。
+这里起关键作用的是<code class="highlighter-rouge">std::integral_constant</code>模板。</p>
+
+<h4 id="代码膨胀开销">代码膨胀开销</h4>
+<p>考虑下面的例子</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">testNewTuple</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">T</span> <span class="o">=</span> <span class="n">NewTuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">char</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="n">T</span> <span class="n">tup</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="s">"somthing"</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="sc">'c'</span><span class="p">;</span>
+    <span class="n">get</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">=</span> <span class="mf">12.34</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>同样检查编译器的生成代码符号可以发现此时的<strong>算法简化为二次幂</strong>O(N^2)了，因为每一次初始化<code class="highlighter-rouge">get</code>操作我们仍然需要为它生成每一个基类的<code class="highlighter-rouge">get</code>函数访问。</p>
+
+<h4 id="再看继承手法">再看继承手法</h4>
+<p>表面上看这里的<strong>模板元定义采用了继承的语法</strong>，但是这里的继承功能其实是<strong>用的组合而非传统面向对象设计中的继承</strong>技巧，因为没有任何的虚函数，也没有任何的方法重载。
+唯一有一点可能迷人眼的其实是<code class="highlighter-rouge">get</code>的声明语法，它其实是<strong>通过数值转类型的方法，将每个基类中都定义了一个独一无二的函数</strong>，然后交给编译器来根据不同的值选择对应的定义。</p>
+
+<p>如果我们去掉这个继承的障眼法，将层层递进的继承结构给拍平变成完全只有一级的继承，是否可以进一步优化减小编译器的负担呢？</p>
+
+<h3 id="采用多继承和浅继承">采用多继承和浅继承</h3>
+<p>采用这种新的思路，我们需要将单个元素的tuple重新定义为一个叶子节点，然后让复杂的多元素类从它继承而来；即如下的定义</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">/// Using leaf
+</span><span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">Index</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">MyTupleLeaf</span><span class="p">{</span>
+    <span class="n">T</span> <span class="n">value_</span><span class="p">;</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+    <span class="k">constexpr</span> <span class="n">MyTupleLeaf</span><span class="p">(</span><span class="n">More</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">arg</span><span class="p">)</span> <span class="o">:</span> <span class="n">value_</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">More</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arg</span><span class="p">)...)</span> <span class="p">{}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>进而我们就可以采用多继承的思路，这里需要使用可变模板的省略技巧</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">NNTuple</span><span class="o">:</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">...</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">More</span><span class="o">&gt;</span>
+    <span class="n">explict</span> <span class="k">constexpr</span> <span class="n">NNTuple</span><span class="p">(</span><span class="n">More</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="o">:</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">More</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...)</span> <span class="p">{}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="o">&gt;</span>
+    <span class="k">auto</span> <span class="o">&amp;</span><span class="n">get</span><span class="p">()</span> <span class="p">{</span><span class="cm">/*??? */</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>然后我们发现这里的get没有办法定义，因为基类里面并没有提供这一方法，而由于多继承的关系，我们也不知道如何派发到哪一个叶子节点。</p>
+
+<p>显然我们需要将<strong>索引信息传递到具体的基类里面，然后再在组合类里面静态派发</strong>。</p>
+
+<h4 id="添加索引">添加索引</h4>
+<p>可以通过在叶子节点里面添加一个索引类型</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">Index</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">MyTupleLeaf</span><span class="p">{</span>
+    <span class="n">T</span> <span class="n">value_</span><span class="p">;</span>
+    <span class="n">T</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">Index</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="n">value_</span><span class="p">;}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p>这里具体叶子节点实现的get方法其实是返回自己的值定义。</p>
+
+<p>而子类的具体实现需要合理的派发这个索引：</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">NNTuple</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">...</span> <span class="n">Indexes</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">NNTuple</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">index_sequence</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">...</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;:</span> <span class="k">public</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">,</span> <span class="n">Ts</span><span class="o">&gt;</span><span class="p">...</span>  <span class="p">{</span>
+    <span class="c1">// This is C++17 only
+</span>    <span class="k">using</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">,</span> <span class="n">Ts</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">...;</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">I</span><span class="o">&gt;</span><span class="p">{});</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>和上面的深度继承类似，我们只需要将所有基类的<code class="highlighter-rouge">get</code>函数引入进来，然后用同样的<code class="highlighter-rouge">integral_constant</code>方法来做类型派发就可以了。</p>
+
+<h4 id="封装索引">封装索引</h4>
+<p>上面的类型定义中带了两个参数，第一个参数是一个索引列表，第二个参数则是实际的类型列表，两者需要保持对应关系(务必要保证<strong>个数和位置是逐一对应的，否则会产生恐怖的编译错误</strong>)，使用起来有些不方便，比如我们需要用如下的代码来操作</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">NNTuple</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">index_sequence</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">char</span><span class="p">,</span> <span class="kt">short</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">tuple</span><span class="p">;</span>
+<span class="kt">short</span><span class="o">&amp;</span> <span class="n">first</span> <span class="o">=</span> <span class="n">tuple</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>好在我们可以封装它为一个新的类型</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">NNTuple</span> <span class="o">:</span> <span class="n">NNTuple</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">make_index_sequence</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">T</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">T</span><span class="p">...</span><span class="o">&gt;</span> <span class="p">{};</span>
+</code></pre></div></div>
+
+<p>这样我们就可以简化实际的代码书写</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">NNTuple</span><span class="o">&lt;</span><span class="kt">char</span><span class="p">,</span> <span class="kt">short</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">tuple</span><span class="p">;</span>
+<span class="kt">short</span><span class="o">&amp;</span> <span class="n">first</span> <span class="o">=</span> <span class="n">tuple</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span>
+</code></pre></div></div>
+
+<h4 id="进一步简化来分离声明和实现">进一步简化来分离声明和实现</h4>
+<p>我们可以使用using声明来分离这些index相关的实现细节，然后重命名具体的实现类</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">NNTupleImpl</span><span class="p">;</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">...</span> <span class="n">Indexes</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">NNTupleImpl</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">index_sequence</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">...</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;:</span> <span class="k">public</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">,</span> <span class="n">Ts</span><span class="o">&gt;</span><span class="p">...</span>  <span class="p">{</span>
+    <span class="k">using</span> <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">Indexes</span><span class="p">,</span> <span class="n">Ts</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">...;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">I</span><span class="o">&gt;</span><span class="p">{});</span>
+    <span class="p">};</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">using</span> <span class="n">NNTuple</span> <span class="o">=</span> <span class="n">NNTupleImpl</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">make_index_sequence</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Ts</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+<p>由此使用者看到的Tuple声明就是一个只有目标类型接口序列的类，而具体的索引相关的操作就被隐藏了。</p>
+
+<h4 id="c14的考虑">C++14的考虑</h4>
+<p>上述的代码中用到了C++17才支持的语法，如果我们要考虑C++14的兼容，可以将<code class="highlighter-rouge">get</code>写作如下的形式</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">//C++14 version of get
+</span>    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="p">,</span> <span class="k">typename</span> <span class="n">FType</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get14</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">FType</span><span class="o">&gt;&amp;</span> <span class="n">leaf</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">leaf</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">I</span><span class="o">&gt;</span><span class="p">{});</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>甚至可以进一步来简化具体的类型，因为我们可以用传入参数的方法来自动推到之</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="p">,</span> <span class="k">typename</span> <span class="n">FType</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">getLeaf</span><span class="p">(</span><span class="n">MyTupleLeaf</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">FType</span><span class="o">&gt;*</span> <span class="n">leaf</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="o">*</span><span class="n">leaf</span><span class="p">;}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get14_1</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">auto</span><span class="o">&amp;</span> <span class="n">leaf</span> <span class="o">=</span> <span class="n">getLeaf</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">leaf</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">I</span><span class="o">&gt;</span><span class="p">{});</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p>因为this指针的类型是确定的，那么根据具体的索引值的不同，我们<strong>可以通过<code class="highlighter-rouge">auto</code>推到得到具体的叶子节点的类型</strong>，
+再调用get就显然去掉了对外暴露的<code class="highlighter-rouge">get14_1()</code>函数声明上的一个类型参数的依赖。</p>
+
+<h4 id="去掉子类中的get">去掉子类中的<code class="highlighter-rouge">get</code></h4>
+<p>我们甚至可以去掉叶子节点中的get定义，而直接返回<code class="highlighter-rouge">value_</code>，即简化为</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="n">MyTupleLeaf</span> <span class="p">{</span><span class="n">T</span> <span class="n">value_</span><span class="p">};</span>
+
+<span class="c1">//.... inside NNTupleImpl
+</span><span class="nl">public:</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="kt">size_t</span> <span class="n">I</span><span class="o">&gt;</span>
+    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">get</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">get_leaf</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="n">value_</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="代码生成情况">代码生成情况</h3>
+<p>对于第三个版本，假设我们由如下的代码</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="n">testNNTuple</span><span class="p">(){</span>
+    <span class="k">using</span> <span class="n">T</span> <span class="o">=</span> <span class="n">NNTuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">char</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="n">T</span> <span class="n">t</span><span class="p">;</span>
+    <span class="n">t</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">t</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=</span> <span class="s">"something"</span><span class="p">;</span>
+    <span class="n">t</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">t</span><span class="p">.</span><span class="n">get14</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">,</span> <span class="kt">char</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=</span> <span class="sc">'c'</span><span class="p">;</span>
+    <span class="n">t</span><span class="p">.</span><span class="n">get14_1</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=</span> <span class="mf">12.34</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>对应的符号表则如下</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  cmake-build-debug git:(master) ✗ nm myTuple|c++filt | grep NNTuple | cut -d " " -f2-100 | sed "s/__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;/string/gp" | uniq 
+T testNNTuple()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::get&lt;0ul&gt;()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::get&lt;1ul&gt;()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::get&lt;2ul&gt;()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::get14&lt;3ul, char&gt;()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::get14_1&lt;4ul&gt;()
+W auto&amp; NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::getLeaf&lt;4ul, double&gt;(MyTupleLeaf&lt;4ul, double&gt;*)
+W NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::NNTupleImpl()
+W NNTupleImpl&lt;std::integer_sequence&lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&gt;, bool, std::string, int, char, double&gt;::~NNTupleImpl()
+</code></pre></div></div>
+<p>显然对每一个索引，它仅仅生成了一个唯一的get函数，其<strong>复杂度终于降低到了最低</strong>的O(N)。</p>
+
+<h2 id="总结">总结</h2>
+<p>模板元和泛型编程是<strong>现代C++语言演进的一个重要方向</strong>，它用<strong>几乎为零的代价实现了高层的逻辑抽象</strong>，不幸的是程序员必须付出额外的编译时间较长的代价来达成这一目标，这不得不说是另外一种形式的权衡。
+Jorg通过他探索的技巧来降低编译时间的负担，我们可以借助这些技巧来有针对性地优化模板元代码，让编译器减少生成不必要的代码，从而在编译期也实现零成本抽象的目标。</p>
+
+<p>同时需要留意的是，这些例子中呈现的行为可能并不适用于所有的C++编译器，有些签名特征甚至是GCC/Clang的实现而MSVC编译器看起来有完全不同的行为。
+也许随着编译器的逐步完善和演化，我们会不再需要这些技巧；然而<strong>演练这些技巧对提高我们对静态语言编译期元编程的认识</strong>也有莫大的好处。</p>
+
+<p>Rust语言是另外一个秉承零成本抽象使命的静态编译语言，而今天它的泛型代码编译也承受着类似的痛苦和不便，只是不知道是否Rust社区有人发掘过类似的技巧来提升编译速度和减小模板文件体积?</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/01/microservice-with-cpp/">微服务开发：C++语言是否真的不适用？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/23/cpp-20-modules-concepts-coroutine/">C++20 - 下一个大版本功能确定</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/22/regular-expression-optimize/">C++正则表达式比Python慢？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/02/23/domain-driven-development-impl/">实现领域驱动设计</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/01/26/clean-architecture-notes/">读Uncle Bob新书-Clean Archtiecture</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/01/19/rust-2018-edition-overview/">Rust2018版：生产力提升的开始</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-04T00:00:00+08:00">October 04, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=reduce-cpp-template-overhead https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="reduce-cpp-template-overhead">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,4 +1,549 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-03T11:24:02+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">微服务开发：C++语言是否真的不适用？</title><link href="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" rel="alternate" type="text/html" title="微服务开发：C++语言是否真的不适用？" /><published>2019-10-01T00:00:00+08:00</published><updated>2019-10-01T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">&lt;p&gt;微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-04T11:29:45+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
+可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。&lt;/p&gt;
+
+&lt;p&gt;之前除了一些社区的抱怨
+(参考这篇&lt;a href=&quot;//post/2018/12/30/modern-cpp-reflection/&quot;&gt;反思文章&lt;/a&gt;)
+很少有正面解决问题的实用思路和技术出现。
+好在最近结束的&lt;a href=&quot;https://cppcon.org/cppcon-2019-program/&quot;&gt;CppCon2019大会&lt;/a&gt;上，来自Google的软件工程师做了一个非常有趣而实用的如何优化编译器运行时模板元编程负担的演讲(原文链接在&lt;a href=&quot;https://cppcon.org/cppcon-2019-program/&quot;&gt;这里&lt;/a&gt;)，&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;由于官方&lt;a href=&quot;https://github.com/CppCon/CppCon2019&quot;&gt;放出来的材料&lt;/a&gt;里没有包含这一部分内容，本文不妨从作者的演讲视频中截取其要点详细探讨一番。&lt;/p&gt;
+
+&lt;h2 id=&quot;基本背景知识&quot;&gt;基本背景知识&lt;/h2&gt;
+&lt;p&gt;模板元编程使现代C++编程的一个&lt;strong&gt;至关重要却又极其烧脑&lt;/strong&gt;的子领域，传统的C++程序员要么使从C背景转换而来，
+要么是出于&lt;strong&gt;用不着就不需要了解”的心理有意绕开&lt;/strong&gt;这部分，导致讲述一些稍微复杂的技巧的时候，他们往往由于缺乏这些基本的背景知识而无法理解，进而给C++语言扣上了一个太复杂的帽子。&lt;/p&gt;
+
+&lt;p&gt;然而这些知识是理解优化编译技巧的基础，试想如果不能大概理解编译器如何来解析和生成模板元的代码，又怎么能发掘出有效的方法来做针对性的优化；
+毕竟&lt;strong&gt;知其所以然是深入理解一项技术的基本要求&lt;/strong&gt;，没有理解其机制而盲目地抱怨设计的差是很无知的。&lt;/p&gt;
+
+&lt;p&gt;Jorg从一个基本的例子来展开他的介绍的。&lt;/p&gt;
+
+&lt;h3 id=&quot;如何用模板元方法计算斐波那契数&quot;&gt;如何用模板元方法计算斐波那契数&lt;/h3&gt;
+&lt;p&gt;斐波那契数列是映射自然增长规律的一个数学序列，用传统的非泛型方法求取它非常容易，用最简单的数学定义和现代的C++语言可以写为如下的形式&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// fib(30) = 832040
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;当然这个写法是编程入门教材中介绍的做法，虽然形式简单却不使用，因为输入的数字稍微大一点，就需要很长时间的运算才能计算出来，并且由于递归深度的限制，很容易遇到栈溢出的难题。
+从编译器优化的角度来看，&lt;strong&gt;非尾递归形式的递归函数调用需要和递归深度相同的嵌套的栈帧&lt;/strong&gt;，很容易触碰到栈空间的上限而引起程序崩溃。&lt;/p&gt;
+
+&lt;p&gt;引用模板元泛型的写法，我们可以用一个结构体加运行期计算的变量的方式来表达同样的算法&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;///This is unfortunately required for C++11/14
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这个例子描述了基本的泛型算法特点&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;将&lt;strong&gt;动态运算的变量当作模板参数&lt;/strong&gt;，并且递归地调用自身，但是模板参数的数值在缩小&lt;/li&gt;
+  &lt;li&gt;对于模板中止条件，采用&lt;strong&gt;模板特化的方法，具体实现之&lt;/strong&gt;，这里即对0/1直接返回&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;c17新语法&quot;&gt;C++17新语法&lt;/h4&gt;
+
+&lt;p&gt;上述的写法虽然不失清晰，但是却略微显臃肿，相比于最初的非模板写法，需要引入三个不同的结构体定义。
+C++17新引入的&lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr if&lt;/code&gt;语法则轻而易举地去掉了这些臃肿，我们可以通过在if表达式中加入&lt;code class=&quot;highlighter-rouge&quot;&gt;constexr&lt;/code&gt;修饰来&lt;strong&gt;告知编译器对应的部分可以在模板元编程实例化的时候来参与&lt;/strong&gt;判断&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FibConstexprIf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FibConstexprIf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FibConstexprIf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//FibConstexprIf&amp;lt;30&amp;gt;::value
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;附带的一个小技巧是，通过显示地调用传入的lambda表达式来给一个static变量赋值，因为函数内部的操作全部是经由编译器运算完成的，最终效果是编译器可以无缝地将在编译器计算完成。&lt;/p&gt;
+
+&lt;p&gt;这个简单的算法逻辑上的操作大概是这样&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;根据传入的参数30,生成FibConstexprIf&amp;lt;30&amp;gt;::value&lt;/li&gt;
+  &lt;li&gt;生成一个临时的lambda函数，并即使调用，在函数执行中
+    &lt;ol&gt;
+      &lt;li&gt;比较模板参数值，如果小于等于１，则直接返回自身&lt;/li&gt;
+      &lt;li&gt;否则需要实例化两个新的结构(&lt;strong&gt;递归步骤&lt;/strong&gt;),这里对应是FibConstexprIf&amp;lt;29&amp;gt;和FibConstexprIf&amp;lt;28&amp;gt;&lt;/li&gt;
+      &lt;li&gt;计算求得两者的value变量，然后相加返回&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;显然这个算法也是递归的，这里我们需要关心模板元函数生成过程中，第二步里面的第二小步是否会生成&lt;strong&gt;结构体定义&lt;/strong&gt;，引起目标可执行文件的膨胀。
+我们可以用如下的命令来检验之&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nm &amp;lt;exe&amp;gt; | c++filt | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;FibConstexprIf
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;好在编译器比较完美地去掉了所有这些中间符号，给我们返回了实际计算得到的值。看起来因为这里的结构体是空结构并且只有一个静态变量声明，编译器可以&lt;strong&gt;自动记忆对应的中间计算的模板元值&lt;/strong&gt;，
+并且可以&lt;strong&gt;自动地内联lambda函数的定义&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;另一种形式的探索&quot;&gt;另一种形式的探索&lt;/h4&gt;
+&lt;p&gt;如果我们想采用一种更直接的方式，直接让&lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr if&lt;/code&gt;这一特性应用到参数上，而不适用结构体的静态成员这一常见的模板元技巧而直接采用普通函数定义，可以得到如下的形式&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;/// fib&amp;lt;30&amp;gt;()
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这一形式能工作的原因是我们用递归调用自身的方式加上 &lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr if&lt;/code&gt;判断来终止递归，思路和最初的运行期动态计算的思路一样。
+可惜当我们再次检查生成的目标可执行文件的时候，发现&lt;strong&gt;可执行文件明显增大&lt;/strong&gt;了不少。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nm&lt;/code&gt;命令查看生成的符号表（当然需要用c++filt做demangle处理）会找到如下的定义&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0000000000000d15 W auto fib&amp;lt;30&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000cf7 W auto fib&amp;lt;29&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000cd9 W auto fib&amp;lt;28&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000cbb W auto fib&amp;lt;27&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c9d W auto fib&amp;lt;26&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c7f W auto fib&amp;lt;25&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c61 W auto fib&amp;lt;24&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c43 W auto fib&amp;lt;23&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c25 W auto fib&amp;lt;22&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000c07 W auto fib&amp;lt;21&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000be9 W auto fib&amp;lt;20&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000bcb W auto fib&amp;lt;19&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000bad W auto fib&amp;lt;18&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000b8f W auto fib&amp;lt;17&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000b71 W auto fib&amp;lt;16&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000b53 W auto fib&amp;lt;15&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000b35 W auto fib&amp;lt;14&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000b17 W auto fib&amp;lt;13&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000af9 W auto fib&amp;lt;12&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000adb W auto fib&amp;lt;11&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000abd W auto fib&amp;lt;10&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a9f W auto fib&amp;lt;9&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a81 W auto fib&amp;lt;8&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a63 W auto fib&amp;lt;7&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a45 W auto fib&amp;lt;6&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a27 W auto fib&amp;lt;5&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+0000000000000a09 W auto fib&amp;lt;4&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+00000000000009eb W auto fib&amp;lt;3&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+00000000000009cd W auto fib&amp;lt;2&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+00000000000009c2 W auto fib&amp;lt;0&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+00000000000009b7 W auto fib&amp;lt;1&amp;gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;显然这种用法虽然看起来更加自然，&lt;strong&gt;编译器却无法自动地替我们内联这些中间状态&lt;/strong&gt;的函数。&lt;/p&gt;
+
+&lt;h3 id=&quot;新的语言特性和函数签名&quot;&gt;新的语言特性和函数签名&lt;/h3&gt;
+&lt;p&gt;从签名的例子输出我们发现这些中间函数的签名中间多了个&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;,从编译器实现角度来看，C++11扩展用法中的&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;关键字要求编译器自己做类型推到，而目前的&lt;strong&gt;编译器实现却毫不犹豫地将auto加到了函数签名前面&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;更一般地看，如下的代码&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;add1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello}, string{&quot;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;world&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;});&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;    cout &amp;lt;&amp;lt; add2(string{&quot;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hello&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;}, string{&quot;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;world&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;});&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;两个地方编译器为我们实例化的函数签名如下(可以很方便地从nm命令输出来检查)&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::string add1(std::string, std::string)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;auto add2&amp;lt;std::string&amp;gt;(std::string, std::string)&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;sfinae和enable_if_t&quot;&gt;SFINAE和&lt;code class=&quot;highlighter-rouge&quot;&gt;enable_if_t&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;模板元编程会大量地使用SFINAE技巧来利用编译器选择函数重载过程中遇到不匹配的重载会跳过寻找下一个可能的匹配这一事实，来提供多个针对不同类型的模板实现，提供编译器的分支运算。
+较新的C++标准则显示地引入了&lt;code class=&quot;highlighter-rouge&quot;&gt;enable_if&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;enable_if_t&lt;/code&gt;来简化编写SFINAE函数的负担。&lt;/p&gt;
+
+&lt;p&gt;可惜的时候&lt;strong&gt;这种简化并不是特别彻底，起码函数的签名中还是带上了&lt;/strong&gt;这些痕迹；考虑如下的例子:&lt;/p&gt;
+
+&lt;p&gt;对于一个普通的模板元函数处理&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;processing &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;如果我们想加上类型判断，让对应的处理仅仅使用于非空类型，那么可以写作&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;enable_if_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is_same&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;processIf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;processingif &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;更进一步地，我们可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;static_assert&lt;/code&gt;技巧来做类型检查，但是不显示地使用SFINAE,则可以写作&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;processIf1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static_assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;is_same&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;processWithAssert...&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;如果我们触发上面的函数调用，然后就可以检查编译器实际生成的函数签名&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;int main(){
+    auto test = string{&quot;test&quot;};
+    process(test);
+
+    processIf(test);
+    processIf1(test);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;对于同样的逻辑实现，编译器生成的函数调用分别是&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;第一个版本对应的为&lt;code class=&quot;highlighter-rouge&quot;&gt;std::string process(std::string)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;第二个版本对应的签名比较复杂，是&lt;code class=&quot;highlighter-rouge&quot;&gt;std::enable_if&amp;lt;!std::is_same&amp;lt;std::string, void&amp;gt;::value, std::string&amp;gt;::type processIf(std::string)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;第三个版本和第一个版本相比，仅仅加上了&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;的前缀和类型信息：&lt;code class=&quot;highlighter-rouge&quot;&gt;auto processIf&amp;lt;std::string&amp;gt;(std::string)&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;因此我们应该多利用新的语言特性，优先选择用&lt;code class=&quot;highlighter-rouge&quot;&gt;static_assert&lt;/code&gt;做类型判断，而逐渐减少使用&lt;code class=&quot;highlighter-rouge&quot;&gt;std::enable_if_t&lt;/code&gt;类型。&lt;/p&gt;
+
+&lt;p&gt;##　优化一个自定义的Tuple类
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Tuple&lt;/code&gt;数据结构是一个非常简单的数据聚集结构，很多讲述现代模板元编程的书籍文章都会拿它做举例；在现代的编程语言中也非常常见；
+其概念非常容易理解，一个&lt;code class=&quot;highlighter-rouge&quot;&gt;tuple&lt;/code&gt;就是一堆有序的类型各异的数据的集合，我们可以用索引的方式访问某个元素，对它进行赋值。&lt;/p&gt;
+
+&lt;p&gt;因为元素的类型可能各不相同，因此这是一个非常适合用模板元编程技巧来表达的数据结构的例子，当然另外一个因素是我们想看下怎么样能简化它的开销，包括运行时的开销和&lt;strong&gt;编译器生成目标代码时候中间数据表达&lt;/strong&gt;的开销。&lt;/p&gt;
+
+&lt;p&gt;###　最简单的形式
+实现tuple最简单的形式是采用递归包含的方式来定义，代码如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;friend&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;more&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;friend&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里我们先定义了一个泛化版本的携带任意多个参数的类型，然后再逐步特化&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;带有一个类型参数的类，仅仅只有一个唯一的元素，并明明为&lt;code class=&quot;highlighter-rouge&quot;&gt;first&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;携带两个以上参数的类型，它除了第一一个&lt;code class=&quot;highlighter-rouge&quot;&gt;firt&lt;/code&gt;外，还内嵌了一个剩余元素的数据成员，注意两者的类型不相同&lt;/li&gt;
+  &lt;li&gt;我们需要一个辅助的类来访问特定的元素实现&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;操作&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;getter实现&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Getter&lt;/code&gt;实现&lt;/h4&gt;
+&lt;p&gt;使用类似的技巧，辅助类可以实现如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MoreN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MoreN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;more&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;它的两个模板参数第一个制定对应的下表索引，第二个则对应该下标对应的元素类型。
+泛化的实现采用&lt;strong&gt;递归的思路依次减小下标，并访问内嵌的第二个元素对应的tuple&lt;/strong&gt;,而特化的版本则对应为下标是0的情况，此时访问的其实是最后一个元素，直接返回对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;first&lt;/code&gt;元素即可。&lt;/p&gt;
+
+&lt;h5 id=&quot;实现一个get函数&quot;&gt;实现一个&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数&lt;/h5&gt;
+&lt;p&gt;显然上面的&lt;code class=&quot;highlighter-rouge&quot;&gt;Getter&lt;/code&gt;类很不好用，因为我们需要每次都指定下标对应的类型，这样非常容易出错并且出错的时候，编译器给出的&lt;strong&gt;诊断信息明显不足或者不好理解&lt;/strong&gt;。
+为了摆脱这种窘境，我们可以采用稍微有点作弊的手法定义一个封装函数&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple_element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Getter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple_element&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里之所以说有点作弊，是因为我们无法得知具体的参数N对应的是什么类型，不得已我们必须借助标准库提供的类型定义，用&lt;code class=&quot;highlighter-rouge&quot;&gt;std::tuple_element&amp;lt;N, std::tuple&amp;lt;More...&amp;gt;&amp;gt;::type&lt;/code&gt;的方式来计算返回值的类型。&lt;/p&gt;
+
+&lt;h4 id=&quot;代码生成的开销&quot;&gt;代码生成的开销&lt;/h4&gt;
+&lt;p&gt;当然这个不是我们最终的目标，因为稍微检查一下就会发现这个实现会引起编译器代码生成上的急剧膨胀。
+假设我们有如下的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;testMyTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;somthing&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'c'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;12.34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;检查符号表会发现，简单的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&amp;lt;4&amp;gt;&lt;/code&gt;操作会引起连锁反应，生成如下的符号&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  cmake-build-debug git:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;master&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ✗ nm myTuple|c++filt | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;MyTuple | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;Getter | cut &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot; &quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f2-100&lt;/span&gt; | sed &lt;span class=&quot;s2&quot;&gt;&quot;s/__cxx11::basic_string&amp;lt;char, std::char_traits&amp;lt;char&amp;gt;, std::allocator&amp;lt;char&amp;gt; &amp;gt;/string/gp&quot;&lt;/span&gt; | uniq    
+W bool&amp;amp; Getter&amp;lt;0ul, bool&amp;gt;::get&amp;lt;bool, std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;bool, std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W char&amp;amp; Getter&amp;lt;0ul, char&amp;gt;::get&amp;lt;char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W double&amp;amp; Getter&amp;lt;0ul, double&amp;gt;::get&amp;lt;double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W int&amp;amp; Getter&amp;lt;0ul, int&amp;gt;::get&amp;lt;int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W std::string&amp;amp; Getter&amp;lt;0ul, std::string &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;::get&amp;lt;std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W char&amp;amp; Getter&amp;lt;1ul, char&amp;gt;::get&amp;lt;int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W double&amp;amp; Getter&amp;lt;1ul, double&amp;gt;::get&amp;lt;char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W int&amp;amp; Getter&amp;lt;1ul, int&amp;gt;::get&amp;lt;std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W std::string&amp;amp; Getter&amp;lt;1ul, std::string &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;::get&amp;lt;bool, std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;bool, std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W char&amp;amp; Getter&amp;lt;2ul, char&amp;gt;::get&amp;lt;std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W double&amp;amp; Getter&amp;lt;2ul, double&amp;gt;::get&amp;lt;int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W int&amp;amp; Getter&amp;lt;2ul, int&amp;gt;::get&amp;lt;bool, std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;bool, std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W char&amp;amp; Getter&amp;lt;3ul, char&amp;gt;::get&amp;lt;bool, std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;bool, std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W double&amp;amp; Getter&amp;lt;3ul, double&amp;gt;::get&amp;lt;std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+W double&amp;amp; Getter&amp;lt;4ul, double&amp;gt;::get&amp;lt;bool, std::string, int, char, double&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;MyTuple&amp;lt;bool, std::string, int, char, double&amp;gt;&amp;amp;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;显然这里单独是Getter函数就生成了15个之多，因为随着每次N的减小，新的Tuple总是会被生成。
+考虑到目标文件中留下的仅仅是唯一类型的函数定义，中间重复的计算并没有包含在内。
+对于每一个给定N个类型的Tuple，它同时&lt;strong&gt;还需要生成所有小于N的子Tuple类型内嵌于自身中&lt;/strong&gt;，实际编译器生成的算法的&lt;strong&gt;时间复杂度其实是三次幂指数&lt;/strong&gt;O(N^3)的。&lt;/p&gt;
+
+&lt;h3 id=&quot;采用继承的方式优化&quot;&gt;采用继承的方式优化&lt;/h3&gt;
+&lt;p&gt;一种简单的思路是采用继承的方法来优化这个定义，避免嵌套。这里我们定义一个用于被具体类型继承的基类如下；
+为防止其&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数被调用，我们将其声明为&lt;code class=&quot;highlighter-rouge&quot;&gt;=delete&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NewTuple&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//serves as a base type only
+&lt;/span&gt;    &lt;span class=&quot;nl&quot;&gt;public:&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(...)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里的基类其实是一个空元素的Tuple，它本身其实并没有任何意义。&lt;/p&gt;
+
+&lt;h4 id=&quot;逐级继承&quot;&gt;逐级继承&lt;/h4&gt;
+&lt;p&gt;基于此，我们让每一个更复杂的Tuple类型从比它少了头部元素的一个维度更低的tuple上去继承。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;get成员函数的实现&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;成员函数的实现&lt;/h5&gt;
+
+&lt;p&gt;为了实现&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数对不同的索引取调用不同的类型，我们需要根据索引值触发对应的类型定义。
+好在&lt;code class=&quot;highlighter-rouge&quot;&gt;std::integral_constant&lt;/code&gt;类型提供了&lt;strong&gt;将任何一个类型的某个具体值转换成一个唯一的编译器可以识别的类型的能力&lt;/strong&gt;，即&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::integral_constant&amp;lt;size_t, 1&amp;gt;&lt;/code&gt;表述的是某个特殊的总是取值为1的编译器可识别的唯一类型&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::integral_constant&amp;lt;size_t, 2&amp;gt;&lt;/code&gt;表述的是取值为2的唯一类型&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::integral_constant&amp;lt;size_t, 3&amp;gt;&lt;/code&gt;表示的是另外一个类型，它和算数加法没有任何关联&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们可以利用它将每个整数索引变换成一个具体的类型从而来书写&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;它的定义依赖于下面的技巧&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;当目前的tuple具有N个元素的时候，其直接基类就有N-1个元素&lt;/li&gt;
+  &lt;li&gt;当前类的&lt;code class=&quot;highlighter-rouge&quot;&gt;get(type&amp;lt;N-1&amp;gt; t)&lt;/code&gt;返回的是&lt;strong&gt;当前tuple的头部&lt;/strong&gt;元素，而&lt;strong&gt;比&lt;code class=&quot;highlighter-rouge&quot;&gt;N-1&lt;/code&gt;更小的索引的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数则由这些基类来提供&lt;/strong&gt;的&lt;/li&gt;
+  &lt;li&gt;而所有的基类的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数具有不同的参数类型，并且都可以被子类所访问，因为他们都被声明为是&lt;code class=&quot;highlighter-rouge&quot;&gt;public&lt;/code&gt;的&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt;声明引入了比当前类型少一个元素的直接基类的类型声明。&lt;/p&gt;
+
+&lt;h5 id=&quot;实现全局的get函数&quot;&gt;实现全局的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数&lt;/h5&gt;
+&lt;p&gt;全局函数的实现可以依赖上面的具体类中的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数的组合来实现：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;即对当前有M个元素的tuple取第N个元素，等价于访问继承体系中的&lt;strong&gt;参数类型的整数值为&lt;code class=&quot;highlighter-rouge&quot;&gt;M-1-N&lt;/code&gt;的&lt;/strong&gt;某个基类的成员函数的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;的访问。
+这里起关键作用的是&lt;code class=&quot;highlighter-rouge&quot;&gt;std::integral_constant&lt;/code&gt;模板。&lt;/p&gt;
+
+&lt;h4 id=&quot;代码膨胀开销&quot;&gt;代码膨胀开销&lt;/h4&gt;
+&lt;p&gt;考虑下面的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;testNewTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NewTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;somthing&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'c'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;12.34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;同样检查编译器的生成代码符号可以发现此时的&lt;strong&gt;算法简化为二次幂&lt;/strong&gt;O(N^2)了，因为每一次初始化&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;操作我们仍然需要为它生成每一个基类的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数访问。&lt;/p&gt;
+
+&lt;h4 id=&quot;再看继承手法&quot;&gt;再看继承手法&lt;/h4&gt;
+&lt;p&gt;表面上看这里的&lt;strong&gt;模板元定义采用了继承的语法&lt;/strong&gt;，但是这里的继承功能其实是&lt;strong&gt;用的组合而非传统面向对象设计中的继承&lt;/strong&gt;技巧，因为没有任何的虚函数，也没有任何的方法重载。
+唯一有一点可能迷人眼的其实是&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;的声明语法，它其实是&lt;strong&gt;通过数值转类型的方法，将每个基类中都定义了一个独一无二的函数&lt;/strong&gt;，然后交给编译器来根据不同的值选择对应的定义。&lt;/p&gt;
+
+&lt;p&gt;如果我们去掉这个继承的障眼法，将层层递进的继承结构给拍平变成完全只有一级的继承，是否可以进一步优化减小编译器的负担呢？&lt;/p&gt;
+
+&lt;h3 id=&quot;采用多继承和浅继承&quot;&gt;采用多继承和浅继承&lt;/h3&gt;
+&lt;p&gt;采用这种新的思路，我们需要将单个元素的tuple重新定义为一个叶子节点，然后让复杂的多元素类从它继承而来；即如下的定义&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;/// Using leaf
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)...)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;进而我们就可以采用多继承的思路，这里需要使用可变模板的省略技巧&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;explict&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;More&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)...)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*??? */&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;然后我们发现这里的get没有办法定义，因为基类里面并没有提供这一方法，而由于多继承的关系，我们也不知道如何派发到哪一个叶子节点。&lt;/p&gt;
+
+&lt;p&gt;显然我们需要将&lt;strong&gt;索引信息传递到具体的基类里面，然后再在组合类里面静态派发&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;添加索引&quot;&gt;添加索引&lt;/h4&gt;
+&lt;p&gt;可以通过在叶子节点里面添加一个索引类型&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里具体叶子节点实现的get方法其实是返回自己的值定义。&lt;/p&gt;
+
+&lt;p&gt;而子类的具体实现需要合理的派发这个索引：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// This is C++17 only
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;和上面的深度继承类似，我们只需要将所有基类的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;函数引入进来，然后用同样的&lt;code class=&quot;highlighter-rouge&quot;&gt;integral_constant&lt;/code&gt;方法来做类型派发就可以了。&lt;/p&gt;
+
+&lt;h4 id=&quot;封装索引&quot;&gt;封装索引&lt;/h4&gt;
+&lt;p&gt;上面的类型定义中带了两个参数，第一个参数是一个索引列表，第二个参数则是实际的类型列表，两者需要保持对应关系(务必要保证&lt;strong&gt;个数和位置是逐一对应的，否则会产生恐怖的编译错误&lt;/strong&gt;)，使用起来有些不方便，比如我们需要用如下的代码来操作&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;好在我们可以封装它为一个新的类型&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTuple&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make_index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这样我们就可以简化实际的代码书写&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;short&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;进一步简化来分离声明和实现&quot;&gt;进一步简化来分离声明和实现&lt;/h4&gt;
+&lt;p&gt;我们可以使用using声明来分离这些index相关的实现细节，然后重命名具体的实现类&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTupleImpl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NNTupleImpl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Indexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NNTupleImpl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;make_index_sequence&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;由此使用者看到的Tuple声明就是一个只有目标类型接口序列的类，而具体的索引相关的操作就被隐藏了。&lt;/p&gt;
+
+&lt;h4 id=&quot;c14的考虑&quot;&gt;C++14的考虑&lt;/h4&gt;
+&lt;p&gt;上述的代码中用到了C++17才支持的语法，如果我们要考虑C++14的兼容，可以将&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;写作如下的形式&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;c1&quot;&gt;//C++14 version of get
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;甚至可以进一步来简化具体的类型，因为我们可以用传入参数的方法来自动推到之&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getLeaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get14_1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getLeaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;integral_constant&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;因为this指针的类型是确定的，那么根据具体的索引值的不同，我们&lt;strong&gt;可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;auto&lt;/code&gt;推到得到具体的叶子节点的类型&lt;/strong&gt;，
+再调用get就显然去掉了对外暴露的&lt;code class=&quot;highlighter-rouge&quot;&gt;get14_1()&lt;/code&gt;函数声明上的一个类型参数的依赖。&lt;/p&gt;
+
+&lt;h4 id=&quot;去掉子类中的get&quot;&gt;去掉子类中的&lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;我们甚至可以去掉叶子节点中的get定义，而直接返回&lt;code class=&quot;highlighter-rouge&quot;&gt;value_&lt;/code&gt;，即简化为&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MyTupleLeaf&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//.... inside NNTupleImpl
+&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;public:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_leaf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;代码生成情况&quot;&gt;代码生成情况&lt;/h3&gt;
+&lt;p&gt;对于第三个版本，假设我们由如下的代码&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;testNNTuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NNTuple&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;something&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get14&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'c'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get14_1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;12.34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;对应的符号表则如下&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜  cmake-build-debug git:(master) ✗ nm myTuple|c++filt | grep NNTuple | cut -d &quot; &quot; -f2-100 | sed &quot;s/__cxx11::basic_string&amp;lt;char, std::char_traits&amp;lt;char&amp;gt;, std::allocator&amp;lt;char&amp;gt; &amp;gt;/string/gp&quot; | uniq 
+T testNNTuple()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::get&amp;lt;0ul&amp;gt;()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::get&amp;lt;1ul&amp;gt;()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::get&amp;lt;2ul&amp;gt;()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::get14&amp;lt;3ul, char&amp;gt;()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::get14_1&amp;lt;4ul&amp;gt;()
+W auto&amp;amp; NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::getLeaf&amp;lt;4ul, double&amp;gt;(MyTupleLeaf&amp;lt;4ul, double&amp;gt;*)
+W NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::NNTupleImpl()
+W NNTupleImpl&amp;lt;std::integer_sequence&amp;lt;unsigned long, 0ul, 1ul, 2ul, 3ul, 4ul&amp;gt;, bool, std::string, int, char, double&amp;gt;::~NNTupleImpl()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;显然对每一个索引，它仅仅生成了一个唯一的get函数，其&lt;strong&gt;复杂度终于降低到了最低&lt;/strong&gt;的O(N)。&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+&lt;p&gt;模板元和泛型编程是&lt;strong&gt;现代C++语言演进的一个重要方向&lt;/strong&gt;，它用&lt;strong&gt;几乎为零的代价实现了高层的逻辑抽象&lt;/strong&gt;，不幸的是程序员必须付出额外的编译时间较长的代价来达成这一目标，这不得不说是另外一种形式的权衡。
+Jorg通过他探索的技巧来降低编译时间的负担，我们可以借助这些技巧来有针对性地优化模板元代码，让编译器减少生成不必要的代码，从而在编译期也实现零成本抽象的目标。&lt;/p&gt;
+
+&lt;p&gt;同时需要留意的是，这些例子中呈现的行为可能并不适用于所有的C++编译器，有些签名特征甚至是GCC/Clang的实现而MSVC编译器看起来有完全不同的行为。
+也许随着编译器的逐步完善和演化，我们会不再需要这些技巧；然而&lt;strong&gt;演练这些技巧对提高我们对静态语言编译期元编程的认识&lt;/strong&gt;也有莫大的好处。&lt;/p&gt;
+
+&lt;p&gt;Rust语言是另外一个秉承零成本抽象使命的静态编译语言，而今天它的泛型代码编译也承受着类似的痛苦和不便，只是不知道是否Rust社区有人发掘过类似的技巧来提升编译速度和减小模板文件体积?&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="cpp" /><category term="design" /><category term="language" /><category term="engineering" /><summary type="html">新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言Zero Cost Abstraction的目标； 可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。</summary></entry><entry><title type="html">微服务开发：C++语言是否真的不适用？</title><link href="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/" rel="alternate" type="text/html" title="微服务开发：C++语言是否真的不适用？" /><published>2019-10-01T00:00:00+08:00</published><updated>2019-10-01T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/01/microservice-with-cpp/">&lt;p&gt;微服务架构模式是当今炙手可热的企业软件架构范式，经过最近几年的广泛的讨论和优缺点争辩之后已经随着
 &lt;a href=&quot;//post/2018/04/26/cloud-native/&quot;&gt;云原生架构&lt;/a&gt;　的逐渐火热而日益呈现星火燎原之势。
 抛开这些争论不谈，假设我们需要实现一个微服务架构的服务，是否&lt;strong&gt;该用&lt;/strong&gt;C++语言或者&lt;strong&gt;是否能用&lt;/strong&gt;C++语言呢？&lt;/p&gt;
 
@@ -2823,453 +3368,4 @@ HTTP协议的无状态保证和REST API的分页查询机制，使得我们只�
 毕竟没有很好的运行效率的话，这门艰深的语言几乎没有什么存在的价值了；
 serde_json库称自己是最快的JSON解析库，还真不是白吹的。&lt;/p&gt;
 
-&lt;p&gt;希望下次再动手写一个工具的时候，还可以再次深入的学习Rust的其它美妙之处。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><summary type="html">公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦， 经常一个页面打开需要等待大半天还是不是崩溃。有些心急的同时已经默默地回到了老的方式，导出数据到Excel然后打开Office工具来搞定。 作为一名程序员，最简单直接的想法就是自己撸起袖子来写代码解决呗，即使是投入产出比不高，好歹是在写工具的过程中提高了自己，一举多得何乐而不为呢？</summary></entry><entry><title type="html">标准化和生产环境就绪的微服务</title><link href="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/" rel="alternate" type="text/html" title="标准化和生产环境就绪的微服务" /><published>2018-05-20T00:00:00+08:00</published><updated>2018-05-20T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/05/20/production-ready-microservice</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/05/20/production-ready-microservice/">&lt;p&gt;微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定；
-然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。
-其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展；
-微服务引入过程中的&lt;strong&gt;一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解&lt;/strong&gt;。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了，
-走的人多了，必然有些更容易走的”直路”显现出来。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;为什么需要标准化&quot;&gt;为什么需要标准化&lt;/h2&gt;
-
-&lt;p&gt;Susan J.Fowler作为一名来自Uber的站点可靠性工程师(Site Reliability Engineer)见证了Uber自身将其庞大而又复杂的单体API剥离成逾千个微服务的，
-并达到超过85%的微服务团队并无配备SRE这一角色也能确保自己的服务运行良好。同时她也见证了微服务团队（尤其是大型微服务架构）中SRE工程师所面临的巨大挑战：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;对SRE本身的能力要求是全方位的，他/她必须是包括软件工程、系统工程、软件架构等多个方面的综合性专家&lt;/li&gt;
-  &lt;li&gt;在有成百上千个微服务组成的企业应用中，大部分的团队更本不可能拥有SRE的资源；SRE也不太可能熟悉哪怕系统中大部分微服务的关键细节&lt;/li&gt;
-  &lt;li&gt;SRE需要对系统整体的可靠性负责，然而任何一个微服务的SLA水平下降都可能带来整个系统的SLA下降；在大多数团队不配备SRE的情况下，
-如何保证日常的开发中新引入的功能不会破坏整体的可靠性、可用性和性能的关键指标，或者如何做有效的回归和可靠性测试，并在发现可能的失败情况下，
-及早地回退引起整体质量下降的服务代码，都是一个看起来几乎不可能的任务&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Susan希望他们可以找到一种简单而又直接的方法来定义微服务实践的规范程度，即一种简单而又可靠的标准，使得组织中的每一个微服务团队都可以仅仅需要遵循这些标准就可以交付符合SLA要求的服务，
-同时还保有微服务架构本身带来的诸如自由选择编程语言、技术栈的优势。这一套标准其实是用一系列检查列表（CheckList)的方式提供，微服务团队在提交自己的实现之前检查这些列表，
-确保所有的实现都能满足列表的要求的情况下才将代码引入到生产环境中；这样整个系统的SLA就可以得到保证。&lt;/p&gt;
-
-&lt;h2 id=&quot;基本原则&quot;&gt;基本原则&lt;/h2&gt;
-
-&lt;p&gt;Susan他们给出的标准化微服务的标准大概可以划分到八个大的基本原则之下，每个微服务必须满足&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;稳定&lt;/li&gt;
-  &lt;li&gt;可靠&lt;/li&gt;
-  &lt;li&gt;可扩展&lt;/li&gt;
-  &lt;li&gt;容错&lt;/li&gt;
-  &lt;li&gt;性能良好&lt;/li&gt;
-  &lt;li&gt;被合理监控&lt;/li&gt;
-  &lt;li&gt;有良好的文档&lt;/li&gt;
-  &lt;li&gt;容灾就绪&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;在这些大的原则之下，Susan他们还详细定义了每一个原则里面的详细列表，并要求每一个原则必须是&lt;strong&gt;可以量化&lt;/strong&gt;以方便提供度量结果，
-从而可以极大地提高微服务系统的可用性。只有&lt;strong&gt;满足了这里列出的所有的条件&lt;/strong&gt;的微服务，才可以被认为是生产就绪的。&lt;/p&gt;
-
-&lt;h3 id=&quot;微服务生态系统&quot;&gt;微服务生态系统&lt;/h3&gt;
-
-&lt;p&gt;微服务从来都不是孤立从在的，它们被构建、运行和交互的环境就是它们生存的环境；大型的微服务系统的生存环境就像是一大片森林，一个沙漠或者一个大海；
-将相关的&lt;strong&gt;整个环境考虑为一个生态系统&lt;/strong&gt;往往更有利于我们采用微服务风格来架构我们的应用系统。&lt;/p&gt;
-
-&lt;p&gt;设计良好的可持续的微服务生态系统往往会尽力用一个基础设施层将底层的细节和上层的微服务应用相隔离开；这样微服务的开发人员可以像开发一个单体应用一样，
-使用他们喜欢的技术和编程语言，自己决定服务内部的软件架构；并不需要过多考虑底层基础设施这些细节，比如操作系统、网络、存储等复杂的基础知识。
-自然地，将这些基础设施保持地稳定、高效、可扩展并能良好地容错就成为一个非常基本的需求。&lt;/p&gt;
-
-&lt;p&gt;微服务的生态系统可以简单地划分为四个层次，尽管有时候层次之间的界限并不是那么清晰而绝对&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;硬件层&lt;/li&gt;
-  &lt;li&gt;通信层&lt;/li&gt;
-  &lt;li&gt;软件应用平台&lt;/li&gt;
-  &lt;li&gt;微服务层&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;最底层的部分是硬件层，它负责处理诸如实际的物理资源，包括真实硬件、网络节点，乃至数据中心的机架、交换机或者SDN网络、存储设备等；这些设施可以是自己搭建的数据中心，
-也可以是从其它的云服务商处租赁来，比如AWS EC2、Google GCP、MS Azure等。所有这些相关的细节被硬件层所管理。
-硬件之上的操作系统，以及相关的配置，资源隔离和抽象设置，主机层面的日志、监控也需要被这一层统一提供；
-具体的系统选择和日志、监控工具可能由企业应用具体的环境来选择决定。
-某种意义上可以将这一硬件层看作是云时代的网络操作系统。&lt;/p&gt;
-
-&lt;p&gt;硬件层之上的是通信层；该层本质上参与了上面两层的交互，因为&lt;strong&gt;所有微服务乃至软件应用平台的交互&lt;/strong&gt;都被这一层所处理。
-从严格分层的角度来看，似乎这一层有些定义不太良好。幸运的是，基本的要素是清晰的。
-它需要处理诸如网络设置、DNS解析、RPC设施、API端点控制、服务发现和注册、负载均衡等微服务底层治理设施。&lt;/p&gt;
-
-&lt;p&gt;作为第三层的软件平台层负责处理所有微服务共享的内部工具、共享的基础服务等。
-这一层必须提供整个系统范围内共享的基础应用软件设施，使得微服务团队&lt;strong&gt;不需要自己设计和维护他们自身微服务逻辑之外的复杂基础软件&lt;/strong&gt;；
-从而微服务团队可以专注于自身需要实现的业务逻辑，而不是比较底层的软件技术。
-设计良好的软件平台需要提供内部开发者共同使用的方便的&lt;strong&gt;内部开发工具,自动化构建和测试平台&lt;/strong&gt;，中心化的自动部署和发布方案，比如一些DevOps工具，自动发布工具，
-微服务层面的日志、监控工具等。&lt;/p&gt;
-
-&lt;p&gt;微服务层处于这个生态系统的最上层，主要负责其职责范围内的业务逻辑和API实现，并和底层的硬件、服务治理设施、通用应用软件平台隔离开。
-唯一一个没有和下面几层完全隔离的就是微服务自身的配置。一种常见的做法是将所有的微服务的配置都用中心化的方式来管理和控制；然而这在大型的微服务软件中可能带来巨大的问题，
-因为当微服务人员需要修改其配置的时候，往往不得不修改其下面几层的文件（因为被中心化托管），由于微服务数量庞大，开发人员往往不知应该改动哪里或者遗漏重要的配置。
-这种情况下，更合理的方案是将各个微服务的配置放在自己的代码库中，然后让底层的工具或者平台可以访问这些配置文件。&lt;/p&gt;
-
-&lt;h2 id=&quot;可靠性和稳定性&quot;&gt;可靠性和稳定性&lt;/h2&gt;
-&lt;p&gt;微服务架构其实给软件系统的可靠性和稳定性带来的更多的挑战，这些挑战本质上是分布式软件架构内生的矛盾引起的，而我们又没有办法回到单体架构的时代。
-从整个生态系统的角度来考虑，任何一个环节、要素的可靠性损失都会传导到相关的上下游，从而使得整个系统的可用性下降。&lt;/p&gt;
-
-&lt;h3 id=&quot;构建稳定而又可靠的微服务的基本原则&quot;&gt;构建稳定而又可靠的微服务的基本原则&lt;/h3&gt;
-&lt;p&gt;微服务架构给开发人员引入了巨大的灵活性，并使得快速的功能迭代成为可能。各个微服务团队可以选用他们自己所熟悉的编程语言、库和微观架构，
-只要提供定义良好的API接口即可。每个服务的设计和功能特性都可能在随时发生着巨大的变化，因而整个系统中的任何一个微服务因为设计不良或者考虑不周引起的稳定性下降或者可靠性降低，
-都会对整个系统的可用性和可靠性带来毁灭性的影响。因此我们天然期望&lt;strong&gt;微服务的任何一次代码的合入都不会引起&lt;/strong&gt;服务的可靠性、可用性水平的下降。&lt;/p&gt;
-
-&lt;p&gt;构建和维护一个可以被称之为稳定而又可靠的微服务，意味着任何一次功能的添加、问题的修复或者代码的重构及演进不会带来整个系统的可靠性和稳定性的降低。
-当然变得更好是会更受欢迎的。为了发布和维护可靠的微服务，我们需要保证有良好的开发流程来支持，并且最好有一个标准化的开发周期模型使得&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;新功能的开发或者其它原因引入的代码改动&lt;strong&gt;必须经过预先定义的多个阶段的流水线检查&lt;/strong&gt;，确保问题尽可能在早期阶段被发现并及时回滚&lt;/li&gt;
-  &lt;li&gt;服务之间的&lt;strong&gt;依赖失效问题可以被尽早发现并阻止&lt;/strong&gt;；一般认为对服务API打版本标签是一种反模式而不值得提倡，因为这样很容易引起沟通不足而导致下游微服务意外失效&lt;/li&gt;
-  &lt;li&gt;适当的路由检查、断路器控制应该被继承到通信层上，实现对微服务出错情况下的处理，防止引起系统性的崩溃&lt;/li&gt;
-  &lt;li&gt;某个特定的微服务提供的API可以被废弃或者微服务本身失效的情况下，其它的微服务不应该一并失效&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;稳定而又可靠的微服务开发往往经历如下的开发模型&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;一旦开发人员提交代码的改动到仓库中的新分支（git模型），新的自动化构建任务即被创建起来执行，并做好自动化的代码检查和服务内部的测试&lt;/li&gt;
-  &lt;li&gt;同时改动的代码需要被仔细的审查和评审，确保可能的问题被及早发现&lt;/li&gt;
-  &lt;li&gt;只有当前两步的检查都没有问题的时候，新的代码才会被提交给外部的构建系统中和其它的服务做集成，打包，测试&lt;/li&gt;
-  &lt;li&gt;测试通过的包会被同时发送给部署的流水线做持续部署测试和提交到服务对应的仓库中&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;部署流水线&quot;&gt;部署流水线&lt;/h3&gt;
-
-&lt;p&gt;大型系统中的大部分错误通常都被认为是来源于错误的部署。在大型的开发组织中，可能有上百个微服务在按照各自的节奏做设计、开发和维护，
-微服务团队之间通常很少有足够好的协调和沟通（因为康威定律决定了跨大型组织的沟通成本是极其高昂）。这种情况下，
-任何一个微服务部署了错误的有问题的版本都有可能造成整个系统的停摆。这种情况下，引入复杂而又分阶段的部署流水线则成为保证微服务系统可靠、稳定的必需手段。&lt;/p&gt;
-
-&lt;p&gt;当一个新的微服务版本被发送到部署流水线的时候（紧接着上一节的过程）&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;该版本暂时被标记为候选的发布版本，先放置到 Staging 阶段，并运行一系列的测试&lt;/li&gt;
-  &lt;li&gt;如果上述测试都通过并觉得没有太大问题，则顺序进入下一个“金丝雀部署”阶段；这里的环境其实是从正在线上运行的微服务生产环境中，
-跳出一部分工作负载，让新的候选微服务版本提供服务，并观察是否有异常情况发生&lt;/li&gt;
-  &lt;li&gt;如果没有问题，则可以慢慢地按照既定的策略用新的微服务版本逐步替换就的服务版本&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;任何一个阶段发现问题，则应当必须尽快回滚，基础设施和构建服务必须能快速回溯到出问题的改动，待对应的微服务团队诊断问题进一步修复。
-通常情况下，Staging 的测试环境往往和后边两个阶段的环境有比较大的区别。金丝雀发布阶段可以根据服务实例的个数或者API的流量选择重定向一小部分到新的候选服务版本；
-譬如5%到10%的生产环境的情况可以被路由到新的服务实例上做处理；一旦发生错误不致于给用户带来很大的困扰，并且的出错的情况下，应该及时终止这一部署回滚到稳定的生产环境版本，
-并抓取对应的日志、诊断信息，以便SRE工程师或者具体的微服务团队解决问题，重新发布。&lt;/p&gt;
-
-&lt;h4 id=&quot;staging&quot;&gt;Staging&lt;/h4&gt;
-&lt;p&gt;Staging环境的测试虽然往往和生产环境不同，然而也需要尽量保证硬件设置上和生产环境比较接近，只是没有真正的用户流量。
-由于资源的限制，在云平台上生产环境可能有数百个微服务的实例来均衡处理实际的负载，而staging环境上实例的数量可能就少得多。
-用户请求的流量可以用mock的方法来模拟测试，或者用工具甚至手工测试的方法来验证。它和开发环境的本质不同是，发布到该环境的服务是可以被发布的候选版本。
-开发人员&lt;strong&gt;必须用同等的重视程度和优先级来应对staging环境上可能出现的错误&lt;/strong&gt;并及时修复。&lt;/p&gt;
-
-&lt;p&gt;有两种不同的方法来选择和构建Staging环境，一种是Full Staging，这种情况下，staging环境基本上就是生产环境的比例缩小的一个拷贝。
-所有的微服务生态系统都被完整的运行，它可以和生产环境共享同样的基础设施、平台等，只是前后端的流量不是来自于真实的用户，
-它也会有自己单独的数据库，并且永远不会和生产环境的微服务发生通信和交互。另外一种配置方式被称之为Partial Staging，
-这种环境下，Staging和生产环境并没有完全做镜像隔离，即staging环境的微服务（往往是候选版本）可能会和生产环境中的微服务有进行交互，
-从而使用生产环境中的下游微服务的API，当然处于数据保护的需要，生产环境中的数据不应该被Partial  Staging的微服务所修改，而只允许读取和访问操作。
-由于Partial Staging环境中的候选版本的微服务可能访问生产环境中的服务，测试和配置的时候则需要更加小心一些，以防对生产环境造成比较大的破坏。&lt;/p&gt;
-
-&lt;h4 id=&quot;金丝雀部署&quot;&gt;金丝雀部署&lt;/h4&gt;
-
-&lt;p&gt;金丝雀部署的想法其实是借鉴了以前矿工下矿井的时候的准备不周，由于不确定矿井中的瓦斯含量和氧气含量是否会由于人体无法感知的异常而引起死亡等事故，
-矿工们往往会带一只金丝雀下井，金丝雀对环境的敏感程度远远超过人类，如果一氧化碳含量过高，金丝雀就会停止鸣叫从而矿工们便知道井下不安全。
-金丝雀部署的策略和旧时矿工们所采用的策略类似，先选择一小部分真实的环境做实验，如果没有异常出现说明可以继续放心部署下去。&lt;/p&gt;
-
-&lt;p&gt;金丝雀部署是&lt;strong&gt;将候选的微服务版本直接放入了生产环境中&lt;/strong&gt;使用(尽管只服务一小部分流量)，因此应该认为它是生产环境部署的一部分。
-所有的监控、诊断、日志信息应该和生产环境中的配置完全相同，以便开发人员可以很方便地调试和解决可能出现的问题。如果有异常的情况出现，
-自动回滚金丝雀环境也是至关重要的；因为任何的错误都意味着声场环境出了问题。&lt;/p&gt;
-
-&lt;p&gt;另外一个相关的问题是怎么确定一个服务的新候选版本应该在金丝雀部署环境中呆多长时间才可以被放心地放入大规模部署中。
-这个其实取决于具体微服务的流量模式和具体的业务逻辑模型，我们需要根据服务的流量模式和业务模型确定一个金丝雀周期时间，
-只有活过了事先定义好的周期时间后，对应的候选版本才能进一步部署到生产环境中。&lt;/p&gt;
-
-&lt;h4 id=&quot;生产环境的部署&quot;&gt;生产环境的部署&lt;/h4&gt;
-
-&lt;p&gt;任何一次的构建和发布到部署环境的改动都应该尽力保证做到稳定而可靠。经过前述各个阶段的测试和检查，
-最终部署到生产环境的微服务候选版本应该是被充分测试和验证过的，&lt;strong&gt;任何情况下（除非是一些极端危急的情况），都不应该跳过前述的步骤&lt;/strong&gt;而直接放到生产环境中。
-最后的部署可以是采用一次性全部部署到所有的实例上的方式，也可以采用更审慎的方式，按照某种预先指定的百分比策略逐步铺开，
-比如先部署25%的实例，再慢慢到50%，75%乃至最后完全部署成功。其它的策略也可以按照服务的国家、地区、数据中心、或者混合上述这些策略来部署开来。&lt;/p&gt;
-
-&lt;p&gt;确保上述的开发和部署流水线被正确执行是保证微服务系统稳定、可靠发布和运行的关键，因为只有如此，
-才能有把握将可能出现的问题在发布之前被尽可能早地揪出来修复掉，避免破坏生产环境的稳定、可靠运行。
-对某些开发者来说，严格遵循上述的周期和流水线可能显得笨拙而缓慢，然而很多情况下，期望一天可以发布数次微服务的变更而又不破坏系统的稳定性和可靠性，
-在复杂的大型微服务系统中变得几乎不可能。每隔几个小时就发生变化的微服务很少是稳定而又可靠的。&lt;/p&gt;
-
-&lt;h3 id=&quot;依赖管理&quot;&gt;依赖管理&lt;/h3&gt;
-&lt;p&gt;微服务架构的一大设想就是各个微服务团队可以独立地发布和演进他们的微服务；这在理论上没什么问题，现实环境中依赖却无处不在。
-从设计上来说，我们可以努力减少服务之间的依赖和耦合，却永远不能一劳永逸地消灭依赖。几乎每一个微服务都有上下游的依赖，
-它需要从上游的微服务接收请求，处理返回，并在处理的过程中调用下游的微服务提供的API。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;理解微服务的上下游依赖，事前仔细的规划和应对可能的依赖失效、错误&lt;/strong&gt;是确保服务可靠、稳定运行的关键要素之一。因为任何上游服务的可用性下降如果没有被正确处理，
-都会导致该微服务的可用性（SLA水平 ）大大下降。为了提高可用性，微服务必须对其所依赖的服务做好失效时的应对措施，采取诸如冗余备份、回滚、缓存或可选副本的方式，
-以便所依赖的微服务出现失败的时候，&lt;strong&gt;整个系统不至于有单点故障&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;为了方便规划、跟踪和管理，微服务之间的依赖关系必须被很好地分析、文档化并实时更总变化。任何可能导致微服务系统SLA水平下降的依赖都应该被包含在本微服务的架构图中，
-并放在微服务的仪表盘中被实时监控着。有可能的情况下，最好尽可能地自动产生服务实现的依赖关系图，便于跟踪和规划。有了这些东西，
-接下来一个关键的步骤就是设置冗备份、缓存等；具体的情况需要依据实际微服务的具体情况而定。一种常用的设置cache的策略是所谓的LRU方法，
-即最近使用的数据被放置在一个队列中，当队列满的时候则将最长时间没有使用的数据给删除掉。这种缓存策略也常常被称为防御性缓存。&lt;/p&gt;
-
-&lt;h3 id=&quot;路由和服务发现&quot;&gt;路由和服务发现&lt;/h3&gt;
-
-&lt;p&gt;另外一个保证可靠性和可用性的考虑是需要保证第二层即&lt;strong&gt;微服务生态中的具体的微服务实例之间的通信层总是可靠的&lt;/strong&gt;。
-用于保证这一层可靠性的机制即是服务注册、服务发现和负载均衡。为了保证通信的可靠，任何时刻某个服务实例的状态必须是明确知道的，
-这就潜在地要求微服务实例的健康检查必须持续地进行，以确保服务请求不会被发送到失效的节点上造成请求失败。
-一种最常用的方式是，采用一个特定的和业务通信无关的通道来监控服务状态。被监控的服务最好需要返回一些有明确意义的信息而不仅仅是返回诸如200 OK这样的状态码。&lt;/p&gt;
-
-&lt;p&gt;如果一个服务的状态变得不可用，那么负载均衡就要做好正确的路由重定向，以保后续的请求不会转发给失效的节点。
-如果整个微服务实例变得不可用，那么负载均衡则需要确保在问题被修复之前，所有的请求都不会路由给失效的微服务。
-然而负载均衡器并不是唯一的选择，在网络没有出现故障单大批微服务返回异常的情况下，断路器该被用来及早地断开微服务调用链路上的尽量靠近上游的节点，防止系统失败蔓延。&lt;/p&gt;
-
-&lt;h3 id=&quot;版本升级和微服务删除&quot;&gt;版本升级和微服务删除&lt;/h3&gt;
-
-&lt;p&gt;旧版本的API需要退出整个系统的情况并不是很少见；如果没有仔细规划和应对该情况，也会引起预料之外的系统稳定性下降。
-微服务团队打算废除某些旧版本的API的时候，他们&lt;strong&gt;必须确保没有使用旧版本服务的客户端（下游）遭到波及&lt;/strong&gt;。解决这一问题本身没有很好的技术手段，
-可能需要更多依赖于一些社会工程学上的手段，和具体组织的文化、组织结构密切相关。&lt;/p&gt;
-
-&lt;p&gt;典型的流程要求旧版本的微服务用户必须被提早通知到（如果做了很好的微服务架构文档管理则不是什么难事），提供新版本的微服务团队需要告知
-原有的客户怎么迁移到新的版本，何时开始彻底废弃老的版本。&lt;strong&gt;在旧版本被废除之前，监控整个系统的状况是至关重要&lt;/strong&gt;的。
-删除一个过时的微服务的情况和版本迁移是类似的情况；但是经常被忽视的是，忘记删除一些不再使用的微服务也会降低系统的可靠性和可用性；
-需要尽早被监控并在合适的时间尽早退出微服务生态系统。&lt;/p&gt;
-
-&lt;h2 id=&quot;可扩展性和性能&quot;&gt;可扩展性和性能&lt;/h2&gt;
-
-&lt;p&gt;生产环境就绪的微服务&lt;strong&gt;必须要是可扩展并且性能良好&lt;/strong&gt;的。它不但能处理大量的请求和任务，并可以根据需要动态伸缩实际使用的资源，
-合理利用云平台基础设施的优势降低商业成本。确保微服务具有良好的可扩展性和性能，需要我们正确理解微服务的定性和定量的扩展因子，
-硬件的效率，正确地识别资源限制和使用瓶颈，正确地估计容量和规划流量的动态扩展情况，以及存储的可扩展性和依赖的动态扩展性。&lt;/p&gt;
-
-&lt;h3 id=&quot;保持可扩展和高性能的重要原则&quot;&gt;保持可扩展和高性能的重要原则&lt;/h3&gt;
-&lt;p&gt;正确评估大型的分布式微服务架构系统的挑战比传统的单体应用要大得多，不幸的是这是由分布式软件系统和计算机架构的内生复杂性所决定的。
-简单来说，你的微服务系统牵扯到的微服务越多，某单个微服务本身的性能和扩展性对整个软件系统的影响就越小 - 这里的关键是我们必须看清全局。
-另一方面，在一个增长而活跃的微服务系统中，流量可能在日渐增加，&lt;strong&gt;每一个微服务都必须能够随着系统的规模的增加而良好地扩展&lt;/strong&gt;才不至于使整个系统遭遇性能问题。
-对任意一个微服务我们必须对下面的这些信息做到心中有数&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;定量和定性的增长规模&lt;/li&gt;
-  &lt;li&gt;硬件资源的使用效率情况&lt;/li&gt;
-  &lt;li&gt;资源瓶颈和需求情况以便合理地做容量规划&lt;/li&gt;
-  &lt;li&gt;确保微服务的依赖的下游微服务也能够随着自己很好的扩展&lt;/li&gt;
-  &lt;li&gt;流量可以被用可扩展的方式所管理和控制&lt;/li&gt;
-  &lt;li&gt;任务和请求可以被高效地处理&lt;/li&gt;
-  &lt;li&gt;数据必须被以可扩展的方式所存储&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;增长规模&quot;&gt;增长规模&lt;/h3&gt;
-&lt;p&gt;我们需要从来两个方面来分析和理解微服务的增长规模：定量增长规模和定性增长规模；两者同时在分析和规划资源分配的时候起着至关重要的作用。
-定性的增长规模可以从对给定微服务在整个微服务生态系统中的重要性和对相应的上层业务逻辑的关键指标的影响上分析的来。
-定量的增长规模则需要用可以度量的、定义良好的、定量的数值来确定该微服务具体可以处理多少业务流量。&lt;/p&gt;
-
-&lt;p&gt;定量的指标经常用每秒请求次数（RPS）和每秒查询测试（QPS）来表述。前者经常用来描述微服务本身的API请求规模，后者则更多用于数据访问情况；
-很多时候两者是可以互换的。这些指标很重要，但是在失去上下文（即定性指标）的情况下可能就毫无用处。
-我们经常可以用负载测试的方式来衡量微服务的定量指标，和历史数据做对照来确定给定的微服务是否满足扩展性需求。&lt;/p&gt;
-
-&lt;p&gt;考虑到&lt;strong&gt;微服务在大的微服务软件生态系统中从来不是单独存在的，我们也需要根据具体的业务逻辑规则来分析定性的增长规模指标&lt;/strong&gt;，这就是定性增长规模的用武之地了。
-整个系统的业务逻辑往往是绑定在整个微服务生态系统的，而不仅仅是某一个具体的微服务。微服务团队需要根据业务分析团队传达的高层业务逻辑需要，
-分解到自己的微服务的上下游逻辑，然后来确定自己的微服务需要应对什么样的扩展性要求；这些分析必然是模糊的，却和定量指标一样重要。&lt;/p&gt;
-
-&lt;h3 id=&quot;资源有效使用情况和使用瓶颈&quot;&gt;资源有效使用情况和使用瓶颈&lt;/h3&gt;
-&lt;p&gt;在一个由很多微服务构成的应用软件系统中，诸如网络、运算节点、存储等资源总是有限而昂贵的。
-出于成本和资源利用率最大化的考虑，整个微服务生态系统需要&lt;strong&gt;按照所提供的业务逻辑的重要性对系统中的微服务做好优先级分类&lt;/strong&gt;，
-使得优先级更高的微服务总是可以得到更大份额的资源使用。
-技术上的挑战则往往来源于上述的微服务生态系统的最底层，诸如是否给某个微服务分配固定的物理资源（成本高但是可靠），或者某些类型的微服务是否可以共享某些资源，
-同时微服务可靠性的潜在要求往往需要我们尽可能地隔离同一个微服务的多个实例，以提高物理硬件失效情况下的可用性。&lt;/p&gt;
-
-&lt;p&gt;规划资源分配之前，还需要着重检查的一件事是确定微服务的资源需求情况和使用瓶颈。这些瓶颈可能来源于一些扩展性上随着资源配额的变化而不能很好扩展的具体限制。
-资源需求情况是指某个微服务需要多少的物理资源才能顺畅地运行，以便&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;有效地处理任务&lt;/li&gt;
-  &lt;li&gt;很好地实现水平或者垂直扩展&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;最常见的需要识别的需求要素当然是微服务单个实例运行需要的CPU计算资源和RAM。这两者是微服务实现扩展的基本要素。
-确定某个微服务的CPU和RAM情况可能会有如下的挑战&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;水平扩展还是垂直扩展&lt;/li&gt;
-  &lt;li&gt;扩展的极限在哪里&lt;/li&gt;
-  &lt;li&gt;单个服务实例需要处理的业务流量会是怎样的&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;资源使用的瓶颈则往往来源于微服务自身设计上的一些限制，这些限制本身会对服务的扩展性产生决定性的影响，从而无法通过添加更多的资源提高任务处理的吞吐率。
-这些资源瓶颈可能是来自于基础设施的限制，也可能来自于微服务自身内部架构设计的制约：因为任何软件架构决策都充满了取舍。&lt;/p&gt;
-
-&lt;p&gt;当资源的瓶颈没有办法很好分析和预测的时候，一种好办法是做充分的负载测试。&lt;/p&gt;
-
-&lt;h3 id=&quot;容量规划&quot;&gt;容量规划&lt;/h3&gt;
-
-&lt;p&gt;容量规划用于解决当微服务的实例被提供更多的物理资源的时候，它可以以适当的方式扩展来处理更多的业务工作负载。
-要达到这一目标，需要保证&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;资源被有效地使用&lt;/li&gt;
-  &lt;li&gt;事先为业务增长做好规划&lt;/li&gt;
-  &lt;li&gt;从&lt;strong&gt;一开始就为服务的性能和扩展性做好设计&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;为确保微服务系统可以很好地随着业务量的增长很好地利用资源，&lt;strong&gt;需要做好定期的资源规划&lt;/strong&gt;，基本的原则包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;事先确定好每一个微服务的资源需求情况&lt;/li&gt;
-  &lt;li&gt;将这些需求编制进资源预算中&lt;/li&gt;
-  &lt;li&gt;确保对应的硬件被预留好可以处理阶段内的业务增长
-做好定期准备的好处是，当业务增长的时候，永远不会出现因为准备不足而造成的服务不稳定或者不可用。反之，
-如果微服务系统没有为业务的增长做好合适的准备和规划，带来的服务宕机或者不可用招致的损失回事巨大的。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;资源容量规划上的另外一个挑战是，规划时候的认为疏忽或者错误可能引起生产环境上的线上故障从而带来损失。
-一种自然的解决之道是，尽可能地将这些过程做成一个自动化的内部资源规划工具，这个工具就可以放在生态系统的第三层中维护，使得所有上层的微服务团队都可以使用来进行试算。&lt;/p&gt;
-
-&lt;h3 id=&quot;依赖服务的扩展性&quot;&gt;依赖服务的扩展性&lt;/h3&gt;
-&lt;p&gt;即使一个微服务被细心地设计以方便很好的扩展，如果它所依赖的微服务没法很好地随着业务量的增长来扩展，整个微服务系统依然是无法满足扩展性和性能要求的。
-确保某个微服务所依赖的微服务都可以随着业务量的增长而顺利地扩展是确保微服务系统生产环境就绪的重要条件之一。&lt;/p&gt;
-
-&lt;p&gt;微服务依赖链条的可扩展性必须得到满足潜在的意味着我们&lt;strong&gt;必须要保持整个组织的所有微服务都需要采用同样的标准&lt;/strong&gt;。
-如果只有核心而又关键的微服务满足高可扩展性，而其他的上下游依赖的微服务不同时满足，则整个微服务系统就无法按照实际业务负载的增长顺利地实现平滑扩展。
-除了保持高度的设计标准化之外，微服务团队需要尽力地确保自己所依赖的微服务可以按照自己的要求正常地伸缩扩展。
-&lt;strong&gt;跨微服务团队的沟通变得至关重要&lt;/strong&gt;，否则系统的关键扩展性瓶颈就无法及时地识别；某种程度上说，这和微服务架构本身的灵活性是相互制约的。
-一种策略是，确保微服务团队之间经常进行架构的评审，并将扩展性的影响和依赖服务的扩展性情况放在微服务架构设计文档中。&lt;/p&gt;
-
-&lt;h3 id=&quot;流量管理&quot;&gt;流量管理&lt;/h3&gt;
-
-&lt;p&gt;微服务系统必须能处理日渐增长的业务流量，并用更为智能的方式管理流量的增长；并保持良好的扩展性和效率。做到这一点需要我们&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;根据业务的增长规模来&lt;strong&gt;事先预估将来流量的增减&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;流量增减的模式必须被充分分析和理解，并以及做好准备；这样新引入的对微服务的改动如果会引起流量处理模式上的变化可以被预先分析和规划。
-服务监控措施也可以顺利跟上，以便在出问题的时候能尽快抓住问题的根源提供快速修复，避免造成业务损失。&lt;/li&gt;
-  &lt;li&gt;微服务必须能够处理流量增长过程中可能出现的爆发和流量尖峰。它必须能以可扩展的方式应对可能出现的业务俱增或者骤降，
-有效地伸缩使用分配的硬件资源，防止可能的流量洪峰造成整个系统的奔溃。然而这些总是说起来容易作起来难。即使是设计良好的微服务，
-即便他们拥有良好的监控、日志措施，一旦出现流量尖峰仍然可能带来系统性的问题。通常来说，这些尖峰应该在基础设施层面做好规划，
-并辅以适当的负责测试措施来事先演练可能出现的情况。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;通常情况下，大型的微服务系统可能跑在跨越多个地区的数据中心上，这些数据中心甚至可能跨越地理上相距甚远的国家。
-&lt;strong&gt;数据中心之间的数据通信出现问题&lt;/strong&gt;并不是一个少见的现象；在基础设施层做好流量的分发和路由是一种常见的做法，
-当然上层的微服务应用也要做好流量被重定向到其它数据中心的准备；这个过程中系统的可用性还不能降低太多。&lt;/p&gt;
-
-&lt;h3 id=&quot;任务管理&quot;&gt;任务管理&lt;/h3&gt;
-
-&lt;p&gt;任何一个微服务都需要出来来自其上游的某些任务请求，做相应的本地处理或者运算，返回处理响应给请求的发送者。
-这个过程中，它可能还要产生新的请求发给其下游的微服务完成自己的处理过程；这里面的每一次处理可以成为一个任务。
-线上的微服务系统在任一时刻可能有大量的任务被同时处理，性能和扩展的角度要求我们尽量提高微服务的处理能力以便更有效地使用资源。
-有许多制约因素值得考虑&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;编程语言和对应框架的限制，很多时候多任务处理的能力和微服务本身的编程语言选择密切相关，
-因为不同的编程语言可能有自己特色的平台框架来完成任务处理，并发控制，异步调度等纯技术的挑战。
-某种程度上说，编程语言的选择是具体微服务设计中的最大的架构决策；这方面需要根据具体微服务的目标和团队背景合理选择，没有一种编程语言适用于所有场景。
-当然选择太多的编程语言也会带来巨大的平台支持挑战。&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;除了编程语言上的限制，微服务团队在设计自己的服务的时候，也需要用标准化地方式思考他们的架构怎么处理任务，这种处理的效率怎么样，
-当更多的请求上来的时候它的处理机制是否容易扩展的问题。为了提高处理能力，任务处理需要支持并发和分区。
-并发意味着不能采用单线程的方式一个任务处理完再调度下一个的方式，因为这样会浪费大量的资源并引起竞争和锁开销。
-分区则要求我们可以将大的任务拆分成小的颗粒去并行调度和执行，执行完毕之后结果可以高效地合并起来。&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;数据存储的扩展性&quot;&gt;数据存储的扩展性&lt;/h3&gt;
-
-&lt;p&gt;微服务系统中的数据存储访问和管理经常成为性能和扩展的痛点。微服务&lt;strong&gt;怎样设计它的数据分割和扩展往往成为整个微服务系统扩展的一个最大的限制&lt;/strong&gt;因素。
-选择正确的数据库系统（不同的微服务可能有不同的选择，完全由业务逻辑的特点决定）在微服务设计中是一个至关复杂的话题。&lt;/p&gt;
-
-&lt;p&gt;仔细审视微服务生态系统的四个层次发现我们可以有两种思路，一种是在平台层将数据库软件作为服务提供给具体的微服务；一种思路是由各个微服务团队自己选择
-采用哪种数据库，怎么集成、打包和发布他们的数据库。当然还有一种混合的思路也可以工作良好，即平台层提供数据库服务，
-同时允许微服务团队在给定的数据库平台服务不匹配他们的需求的时候，选择他们自己的数据库。&lt;/p&gt;
-
-&lt;p&gt;无论采用哪种方式，微服务团队都需要考虑应该采用关系数据库，还是采用弱结构化的NoSQL数据库；他们的业务扩张的方式是更需要水平扩展增加实例，还是水平扩展分配更多的资源。
-一般来说，如果水平扩展的要求比较高，读写需要并行地进行，那么NoSQL可能是更好的选择。&lt;/p&gt;
-
-&lt;p&gt;另外一个麻烦的挑战来源于数据库的测试，尤其是&lt;strong&gt;测试数据的构建、使用和管理&lt;/strong&gt;。
-在部署流水线中，staging阶段需要读写真正的数据库，full staging的情况下，测试环境会有自己独立的数据库，所有的测试数据库访问都会和生产环境的数据隔离开了。
-而partial stagging的部署情况下，测试可能需要访问生产数据库；这个时候我们需要格外小心确保生产数据库可以正确地区分测试数据不至于被写坏，
-并且测试过程中产生的数据可以被定期地清除以免产生不必要的垃圾。&lt;/p&gt;
-
-&lt;h2 id=&quot;容错和容灾演练&quot;&gt;容错和容灾演练&lt;/h2&gt;
-&lt;p&gt;生产环境就绪的微服务系统需要保证能在服务出错的情况下仍然可用，并在发生灾难性故障的时候，有恰当的应对措施提供定义好的可用性等级。
-这不仅要求微服务系统设计经过仔细的规划，准备好灾难处理，还要求时不时地将某些微服务置于失效的情况下，然后确保它可以正常而优雅地恢复服务。&lt;/p&gt;
-
-&lt;h3 id=&quot;容错处理的基本原则&quot;&gt;容错处理的基本原则&lt;/h3&gt;
-
-&lt;p&gt;在一个由很多个微服务组成的微服务系统中，任何一个可能发生错误的微服务都最终会在某个时间出错。复杂的服务间依赖关系会导致其中一个服务的错误
-蔓延到其他相互依赖的服务上，如果处理不当最终会导致整个系统的失效和不可用。唯一的应对措施是，&lt;strong&gt;务必保证系统中的每一个微服务都是&lt;/strong&gt;可容错的并做好容灾准备。&lt;/p&gt;
-
-&lt;p&gt;要想达到上述目标，第一件事情就是需要定位系统中的单点故障并竭力从设计上去除这些单点故障。所谓的单点故障是指，
-某个服务（或者其他实体）出现故障的时候，整个系统就会变得不可用。在微服务生态系统中，四个层次中的每一层都可能存在潜在的单点。
-有时候并不是系统中的所有单点故障都可以完美地从设计中移除。此时我们需要识别系统中可能的失败场景，并做好应对措施。&lt;/p&gt;
-
-&lt;p&gt;从设计上我们需要做到让微服务可以应对两种可能的错误&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;内部错误，即微服务内部设计上的可能的错误&lt;/li&gt;
-  &lt;li&gt;外部错误则包括微服务生态系统上其它层次的错误&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;一旦我们移除了单点，并识别到了可能的失败场景，下一件重要的事情是需要验证和测试是否我们的微服务可以在出现错误或者灾难的时候可以从容地从错误中恢复服务；
-并因此&lt;strong&gt;确定微服务是否具有足够的弹性&lt;/strong&gt;来应对错误。再好的设计都必须用严格的测试来保证当具体的微服务被置于错误的场景的时候系统是否可以足够从容地恢复。
-一种常见的做法是，定期而随机地将生产环境中的某些微服务置于失效的场景（杀死或者关闭某些基础设施），并测试是否系统的正常运行收到影响。&lt;/p&gt;
-
-&lt;p&gt;由于并不是所有的错误和灾难都可以被事前预测，非技术的组织因素也应该被仔细准备。包括错误检测机制和应对策略需要被预先准备并制定好周密的计划；
-一旦出现事前未预料到的故障，可以按照事前定义的策略很快地处理以恢复系统服务。&lt;/p&gt;
-
-&lt;h3 id=&quot;避免系统单点故障&quot;&gt;避免系统单点故障&lt;/h3&gt;
-
-&lt;p&gt;理论上说，任何一个微服务从设计上来说都不应该引入单点故障；而现实情况是，很多微服务都会经常性地编程系统的单点。
-在系统真正失败的时候识别系统中的微服务单点是很容易的，而事前分析和发现系统的单点则困难得多；当然我们要也能通过坐等单点故障出现来慢慢修复单点。
-一种好办法是事先和具体的微服务团队进行服务架构评审，并通过仔细的分析和提问发现潜在的单点。架构师可以和微服务团队的成员在白板前
-就该微服务可能的错误场景进行讨论，借此识别可能出现的故障点。一旦识别到这些可能的故障点，要么我们需要从设计上将其从微服务架构中去除，
-要么就要设计好应对措施；注意前者并不是总能够做到的。&lt;/p&gt;
-
-&lt;h3 id=&quot;典型错误场景&quot;&gt;典型错误场景&lt;/h3&gt;
-
-&lt;p&gt;识别可能出现的错误或者灾难场景是去除单点故障之后的下一步要做的要紧事。通常我们可以依据微服务生态系统的层次划分，将这些错误和灾难分为四类&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;最常见的错误是硬件的错误或者失效&lt;/li&gt;
-  &lt;li&gt;基础设施层（通信基础设施，中间件，网关、路由、服务发现）的故障&lt;/li&gt;
-  &lt;li&gt;依赖微服务的失效&lt;/li&gt;
-  &lt;li&gt;微服务内部的错误&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;完整地列举所有可能的错误场景是不现实的，然而分析一些常见的失效场景却可能是非常有意义的。
-这些错误可能和整个组织的文化和行为方式有密切的关系，并会对整个微服务生态系统的可靠性造成巨大的影响。
-当然这也是为什么我们需要标准化的微服务实践以便更好地规避这些可能的陷阱。&lt;/p&gt;
-
-&lt;p&gt;第一种常见的错误是缺乏足够的微服务设计和充分的架构分析和讨论，从而使得&lt;strong&gt;服务的设计低劣&lt;/strong&gt;。这在大型的组织中影响格外大需要更加小心留意。
-需要避免这种错误的原因也显而易见：没有人可以有能力知道大型系统的所有细节，没有人知道四个层次中所有的关键细节知识。
-当新的系统被设计，新的微服务被添加的时候，确保生态系统中的四个层次中的工程师参与设计的评审过程以决定系统或者服务应该怎样构建和运行是是至关重要的。
-由于微服务系统的演进速度可能很快，定期的设计评审和文档化以保持架构的新鲜度往往是必须的：死的架构文档是没有意义的。&lt;/p&gt;
-
-&lt;p&gt;第二种场景的错误是缺乏足够充分的代码评审。当然这个问题不是微服务架构独有的，微服务架构的方式却有意无意地放大了这个问题的严重程度。
-每个微服务的设计和演进和其他微服务尽量保持解耦这一目标给微服务组织带来了新的挑战。复杂的微服务系统中，要求频繁的上下文切换，更多的汇报或者会议，
-管理人员对速度的迷恋都会导致无穷无尽的bug被引入到系统中而没有被恰当的代码评审所发现。我们可以写更多的测试来覆盖可能场景，
-增加更多的回归测试条件，确保如果代码bug没有被评审时候发现，那么它也可以在自动化测试或者持续部署流水线中发现。&lt;/p&gt;
-
-&lt;p&gt;另外一种常见的问题来源于部署错误；这可能是前两种常见错误的延伸，比如没有经过仔细设计和评审的包含bug的代码在未经过充分的测试或者良好的持续部署流水线检查即进入生产环境，
-往往会带来灾难性的后果造成线上环境事故。构建良好的工程师文化氛围确保&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;代码评审可以被认真地对待&lt;/li&gt;
-  &lt;li&gt;开发人员有足够的时间来评审他们同事的代码，并尽量在开始的时候就一次将可能做好的事情做对&lt;/li&gt;
-  &lt;li&gt;构建稳定、可靠的基础设施和自动化测试环境&lt;/li&gt;
-  &lt;li&gt;采纳良好的持续集成和持续部署实践&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;硬件错误&quot;&gt;硬件错误&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;通信层和平台层错误&quot;&gt;通信层和平台层错误&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;服务依赖错误&quot;&gt;服务依赖错误&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;服务内部错误&quot;&gt;服务内部错误&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;弹性测试&quot;&gt;弹性测试&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;故障检测和修复&quot;&gt;故障检测和修复&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;事故和响应处理&quot;&gt;事故和响应处理&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;微服务监控&quot;&gt;微服务监控&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;文档&quot;&gt;文档&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="architecture" /><category term="microservice" /><category term="standardization" /><summary type="html">微服务作为一种分布式的软件架构风格几乎已经席卷软件开发的各个角落；尽管它从被明确提出之后也很快经历了大量的质疑、批判乃至否定； 然而背后实践这一符合康威定律的简单（将问题分而治之）而又复杂（需要解决服务本身引起的的许多复杂的基础设施问题）的架构风格的组织却与日俱增。 其原因也不过是随着云计算技术的逐步深入，分布式架构成为最简单的选择，因为大部分情况下处于成本的考量，我们更需要水平扩展而不是垂直扩展； 微服务引入过程中的一些痛点也随着越来越多云原生应用的开源组件的出现而得到缓解。尝试将微服务实践标准化以降低实施成本的努力也变得不再是“空中楼阁”了， 走的人多了，必然有些更容易走的”直路”显现出来。</summary></entry></feed>
+&lt;p&gt;希望下次再动手写一个工具的时候，还可以再次深入的学习Rust的其它美妙之处。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><summary type="html">公司里面进来切换到了一个新的Backlog管理工具来管理日常的需求和项目规划，可惜新的工具虽然是名门之秀的JIRA（来自于澳大利亚的ＩＴ公司confluence），但是访问起来却异常痛苦， 经常一个页面打开需要等待大半天还是不是崩溃。有些心急的同时已经默默地回到了老的方式，导出数据到Excel然后打开Office工具来搞定。 作为一名程序员，最简单直接的想法就是自己撸起袖子来写代码解决呗，即使是投入产出比不高，好歹是在写工具的过程中提高了自己，一举多得何乐而不为呢？</summary></entry></feed>
