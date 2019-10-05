@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-04T18:28:03+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-05T18:13:04+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
 可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。&lt;/p&gt;
 
 &lt;p&gt;之前除了一些社区的抱怨
@@ -827,7 +827,7 @@ Jorg通过他探索的技巧来降低编译时间的负担，我们可以借助�
 &lt;p&gt;然而一次偶然听到的InfoQ大会上张磊做的关于Kubernetes本质和演进的演讲勾起了我内心的兴趣；我不禁想&lt;strong&gt;能够将这个庞大的开源项目做条分缕析、深入浅出地介绍的明明白白的技术人&lt;/strong&gt;开的专栏必然不简单。
 于是才又“精明”地收藏了这个专栏并在节日活动的时候果断购入，然后依照自己的节奏慢慢消化吸收。&lt;/p&gt;
 
-&lt;p&gt;原作者的内容分为八个部分来阐述，这里也就着作者本身的顺序简单地记录下自学过程中的一些重要要素和思考。&lt;/p&gt;
+&lt;p&gt;原作者的内容分为几个部分来阐述的，这里也就着作者本身的顺序简单地记录下自学过程中的一些重要要素和思考。&lt;/p&gt;
 
 &lt;h2 id=&quot;kuberenetes的背景和容器技术的基本发端&quot;&gt;Kuberenetes的背景和容器技术的基本发端&lt;/h2&gt;
 &lt;p&gt;第一个部分是关于历史背景的讲述，这方面的故事在好多地方都流传甚广了。简单来说Kubernetes这个项目其实是&lt;strong&gt;Google内部自己已经做了很多年的分布式系统开发经验&lt;/strong&gt;并经历了多次迭代之后的结晶，开源给整个业界使用的。&lt;/p&gt;
@@ -1015,7 +1015,7 @@ Docker容器技术的出现初看起来没有太大技术本质上的创新，�
 &lt;/ul&gt;
 
 &lt;h4 id=&quot;拓扑状态&quot;&gt;拓扑状态&lt;/h4&gt;
-&lt;p&gt;基于拓扑顺序而言的有状态应用而言，我们可以利用headless service的概念，通过拿到service名字只会，直接用label选择规则就可以定位到对应的service POD实例的IP，而不需要经过virtual IP机制。&lt;/p&gt;
+&lt;p&gt;基于拓扑顺序而言的有状态应用而言，我们可以利用headless service的概念（即需要指定&lt;code class=&quot;highlighter-rouge&quot;&gt;clusterIP=None&lt;/code&gt;），通过拿到service名字之后，直接用label选择规则就可以定位到对应的service POD实例的IP，而不需要经过virtual IP机制。&lt;/p&gt;
 
 &lt;p&gt;这一策略能行得通是因为POD在被创建的时候，&lt;strong&gt;每个POD都被赋予一个带编号的名字&lt;/strong&gt;(比如web-1/web-2/等)，并且这些编号从1开始依次增加，严格按照顺序创建。
 销毁的时候，也需要按照顺利进行。&lt;/p&gt;
@@ -1041,8 +1041,331 @@ Docker容器技术的出现初看起来没有太大技术本质上的创新，�
   &lt;li&gt;控制器会重新尝试创建对应编号的POD，并且在创建之后，尝试重新关联相同编号的PVC&lt;/li&gt;
 &lt;/ol&gt;
 
+&lt;h4 id=&quot;statefulset的设计思想&quot;&gt;StatefulSet的设计思想&lt;/h4&gt;
+&lt;p&gt;综合以上两种情况，可以看出来StatefulSet的核心思路是&lt;strong&gt;其本身是一种特殊的Deployment，它所控制的POD资源在运行调度的时候，每一个POD都会被单独编号&lt;/strong&gt;；并且这些编号信心还会反应在其POD资源的名字和DNS信息上，作为POD的网络身份名字。&lt;/p&gt;
+
+&lt;p&gt;基于该编号信息，它就可以利用Kubernetes里面的Headless Service和PV、PVC的概念，实现对POD的拓扑状态和存储资源状态的维护和控制。&lt;/p&gt;
+
 &lt;h3 id=&quot;daemonset守护进程&quot;&gt;DaemonSet守护进程&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;TBD&lt;/strong&gt;&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kubernetes" /><category term="notes" /><category term="engineering" /><category term="tools" /><category term="container" /><summary type="html">云计算从十年前的风起云涌却叫好不叫座的局面慢慢地变成了无人刻意提起的境地，这一切的幕后游戏规则改变者某种程度上来说 都是因为Kubernetes这个伟大的开源项目以及依托于它的云原生运动 (参考前文)) 的蓬勃发展而激发。</summary></entry><entry><title type="html">C++20 - 下一个大版本功能确定</title><link href="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/" rel="alternate" type="text/html" title="C++20 - 下一个大版本功能确定" /><published>2019-06-23T00:00:00+08:00</published><updated>2019-06-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/">&lt;p&gt;C++20的功能特性已经于3月份冻结，显然&lt;strong&gt;这次终于来了一波大的改进&lt;/strong&gt;，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。&lt;/p&gt;
+&lt;p&gt;DaemonSet是另外一个控制器，它的主要场景类似于普通Linux系统里面的守护进程，只不过它的作用域是一个一个独立的Kubernetes集群节点，即我们想控制一些POD的部署，让它&lt;strong&gt;确保在整个集群的每个节点上都有且仅有一个POD实例&lt;/strong&gt;在运行的场景。&lt;/p&gt;
+
+&lt;p&gt;如果集群被扩容（即有新的节点加入进来），那么DaemonSet会立刻在这个新的节点上创建一个新的POD出来；而当某个节点被删除的时候，其上的POD也会被自动清理掉。&lt;/p&gt;
+
+&lt;p&gt;这种控制器的应用场景包含一些特殊的插件的Agent，比如网络或者存储插件，监控和日志等组件；它们基本的工作原理都是在一个节点上创建一个唯一的实例，完成网络处理、文件系统挂载、日志转发和监控等节点层面唯一的处理。&lt;/p&gt;
+
+&lt;h4 id=&quot;daemonset如何保证唯一&quot;&gt;DaemonSet如何保证唯一&lt;/h4&gt;
+&lt;p&gt;其控制器通过&lt;strong&gt;获取etcd数据库里面的Node列表，然后逐一遍历&lt;/strong&gt;其中的节点并做相应的检查，即可判定是否需要创建或者删除POD。
+如果没有，则新创建POD；如果多余一个，则执行删除即可。&lt;/p&gt;
+
+&lt;p&gt;删除的操作比较简单，通过现有的API调用即可；添加操作稍微麻烦一点。
+旧版的API可以通过指定POD对象的&lt;code class=&quot;highlighter-rouge&quot;&gt;nodeSelector&lt;/code&gt;将新的节点名字加上去；但是这样的操作多少有些不方便并且将要被废弃。&lt;/p&gt;
+
+&lt;p&gt;更好的方法是通过&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.nodeAffinity&lt;/code&gt;来实现，例如下面的例子&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;apiVersion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;v1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Pod&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;metadata&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;with-node-affinity&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;affinity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;nodeAffinity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;nodeSelectorTerms&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;matchExpressions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;metadata.name&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;operator&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;In&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node-geektime&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里要求在每次调度的时候予以考虑如下的匹配条件，具体的条件是当其&lt;code class=&quot;highlighter-rouge&quot;&gt;metadata.name&lt;/code&gt;是&lt;code class=&quot;highlighter-rouge&quot;&gt;node-geektime&lt;/code&gt;的时候才需要运行POD。&lt;/p&gt;
+
+&lt;h5 id=&quot;污点标记&quot;&gt;污点标记&lt;/h5&gt;
+&lt;p&gt;DaemonSet能在Node初始化完毕之前就启动，它所依赖的机制是一个&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.tolerations&lt;/code&gt;的声明，比如我们允许对应的节点是&lt;code class=&quot;highlighter-rouge&quot;&gt;unschedulable&lt;/code&gt;的节点也可以允许调度；而默认情况下这样的节点上不会调度任何POD。&lt;/p&gt;
+
+&lt;p&gt;加上了这个标记，即使对应的Node不可用，Kubernetes也会尝试去调度对应的POD直到成功位为止。当然对应的节点如果发生故障的话，调度则会失败。&lt;/p&gt;
+
+&lt;p&gt;这样的机制很有用，是因为一些特殊的插件agent比如&lt;strong&gt;网络插件，必须要在节点还没有完全完成初始化的时候&lt;/strong&gt;被先调度起来。利用这个技巧，我们甚至可以在集群的master节点上选择调度某个POD。&lt;/p&gt;
+
+&lt;h3 id=&quot;非长时间执行的服务&quot;&gt;非长时间执行的服务&lt;/h3&gt;
+&lt;p&gt;除了常见的微服务应用，Kubernetes也可以用来处理一些不是需要一直运行的任务，一般情况下人们称之为离线业务或者批处理业务。这些业务的执行特点是&lt;strong&gt;一次执行之后就退出&lt;/strong&gt;了，如果我们仍然选择上述的控制器来管理，
+就会引起循环的调用和推出，类似于滚动更新等高级功能就无法工作了。&lt;/p&gt;
+
+&lt;p&gt;早期Google自己的Borg系统就提出了两种业务形态，分别是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Long Running Service即长时间运行的服务&lt;/li&gt;
+  &lt;li&gt;Batch Jobs即批处理作业；该形态自然也被加入到了Kubernetes中&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;job&quot;&gt;Job&lt;/h4&gt;
+&lt;p&gt;Job对应于专门的一次性执行的任务，它通过&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.template.spec.restartPolicy=Never&lt;/code&gt;来指定任务完成后不用重启。
+Job控制器会在运行期的时候为实际的POD实例生成一个常常的UUID，保证对应的JOB和它的POD实现一一匹配。&lt;/p&gt;
+
+&lt;p&gt;当然上述的&lt;code class=&quot;highlighter-rouge&quot;&gt;restartPolicy&lt;/code&gt;&lt;strong&gt;可以被设置为&lt;code class=&quot;highlighter-rouge&quot;&gt;OnFailure&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;Never&lt;/code&gt;&lt;/strong&gt;,前者对应于失败的时候允许重新启动以便实现出错重试的逻辑。
+同时需要谨慎使用该逻辑，因为如果程序有问题，我们不太会期望Job被重试太多次而浪费资源！
+幸好Kubernetes自己已经给设置了一个最大的重试次数，&lt;strong&gt;没有指定的情况下会重试6次&lt;/strong&gt;，我们可以通过指定一个新的值给&lt;code class=&quot;highlighter-rouge&quot;&gt;backoffLimit&lt;/code&gt;来自定义重试次数。&lt;/p&gt;
+
+&lt;p&gt;离线作业还有一种情况是因为种种原因，POD容器里面定义的操作迟迟没有结束，为了避免占用太多的资源，Kubernetes允许我们设置&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.activateDeadlineSeconds&lt;/code&gt;来指定最长允许运行的时间；超过了之后，对应的Pod就会被终止。
+因为超过时限而终止的POD的状态也可以在POD的状态里面看到。&lt;/p&gt;
+
+&lt;h4 id=&quot;并行作业和最小完成数&quot;&gt;并行作业和最小完成数&lt;/h4&gt;
+&lt;p&gt;某些特殊的任务可以并行去完成，对应的控制参数是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.parallelism&lt;/code&gt;指定最多同时可以启动的POD的个数&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.completions&lt;/code&gt;定义了Job完成时最少需要正常完毕的POD的个数&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;cronjob&quot;&gt;CronJob&lt;/h4&gt;
+&lt;p&gt;CronJob用来描述需要定期执行的任务，它和Job的关系就如同Deployment和POD的关系一样，即&lt;strong&gt;CronJob是通过控制Job对象来完成定时任务&lt;/strong&gt;的。
+它所创建和删除Job的依据是API定义中传入的符合Unix Crontab格式的调度表达式。&lt;/p&gt;
+
+&lt;h2 id=&quot;持久化存储&quot;&gt;持久化存储&lt;/h2&gt;
+&lt;p&gt;前面部分探讨有状态服务部署的时候，以及简要涉猎了存储部分的概念，这一部分则深入探究这些概念背后的细节。
+从概念上说，PV描述了实际运维人员负责创建并放置到Kubernetes集群里给各个POD使用的持久化存储数据卷实现，而PVC则相当于是存储需求的接口描述；这里的基本思想是&lt;strong&gt;面向对象式的接口和实现分离&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;但是一个棘手的问题是，有可能POD启动的时候，PVC的匹配没有成功，那么POD启动就会失败。如果此时运维人员及时发现了这一问题，并创建新的PV存储加入到平台中，怎么保证新创建的PV可以被正确的识别和匹配？
+问题的答案在于系统内部的一个特殊的控制器：PersistentVolumeController。&lt;/p&gt;
+
+&lt;h3 id=&quot;persistentvolumecontroller&quot;&gt;PersistentVolumeController&lt;/h3&gt;
+&lt;p&gt;该控制器会定期去查看每一个PVC，&lt;strong&gt;检查它是否已经处于绑定状态&lt;/strong&gt;，如果不是则会查找所有的PV，找到一个匹配的并与PVC做绑定。
+绑定的过程其实是通过填充&lt;code class=&quot;highlighter-rouge&quot;&gt;spec.volumeName&lt;/code&gt;字段来完成的，从而只要Kubernetes能够找到这个PVC对象，它就可以将之分配给需要的POD来使用。&lt;/p&gt;
+
+&lt;h3 id=&quot;pv如何完成绑定&quot;&gt;PV如何完成绑定&lt;/h3&gt;
+&lt;p&gt;PV的所谓持久化，意味着挂载目录里面的内容不会因为容器的删除而被销毁清理，也不会跟某个具体的宿主机（节点）进行绑定，因为容器可能在下次重新调度的时候，在一个完全不同的宿主机上被创建出来。
+因而&lt;strong&gt;持久化卷的实现往往需要依赖于一个远程通过网络访问的存储服务&lt;/strong&gt;，比如NFS文件系统或者公有云服务提供商的远程磁盘等。&lt;/p&gt;
+
+&lt;p&gt;其准备阶段可以认为经历两个阶段的处理&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;将远程的存储服务挂载到宿主机上，这个阶段被成为Attach操作&lt;/li&gt;
+  &lt;li&gt;第二个步骤类似于文件系统的格式化操作并挂载到具体的宿主机指定的挂载点上，以便POD能够访问&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;经过了这两个阶段，内部的kubelet只需要&lt;strong&gt;将对应的目录通过container接口的mount参数传递给docker容器&lt;/strong&gt;就可以让POD里面的容器能够访问这个持久化的存储卷了。&lt;/p&gt;
+
+&lt;p&gt;反向的解绑和删除操作只需要理解为是以相反的顺序执行相反的操作即可，即先unmount然后再detach。&lt;/p&gt;
+
+&lt;p&gt;更具体地说，上述两个阶段也是由两个控制器来负责的&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;AttachDetachController负责关于POD和宿主机的attach/detach情况的检查和操作，该控制器需要运行在master节点上，因为它自身是kube-controller-manager的一部分&lt;/li&gt;
+  &lt;li&gt;VolumeManagerReconciler作为Kubelet组件的一部分负责宿主机上的mount/unmount操作&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;storage-class和pv创建&quot;&gt;Storage Class和PV创建&lt;/h3&gt;
+&lt;p&gt;在大规模的生产线环境中，不同的微服务容器可能需要用到成千上万个PVC，从而意味着需要准备大量的PV。
+在业务动态开发扩大的过程中，系统中的PVC可能会动态地发生变化，指望运维来人肉创建PV显然是难以为继的。
+显然我们需要一种能够&lt;strong&gt;动态创建PV的机制，该机制的核心则依赖于名字为StorageClass&lt;/strong&gt;的对象。&lt;/p&gt;
+
+&lt;p&gt;从对象的名字来看，它其实是一种PV创建方法的模板；它需要定义两个部分的信息&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;PV本身的属性，如存储类型，卷的大小容量等信息&lt;/li&gt;
+  &lt;li&gt;创建过程中所要用到的存储系统插件，如Ceph等。
+有了这些信息，Kubernetes就可以&lt;strong&gt;依据用户声明中的PVC，找到对应的&lt;code class=&quot;highlighter-rouge&quot;&gt;StorageClass&lt;/code&gt;&lt;/strong&gt;，然后利用其中定义的插件来生成实际需要的PV。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;pvpvc机制是否是过度设计&quot;&gt;PV/PVC机制是否是过度设计&lt;/h3&gt;
+&lt;p&gt;探讨是否过度设计的问题，往往需要澄清清楚设计的目标然后才能判断是否有过度设计的嫌疑。
+作为一个面向开源社区的项目，这样的分离&lt;strong&gt;主要期望的是能够支持形形色色的第三方存储&lt;/strong&gt;系统的实现机制，并尽力对容器应用隐藏这些细节差异，
+因此&lt;strong&gt;灵活性和可扩展性&lt;/strong&gt;在这里成为被重点被关照的设计目标，从这个角度看就显然没有过度设计。&lt;/p&gt;
+
+&lt;p&gt;如果需要自己实现一个类似于本地磁盘访问一样的本地存储卷，甚至还要付出额外的努力来&lt;strong&gt;适配实现Kubernetes平台所要求的抽象分离设计要求&lt;/strong&gt;；处于可用性的考虑我们不能将目录直接映射为PV，而是采用块设备的方式来对应PV。
+由于这一本地块设备的挂载要早于POD调度，因此还要实现在使用本地磁盘卷之前先配置好磁盘或者块设备。&lt;/p&gt;
+
+&lt;h2 id=&quot;网络管理&quot;&gt;网络管理&lt;/h2&gt;
+
+&lt;p&gt;Docker容器本身提供了基于Linux内核命名空间的网络栈隔离机制，而Kubernetes本身的网络管理功能则依托于容器本身提供的网络隔离能力之上。&lt;/p&gt;
+
+&lt;h3 id=&quot;docker的网络栈&quot;&gt;Docker的网络栈&lt;/h3&gt;
+&lt;p&gt;具体到网络栈隔离，我们通常需要考虑如下这些要素&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;网卡设备&lt;/li&gt;
+  &lt;li&gt;本地回环设备即loopback&lt;/li&gt;
+  &lt;li&gt;路由表&lt;/li&gt;
+  &lt;li&gt;iptable访问规则&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Docker本身可以支持&lt;code class=&quot;highlighter-rouge&quot;&gt;host&lt;/code&gt;模式直接使用宿主的网络服务，而不采用命名空间隔离技术。当然这样的缺憾是所有的网络处理其实都是由宿主机来完成的，&lt;strong&gt;没有办法完成精细化的网络管理和控制&lt;/strong&gt;而且容易引起资源冲突；
+这样做也由明显的性能上的优势，却不符合绝大部分虚拟化的环境中的网络资源隔离和管控需求。
+Linux中我们可以&lt;strong&gt;通过网桥来实现虚拟网络交换&lt;/strong&gt;的工作，其原理是依赖于工作在数据链路层的MAC地址学习而将不同的数据包发送到不同的网络端口上的。&lt;/p&gt;
+
+&lt;h4 id=&quot;veth虚拟网桥&quot;&gt;veth虚拟网桥&lt;/h4&gt;
+&lt;p&gt;具体到Docker的实现来说，它通过&lt;strong&gt;虚拟的&lt;code class=&quot;highlighter-rouge&quot;&gt;veth&lt;/code&gt;设备来连接两个可以互联互通的容器&lt;/strong&gt;；在创建好的使用网桥的容器中，我们可以看到的&lt;code class=&quot;highlighter-rouge&quot;&gt;eth0&lt;/code&gt;其实就是网桥连通的一端。而连接的另一端则发生在宿主机上的名字为&lt;code class=&quot;highlighter-rouge&quot;&gt;vethxxxx&lt;/code&gt;的虚拟网卡设备；&lt;code class=&quot;highlighter-rouge&quot;&gt;brctl show&lt;/code&gt;可以看到虚拟网卡会被关联到具体的docker容器上；网桥设备则现实为&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;这样任何的&lt;code class=&quot;highlighter-rouge&quot;&gt;veth&lt;/code&gt;虚拟网卡都会变成是&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;网桥的从设备，所有的网络流量都会先发给&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;网桥，然后由网桥来决定将其转发到哪个容器对应的虚拟网卡上，即所有的这些&lt;strong&gt;从设备都变成网桥转发的一个端口&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;任何网络访问的请求都会处理大概如下的流程&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;容器里面的对外访问都会被路由到&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;网桥上去-具体情况可以在容器内查看路由表&lt;/li&gt;
+  &lt;li&gt;根据IP地址判定目标地址是否是本地容器里的IP
+　　- 如果是，则发送到&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;网桥，由网桥决定发送到哪个&lt;code class=&quot;highlighter-rouge&quot;&gt;vethxxx&lt;/code&gt;设备，一旦发送完毕，数据包就会自然出现在对应容器的&lt;code class=&quot;highlighter-rouge&quot;&gt;eth0&lt;/code&gt;网卡上
+　　- 如果不是，则会根据宿主机的路由规则来决定下一跳的节点&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;跨主机通信&quot;&gt;跨主机通信&lt;/h4&gt;
+&lt;p&gt;这样的机制保证了同一个节点上的容器之间的IP总是可以互相连通的，并且容器内的应用也可以访问宿主机上绑定的其它IP或者宿主机可以直接到达的目标地址。
+然而如果&lt;strong&gt;需要跨越主机访问另外一个机器内的容器的IP&lt;/strong&gt;的时候，Docker默认的桥接技术就无能为力了；需要借助容器编排平台的能力。&lt;/p&gt;
+
+&lt;p&gt;想要提供跨越主机的容器之间的互相访问，我们需要扩展上面的网桥的概念，创建一种虚拟的网桥将各个主机之间的容器都桥接起来，这种方法就像&lt;strong&gt;创建了一个覆盖在所有的容器网桥之上的一个虚拟网络&lt;/strong&gt;，所以被成为Overlay Network。&lt;/p&gt;
+
+&lt;h3 id=&quot;flannel&quot;&gt;Flannel&lt;/h3&gt;
+&lt;p&gt;CoreOS公司推出了被成为Flannel的框架来解决跨容器主机通信的问题；其本身由几种不同的后端实现，分别是&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;VXLAN&lt;/li&gt;
+  &lt;li&gt;host-gw&lt;/li&gt;
+  &lt;li&gt;UDP是&lt;strong&gt;最早提出也最容易&lt;/strong&gt;理解的方式，然而其&lt;strong&gt;性能也最差&lt;/strong&gt;，现在依据几乎不用了&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;udp&quot;&gt;UDP&lt;/h4&gt;
+&lt;p&gt;UDP的方式依赖于Flannel框架在宿主机上创建的&lt;strong&gt;工作在网络层的虚拟隧道设备&lt;code class=&quot;highlighter-rouge&quot;&gt;flannel0&lt;/code&gt;&lt;/strong&gt;，和重定向到这个隧道的路由表。当宿主机收到无法匹配到本机&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;的数据包的时候，它会根据flannel创建的路由重定向到这个名字为&lt;code class=&quot;highlighter-rouge&quot;&gt;flannel0&lt;/code&gt;的隧道设备上。&lt;/p&gt;
+
+&lt;p&gt;同时在宿主机上还有一个&lt;strong&gt;守护进程flanneld负责监控收到的包，然后依据各个节点上的flanneld之间相互维护的子网关系，将其转发到对应的其它宿主机上&lt;/strong&gt;的flanneld。
+实现上不同的机器会处于不同的子网中，因此flanneld可以根据子网信息决定应该发送到哪个具体ide节点上。而子网和节点的对应关系则存储在etcd数据库中。&lt;/p&gt;
+
+&lt;p&gt;flanneld之间的通信是通过UDP协议来完成的，UDP的源地址是发送方的宿主机的地址，而目的地址则是接收方的宿主机的地址。这样利用宿主机之间的路由表就可以完成数据的收发。&lt;/p&gt;
+
+&lt;h5 id=&quot;性能问题&quot;&gt;性能问题&lt;/h5&gt;
+&lt;p&gt;操作系统的运行概念上将程序的状态分为内核态和用户态，在这两个状态之间切换需要经历&lt;strong&gt;上下文切换&lt;/strong&gt;，并且它们访问的&lt;strong&gt;内存空间是物理上隔离&lt;/strong&gt;的；如果需要交换数据则必须要做内存的搬运。TUN隧道设备的特色是&lt;strong&gt;工作于用户空间&lt;/strong&gt;，即使简单的考虑用户从容器内发送数据出去就需要经过&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;容器到docker0的数据交换，从用户态到内核&lt;/li&gt;
+  &lt;li&gt;docker0到flanneld的交换，从内核态到用户态&lt;/li&gt;
+  &lt;li&gt;flanned到eth0的数据交换，又从用户态到内核态&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;算上接收方的方向处理，&lt;strong&gt;一次数据收发需要６次的数据切换&lt;/strong&gt;，性能开销很大，而用户的角度来看可能只期望两次。
+所以UDP方式的性能很差，很快人们就不再使用了。&lt;/p&gt;
+
+&lt;h4 id=&quot;vxlan&quot;&gt;VXLAN&lt;/h4&gt;
+&lt;p&gt;Linux本身支持Virtual Extensible LAN的虚拟可扩展局域网技术；使用这种技术来完成封装和解封工作就可以有效地规避UDP隧道带来的不必要的数据切换拷贝开销。&lt;/p&gt;
+
+&lt;p&gt;VXLAN的实现方式要求工作于数据链路层，并且会在宿主机上设置一个特殊的设备作为隧道通信的两端，即VTEP(VXLAN Tunning End Point)，它需要在数据链路层完成和上面的IP隧道类似的流程；主要的区别是&lt;strong&gt;所有的类似操作都在内核态完成&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;VETP设备的表现形态是&lt;code class=&quot;highlighter-rouge&quot;&gt;flannel.1&lt;/code&gt;设备，它工作在内核态并且作用在数据链路层上。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;flanneld&lt;/code&gt;则负责维护对应隧道的出口的VETH设备信息。
+因为二层设备需要依赖于MAC地址，因此&lt;code class=&quot;highlighter-rouge&quot;&gt;flanneld&lt;/code&gt;在宿主机上会依据节点的信息，通过ARP协议查询获取对应的MAC地址，然后将其对应关系保存下来。这样&lt;code class=&quot;highlighter-rouge&quot;&gt;flannel.1&lt;/code&gt;就可以根据该信息查询到IP对应的MAC信息了。&lt;/p&gt;
+
+&lt;p&gt;Linux内核会把目的设备的MAC地址和目标容器的&lt;strong&gt;IP地址信息写入VXLAN的内部数据帧结构&lt;/strong&gt;中，这部分信息会放在封装的外部数据帧中。同时此外部数据帧还包含VXLAN对应的头，里面包含由类似VNI的信息，然后将这些数据帧封装为一个UDP包发送出去。&lt;/p&gt;
+
+&lt;p&gt;同时为了使得该UDP包可以正确地发送出去，&lt;code class=&quot;highlighter-rouge&quot;&gt;flanneld&lt;/code&gt;还负责维护了一个&lt;strong&gt;转发数据库FDB，里面放置了MAC地址和IP地址、设备名称(flannel.1)的对应信息&lt;/strong&gt;，从而Linux内核可以依据该转发信息将UDP包发送到正确的主机上。&lt;/p&gt;
+
+&lt;h3 id=&quot;kubernetes的cni插件&quot;&gt;Kubernetes的CNI插件&lt;/h3&gt;
+&lt;p&gt;Kuberenetes管理网络插件的方法是通过&lt;strong&gt;名字为CNI的接口&lt;/strong&gt;来实现的。在CNI的术语里面，用于替代上述&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;的网桥名字被成为是&lt;code class=&quot;highlighter-rouge&quot;&gt;cni0&lt;/code&gt;。
+而Kubernetes里面的网络管理方式和上面的VXLAN模式几乎没有任何不同，只是&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;被换成了&lt;code class=&quot;highlighter-rouge&quot;&gt;cni0&lt;/code&gt;而已。&lt;/p&gt;
+
+&lt;p&gt;默认情况下，Kubernetes为Flannel分配的子网范围是&lt;code class=&quot;highlighter-rouge&quot;&gt;10.244.0.0/16&lt;/code&gt;，部署参数&lt;code class=&quot;highlighter-rouge&quot;&gt;--pod-network-cidr=xxx.xxx.xxx.xxx/yy&lt;/code&gt;可以指定新的子网。&lt;/p&gt;
+
+&lt;h4 id=&quot;为什么要用不同的名字&quot;&gt;为什么要用不同的名字&lt;/h4&gt;
+&lt;p&gt;如果是用docker命令行创建的容器，它的容器内的网桥还是会连接在&lt;code class=&quot;highlighter-rouge&quot;&gt;docker0&lt;/code&gt;上，而使用POD的方式创建的容器则会具有&lt;code class=&quot;highlighter-rouge&quot;&gt;cni0&lt;/code&gt;的接口，这样的不同是因为&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Kubernetes没有也不希望直接绑定于Docker的网络管理模型，因而它不希望管理和控制cni0&lt;/li&gt;
+  &lt;li&gt;Kubernetes自身的POD里面的&lt;code class=&quot;highlighter-rouge&quot;&gt;infra&lt;/code&gt;容器有特殊的设计；当&lt;strong&gt;POD被创建之后，Infra容器总是被先创建&lt;/strong&gt;，然后Kubernetes再调用CNI网络插件设置符合预期的网络空间&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;host-gw模式&quot;&gt;host-gw模式&lt;/h4&gt;
+&lt;p&gt;上述的第三种模式的工作模式如下&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;假设需要通信的&lt;strong&gt;节点之间在二层链路层是互通&lt;/strong&gt;的&lt;/li&gt;
+  &lt;li&gt;将每个flannel的子网的下一跳&lt;strong&gt;直接设置为该子网对应的宿主机的IP&lt;/strong&gt;地址&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;从而达到该宿主机本身成了容器通信路径里面的网管的作用，并且这些子网和对应主机的关联信息依然保存再etcd中；
+&lt;code class=&quot;highlighter-rouge&quot;&gt;flanneld&lt;/code&gt;则需要监控数据的变化，然后实时更新路由表。&lt;/p&gt;
+
+&lt;p&gt;实现host-gw模式的插件除了flannel之外还有&lt;strong&gt;利用BGP网关协议来实现互通性&lt;/strong&gt;的Calico项目。
+Calico的特色是不依赖上述的虚拟网桥设备的概念，而利用强大的边界网管协议，直接实现节点与节点之间的全息路由交换。&lt;/p&gt;
+
+&lt;h3 id=&quot;service对象&quot;&gt;Service对象&lt;/h3&gt;
+&lt;p&gt;Service对象其实就对应于常说的微服务应用，之所以我们需要这个概念是因为&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;POD是一个部署、调度期的概念，它的&lt;strong&gt;IP地址可能是不固定&lt;/strong&gt;的，而服务使用方却希望有一个确定的访问点&lt;/li&gt;
+  &lt;li&gt;需要考虑扩展性，多个POD还可能被负载均衡器所控制&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Kuberenetes通过使用&lt;code class=&quot;highlighter-rouge&quot;&gt;Service&lt;/code&gt;对象来&lt;strong&gt;选择某些符合条件的POD运行期实例&lt;/strong&gt;，并提供稳定的访问点(virtual IP)来提供外部应用程序对所抽象的应用服务的访问。
+显然Service要能正常工作，Kuberenetes灵活的网络层功不可没。&lt;/p&gt;
+
+&lt;h4 id=&quot;查看service的服务端点&quot;&gt;查看Service的服务端点&lt;/h4&gt;
+&lt;p&gt;具体哪些POD可以对外提供所声明的服务，是&lt;strong&gt;由Kubernetes运行时平台决定&lt;/strong&gt;的，它需要保证对应的POD满足&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;处于运行状态&lt;/li&gt;
+  &lt;li&gt;可用性检查探针检查通过&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;而当POD运行出现问题的时候，Kubernetes会立刻将其从Service的实例里面删除。&lt;/p&gt;
+
+&lt;h4 id=&quot;网络层如何工作&quot;&gt;网络层如何工作&lt;/h4&gt;
+&lt;p&gt;Service其实是&lt;strong&gt;依赖于iptables规则&lt;/strong&gt;来实现Virtual IP的重定向的，即这个所谓的ClusterIP可以不真正存在（即使ping不同它代理的Service也照样可以正常工作）。&lt;/p&gt;
+
+&lt;p&gt;同时Kubernetes提供了默认的基于轮询的负载均衡实现，而&lt;strong&gt;每一个提供服务的POD都会得到一条对应的路由转发规则&lt;/strong&gt;。为了保证多个POD实例得到服务的机会均等，对应的iptables规则里面会加上&lt;strong&gt;对应的probability设置&lt;/strong&gt;来影响路由规则的命中率。&lt;/p&gt;
+
+&lt;h4 id=&quot;iptables数量的限制&quot;&gt;iptables数量的限制&lt;/h4&gt;
+&lt;p&gt;由于Service的重定向需要依赖于大量的iptables规则的实时刷新和查询，当宿主机上由大量的POD需要被调度的时候，
+宿主机的资源会被大量消耗在iptables的处理中，因而&lt;strong&gt;基于iptables规则的Service机制成为制约POD数量&lt;/strong&gt;的一个主要因素之一。&lt;/p&gt;
+
+&lt;p&gt;IPVS模式通过在创建Service的时候在宿主机上创建虚拟网卡并分配service地址的方式来解决这个问题。
+然后kubeproxy组件就会通过Linux提供的IPVS模块为IP地址设置成多个虚拟主机，然后主机之间通过轮询的方式作负载均衡。
+通过将&lt;strong&gt;高负载的处理请求放入操作系统内核态&lt;/strong&gt;，IPVS有效地规避了大量动态iptables规则的刷新带来的性能问题。&lt;/p&gt;
+
+&lt;h4 id=&quot;service和dns&quot;&gt;Service和DNS&lt;/h4&gt;
+&lt;p&gt;Kubernetes会为Service和POD分配DNS名字；而Service从服务模式上可以分为&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;ClusterIP模式，对应的&lt;strong&gt;访问方式是基于Virtual IP&lt;/strong&gt;的&lt;/li&gt;
+  &lt;li&gt;Headless模式，此时ClusterIP设置为None,DNS解析的时候会&lt;strong&gt;直接指向一个稳定的POD对应的IP&lt;/strong&gt; 
+实际使用的过程中，需要根据应用服务的特征做合理的选择。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;kubernetes的调度和资源管理&quot;&gt;Kubernetes的调度和资源管理&lt;/h2&gt;
+&lt;p&gt;如前面所述，POD是Kuberenetes提供的最基本的资源调度单元，因此&lt;strong&gt;所有和资源控制管理有关的属性都可以并且应该属于POD&lt;/strong&gt;的字段；其中我们最熟悉也最重要的就是CPU和内存资源。&lt;/p&gt;
+
+&lt;h3 id=&quot;资源压缩&quot;&gt;资源压缩&lt;/h3&gt;
+&lt;p&gt;因为CPU资源不足的时候，POD只会因为饥饿而执行缓慢却&lt;strong&gt;不会直接退出&lt;/strong&gt;，因此CPU资源属于可压缩的资源。
+而内存则不同，当程序内存不足的时候，POD就会由于内存不足而&lt;strong&gt;直接被内核杀掉&lt;/strong&gt;，所以内存属于不可压缩的资源。&lt;/p&gt;
+
+&lt;p&gt;POD里面可以由多个不同的容器组成，而资源消耗的最小单元是容器而不是POD，所以一个&lt;strong&gt;POD所占用的资源等价于所有容器的资源的总和&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;cpu资源&quot;&gt;CPU资源&lt;/h4&gt;
+&lt;p&gt;Kubernetes用逻辑抽象的方式来定义CPU，其单位是CPU的个数，数字１表示限制为１个CPU，至于这个具体的1的含义是如何解释，完全取决于宿主机的实现，因为CPU资源属于可压缩的资源。
+同时我们&lt;strong&gt;可以将CPU资源限制设置为分数&lt;/strong&gt;，Kubernetes的惯用法是用类似于&lt;code class=&quot;highlighter-rouge&quot;&gt;500m&lt;/code&gt;来表示0.5个CPU。&lt;/p&gt;
+
+&lt;h4 id=&quot;内存资源&quot;&gt;内存资源&lt;/h4&gt;
+&lt;p&gt;Kubernetes的内存资源因为其不可压缩性，只能用类似于绝对数量的单位来表示。比如&lt;code class=&quot;highlighter-rouge&quot;&gt;1Ki&lt;/code&gt;表示1KB，而&lt;code class=&quot;highlighter-rouge&quot;&gt;1Mi&lt;/code&gt;表示1MB,
+基本上常见的表示内存容量的&lt;strong&gt;大写字母后面再加上小写字母i&lt;/strong&gt;就表示对应的容量。&lt;/p&gt;
+
+&lt;h3 id=&quot;资源请求和限制&quot;&gt;资源请求和限制&lt;/h3&gt;
+&lt;p&gt;从设计上来说，Kubernetes允许用户设置资源的上限和请求值，一般&lt;strong&gt;上限(limit)需要大于请求(request)&lt;/strong&gt;值。
+这样当调度的时候，&lt;strong&gt;调度器会按照请求值&lt;/strong&gt;进行计算，而传递给内核的cgroups的时候，实际设置的参数是上限。&lt;/p&gt;
+
+&lt;p&gt;这样的实际来源于Borg的动态资源边界定义&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;作业提交时设置的资源边界不一定是调度器需要严格遵守的&lt;/li&gt;
+  &lt;li&gt;实际情况下，大多数作业&lt;strong&gt;实际使用的资源比它请求的资源限制要小&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;pod调度类型&quot;&gt;POD调度类型&lt;/h4&gt;
+&lt;p&gt;考虑到POD可能由多个容器组成，容器里面可能会设置请求值和上限值，Kubernetes会给POD设定一个调度类型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;所有&lt;/strong&gt;的容器都设置了请求和上限值，并且&lt;strong&gt;请求和上限值总是相等&lt;/strong&gt;，POD就是guaranteed&lt;/li&gt;
+  &lt;li&gt;不满足上述条件，但是&lt;strong&gt;至少有一个容器&lt;/strong&gt;设置了请求值，那么POD就是Burstable&lt;/li&gt;
+  &lt;li&gt;既没有设置请求值也没有设置上限值，POD是BestEffort&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;当宿主机上的资源不足的时候，Kubernetes会根据POD的类型做不同的调度回收策略。默认情况下，这个触发阈值为&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;memory.available&amp;lt;100Mi
+nodefs.available&amp;lt;10%
+nodefs.inodesFree&amp;lt;5%
+imagefs.available&amp;lt;15%
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;当不得不回收POD资源的时候，根据POD的类型会&lt;strong&gt;先回收BestEffort类型&lt;/strong&gt;的，然后查找Burstable中那些&lt;strong&gt;使用量超出请求量&lt;/strong&gt;的POD优先进行回收，最后才是回收Guaranteed中的使用量超出限制量的POD。
+因此对于重要的应用POD，我们最好设置它的&lt;code class=&quot;highlighter-rouge&quot;&gt;request&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;limit&lt;/code&gt;是相等的。&lt;/p&gt;
+
+&lt;h4 id=&quot;cpuset来提升性能&quot;&gt;cpuset来提升性能&lt;/h4&gt;
+&lt;p&gt;使用容器的时候，我们可以将某个&lt;strong&gt;容器绑定到特定的CPU核&lt;/strong&gt;上来减少上下文切换次数，提高应用程序的性能。
+如果要使用该特性，需要保证POD是Guaranteed类型的，然后设置&lt;code class=&quot;highlighter-rouge&quot;&gt;limits&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;requests&lt;/code&gt;里面的&lt;code class=&quot;highlighter-rouge&quot;&gt;cpu&lt;/code&gt;&lt;strong&gt;属性是相同的整数值&lt;/strong&gt;，而具体的整数值的含义是由Kubernetes调度器来负责分配的。&lt;/p&gt;
+
+&lt;h3 id=&quot;gpu和device-plugin&quot;&gt;GPU和Device Plugin&lt;/h3&gt;
+&lt;p&gt;除了常见的CPU和内存资源外，Kubernetes平台也提供了灵活的&lt;strong&gt;插件化机制来分配和管理特殊的&lt;/strong&gt;资源，诸如GPU、FPGA等非常规资源。&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+&lt;p&gt;作为资深的Kubernetes开发人员，张磊提供了一个百科全书式的深入浅出的介绍，既有&lt;strong&gt;深度探索实现机制的例子&lt;/strong&gt;又有各种可选方案的理论特色的介绍。
+课程的内容无论是广度还是深度上都远远超出了专栏本身的定价；
+显然这&lt;strong&gt;不是一门浅尝辄止就可以掌握&lt;/strong&gt;的课程，值得多次回顾以便更加深入地理解这一改变技术界的云平台管理工具。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="kubernetes" /><category term="notes" /><category term="engineering" /><category term="tools" /><category term="container" /><summary type="html">云计算从十年前的风起云涌却叫好不叫座的局面慢慢地变成了无人刻意提起的境地，这一切的幕后游戏规则改变者某种程度上来说 都是因为Kubernetes这个伟大的开源项目以及依托于它的云原生运动 (参考前文)) 的蓬勃发展而激发。</summary></entry><entry><title type="html">C++20 - 下一个大版本功能确定</title><link href="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/" rel="alternate" type="text/html" title="C++20 - 下一个大版本功能确定" /><published>2019-06-23T00:00:00+08:00</published><updated>2019-06-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/06/23/cpp-20-modules-concepts-coroutine/">&lt;p&gt;C++20的功能特性已经于3月份冻结，显然&lt;strong&gt;这次终于来了一波大的改进&lt;/strong&gt;，而不再是像之前C++14/C++17那般小打小闹的做小步快跑，尤其是三个讨论很久的大feature终于被合入主干；并且这些feature终将会极大地影响后续C++代码的书写方式。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
