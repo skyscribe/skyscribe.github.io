@@ -19,7 +19,7 @@
 
 
 
-<title>重学Kubernetes - 学张磊的《深度剖析Kubernetes》 - 驭风万里无垠</title>
+<title>重学Kubernetes - 读张磊的《深度剖析Kubernetes》 - 驭风万里无垠</title>
 
 
 
@@ -33,7 +33,7 @@
 
 <meta property="og:locale" content="en">
 <meta property="og:site_name" content="驭风万里无垠">
-<meta property="og:title" content="重学Kubernetes - 学张磊的《深度剖析Kubernetes》">
+<meta property="og:title" content="重学Kubernetes - 读张磊的《深度剖析Kubernetes》">
 
 
   <link rel="canonical" href="https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/">
@@ -46,7 +46,7 @@
 
 
   <meta name="twitter:site" content="@skyscribe">
-  <meta name="twitter:title" content="重学Kubernetes - 学张磊的《深度剖析Kubernetes》">
+  <meta name="twitter:title" content="重学Kubernetes - 读张磊的《深度剖析Kubernetes》">
   <meta name="twitter:description" content="云计算从十年前的风起云涌却叫好不叫座的局面慢慢地变成了无人刻意提起的境地，这一切的幕后游戏规则改变者某种程度上来说都是因为Kubernetes这个伟大的开源项目以及依托于它的云原生运动(参考前文))的蓬勃发展而激发。">
   <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/">
 
@@ -322,7 +322,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/tools/index.html">tools(24)</a>
+      <a href="/categories/tools/index.html">tools(25)</a>
   </span>
   </li>
   
@@ -376,7 +376,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/study/index.html">study(15)</a>
+      <a href="/categories/study/index.html">study(16)</a>
   </span>
   </li>
   
@@ -385,7 +385,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/notes/index.html">notes(28)</a>
+      <a href="/categories/notes/index.html">notes(29)</a>
   </span>
   </li>
   
@@ -475,7 +475,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/architecture/index.html">architecture(4)</a>
+      <a href="/categories/architecture/index.html">architecture(5)</a>
   </span>
   </li>
   
@@ -490,7 +490,7 @@
 
 
   <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
-    <meta itemprop="headline" content="重学Kubernetes - 学张磊的《深度剖析Kubernetes》">
+    <meta itemprop="headline" content="重学Kubernetes - 读张磊的《深度剖析Kubernetes》">
     <meta itemprop="description" content="云计算从十年前的风起云涌却叫好不叫座的局面慢慢地变成了无人刻意提起的境地，这一切的幕后游戏规则改变者某种程度上来说都是因为Kubernetes这个伟大的开源项目以及依托于它的云原生运动(参考前文))的蓬勃发展而激发。">
     <meta itemprop="datePublished" content="August 24, 2019">
     
@@ -498,7 +498,7 @@
     <div class="page__inner-wrap">
       
         <header>
-          <h1 class="page__title" itemprop="headline">重学Kubernetes - 学张磊的《深度剖析Kubernetes》
+          <h1 class="page__title" itemprop="headline">重学Kubernetes - 读张磊的《深度剖析Kubernetes》
 </h1>
           
             <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
@@ -508,7 +508,7 @@
 
 
 
-本文有 17799 字，大约需要 44 分钟可以读完, 创建于 2019-08-24
+本文有 17808 字，大约需要 44 分钟可以读完, 创建于 2019-08-24
 
 
 
@@ -591,7 +591,10 @@ Docker容器技术的出现初看起来没有太大技术本质上的创新，�
   <li>其它高级功能如日志、监控、熔断、限流等</li>
 </ul>
 
-<p>基于Google自身从Borg到Omega再到开发Kubernetes系统的长期的基础设施虚拟化管理经验，Kubernetes项目本身采用了完全基于声明式API的做法来构建一个极度强调灵活性的基础平台</p>
+<p>基于Google自身<a href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/44843.pdf">从Borg到Omega再到开发Kubernetes系统</a>
+的长期的基础设施虚拟化管理经验(参加前面的<a href="(//post/2019/07/21/from-borg-to-kubernetes/)">笔记</a>)，
+Kubernetes项目本身采用了完全基于声明式API的做法来
+构建一个极度强调灵活性的基础平台</p>
 <ul>
   <li>其主要系统都是基于Object来建模的，并且对各种Object提供了丰富的REST API</li>
   <li>内部各种Object之间使松散耦合的</li>
@@ -1144,7 +1147,20 @@ imagefs.available&lt;15%
 
         
             <li>
-                <a href="/post/2019/08/24/learn-kubernetes-again/">重学Kubernetes - 学张磊的《深度剖析Kubernetes》</a>
+                <a href="/post/2019/08/24/learn-kubernetes-again/">重学Kubernetes - 读张磊的《深度剖析Kubernetes》</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/07/21/from-borg-to-kubernetes/">读Google著名的分布式设计论文－从Borg到Kubernetes的演进</a>
             </li>
             
             
@@ -1184,19 +1200,6 @@ imagefs.available&lt;15%
         
             <li>
                 <a href="/post/2019/02/23/domain-driven-development-impl/">实现领域驱动设计</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2019/01/26/clean-architecture-notes/">读Uncle Bob新书-Clean Archtiecture</a>
             </li>
             
             
@@ -1287,7 +1290,7 @@ imagefs.available&lt;15%
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=重学Kubernetes - 学张磊的《深度剖析Kubernetes》 https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=重学Kubernetes - 读张磊的《深度剖析Kubernetes》 https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
   <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 

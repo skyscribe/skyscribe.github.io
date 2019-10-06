@@ -349,6 +349,10 @@
 <lastmod>2019-06-23T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2019/07/21/from-borg-to-kubernetes/</loc>
+<lastmod>2019-07-21T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/post/2019/08/24/learn-kubernetes-again/</loc>
 <lastmod>2019-08-24T00:00:00+08:00</lastmod>
 </url>
@@ -680,5 +684,8 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/page18/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/page19/</loc>
 </url>
 </urlset>
