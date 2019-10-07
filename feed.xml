@@ -1,4 +1,467 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-06T18:51:35+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-07T21:02:59+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Google的新操作系统Fuchsia的内核设计</title><link href="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" rel="alternate" type="text/html" title="Google的新操作系统Fuchsia的内核设计" /><published>2019-10-06T00:00:00+08:00</published><updated>2019-10-06T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">&lt;p&gt;传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。
+由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;p&gt;本文尝试就其目前官方公布的技术文档就其架构设计做一简单分析。&lt;/p&gt;
+
+&lt;h2 id=&quot;内核架构&quot;&gt;内核架构&lt;/h2&gt;
+&lt;p&gt;Fuchsia其实是基于一个微内核风格的架构，&lt;strong&gt;内核项目的名字叫做Zircon&lt;/strong&gt;。Fuchsia本身是程序员直接面对的操作系统环境，
+它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现底层的系统硬件资源管理，同时&lt;strong&gt;提供系统调用接口&lt;/strong&gt;给上层程序使用。&lt;/p&gt;
+
+&lt;p&gt;微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，因为两者的优势和劣势都非常明显&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;微内核由于选择将内核的组织&lt;strong&gt;用分布式的思路解耦&lt;/strong&gt;开来，从设计上来说比较漂亮容易扩展但是最大的不足是性能太差&lt;/li&gt;
+  &lt;li&gt;宏内核则对应于软件架构上的&lt;strong&gt;大一统、集中式单体风格&lt;/strong&gt;，所有的东西都放在内核中；从设计上来说非常丑陋不看维护成本高昂但是胜在性能很好&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;学术界一致在讨伐以Linux为代表的&lt;strong&gt;宏内核架构是设计落后&lt;/strong&gt;的表现，却被Linus直接打脸说&lt;strong&gt;微内核的想法在现在的硬件条件下根本就是在浪费资源&lt;/strong&gt;，想要高效实现必须要采用宏内核的思路；
+之前几十年的计算机系统发展历史印证了Linus实用主义思想的胜利，
+而Windows系统的内核干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。&lt;/p&gt;
+
+&lt;p&gt;Zircon直接旗帜鲜明地宣称它是一个微内核架构，让人自然而然地好奇它怎么设计来避免传统的微内核架构需要重复拷贝数据性能低下的弊端。&lt;/p&gt;
+
+&lt;h2 id=&quot;zircon顶层概念设计&quot;&gt;Zircon顶层概念设计&lt;/h2&gt;
+&lt;p&gt;传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在Unix变成哲学一书中详细地阐述了这一理念）；Zircon完全没有采用这一理念，它另起炉灶用&lt;strong&gt;面型对象的思想&lt;/strong&gt;来假设所有的内核所管理的东西都是对象;
+即&lt;strong&gt;一切接对象&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;这些对象是&lt;strong&gt;通过句柄handle的方式在系统调用中暴露&lt;/strong&gt;给用户使用的，对象本身则是通过继承自一个名字为&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;的抽象类;它的定义包含在&lt;code class=&quot;highlighter-rouge&quot;&gt;/kernel/object/include/object/dispatcher.h&lt;/code&gt;中。&lt;/p&gt;
+
+&lt;h3 id=&quot;dispatcher定义&quot;&gt;Dispatcher定义&lt;/h3&gt;
+&lt;p&gt;Dispatcher的定义声明如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Dispatcher&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCountedUpgradeable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                   &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Recyclable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCountedUpgradeable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddRef&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCountedUpgradeable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCountedUpgradeable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Adopt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCountedUpgradeable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddRefMaybeInDestructor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Dispatchers are either Solo or Peered. They handle refcounting
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// and locking differently.
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;从类体系结构上看，它用私有继承的方式（C++中私有继承一般用来复用实现）实现了&lt;strong&gt;基于引用计数&lt;/strong&gt;的生存周期管理。
+因而有引用计数的接口操作定义&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;increment_handle_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle_count_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetch_add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// Returns true exactly when the handle count goes to zero.
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;decrement_handle_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle_count_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetch_sub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_handle_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle_count_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;该接口上可以添加或者删除&lt;code class=&quot;highlighter-rouge&quot;&gt;Observer&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_status_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AddObserver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StateObserver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RemoveObserver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StateObserver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;observer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Cancel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Handle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;最后一个cancel接口可以实现停止某个observer对handle状态的监控。&lt;/p&gt;
+
+&lt;h4 id=&quot;针对具体实现子类的接口&quot;&gt;针对具体实现子类的接口&lt;/h4&gt;
+&lt;p&gt;剩下的一些虚函数接口定义则是为了方便实现类似于模板方法这一设计模式而提供给具体的对象实现的&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_obj_type_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_status_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_signal_self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clear_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;set_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_status_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_signal_peer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clear_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;set_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;on_zero_handles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h4 id=&quot;内核对象的id&quot;&gt;内核对象的ID&lt;/h4&gt;
+&lt;p&gt;内核中的所有对象都有一个唯一的ID标识符，用&lt;code class=&quot;highlighter-rouge&quot;&gt;koid&lt;/code&gt;来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。&lt;/p&gt;
+
+&lt;h4 id=&quot;handle&quot;&gt;Handle&lt;/h4&gt;
+&lt;p&gt;用户空间的代码如果想访问内核服务中的对象，必须通过&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;句柄来完成。&lt;strong&gt;句柄的概念和Linux里面的文件描述符&lt;/strong&gt;的概３念比较类似，它是一种设计上的资源索引和具体资源实现的隔离；这样的隔离使得更灵活的系统演进和扩展变得更加容易。&lt;/p&gt;
+
+&lt;p&gt;Handle在用户空间的程序看来其实是一个32位的整数值，用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_t&lt;/code&gt;来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;对象作为系统调用的参数传递进去，
+这样系统调用的格式上&lt;strong&gt;大都携带一个所要操作的资源的标识&lt;/strong&gt;，从而让内核直到作用在哪个内核对象上。&lt;/p&gt;
+
+&lt;h5 id=&quot;handle和object的对应和校验&quot;&gt;handle和object的对应和校验&lt;/h5&gt;
+&lt;p&gt;显然，对于用户空间的进程来说，多个不同的进程可能需要访问同一个内核资源，此时它们需要有不同的handle而不能共享同一个handle;
+任何时候用户通过系统调用传入一个&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;的时候，内核都会做相应的校验&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;合法性校验：对应的资源&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;是否存在内核为用户进程创建的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车&lt;/li&gt;
+  &lt;li&gt;类型校验：对应的资源的类型和系统调用所对应的&lt;strong&gt;类型是否一致&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;安全校验：用户空间的程序是否有&lt;strong&gt;合理的权限&lt;/strong&gt;来操作访问对应的内核资源；这个设计在当今的网络安全环境下尤其重要&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;handle和资源的单一绑定&quot;&gt;handle和资源的单一绑定&lt;/h5&gt;
+&lt;p&gt;一个内核对象资源可以绑定于多个handle，反过来对于某个具体的handle而言它却只能绑定于一个具体的资源。并且这个绑定被设计为要么绑定于内核资源对象，要么绑定于用户空间程序；同时只有绑定于用户空间的时候，它才是对用户程序而言可见的（采用上述的整数数值的方式）。&lt;/p&gt;
+
+&lt;p&gt;当这个handle被绑定于内核的时候，我们称它为处于迁移中(&lt;code class=&quot;highlighter-rouge&quot;&gt;in-transit&lt;/code&gt;)状态。&lt;/p&gt;
+
+&lt;h5 id=&quot;用户空间的handle值&quot;&gt;用户空间的handle值&lt;/h5&gt;
+&lt;p&gt;不同用户程序中的同一个handle值之间&lt;strong&gt;没有逻辑上的直接关系&lt;/strong&gt;；它们可以指向不同类型的资源，或者对一个进程有意义的整数值对另外一个进程可能完全没有意义。
+同时关于handle值目前有一些特殊的限定用法&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;0&lt;/code&gt;被定义为非法的handle值，而其它的合法的handle必然是&lt;strong&gt;一个大于0的正整数&lt;/strong&gt;。这是一个自然而然的设计，有利于实际的比较&lt;/li&gt;
+  &lt;li&gt;多个&lt;code class=&quot;highlighter-rouge&quot;&gt;handel&lt;/code&gt;&lt;strong&gt;可能归属于同一个集合&lt;/strong&gt;中，此时最低的两个比特位表示它属于哪个集合，并可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_HANDLE_FIXED_BITS_MASK&lt;/code&gt;来获取掩码&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;内核中的handle&quot;&gt;内核中的handle&lt;/h5&gt;
+&lt;p&gt;内核态的handle实际上是一个C++对象，它从逻辑上包含三个逻辑部分&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;对实际内核对象的引用&lt;/li&gt;
+  &lt;li&gt;被允许的操作权限定义&lt;/li&gt;
+  &lt;li&gt;实际被绑定的进程的信息
+权限和进程绑定的语义意味着内核&lt;strong&gt;允许同一个用户进程来创建不同&lt;/strong&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;来访问同一个内核对象，只要它们的权限不同就可以。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;handle定义&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Handle&lt;/code&gt;定义&lt;/h5&gt;
+&lt;p&gt;内核中的类定义在&lt;code class=&quot;highlighter-rouge&quot;&gt;kernel/object/include/object/handle.h&lt;/code&gt;文件中，它是一个标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;final&lt;/code&gt;的具体类;
+类开头的注释说吗了它维护了进程和关联的内核对象的关联信息。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// A Handle is how a specific process refers to a specific Dispatcher.
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Handle&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// Returns the Dispatcher to which this instance points.
+&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// Returns the process that owns this instance. Used to guarantee
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// that one process may not access a handle owned by a different process.
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;zx_koid_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process_id_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;err&quot;&gt;　&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// Sets the value returned by process_id().
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;set_process_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zx_koid_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;为了避免不同的进程访问，类结构里面保存了它所关联的进程ID信息。&lt;/p&gt;
+
+&lt;p&gt;针对内核资源的引用计数方面，该类提供了丰富的读取和查询操作；并提供接口返回权限检查操作。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;c1&quot;&gt;// Returns the |rights| parameter that was provided when this instance
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// was created.
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rights&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rights_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// Returns true if this handle has all of the desired rights bits set.
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HasRights&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zx_rights_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;desired&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rights_&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;desired&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;desired&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;c1&quot;&gt;// Returns a value that can be decoded by Handle::FromU32() to derive a
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// pointer to this instance.  ProcessDispatcher will XOR this with its
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// |handle_rand_| to create the zx_handle_t value that user space sees.
+&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_value_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// Get the number of outstanding handles for a given dispatcher.
+&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h6 id=&quot;内核对象的封装&quot;&gt;内核对象的封装&lt;/h6&gt;
+&lt;p&gt;同样的头文件中还包含了一个管理内核对象生存周期的&lt;code class=&quot;highlighter-rouge&quot;&gt;KenelHandle&lt;/code&gt;类，从它的定义可以看出&lt;strong&gt;内核对象使用的是典型的移动语义&lt;/strong&gt;，即不允许复制但是可以移动。
+因为这是内核的代码，并且&lt;strong&gt;C++标准库中的智能指针被禁用&lt;/strong&gt;了(参考这里的&lt;a href=&quot;https://fuchsia.dev/fuchsia-src/zircon/cxx&quot;&gt;C++语言使用&lt;/a&gt;说明)，所以该类的实现基本就是重复了C++标准库的做法&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;KernelHandle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;friend&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+ &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;explicit&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;c1&quot;&gt;// Movable but not copyable since we own the underlying Dispatcher.
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;operator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这个类是一个针对抽象资源的封装，并且对用传入的内核对象引用来构造的方式，采用了直接的&lt;code class=&quot;highlighter-rouge&quot;&gt;move&lt;/code&gt;操作来替换所有权。
+同时拷贝和复制操作也被直接禁用。&lt;/p&gt;
+
+&lt;p&gt;对不同类型资源(模板参数类型不一样)的构造和赋值，也是直接采用move语义来操作实现中封装的内核对象。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;operator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;KernelHandle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;reset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;other&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;reset&lt;/code&gt;操作和&lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt;实现基本就是照搬了&lt;code class=&quot;highlighter-rouge&quot;&gt;uniq_ptr&lt;/code&gt;类型的唯一所有权的处理手法。&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;reset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  
+  &lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_zero_handles&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;fbl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefPtr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dispatcher_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;用户空间的创建替换更新和关闭&quot;&gt;用户空间的创建、替换、更新和关闭&lt;/h5&gt;
+&lt;p&gt;如果要访问内核资源，用户空间的进程需要先通过具体资源的&lt;strong&gt;系统调用来创建&lt;/strong&gt;一个对应资源的handle；比如如下这些系统调用函数&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_event_create&lt;/code&gt;创建一个事件类型的资源&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_process_create&lt;/code&gt;创建一个进程资源，这里进程本身其实也是一类具体的资源；这里的概念和Linux里面的进程管理作为内核的基本构造的方法完全不同：Zircon是&lt;strong&gt;将进程也作为抽象对象的一种实现&lt;/strong&gt;了。&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_thread_create&lt;/code&gt;创建一个线程资源
+这些函数在创建对应资源的同时，也返回了一个用户空间可用的指向对应资源的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Handle本身可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_duplicate&lt;/code&gt;调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来&lt;strong&gt;降低需要访问的资源权限&lt;/strong&gt;。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_replace&lt;/code&gt;用来替换一个已有的handle,用户甚至可以在这个API中添加新的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;的权限。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_close&lt;/code&gt;顾名思义完成关闭handle的目的。&lt;/p&gt;
+
+&lt;h5 id=&quot;用户空间和内核空间的迁移&quot;&gt;用户空间和内核空间的迁移&lt;/h5&gt;
+&lt;p&gt;如下的两组API用来完成&lt;strong&gt;handle在内核和用户空间的转换&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_write&lt;/code&gt;将对应的用户空间的handle转移到内核空间中，即放置于&lt;code class=&quot;highlighter-rouge&quot;&gt;in-transist&lt;/code&gt;状态&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_read&lt;/code&gt;+&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_call&lt;/code&gt;将处于内核中的handle提前出来并绑定到用户空间中&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这两组API的功能实现了类似于传统Linux内核的上下文切换的功能。&lt;/p&gt;
+
+&lt;h5 id=&quot;基于引用技术的资源权限管理&quot;&gt;基于引用技术的资源权限管理&lt;/h5&gt;
+&lt;p&gt;内核中的资源如上面的&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;类的接口声明，采用了&lt;strong&gt;基于引用计数的生命周期管理思路&lt;/strong&gt;；任何时候有一个新的handle指向一个资源，其内部的引用计数就会增加；已有的handle被关闭的时候，引用计数会自减。
+当引用减小为0的时候，对应的资源会被&lt;strong&gt;自动销毁或者处于终结状态等待延迟的垃圾回收机制&lt;/strong&gt;来清理无人使用的资源。&lt;/p&gt;
+
+&lt;h2 id=&quot;如何运行用户代码jobprocessthread&quot;&gt;如何运行用户代码：Job/Process/Thread&lt;/h2&gt;
+&lt;p&gt;Zircon将&lt;strong&gt;应用程序的加载和执行放到了内核之外&lt;/strong&gt;，由用户空间的工具和函数来提供；从内核提供的资源角度来看，由下面三种重要的资源&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Job是最顶层的对象资源，它定义了运行期的种种限制，并且&lt;strong&gt;Job之间采用父子关系结构&lt;/strong&gt;，并且在系统启动的时候有个&lt;strong&gt;顶层的根(RootJob)&lt;/strong&gt;，这一设计基本是复用了传统的Linx系统设计思路&lt;/li&gt;
+  &lt;li&gt;一个Job拥有一个或者多个Process资源对象，这里的Process类似于我们熟悉的进程&lt;/li&gt;
+  &lt;li&gt;一个Process拥有一个或者多个Thread资源对象，而Thread代表了CPU可以执行的最小单元如CPU、寄存器、堆栈等&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这样的设计方式比传统的Unix基于Task的思路要方便不少，比如传统的用户进程组的概念被Job所替代，并且Thread和Process的关系也被显示地设计为包含关系，不管是使用的&lt;strong&gt;便利性还是安全性上都更为干净清晰&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;job&quot;&gt;Job&lt;/h3&gt;
+&lt;p&gt;Job主要的目的是用来做进程的分组控制，它可以在分组的层面上提供诸如系统调用权限、资源使用限额控制等。这方面明显可以看到目前的Linux上的&lt;strong&gt;容器技术设计&lt;/strong&gt;的考虑。&lt;/p&gt;
+
+&lt;p&gt;所有的Job构成了一个&lt;strong&gt;单根的树形结构&lt;/strong&gt;，除了根节点外每一个Job都可以由一个或者多个子Job。同时因为Process是Job的子节点，它可以在树结构中和Job处于平级结构。&lt;/p&gt;
+
+&lt;p&gt;Job对象中包含如下信息&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;指向父对象的引用&lt;/li&gt;
+  &lt;li&gt;包含子Job的集合&lt;/li&gt;
+  &lt;li&gt;一组成员进程的集合&lt;/li&gt;
+  &lt;li&gt;一组控制策略（目前尚未实现）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;目前由两个系统调用来完成对Job的控制，&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_job_create()&lt;/code&gt;用于创建Job，而&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_job_set_policy()&lt;/code&gt;用于设置控制策略。&lt;/p&gt;
+
+&lt;h3 id=&quot;进程process&quot;&gt;进程Process&lt;/h3&gt;
+&lt;p&gt;Process和传统的Linux进程的概念比起来没有太大的差别，都是用来表示可以被运行的一些程序指令的集合。
+它被Job所控制，包含如下的资源&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;handles句柄对象&lt;/li&gt;
+  &lt;li&gt;虚拟内存区域对象&lt;/li&gt;
+  &lt;li&gt;线程对象&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;进程的创建和启动&lt;strong&gt;需要两个步骤&lt;/strong&gt;来完成&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_process_create&lt;/code&gt;负责创建但不执行&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_process_start&lt;/code&gt;负责执行，它在创建之后只能被执行一次&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个进程里面可以加入多个线程，进程会一致执行直到下列一个条件满足&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;最后一个包含的线程退出&lt;/li&gt;
+  &lt;li&gt;进程自己调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_process_exit&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;父Job终止了自己的执行&lt;/li&gt;
+  &lt;li&gt;父Job被销毁&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;线程thread&quot;&gt;线程Thread&lt;/h3&gt;
+&lt;p&gt;线程是一种实际消耗CPU运行资源并&lt;strong&gt;被内核调度器所调度执行&lt;/strong&gt;的一种资源，这一点和传统的Unix内核设计截然不同。它运行在一个特定的父进程对象中，使用进程所提供的内存、资源句柄等信息来完成IO处理和计算功能。&lt;/p&gt;
+
+&lt;h4 id=&quot;线程生存周期&quot;&gt;线程生存周期&lt;/h4&gt;
+&lt;p&gt;线程随着&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_thread_create()&lt;/code&gt;调用而被创建，但是&lt;strong&gt;并不会在创建后就立即被执行&lt;/strong&gt;。只有有人调用了&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_thread_start()&lt;/code&gt;或者调用了&lt;strong&gt;父进程&lt;/strong&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_process_start()&lt;/code&gt;之后才会被执行（此时该线程是进程里面的&lt;strong&gt;第一个线程&lt;/strong&gt;）。两种系统调用都包含了实际代码执行的入口信息。
+该入口信息是一个内存地址资源，传递的时候也是以句柄的方式来传入的。&lt;/p&gt;
+
+&lt;p&gt;线程的退出条件包含以下几种情况之一&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_thread_exit()&lt;/code&gt;调用用于自行退出，入口点函数的&lt;strong&gt;返回并不会自行退出&lt;/strong&gt;线程&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmar_unmap_handle_close_thread_exit()&lt;/code&gt;调用回收了对应的虚拟内存资源，此时调用方的堆栈信息也会被系统回收&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_futex_wake_handle_close_thread_exit()&lt;/code&gt;调用&lt;/li&gt;
+  &lt;li&gt;父进程自身退出的时候，连带终止所有子线程&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_task_kill&lt;/code&gt;终止了线程的句柄&lt;/li&gt;
+  &lt;li&gt;系统产生了异常行为，此时没有其它的处理程序可以顺利退出该线程&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;默认情况下，线程&lt;strong&gt;默认总是和父进程解绑&lt;/strong&gt;(detach)的，这意味着在父进程退出的时候，无需调用专门的&lt;code class=&quot;highlighter-rouge&quot;&gt;join()&lt;/code&gt;函数来做清理。&lt;/p&gt;
+
+&lt;h3 id=&quot;内核到用户空间的启动&quot;&gt;内核到用户空间的启动&lt;/h3&gt;
+&lt;p&gt;基于微内核的架构的一个比较复杂的地方是如何启动第一个用户空间的进程。
+一种流行的做法是在内核层面实现一个仅仅用于启动加载的“迷你版“的文件系统读写和程序加载功能，然后再内核完成自启动之后旧不再使用这些功能；而Ziron并未采用这一流行的设计方法。&lt;/p&gt;
+
+&lt;p&gt;Ziron使用的Bootloader会用&lt;strong&gt;称为ZBI的镜像文件格式&lt;/strong&gt;来同时加载内核镜像和一个数据块。该镜像格式是一个内嵌了诸如硬件细节信息、内核启动时候的命令行参数、压缩的内存磁盘镜像文件等内容的&lt;strong&gt;简单容器格式&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;内存磁盘镜像文件使用LZ4格式压缩，解压后它的镜像格式是BOOTFS格式；该格式其实是一个&lt;strong&gt;简单的只读文件系统&lt;/strong&gt;，内含了用户空间程序需要运行的环境、共享库和数据文件等，且每一项都包含了&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;文件名&lt;/li&gt;
+  &lt;li&gt;文件大小&lt;/li&gt;
+  &lt;li&gt;文件在BOOTFS里面的相对偏移量&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这些数值都需要&lt;strong&gt;保证和页面大小对齐&lt;/strong&gt;，并且目前仅限于32位数字。
+当内核完成自举之后，BOOTFS里面的这些文件随之变成一个挂载在&lt;code class=&quot;highlighter-rouge&quot;&gt;/boot目录&lt;/code&gt;的文件系统。&lt;/p&gt;
+
+&lt;p&gt;但是内核本身并不包含任何解压和解析BOOTFS文件格式的代码，这些功能是通过第一个用户空间的称为&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;的进程来完成的。&lt;/p&gt;
+
+&lt;h4 id=&quot;userboot进程的加载&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;进程的加载&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;进程是一个普通的用户空间进程，它可以使用内核定义的系统调用来完成具体的工作；它和其它用户空间进程的区别在于内核加载它的方式是特殊的。
+在编译阶段，userboot被和内核镜像直接用&lt;strong&gt;简单的ELF文件格式打包&lt;/strong&gt;在一起。
+然而内核并不需要真的来解析ELF文件才能使用它，在编译期间诸如只读段的大小、可执行段的大小、入口函数的位置这些信息都被从文件中提取出来然后&lt;strong&gt;用常量定义的方式传递给内核&lt;/strong&gt;代码。&lt;/p&gt;
+
+&lt;p&gt;随后在加载过程中，内核会发送初始的bootstrap消息给userboot，内核启动的命令行参数会被解析为一个一个的单词并以字符串环境变量的格式传递给userboot；这样所有它需要使用的资源句柄都会包含在该消息中。&lt;/p&gt;
+
+&lt;h5 id=&quot;解压bootfs和启动加载服务&quot;&gt;解压BOOTFS和启动加载服务&lt;/h5&gt;
+&lt;p&gt;随后基于内核映射系统调用的vDSO的工作方式，userboot可以在其后的内存位置上找到系统调用的代码入口，完成系统调用。
+它需要做的第一件事就是&lt;strong&gt;通过传入为VMO类型的句柄来解压ZBI格式的BOOTFS镜像&lt;/strong&gt;，使用自己包含的LZ4格式支持代码来完成解压处理，将解压之后的文件内容放入新的VMO对象中。&lt;/p&gt;
+
+&lt;p&gt;接下来它需要环境变量传入的&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot=&amp;lt;file&amp;gt;&lt;/code&gt;信息，来&lt;strong&gt;查找到对应的文件作为第一个真正的用户空间&lt;/strong&gt;进程；如果用户没有指定该启动选项，则默认启动BOOTFS镜像中包含的&lt;code class=&quot;highlighter-rouge&quot;&gt;bin/bootsvc&lt;/code&gt;程序。
+因为usertoot实现了完整的ELF格式解析功能，它可以识别到具体的动态链接文件的属性信息，并在需要的时候调用额外的解析器来加载需要解释执行的文件。&lt;/p&gt;
+
+&lt;p&gt;随后userboot会将包含系统调用服务的vDSO加载到一个随机的内存地址（这样可以有效地防止黑客攻击内核），并用正常的基于Channel的方式启动新的进程，将这个vDSO的基地址和Channel资源的句柄传递给子进程。
+在这个Channel上，userboot会将它从内核接收到的启动信息简单替换处理后发送个子进程。&lt;/p&gt;
+
+&lt;h5 id=&quot;加载服务传递&quot;&gt;加载服务传递&lt;/h5&gt;
+&lt;p&gt;直接被&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;启动的是一个加载服务进程，它会接收到userboot传递来的vDSO和一个包含加载服务信息的通道的句柄。
+正常情况下加载服务处理完成这些信息之后，应该&lt;strong&gt;尽快关闭该通道&lt;/strong&gt;。
+userboot程序会循环处理来自加载服务的请求，并且在收到加载对象的请求的时候，查询BOOTFS中的以&lt;code class=&quot;highlighter-rouge&quot;&gt;lib/&lt;/code&gt;为前缀的文件&lt;strong&gt;并用VMO的方式将内容返回&lt;/strong&gt;给加载服务；这样第一个真正的用户进程就可以访问放在BOOTFS中的动态链接库信息。
+这些文件同时也会以文件的形态出现在&lt;code class=&quot;highlighter-rouge&quot;&gt;/boot&lt;/code&gt;中。&lt;/p&gt;
+
+&lt;p&gt;作为一个单线程的应用，&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;在通道被对方关闭之后，就立马退出处理循环并不再需要做其它事情了。
+除了特殊测试场景的设置它会等待启动的用户程序退出才自己退出外，正常情况下&lt;code class=&quot;highlighter-rouge&quot;&gt;userboot&lt;/code&gt;就会自行退出，留下它所启动的子进程作为用户可以看见的第一个进程。&lt;/p&gt;
+
+&lt;h3 id=&quot;虚拟内存对象&quot;&gt;虚拟内存对象&lt;/h3&gt;
+
+&lt;h2 id=&quot;ipc机制&quot;&gt;IPC机制&lt;/h2&gt;
+&lt;p&gt;Zircon提供了&lt;strong&gt;基于消息传递&lt;/strong&gt;设计的IPC机制，这里面主要的IPC对象是Socket和Channel；两者都提供双向的消息交互，具有两个通信端点。
+创建Socket或者Channel的时候，我们就会得到&lt;strong&gt;指向同一个IPC对象资源的两个句柄&lt;/strong&gt;，每一个代表通信的一方向。&lt;/p&gt;
+
+&lt;h3 id=&quot;socket&quot;&gt;Socket&lt;/h3&gt;
+&lt;p&gt;Socket提供了一种双向的基于数据流的IPC机制，它的主要机制是&lt;strong&gt;数据搬运和移动&lt;/strong&gt;。
+创建之后，连接socket的两端都可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_sockert_read/write&lt;/code&gt;执行读写操作;同时它支持类似于TCP协议的半关闭的概念，用户可以在&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_socket_shutdown&lt;/code&gt;里设置&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_SOCKET_SHUTDOWN_READ/WRITE&lt;/code&gt;来关闭读或者写操作。&lt;/p&gt;
+
+&lt;p&gt;Socket本身分为两种类型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;ZX_SOCKET_STREAM类型的socket在写入的时候会检查内部缓冲的大小，如果&lt;strong&gt;缓冲区未满则允许写入一部分或者全部&lt;/strong&gt;数据，写操作会返回成功，并且调用者可以得到实际写入的字节数；如果缓冲已满，则返回&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_ERR_SHOULD_WAIT&lt;/code&gt;，此时调用方需要用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_async&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_one&lt;/code&gt;这样的异步调用来等待&lt;/li&gt;
+  &lt;li&gt;ZX_SOCKET_DATAGRAM类型的socket在类似情况下&lt;strong&gt;不会部分写入&lt;/strong&gt;，如果缓冲可用空间不足则会直接返回&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_ERR_SHOULD_WAIT&lt;/code&gt;,如果写入成功返回值就会包含实际写入的数据大小。而该类型的socket在读取的时候会仅仅读取第一个可用的DATAGRAM。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Socket相关的系统调用还提供了类似于查询缓冲大小的API，用户需要在&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_get_info&lt;/code&gt;中指定对象类型为&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_INFO_SOCKET&lt;/code&gt;，然后再返回的结构体中查看&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_info_socket_t&lt;/code&gt;。
+这个获取内核对象信息的接口是一个C风格的泛型接口&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;zircon/syscalls.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;zx_status_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_object_get_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zx_handle_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buffer_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;actual&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                               &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;avail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;channel&quot;&gt;Channel&lt;/h3&gt;
+&lt;p&gt;Channel对象&lt;strong&gt;是一种基于数据报&lt;/strong&gt;的IPC对象；不同于socket的机制，IPC的两端通过Channel&lt;strong&gt;交换的是内核资源的句柄&lt;/strong&gt;。
+Channel最大不能超过&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_CHANNEL_MAX_MSG_BYTES&lt;/code&gt;个字节，同时它还限制了最多可以关联&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_CHANNEL_MAX_MSG_HANDLES&lt;/code&gt;个内核对象句柄。&lt;/p&gt;
+
+&lt;p&gt;当对应的内核资源的句柄被写入到一个Channel中去的时候，它再当前调用进程里面的句柄引用就会被删除；而当Channel的读取方获得该资源句柄的时候，它又被内核自动关联到接收进程的引用句柄列表中。
+&lt;strong&gt;处于中间状态的内核对象会持续存在&lt;/strong&gt;，除非有一些关闭进程或者异常处理的程序关闭了Channel的另外一端，这种情况下对应的资源句柄会被一同清理。&lt;/p&gt;
+
+&lt;h4 id=&quot;channel和消息队列&quot;&gt;Channel和消息队列&lt;/h4&gt;
+&lt;p&gt;Channel自身维护了一个&lt;strong&gt;有序的消息队列&lt;/strong&gt;，其中的每一个消息里面包含数据和某些内核资源句柄。
+对&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_write&lt;/code&gt;的调用会将对应的消息放入Channel的消息队列中，而&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_read&lt;/code&gt;则会将已经排队的消息出队。
+某个线程可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_one&lt;/code&gt;系统调用显示地阻塞等待另外一方发送消息。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_channel_call&lt;/code&gt;调用则会完成如下的操作&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;将消息写入队列&lt;/li&gt;
+  &lt;li&gt;等待对方的消息响应&lt;/li&gt;
+  &lt;li&gt;将收到的消息出队，此时收到的消息的&lt;strong&gt;前４个字节&lt;/strong&gt;包含内核提供的&lt;code class=&quot;highlighter-rouge&quot;&gt;transaction ID&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;通过channel收发消息的操作原子化和一致性&quot;&gt;通过Channel收发消息的操作原子化和一致性&lt;/h5&gt;
+&lt;p&gt;通过一个Channel来发送消息总是经过如下的两步式操作&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;用&lt;strong&gt;原子化的方式&lt;/strong&gt;将数据写入channel并将消息中包含的所有对象的句柄的所有权移动到Channel中去&lt;/li&gt;
+  &lt;li&gt;消息的读取方用用原子化方式将所有的资源句柄移入调用方的句柄表里面，如果有失败发生，所有权依然再Channel对象中，但是用户指定了&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_CHANNEL_READ_MAY_DISCARD&lt;/code&gt;选项的除外&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;正式因为这个移动和所有权的设计，导致Channel对象不像其它内核对象一样可以被复制。Fuchsia设计的关于&lt;strong&gt;消息的顺序性保证异常严格&lt;/strong&gt;：
+当一个Channel的所有权正在被内核从一个进程传递到另外一个进程的过程中的时候，即使是来自于同一个进程的同时进行的消息写入操作也不会破坏消息之间的相对次序。&lt;/p&gt;
+
+&lt;p&gt;上述的顺序性保证是Channel独有的，其它的内核对象并没有该性质。&lt;/p&gt;
+
+&lt;h3 id=&quot;signalport和event&quot;&gt;Signal，Port和Event&lt;/h3&gt;
+&lt;p&gt;Signal和Event是用于实现进程间通知的一类内核对象。&lt;/p&gt;
+
+&lt;h4 id=&quot;signal&quot;&gt;Signal&lt;/h4&gt;
+&lt;p&gt;Zircon内核对象通过Signal接口来通知应用程序一些简单的信息：一个signal仅仅能传输&lt;strong&gt;信息容量为一即一个比特位&lt;/strong&gt;的内核发生的具体事件。有些signal是多个内核对象共享的，而另外一些则是因内核对象的不同而定。&lt;/p&gt;
+
+&lt;p&gt;用户空间的程序可以用如下的系统调用来捕捉内核对象的signal&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_one&lt;/code&gt;会以阻塞的方式等待给定内核对象上的指定信号集中的某一个发生，直到超时或者关注的信号被触发&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_many&lt;/code&gt;允许用户&lt;strong&gt;传入多个等待的内核对象以及它们上关联的&lt;/strong&gt;信号集作为参数，并等到对应的信号通知，直到超时或者至少一个信号被触发&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_async&lt;/code&gt;是异步等待的系统调用，它通过一个额外的Port类对象来协助完成&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最后一个异步的等待方式略微复杂，但是避免了同步等待阻塞应用程序的代价&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;zx_status_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zx_object_wait_async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zx_handle_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                 &lt;span class=&quot;n&quot;&gt;zx_handle_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                 &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                 &lt;span class=&quot;n&quot;&gt;zx_signals_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;signals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                                 &lt;span class=&quot;kt&quot;&gt;uint32_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;port和异步等待&quot;&gt;port和异步等待&lt;/h4&gt;
+&lt;p&gt;上面的系统调用通过&lt;code class=&quot;highlighter-rouge&quot;&gt;signals&lt;/code&gt;参数指定对应handle所指向的内核对象上的哪些signal需要被关注，当对应的signal被触发的时候，一个新的包会被排队于Port对象上。&lt;/p&gt;
+
+&lt;p&gt;而Port的队列里会&lt;strong&gt;包含所有已经发生的信号&lt;/strong&gt;而不仅仅限于&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_wait_async&lt;/code&gt;所指定的那些signal；一旦排队发生，异步等到的操作即告完成，即不会有更多的信号引起的包被排队于Port上。&lt;/p&gt;
+
+&lt;p&gt;Port对象的用户可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_port_wait&lt;/code&gt;来获取这些得到的信号，也可以用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_port_cancel&lt;/code&gt;系统调用终止整个异步等待操作。&lt;/p&gt;
+
+&lt;h5 id=&quot;port的逻辑概念&quot;&gt;Port的逻辑概念&lt;/h5&gt;
+&lt;p&gt;Port其实是一个更加底层的&lt;strong&gt;消息信箱&lt;/strong&gt;的概念。它允许线程等待通过包发送的各种各样的事件；这些事件不但包含显示地排队于其上的包，也适用于通过异步IPC机制发送过来的消息数据。它通过三个系统调用来提供服务&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_port_create&lt;/code&gt;创建一个Port&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_port_queue&lt;/code&gt;发送数据包到某个Port对象&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_port_wait&lt;/code&gt;等待数据包&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Port既可以接收来自用户空间的包，也&lt;strong&gt;可以处理来自内核的包&lt;/strong&gt;（如上面所述的Signal）；它还可以绑定于某种内核中断，此时&lt;strong&gt;内核中断的优先级比其它的非中断包的优先级要高&lt;/strong&gt;因而会被优先处理。&lt;/p&gt;
+
+&lt;p&gt;如果一个线程需要处理大量的内核对象Handle上过来的信号，&lt;strong&gt;Port机制是一种效率更高&lt;/strong&gt;的方案所以应该被优先考虑。&lt;/p&gt;
+
+&lt;h4 id=&quot;event&quot;&gt;Event&lt;/h4&gt;
+&lt;p&gt;Event是一种包含了多个活跃信号集的简单内核对象，它代表了用户可以触发的信号对象集。目前预留了&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_USER_SIGNAL_0&lt;/code&gt;到&lt;code class=&quot;highlighter-rouge&quot;&gt;ZX_USER_SIGNAL_7&lt;/code&gt;总共8个用户可以设置、清理、等待的自定义信号。&lt;/p&gt;
+
+&lt;p&gt;用户需要适用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_signal&lt;/code&gt;来触发自定义的信号。&lt;/p&gt;
+
+&lt;p&gt;Event Pair则是一对其中的信号会互相触发的Event对。用户可以适用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_object_signal&lt;/code&gt;来向对方发送自定义的信号。
+当Event Pair上的一端上的所有资源句柄都被关闭的时候，另外一端则会自动收到&lt;code class=&quot;highlighter-rouge&quot;&gt;PEER_CLOSED&lt;/code&gt;信号。&lt;/p&gt;
+
+&lt;h3 id=&quot;虚拟内存对象vmo&quot;&gt;虚拟内存对象VMO&lt;/h3&gt;
+&lt;p&gt;虚拟内存对象表示一系列&lt;strong&gt;物理内存页对象&lt;/strong&gt;，或者是需要按需创建、惰性按需填充的内存页的集合。
+内核提供&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmar_map&lt;/code&gt;来允许用户将地址空间映射到进程里面；&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmar_unmap&lt;/code&gt;则执行相反的地址空间的卸映射。
+用户程序也通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmar_protect&lt;/code&gt;来设置或者调整页面的控制权限。&lt;/p&gt;
+
+&lt;p&gt;同一个VMO对象可以被多个进程各自映射到他们的用户地址空间中。&lt;strong&gt;不同于Linux&lt;/strong&gt;的内核空间和用户空间完全隔离的做法，
+Zircon用&lt;strong&gt;同样VMO对象&lt;/strong&gt;来满足内核空间和用户空间的内存管理；它是一种通用的多进程之间共享内存的做法。&lt;/p&gt;
+
+&lt;h4 id=&quot;页面对齐和大小调整&quot;&gt;页面对齐和大小调整&lt;/h4&gt;
+&lt;p&gt;实际VMO的大小会被内核自动调整为和页面大小对齐，用户可以适用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmo_set_size&lt;/code&gt;来指定一个希望设置的大小，而&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmo_get_size&lt;/code&gt;则接收内核调整过后向上对齐的实际大小。&lt;/p&gt;
+
+&lt;h4 id=&quot;页面映射和分配&quot;&gt;页面映射和分配&lt;/h4&gt;
+&lt;p&gt;内存页面被相关的系统调用以&lt;strong&gt;按需使用的方式分配&lt;/strong&gt;给VMO对象，比如&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;系统调用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmo_read&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmo_write&lt;/code&gt;被触发的时候，或者&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmar_map&lt;/code&gt;创建的VMO对象被写入数据的时候&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;内核也允许通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_vmo_op_range&lt;/code&gt;调用来分配或者释放对应的内存页，不过这些操作应该被当作是非常底层的系统调用来使用，一般可以应用于缓存或者锁算法；一般用户空间的代码还是不用为好。&lt;/p&gt;
+
+&lt;h2 id=&quot;libc库的支持&quot;&gt;libc库的支持&lt;/h2&gt;
+&lt;p&gt;Fuchsia实现了一个部分遵循POSIX标准（子集）的C标准库；它最初是基于musl这个容器世界里非常流行的迷你C库，但是修改了很多自己的实现；但是整体的代码布局依然和musl保持一致。&lt;/p&gt;
+
+&lt;p&gt;由于系统设计的不同，Fuchsia的C库并不支持静态链接，所有的程序都必须使用动态链接，且libc.so本身就是一个动态链接器。
+另外，它也不支持Linux上的IO操作的功能，相反它提供了一个针对fdio.so的弱符号封装。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="os" /><category term="kernel" /><category term="design" /><category term="architecture" /><category term="engineering" /><summary type="html">传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。 由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。</summary></entry><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
 可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。&lt;/p&gt;
 
 &lt;p&gt;之前除了一些社区的抱怨
@@ -3499,155 +3962,4 @@ lib
 略微有些美中不足的是，异步编程和协程的支持还没有很完备，不得不通过预留关键字的做法留待后续版本继续解决。&lt;/p&gt;
 
 &lt;p&gt;另外一个没有提到的方面是关于Windows上工具链的支持和某些大的IDE工具对Nightly版本的依赖。
-尤其是RLS/Racer这两个比较重要的工具时不时会出现循环的重启，还必须依赖于Nightly版本，继续社区加大bug改进力度，早日加到文档版本中去。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><category term="tools" /><summary type="html">不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型， 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。 社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产， 之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在接近年底的时候迟到但是没有爽约，官方将1.31版本宣布为正式的2018版本。</summary></entry><entry><title type="html">现代C++语言是否走上了歧路?</title><link href="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/" rel="alternate" type="text/html" title="现代C++语言是否走上了歧路?" /><published>2018-12-30T00:00:00+08:00</published><updated>2018-12-30T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection</id><content type="html" xml:base="https://skyscribe.github.io/post/2018/12/30/modern-cpp-reflection/">&lt;p&gt;C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。
-进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。
-只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在&lt;a href=&quot;https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/&quot;&gt;这篇名为哀悼现代C++&lt;/a&gt;的博客文章。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;p&gt;作者是一位来自Unity的游戏开发程序员，而一般意义上认为C++仍然具有顽强生命力的领域中，游戏开发是很大的一块地盘；因此这篇来自游戏社区的自己人的反思更加惹人注目；
-难道是死忠粉都不愿意继续坚持自己的语言宗教信仰而要改换门庭另投明主了吗？仔细阅读了作者的文字，又发现并不是完全这样。&lt;/p&gt;
-
-&lt;h2 id=&quot;作者为什么要挑起这个话题&quot;&gt;作者为什么要挑起这个话题&lt;/h2&gt;
-
-&lt;p&gt;其实作者也是有感于最近的C++20语言标准正式纳入了ranges这个有名的第三方库而发（其实我个人第一次看到这个库的时候也是眼前一亮，可惜这么多年还在语言标准的门外徘徊）。
-Ranges库的作者在自己的&lt;a href=&quot;http://ericniebler.com/2018/12/05/standard-ranges/&quot;&gt;博客中&lt;/a&gt;兴奋地告诉大家它的库重要要成为新的2020标准的一部分了，
-并且&lt;strong&gt;信心满满地给大家演示了一个具体的例子&lt;/strong&gt;来宣传这个新的特性是如何的激动人心。不料社区众人并不买账，
-很多游戏开发圈子的人给出的确是大大的不喜欢，甚至Aras直接引述了他自己写的一篇twitter消息&lt;strong&gt;将不满发泄到了整个现代的语言标准进化方向&lt;/strong&gt;上(
-不知道Bjarne老爷子会不会气的跳起来，毕竟他在负责领导标准委员会中的语言演进方向工作小组)，
-并直言不讳地说，负责制定语言标准的大佬们实在是走错了方向，没有真正关心一线开发人员的诉求；于是一石激起千层浪，
-整个社区都充满了对语言标准委员会掌舵的演进方向的不满。&lt;/p&gt;
-
-&lt;p&gt;撇开很是主观的争论不说，技术方面看，Aras是否太偏激了？&lt;/p&gt;
-
-&lt;h2 id=&quot;作者的痛点&quot;&gt;作者的痛点&lt;/h2&gt;
-
-&lt;p&gt;整篇文章写的比较长，也许是预料到很多人没有耐心仔细读完，作者在开头就简单概括了他所认为的现代语言标准的三宗罪&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;&lt;strong&gt;编译时间&lt;/strong&gt;是个非常重要的话题，可惜标准委员会视若不见&lt;/li&gt;
-  &lt;li&gt;非优化模式即&lt;strong&gt;调试模式&lt;/strong&gt;下的编译时间尤其恐怖，调试的需求被忽视&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;心智负担&lt;/strong&gt;太重，要想轻松地写出显然正确的程序需要极其细心地推敲才行&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;原始的ranges库的例子&quot;&gt;原始的Ranges库的例子&lt;/h3&gt;
-
-&lt;p&gt;既然讨论是因为Eric的Range库而发，作者先详细描述了这个用于计算毕达哥拉斯三元组（也就是勾股定理数）的例子，原文的例子比较长，但是核心的部分还是不难理解的。&lt;/p&gt;
-
-&lt;p&gt;首先是一些简单的匿名函数，因为原作者想用&lt;strong&gt;函数式编程&lt;/strong&gt;的写法来演示他的新库；首先是一个使用了concept约束的&lt;code class=&quot;highlighter-rouge&quot;&gt;for_each&lt;/code&gt;函数&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// &quot;for_each&quot; creates a new view by applying a
-// transformation to each element in an input
-// range, and flattening the resulting range of
-// ranges.
-// (This uses one syntax for constrained lambdas
-// in C++20.)
-&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Range&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-     &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;iterator_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-     &lt;span class=&quot;n&quot;&gt;IndirectUnaryInvocable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Range&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indirect_result_t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;transform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;然后还需要一个&lt;code class=&quot;highlighter-rouge&quot;&gt;yield_if&lt;/code&gt;函数用于按照给定的条件，生成一个结果出来，还是典型的函数式编程的路子 (这里省略了&lt;code class=&quot;highlighter-rouge&quot;&gt;maybe_view&lt;/code&gt;泛型的定义，可以去原文中翻查)&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// &quot;yield_if&quot; takes a bool and a value and
-// returns a view of zero or one elements.
-&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yield_if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Semiregular&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;maybe_view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;move&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
-             &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;maybe_view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;主体部分则是一个用惰性方法求三元组的代码，输入是一个理论上无限长的整数序列，通过&lt;code class=&quot;highlighter-rouge&quot;&gt;for_each&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;yield_if&lt;/code&gt;的组合调用，过滤出符合条件的所有的三元组，
-最终在现实输出的时候，用新的标准库的&lt;code class=&quot;highlighter-rouge&quot;&gt;take&lt;/code&gt;取前１０个元素打印输出。&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Define an infinite range of all the
-// Pythagorean triples:
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triples&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;for_each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iota&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yield_if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;make_tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;// Display the first 10 triples
-&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;triples&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'('&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;','&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;','&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;triple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;')'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\n'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;如果熟悉函数式编程的常规范式，会发现这个是一个再简单不过的例子；只是示例代码的实际意义可能显得不大，
-毕竟最老式的Ｃ风格代码也还是容易理解的&lt;/p&gt;
-&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;printNTriples&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-                    &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d, %d, %d&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-                    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-                        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;当然处于代码可维护性的角度来考虑，新风格的现代C++代码要容易复用并且难出错的多，
-因为代码的复杂度大大降低了，逻辑表达式的嵌套也被分散到了各个更小而又基本的组合函数上了。
-不过这些因素不是Aras想要讨论的点。&lt;/p&gt;
-
-&lt;h3 id=&quot;编译时间&quot;&gt;编译时间&lt;/h3&gt;
-&lt;p&gt;作者很快毕竟了一下两个版本的编译时间，毫无悬念，现代的C++版本完败，而且差距是相当惊人的。
-没有用任何模板元泛型编程手段的老C++代码只需要64毫秒就可以编译完毕，得到的可执行文件只要8KB（当然肯定是动态链接了系统库了);
-这个还是带调试模式的编译，如果用上所有的优化手段，则编译耗费了71毫秒，并且在１毫秒之内得到了100组输出。&lt;/p&gt;
-
-&lt;p&gt;而原例子中的现代的C++代码则需要用最新的C++17标准编译，在调试模式和正常模式下，
-编译时间分别是2920毫秒和3020毫秒，运行时间则相差无几。所以作者得出的结论是，其他方面可能差不多，
-性能也没有损失，编译时间却暴涨了几十倍。&lt;/p&gt;
-
-&lt;p&gt;作为一个对比的例子，作者拿出来了一个开源数据库SQLLite的编译时间作为对比，并发现用同样的硬件，
-可以在&lt;strong&gt;不到１秒钟的时间内完成SQLLite所有的２２万行Ｃ代码&lt;/strong&gt;的编译，这个差异还是很惊人的。
-原因在哪里？无外乎是模板元和泛型的滥用导致庞大的头文件预处理和解析；这个问题在完整的模块化机制被支持之前，没有很好的解决办法。&lt;/p&gt;
-
-&lt;p&gt;回到当前状态的range库，第三个版本的代码&lt;strong&gt;居然有180万行的代码全部包在头文件&lt;/strong&gt;中了，如果谁在自己的头文件中保护了这个库，编译的时候就真的会演变成一场灾难了。
-这个抱怨和吐槽的确是稳准而狠，没法简单解决的。&lt;/p&gt;
-
-&lt;h3 id=&quot;调试模式的编译&quot;&gt;调试模式的编译&lt;/h3&gt;
-
-&lt;p&gt;吐槽完绝对的编译时间，作者又对调试模式下差不多的编译时间做起了批判，也许是游戏行业有很轻的需求来调试而没有很多的自动化测试吗？
-另外一个第三方的例子来自于&lt;a href=&quot;https://www.youtube.com/watch?v=m1jAgV4ZOhQ&quot;&gt;Optiming OBJ Loader&lt;/a&gt;，里面给出的结论是，尽量&lt;strong&gt;避免使用STL&lt;/strong&gt;，
-赤裸裸地打脸标准委员会呀。&lt;/p&gt;
-
-&lt;h3 id=&quot;心智负担&quot;&gt;心智负担&lt;/h3&gt;
-
-&lt;p&gt;这方面作者没有特别仔细的展开，似乎怨愤都集中在了上面的编译时间，并且在解密为什么编译时间那么长的时候，
-顺带抱怨了&lt;strong&gt;模板元的滥用&lt;/strong&gt;导致非常复杂的处理规则需要小心谨记。
-这方面的讨论其实已经由来已久了，因为社区的主要演进方向本来就是遵循下面的设计哲学&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;如果可能用库的方式来实现的特性，绝不会动用语言特性来实现。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;这一考虑的初衷主要是为了&lt;strong&gt;照顾到规模庞大的遗留代码的历史包袱&lt;/strong&gt;，B.S在他的《C++ 语言的设计与演化》一书中曾经仔细阐明了这个重要的设计原则；
-可惜这一考虑毕竟是有些矫枉过正的感觉；一些通过修改语言特性可以更简单实现的现代功能偏偏要通过复杂的宏和模板元来实现，一直被很多感觉不爽的用户口诛笔伐。&lt;/p&gt;
-
-&lt;p&gt;不得不说，后向兼容真的是个勇敢而又艰巨的选择；年轻而又没有历史包袱的程序语言曾经屡屡嘲笑C++语言的复杂，
-而真正等到他们变得成熟的时候，
-真正面临同样的挑战，早期开天辟地新起炉灶的痛快劲儿马上消失殆尽的时候，才能体会到实际设计的复杂和中间的不得已而为；
-很多&lt;strong&gt;设计错误越是想在后期去弥补就越是显得困难&lt;/strong&gt;；而用户总是会喜新厌旧寻找新的让他们感觉舒服的工具和环境。&lt;/p&gt;
-
-&lt;p&gt;当然C++编程语言复杂的多范式支持本身的确也会让人写起代码来畏首畏尾，这方面也没什么可说的。
-不过话说回来，从来就没有人要求用户必须熟悉全部的语言特性，才可以投入生产使用；
-试图去掌握全部的语言特性的想法必然不能和具有几十年生命的跨度如此大的语言融合的很好。&lt;/p&gt;
-
-&lt;p&gt;社区会如何反应这方面的挑战，是说模块化的提案已经在加速讨论和演进吗，还是说constexpr的增强可以给编译器更多的指示信息来提高编译速度？
-毕竟Herb Sutter一直在推动让现代的C++语言往更好使用的方向去走，对面Rust语言遇到的困难和获得的经验，
-也许可以被社区的大佬们借鉴。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="cpp" /><summary type="html">C++标准的演进和推出速度过慢一直被内外社区批评，甚至当第一个21世纪的语言标准终于于2011年发布的时候，标准委员会的人都自嘲说我们是一门计算机语言，所以0x需要用十六进制数表示。 进入了第二个十年之后，社区的老学究们终于决定引入时髦的＂发布火车＂的模型，滚动地推出新的功能，之后新的语言标准总算按照一个大版本一个小版本间杂而出的方式推到了程序员的面前。 只是社区中对于新的语言的发展方向一直有很多不同的声音，最近的一次大规模声讨则是起源于Aras P在这篇名为哀悼现代C++的博客文章。</summary></entry></feed>
+尤其是RLS/Racer这两个比较重要的工具时不时会出现循环的重启，还必须依赖于Nightly版本，继续社区加大bug改进力度，早日加到文档版本中去。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><category term="tools" /><summary type="html">不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型， 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。 社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产， 之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在接近年底的时候迟到但是没有爽约，官方将1.31版本宣布为正式的2018版本。</summary></entry></feed>

@@ -1,0 +1,1305 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Google的新操作系统Fuchsia的内核设计 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Google的新操作系统Fuchsia的内核设计">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">
+
+
+
+  <meta property="og:description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Google的新操作系统Fuchsia的内核设计">
+  <meta name="twitter:description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2019-10-06T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(25)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(29)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(46)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(26)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(6)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Google的新操作系统Fuchsia的内核设计">
+    <meta itemprop="description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+    <meta itemprop="datePublished" content="October 06, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Google的新操作系统Fuchsia的内核设计
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+
+
+本文有 15125 字，大约需要 37 分钟可以读完, 创建于 2019-10-06
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。
+由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。
+<!--more--></p>
+
+<p>本文尝试就其目前官方公布的技术文档就其架构设计做一简单分析。</p>
+
+<h2 id="内核架构">内核架构</h2>
+<p>Fuchsia其实是基于一个微内核风格的架构，<strong>内核项目的名字叫做Zircon</strong>。Fuchsia本身是程序员直接面对的操作系统环境，
+它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现底层的系统硬件资源管理，同时<strong>提供系统调用接口</strong>给上层程序使用。</p>
+
+<p>微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，因为两者的优势和劣势都非常明显</p>
+<ul>
+  <li>微内核由于选择将内核的组织<strong>用分布式的思路解耦</strong>开来，从设计上来说比较漂亮容易扩展但是最大的不足是性能太差</li>
+  <li>宏内核则对应于软件架构上的<strong>大一统、集中式单体风格</strong>，所有的东西都放在内核中；从设计上来说非常丑陋不看维护成本高昂但是胜在性能很好</li>
+</ul>
+
+<p>学术界一致在讨伐以Linux为代表的<strong>宏内核架构是设计落后</strong>的表现，却被Linus直接打脸说<strong>微内核的想法在现在的硬件条件下根本就是在浪费资源</strong>，想要高效实现必须要采用宏内核的思路；
+之前几十年的计算机系统发展历史印证了Linus实用主义思想的胜利，
+而Windows系统的内核干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。</p>
+
+<p>Zircon直接旗帜鲜明地宣称它是一个微内核架构，让人自然而然地好奇它怎么设计来避免传统的微内核架构需要重复拷贝数据性能低下的弊端。</p>
+
+<h2 id="zircon顶层概念设计">Zircon顶层概念设计</h2>
+<p>传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在Unix变成哲学一书中详细地阐述了这一理念）；Zircon完全没有采用这一理念，它另起炉灶用<strong>面型对象的思想</strong>来假设所有的内核所管理的东西都是对象;
+即<strong>一切接对象</strong>。</p>
+
+<p>这些对象是<strong>通过句柄handle的方式在系统调用中暴露</strong>给用户使用的，对象本身则是通过继承自一个名字为<code class="highlighter-rouge">Dispatcher</code>的抽象类;它的定义包含在<code class="highlighter-rouge">/kernel/object/include/object/dispatcher.h</code>中。</p>
+
+<h3 id="dispatcher定义">Dispatcher定义</h3>
+<p>Dispatcher的定义声明如下</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Dispatcher</span> <span class="o">:</span> <span class="k">private</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefCountedUpgradeable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;</span><span class="p">,</span>
+                   <span class="k">private</span> <span class="n">fbl</span><span class="o">::</span><span class="n">Recyclable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">using</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefCountedUpgradeable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;::</span><span class="n">AddRef</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefCountedUpgradeable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;::</span><span class="n">Release</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefCountedUpgradeable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;::</span><span class="n">Adopt</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefCountedUpgradeable</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;::</span><span class="n">AddRefMaybeInDestructor</span><span class="p">;</span>
+    <span class="c1">// Dispatchers are either Solo or Peered. They handle refcounting
+</span>    <span class="c1">// and locking differently.
+</span>    <span class="k">virtual</span> <span class="o">~</span><span class="n">Dispatcher</span><span class="p">();</span>
+</code></pre></div></div>
+<p>从类体系结构上看，它用私有继承的方式（C++中私有继承一般用来复用实现）实现了<strong>基于引用计数</strong>的生存周期管理。
+因而有引用计数的接口操作定义</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">increment_handle_count</span><span class="p">()</span> <span class="p">{</span> <span class="n">handle_count_</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ktl</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">);</span> <span class="p">}</span>
+<span class="c1">// Returns true exactly when the handle count goes to zero.
+</span><span class="kt">bool</span> <span class="nf">decrement_handle_count</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">handle_count_</span><span class="p">.</span><span class="n">fetch_sub</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ktl</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1u</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">uint32_t</span> <span class="n">current_handle_count</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">handle_count_</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">ktl</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>该接口上可以添加或者删除<code class="highlighter-rouge">Observer</code></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">virtual</span> <span class="n">zx_status_t</span> <span class="n">AddObserver</span><span class="p">(</span><span class="n">StateObserver</span><span class="o">*</span> <span class="n">observer</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="n">RemoveObserver</span><span class="p">(</span><span class="n">StateObserver</span><span class="o">*</span> <span class="n">observer</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="n">Cancel</span><span class="p">(</span><span class="k">const</span> <span class="n">Handle</span><span class="o">*</span> <span class="n">handle</span><span class="p">);</span>
+</code></pre></div></div>
+<p>最后一个cancel接口可以实现停止某个observer对handle状态的监控。</p>
+
+<h4 id="针对具体实现子类的接口">针对具体实现子类的接口</h4>
+<p>剩下的一些虚函数接口定义则是为了方便实现类似于模板方法这一设计模式而提供给具体的对象实现的</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">virtual</span> <span class="n">zx_obj_type_t</span> <span class="n">get_type</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="n">zx_status_t</span> <span class="n">user_signal_self</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">clear_mask</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">set_mask</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="n">zx_status_t</span> <span class="n">user_signal_peer</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">clear_mask</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">set_mask</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">on_zero_handles</span><span class="p">()</span> <span class="p">{}</span>
+    <span class="c1">//...
+</span></code></pre></div></div>
+<h4 id="内核对象的id">内核对象的ID</h4>
+<p>内核中的所有对象都有一个唯一的ID标识符，用<code class="highlighter-rouge">koid</code>来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。</p>
+
+<h4 id="handle">Handle</h4>
+<p>用户空间的代码如果想访问内核服务中的对象，必须通过<code class="highlighter-rouge">handle</code>句柄来完成。<strong>句柄的概念和Linux里面的文件描述符</strong>的概３念比较类似，它是一种设计上的资源索引和具体资源实现的隔离；这样的隔离使得更灵活的系统演进和扩展变得更加容易。</p>
+
+<p>Handle在用户空间的程序看来其实是一个32位的整数值，用<code class="highlighter-rouge">zx_handle_t</code>来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的<code class="highlighter-rouge">handle</code>对象作为系统调用的参数传递进去，
+这样系统调用的格式上<strong>大都携带一个所要操作的资源的标识</strong>，从而让内核直到作用在哪个内核对象上。</p>
+
+<h5 id="handle和object的对应和校验">handle和object的对应和校验</h5>
+<p>显然，对于用户空间的进程来说，多个不同的进程可能需要访问同一个内核资源，此时它们需要有不同的handle而不能共享同一个handle;
+任何时候用户通过系统调用传入一个<code class="highlighter-rouge">handle</code>的时候，内核都会做相应的校验</p>
+<ul>
+  <li>合法性校验：对应的资源<code class="highlighter-rouge">handle</code>是否存在内核为用户进程创建的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车</li>
+  <li>类型校验：对应的资源的类型和系统调用所对应的<strong>类型是否一致</strong></li>
+  <li>安全校验：用户空间的程序是否有<strong>合理的权限</strong>来操作访问对应的内核资源；这个设计在当今的网络安全环境下尤其重要</li>
+</ul>
+
+<h5 id="handle和资源的单一绑定">handle和资源的单一绑定</h5>
+<p>一个内核对象资源可以绑定于多个handle，反过来对于某个具体的handle而言它却只能绑定于一个具体的资源。并且这个绑定被设计为要么绑定于内核资源对象，要么绑定于用户空间程序；同时只有绑定于用户空间的时候，它才是对用户程序而言可见的（采用上述的整数数值的方式）。</p>
+
+<p>当这个handle被绑定于内核的时候，我们称它为处于迁移中(<code class="highlighter-rouge">in-transit</code>)状态。</p>
+
+<h5 id="用户空间的handle值">用户空间的handle值</h5>
+<p>不同用户程序中的同一个handle值之间<strong>没有逻辑上的直接关系</strong>；它们可以指向不同类型的资源，或者对一个进程有意义的整数值对另外一个进程可能完全没有意义。
+同时关于handle值目前有一些特殊的限定用法</p>
+<ul>
+  <li><code class="highlighter-rouge">0</code>被定义为非法的handle值，而其它的合法的handle必然是<strong>一个大于0的正整数</strong>。这是一个自然而然的设计，有利于实际的比较</li>
+  <li>多个<code class="highlighter-rouge">handel</code><strong>可能归属于同一个集合</strong>中，此时最低的两个比特位表示它属于哪个集合，并可以用<code class="highlighter-rouge">ZX_HANDLE_FIXED_BITS_MASK</code>来获取掩码</li>
+</ul>
+
+<h5 id="内核中的handle">内核中的handle</h5>
+<p>内核态的handle实际上是一个C++对象，它从逻辑上包含三个逻辑部分</p>
+<ul>
+  <li>对实际内核对象的引用</li>
+  <li>被允许的操作权限定义</li>
+  <li>实际被绑定的进程的信息
+权限和进程绑定的语义意味着内核<strong>允许同一个用户进程来创建不同</strong>的<code class="highlighter-rouge">handle</code>来访问同一个内核对象，只要它们的权限不同就可以。</li>
+</ul>
+
+<h5 id="handle定义"><code class="highlighter-rouge">Handle</code>定义</h5>
+<p>内核中的类定义在<code class="highlighter-rouge">kernel/object/include/object/handle.h</code>文件中，它是一个标记为<code class="highlighter-rouge">final</code>的具体类;
+类开头的注释说吗了它维护了进程和关联的内核对象的关联信息。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// A Handle is how a specific process refers to a specific Dispatcher.
+</span><span class="k">class</span> <span class="nc">Handle</span> <span class="k">final</span> <span class="p">{</span>
+ <span class="k">public</span><span class="o">:</span>
+  <span class="c1">// Returns the Dispatcher to which this instance points.
+</span>  <span class="k">const</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">Dispatcher</span><span class="o">&gt;&amp;</span> <span class="n">dispatcher</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">dispatcher_</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">// Returns the process that owns this instance. Used to guarantee
+</span>  <span class="c1">// that one process may not access a handle owned by a different process.
+</span>  <span class="n">zx_koid_t</span> <span class="n">process_id</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">process_id_</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">ktl</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span> <span class="p">}</span>
+  <span class="err">　</span>
+  <span class="c1">// Sets the value returned by process_id().
+</span>  <span class="kt">void</span> <span class="n">set_process_id</span><span class="p">(</span><span class="n">zx_koid_t</span> <span class="n">pid</span><span class="p">);</span>
+</code></pre></div></div>
+<p>为了避免不同的进程访问，类结构里面保存了它所关联的进程ID信息。</p>
+
+<p>针对内核资源的引用计数方面，该类提供了丰富的读取和查询操作；并提供接口返回权限检查操作。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Returns the |rights| parameter that was provided when this instance
+</span>  <span class="c1">// was created.
+</span>  <span class="kt">uint32_t</span> <span class="n">rights</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">rights_</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">// Returns true if this handle has all of the desired rights bits set.
+</span>  <span class="kt">bool</span> <span class="n">HasRights</span><span class="p">(</span><span class="n">zx_rights_t</span> <span class="n">desired</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="p">(</span><span class="n">rights_</span> <span class="o">&amp;</span> <span class="n">desired</span><span class="p">)</span> <span class="o">==</span> <span class="n">desired</span><span class="p">;</span> <span class="p">}</span>
+  
+  <span class="c1">// Returns a value that can be decoded by Handle::FromU32() to derive a
+</span>  <span class="c1">// pointer to this instance.  ProcessDispatcher will XOR this with its
+</span>  <span class="c1">// |handle_rand_| to create the zx_handle_t value that user space sees.
+</span>  <span class="kt">uint32_t</span> <span class="n">base_value</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">base_value_</span><span class="p">;</span> <span class="p">}</span>
+  
+  <span class="c1">//...
+</span>  <span class="c1">// Get the number of outstanding handles for a given dispatcher.
+</span>  <span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">Count</span><span class="p">(</span><span class="k">const</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">Dispatcher</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h6 id="内核对象的封装">内核对象的封装</h6>
+<p>同样的头文件中还包含了一个管理内核对象生存周期的<code class="highlighter-rouge">KenelHandle</code>类，从它的定义可以看出<strong>内核对象使用的是典型的移动语义</strong>，即不允许复制但是可以移动。
+因为这是内核的代码，并且<strong>C++标准库中的智能指针被禁用</strong>了(参考这里的<a href="https://fuchsia.dev/fuchsia-src/zircon/cxx">C++语言使用</a>说明)，所以该类的实现基本就是重复了C++标准库的做法</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">KernelHandle</span> <span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+  <span class="k">friend</span> <span class="k">class</span> <span class="nc">KernelHandle</span><span class="p">;</span>
+  <span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">dispatcher_</span><span class="p">;</span>
+
+ <span class="k">public</span><span class="o">:</span>
+  <span class="n">KernelHandle</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+  <span class="k">explicit</span> <span class="nf">KernelHandle</span><span class="p">(</span><span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">dispatcher</span><span class="p">)</span> <span class="o">:</span> <span class="n">dispatcher_</span><span class="p">(</span><span class="n">ktl</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">dispatcher</span><span class="p">))</span> <span class="p">{}</span>
+  <span class="o">~</span><span class="n">KernelHandle</span><span class="p">()</span> <span class="p">{</span> <span class="n">reset</span><span class="p">();</span> <span class="p">}</span>
+  
+  <span class="c1">// Movable but not copyable since we own the underlying Dispatcher.
+</span>  <span class="n">KernelHandle</span><span class="p">(</span><span class="k">const</span> <span class="n">KernelHandle</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+  <span class="n">KernelHandle</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">KernelHandle</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+</code></pre></div></div>
+<p>这个类是一个针对抽象资源的封装，并且对用传入的内核对象引用来构造的方式，采用了直接的<code class="highlighter-rouge">move</code>操作来替换所有权。
+同时拷贝和复制操作也被直接禁用。</p>
+
+<p>对不同类型资源(模板参数类型不一样)的构造和赋值，也是直接采用move语义来操作实现中封装的内核对象。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+  <span class="n">KernelHandle</span><span class="p">(</span><span class="n">KernelHandle</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="o">:</span> <span class="n">dispatcher_</span><span class="p">(</span><span class="n">ktl</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="n">dispatcher_</span><span class="p">))</span> <span class="p">{}</span>
+
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+  <span class="n">KernelHandle</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">KernelHandle</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;&amp;&amp;</span> <span class="n">other</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">reset</span><span class="p">(</span><span class="n">ktl</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="n">dispatcher_</span><span class="p">));</span>
+    <span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">reset</code>操作和<code class="highlighter-rouge">release</code>实现基本就是照搬了<code class="highlighter-rouge">uniq_ptr</code>类型的唯一所有权的处理手法。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kt">void</span> <span class="nf">reset</span><span class="p">()</span> <span class="p">{</span> <span class="n">reset</span><span class="p">(</span><span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">());</span> <span class="p">}</span>
+  
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+  <span class="kt">void</span> <span class="n">reset</span><span class="p">(</span><span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span> <span class="n">dispatcher</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">dispatcher_</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">dispatcher_</span><span class="o">-&gt;</span><span class="n">on_zero_handles</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="n">dispatcher_</span> <span class="o">=</span> <span class="n">ktl</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">dispatcher</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">const</span> <span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span> <span class="n">dispatcher</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">dispatcher_</span><span class="p">;</span> <span class="p">}</span>
+  <span class="n">fbl</span><span class="o">::</span><span class="n">RefPtr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">release</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">ktl</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">dispatcher_</span><span class="p">);</span> <span class="p">}</span>
+
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h5 id="用户空间的创建替换更新和关闭">用户空间的创建、替换、更新和关闭</h5>
+<p>如果要访问内核资源，用户空间的进程需要先通过具体资源的<strong>系统调用来创建</strong>一个对应资源的handle；比如如下这些系统调用函数</p>
+<ul>
+  <li><code class="highlighter-rouge">zx_event_create</code>创建一个事件类型的资源</li>
+  <li><code class="highlighter-rouge">zx_process_create</code>创建一个进程资源，这里进程本身其实也是一类具体的资源；这里的概念和Linux里面的进程管理作为内核的基本构造的方法完全不同：Zircon是<strong>将进程也作为抽象对象的一种实现</strong>了。</li>
+  <li><code class="highlighter-rouge">zx_thread_create</code>创建一个线程资源
+这些函数在创建对应资源的同时，也返回了一个用户空间可用的指向对应资源的<code class="highlighter-rouge">handle</code>。</li>
+</ul>
+
+<p>Handle本身可以通过<code class="highlighter-rouge">zx_handle_duplicate</code>调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来<strong>降低需要访问的资源权限</strong>。
+<code class="highlighter-rouge">zx_handle_replace</code>用来替换一个已有的handle,用户甚至可以在这个API中添加新的<code class="highlighter-rouge">handle</code>的权限。
+<code class="highlighter-rouge">zx_handle_close</code>顾名思义完成关闭handle的目的。</p>
+
+<h5 id="用户空间和内核空间的迁移">用户空间和内核空间的迁移</h5>
+<p>如下的两组API用来完成<strong>handle在内核和用户空间的转换</strong></p>
+<ul>
+  <li><code class="highlighter-rouge">zx_channel_write</code>将对应的用户空间的handle转移到内核空间中，即放置于<code class="highlighter-rouge">in-transist</code>状态</li>
+  <li><code class="highlighter-rouge">zx_channel_read</code>+<code class="highlighter-rouge">zx_channel_call</code>将处于内核中的handle提前出来并绑定到用户空间中</li>
+</ul>
+
+<p>这两组API的功能实现了类似于传统Linux内核的上下文切换的功能。</p>
+
+<h5 id="基于引用技术的资源权限管理">基于引用技术的资源权限管理</h5>
+<p>内核中的资源如上面的<code class="highlighter-rouge">Dispatcher</code>类的接口声明，采用了<strong>基于引用计数的生命周期管理思路</strong>；任何时候有一个新的handle指向一个资源，其内部的引用计数就会增加；已有的handle被关闭的时候，引用计数会自减。
+当引用减小为0的时候，对应的资源会被<strong>自动销毁或者处于终结状态等待延迟的垃圾回收机制</strong>来清理无人使用的资源。</p>
+
+<h2 id="如何运行用户代码jobprocessthread">如何运行用户代码：Job/Process/Thread</h2>
+<p>Zircon将<strong>应用程序的加载和执行放到了内核之外</strong>，由用户空间的工具和函数来提供；从内核提供的资源角度来看，由下面三种重要的资源</p>
+<ul>
+  <li>Job是最顶层的对象资源，它定义了运行期的种种限制，并且<strong>Job之间采用父子关系结构</strong>，并且在系统启动的时候有个<strong>顶层的根(RootJob)</strong>，这一设计基本是复用了传统的Linx系统设计思路</li>
+  <li>一个Job拥有一个或者多个Process资源对象，这里的Process类似于我们熟悉的进程</li>
+  <li>一个Process拥有一个或者多个Thread资源对象，而Thread代表了CPU可以执行的最小单元如CPU、寄存器、堆栈等</li>
+</ul>
+
+<p>这样的设计方式比传统的Unix基于Task的思路要方便不少，比如传统的用户进程组的概念被Job所替代，并且Thread和Process的关系也被显示地设计为包含关系，不管是使用的<strong>便利性还是安全性上都更为干净清晰</strong>。</p>
+
+<h3 id="job">Job</h3>
+<p>Job主要的目的是用来做进程的分组控制，它可以在分组的层面上提供诸如系统调用权限、资源使用限额控制等。这方面明显可以看到目前的Linux上的<strong>容器技术设计</strong>的考虑。</p>
+
+<p>所有的Job构成了一个<strong>单根的树形结构</strong>，除了根节点外每一个Job都可以由一个或者多个子Job。同时因为Process是Job的子节点，它可以在树结构中和Job处于平级结构。</p>
+
+<p>Job对象中包含如下信息</p>
+<ul>
+  <li>指向父对象的引用</li>
+  <li>包含子Job的集合</li>
+  <li>一组成员进程的集合</li>
+  <li>一组控制策略（目前尚未实现）</li>
+</ul>
+
+<p>目前由两个系统调用来完成对Job的控制，<code class="highlighter-rouge">zx_job_create()</code>用于创建Job，而<code class="highlighter-rouge">zx_job_set_policy()</code>用于设置控制策略。</p>
+
+<h3 id="进程process">进程Process</h3>
+<p>Process和传统的Linux进程的概念比起来没有太大的差别，都是用来表示可以被运行的一些程序指令的集合。
+它被Job所控制，包含如下的资源</p>
+<ul>
+  <li>handles句柄对象</li>
+  <li>虚拟内存区域对象</li>
+  <li>线程对象</li>
+</ul>
+
+<p>进程的创建和启动<strong>需要两个步骤</strong>来完成</p>
+<ul>
+  <li><code class="highlighter-rouge">zx_process_create</code>负责创建但不执行</li>
+  <li><code class="highlighter-rouge">zx_process_start</code>负责执行，它在创建之后只能被执行一次</li>
+</ul>
+
+<p>一个进程里面可以加入多个线程，进程会一致执行直到下列一个条件满足</p>
+<ul>
+  <li>最后一个包含的线程退出</li>
+  <li>进程自己调用了<code class="highlighter-rouge">zx_process_exit</code></li>
+  <li>父Job终止了自己的执行</li>
+  <li>父Job被销毁</li>
+</ul>
+
+<h3 id="线程thread">线程Thread</h3>
+<p>线程是一种实际消耗CPU运行资源并<strong>被内核调度器所调度执行</strong>的一种资源，这一点和传统的Unix内核设计截然不同。它运行在一个特定的父进程对象中，使用进程所提供的内存、资源句柄等信息来完成IO处理和计算功能。</p>
+
+<h4 id="线程生存周期">线程生存周期</h4>
+<p>线程随着<code class="highlighter-rouge">zx_thread_create()</code>调用而被创建，但是<strong>并不会在创建后就立即被执行</strong>。只有有人调用了<code class="highlighter-rouge">zx_thread_start()</code>或者调用了<strong>父进程</strong>的<code class="highlighter-rouge">zx_process_start()</code>之后才会被执行（此时该线程是进程里面的<strong>第一个线程</strong>）。两种系统调用都包含了实际代码执行的入口信息。
+该入口信息是一个内存地址资源，传递的时候也是以句柄的方式来传入的。</p>
+
+<p>线程的退出条件包含以下几种情况之一</p>
+<ul>
+  <li><code class="highlighter-rouge">zx_thread_exit()</code>调用用于自行退出，入口点函数的<strong>返回并不会自行退出</strong>线程</li>
+  <li><code class="highlighter-rouge">zx_vmar_unmap_handle_close_thread_exit()</code>调用回收了对应的虚拟内存资源，此时调用方的堆栈信息也会被系统回收</li>
+  <li><code class="highlighter-rouge">zx_futex_wake_handle_close_thread_exit()</code>调用</li>
+  <li>父进程自身退出的时候，连带终止所有子线程</li>
+  <li><code class="highlighter-rouge">zx_task_kill</code>终止了线程的句柄</li>
+  <li>系统产生了异常行为，此时没有其它的处理程序可以顺利退出该线程</li>
+</ul>
+
+<p>默认情况下，线程<strong>默认总是和父进程解绑</strong>(detach)的，这意味着在父进程退出的时候，无需调用专门的<code class="highlighter-rouge">join()</code>函数来做清理。</p>
+
+<h3 id="内核到用户空间的启动">内核到用户空间的启动</h3>
+<p>基于微内核的架构的一个比较复杂的地方是如何启动第一个用户空间的进程。
+一种流行的做法是在内核层面实现一个仅仅用于启动加载的“迷你版“的文件系统读写和程序加载功能，然后再内核完成自启动之后旧不再使用这些功能；而Ziron并未采用这一流行的设计方法。</p>
+
+<p>Ziron使用的Bootloader会用<strong>称为ZBI的镜像文件格式</strong>来同时加载内核镜像和一个数据块。该镜像格式是一个内嵌了诸如硬件细节信息、内核启动时候的命令行参数、压缩的内存磁盘镜像文件等内容的<strong>简单容器格式</strong>。</p>
+
+<p>内存磁盘镜像文件使用LZ4格式压缩，解压后它的镜像格式是BOOTFS格式；该格式其实是一个<strong>简单的只读文件系统</strong>，内含了用户空间程序需要运行的环境、共享库和数据文件等，且每一项都包含了</p>
+<ul>
+  <li>文件名</li>
+  <li>文件大小</li>
+  <li>文件在BOOTFS里面的相对偏移量</li>
+</ul>
+
+<p>这些数值都需要<strong>保证和页面大小对齐</strong>，并且目前仅限于32位数字。
+当内核完成自举之后，BOOTFS里面的这些文件随之变成一个挂载在<code class="highlighter-rouge">/boot目录</code>的文件系统。</p>
+
+<p>但是内核本身并不包含任何解压和解析BOOTFS文件格式的代码，这些功能是通过第一个用户空间的称为<code class="highlighter-rouge">userboot</code>的进程来完成的。</p>
+
+<h4 id="userboot进程的加载"><code class="highlighter-rouge">userboot</code>进程的加载</h4>
+<p><code class="highlighter-rouge">userboot</code>进程是一个普通的用户空间进程，它可以使用内核定义的系统调用来完成具体的工作；它和其它用户空间进程的区别在于内核加载它的方式是特殊的。
+在编译阶段，userboot被和内核镜像直接用<strong>简单的ELF文件格式打包</strong>在一起。
+然而内核并不需要真的来解析ELF文件才能使用它，在编译期间诸如只读段的大小、可执行段的大小、入口函数的位置这些信息都被从文件中提取出来然后<strong>用常量定义的方式传递给内核</strong>代码。</p>
+
+<p>随后在加载过程中，内核会发送初始的bootstrap消息给userboot，内核启动的命令行参数会被解析为一个一个的单词并以字符串环境变量的格式传递给userboot；这样所有它需要使用的资源句柄都会包含在该消息中。</p>
+
+<h5 id="解压bootfs和启动加载服务">解压BOOTFS和启动加载服务</h5>
+<p>随后基于内核映射系统调用的vDSO的工作方式，userboot可以在其后的内存位置上找到系统调用的代码入口，完成系统调用。
+它需要做的第一件事就是<strong>通过传入为VMO类型的句柄来解压ZBI格式的BOOTFS镜像</strong>，使用自己包含的LZ4格式支持代码来完成解压处理，将解压之后的文件内容放入新的VMO对象中。</p>
+
+<p>接下来它需要环境变量传入的<code class="highlighter-rouge">userboot=&lt;file&gt;</code>信息，来<strong>查找到对应的文件作为第一个真正的用户空间</strong>进程；如果用户没有指定该启动选项，则默认启动BOOTFS镜像中包含的<code class="highlighter-rouge">bin/bootsvc</code>程序。
+因为usertoot实现了完整的ELF格式解析功能，它可以识别到具体的动态链接文件的属性信息，并在需要的时候调用额外的解析器来加载需要解释执行的文件。</p>
+
+<p>随后userboot会将包含系统调用服务的vDSO加载到一个随机的内存地址（这样可以有效地防止黑客攻击内核），并用正常的基于Channel的方式启动新的进程，将这个vDSO的基地址和Channel资源的句柄传递给子进程。
+在这个Channel上，userboot会将它从内核接收到的启动信息简单替换处理后发送个子进程。</p>
+
+<h5 id="加载服务传递">加载服务传递</h5>
+<p>直接被<code class="highlighter-rouge">userboot</code>启动的是一个加载服务进程，它会接收到userboot传递来的vDSO和一个包含加载服务信息的通道的句柄。
+正常情况下加载服务处理完成这些信息之后，应该<strong>尽快关闭该通道</strong>。
+userboot程序会循环处理来自加载服务的请求，并且在收到加载对象的请求的时候，查询BOOTFS中的以<code class="highlighter-rouge">lib/</code>为前缀的文件<strong>并用VMO的方式将内容返回</strong>给加载服务；这样第一个真正的用户进程就可以访问放在BOOTFS中的动态链接库信息。
+这些文件同时也会以文件的形态出现在<code class="highlighter-rouge">/boot</code>中。</p>
+
+<p>作为一个单线程的应用，<code class="highlighter-rouge">userboot</code>在通道被对方关闭之后，就立马退出处理循环并不再需要做其它事情了。
+除了特殊测试场景的设置它会等待启动的用户程序退出才自己退出外，正常情况下<code class="highlighter-rouge">userboot</code>就会自行退出，留下它所启动的子进程作为用户可以看见的第一个进程。</p>
+
+<h3 id="虚拟内存对象">虚拟内存对象</h3>
+
+<h2 id="ipc机制">IPC机制</h2>
+<p>Zircon提供了<strong>基于消息传递</strong>设计的IPC机制，这里面主要的IPC对象是Socket和Channel；两者都提供双向的消息交互，具有两个通信端点。
+创建Socket或者Channel的时候，我们就会得到<strong>指向同一个IPC对象资源的两个句柄</strong>，每一个代表通信的一方向。</p>
+
+<h3 id="socket">Socket</h3>
+<p>Socket提供了一种双向的基于数据流的IPC机制，它的主要机制是<strong>数据搬运和移动</strong>。
+创建之后，连接socket的两端都可以通过<code class="highlighter-rouge">zx_sockert_read/write</code>执行读写操作;同时它支持类似于TCP协议的半关闭的概念，用户可以在<code class="highlighter-rouge">zx_socket_shutdown</code>里设置<code class="highlighter-rouge">ZX_SOCKET_SHUTDOWN_READ/WRITE</code>来关闭读或者写操作。</p>
+
+<p>Socket本身分为两种类型</p>
+<ul>
+  <li>ZX_SOCKET_STREAM类型的socket在写入的时候会检查内部缓冲的大小，如果<strong>缓冲区未满则允许写入一部分或者全部</strong>数据，写操作会返回成功，并且调用者可以得到实际写入的字节数；如果缓冲已满，则返回<code class="highlighter-rouge">ZX_ERR_SHOULD_WAIT</code>，此时调用方需要用<code class="highlighter-rouge">zx_object_wait_async</code>或者<code class="highlighter-rouge">zx_object_wait_one</code>这样的异步调用来等待</li>
+  <li>ZX_SOCKET_DATAGRAM类型的socket在类似情况下<strong>不会部分写入</strong>，如果缓冲可用空间不足则会直接返回<code class="highlighter-rouge">ZX_ERR_SHOULD_WAIT</code>,如果写入成功返回值就会包含实际写入的数据大小。而该类型的socket在读取的时候会仅仅读取第一个可用的DATAGRAM。</li>
+</ul>
+
+<p>Socket相关的系统调用还提供了类似于查询缓冲大小的API，用户需要在<code class="highlighter-rouge">zx_object_get_info</code>中指定对象类型为<code class="highlighter-rouge">ZX_INFO_SOCKET</code>，然后再返回的结构体中查看<code class="highlighter-rouge">zx_info_socket_t</code>。
+这个获取内核对象信息的接口是一个C风格的泛型接口</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;zircon/syscalls.h&gt;
+</span>
+<span class="n">zx_status_t</span> <span class="n">zx_object_get_info</span><span class="p">(</span><span class="n">zx_handle_t</span> <span class="n">handle</span><span class="p">,</span>
+                               <span class="kt">uint32_t</span> <span class="n">topic</span><span class="p">,</span>
+                               <span class="kt">void</span><span class="o">*</span> <span class="n">buffer</span><span class="p">,</span>
+                               <span class="kt">size_t</span> <span class="n">buffer_size</span><span class="p">,</span>
+                               <span class="kt">size_t</span><span class="o">*</span> <span class="n">actual</span><span class="p">,</span>
+                               <span class="kt">size_t</span><span class="o">*</span> <span class="n">avail</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="channel">Channel</h3>
+<p>Channel对象<strong>是一种基于数据报</strong>的IPC对象；不同于socket的机制，IPC的两端通过Channel<strong>交换的是内核资源的句柄</strong>。
+Channel最大不能超过<code class="highlighter-rouge">ZX_CHANNEL_MAX_MSG_BYTES</code>个字节，同时它还限制了最多可以关联<code class="highlighter-rouge">ZX_CHANNEL_MAX_MSG_HANDLES</code>个内核对象句柄。</p>
+
+<p>当对应的内核资源的句柄被写入到一个Channel中去的时候，它再当前调用进程里面的句柄引用就会被删除；而当Channel的读取方获得该资源句柄的时候，它又被内核自动关联到接收进程的引用句柄列表中。
+<strong>处于中间状态的内核对象会持续存在</strong>，除非有一些关闭进程或者异常处理的程序关闭了Channel的另外一端，这种情况下对应的资源句柄会被一同清理。</p>
+
+<h4 id="channel和消息队列">Channel和消息队列</h4>
+<p>Channel自身维护了一个<strong>有序的消息队列</strong>，其中的每一个消息里面包含数据和某些内核资源句柄。
+对<code class="highlighter-rouge">zx_channel_write</code>的调用会将对应的消息放入Channel的消息队列中，而<code class="highlighter-rouge">zx_channel_read</code>则会将已经排队的消息出队。
+某个线程可以用<code class="highlighter-rouge">zx_object_wait_one</code>系统调用显示地阻塞等待另外一方发送消息。</p>
+
+<p><code class="highlighter-rouge">zx_channel_call</code>调用则会完成如下的操作</p>
+<ul>
+  <li>将消息写入队列</li>
+  <li>等待对方的消息响应</li>
+  <li>将收到的消息出队，此时收到的消息的<strong>前４个字节</strong>包含内核提供的<code class="highlighter-rouge">transaction ID</code></li>
+</ul>
+
+<h5 id="通过channel收发消息的操作原子化和一致性">通过Channel收发消息的操作原子化和一致性</h5>
+<p>通过一个Channel来发送消息总是经过如下的两步式操作</p>
+<ul>
+  <li>用<strong>原子化的方式</strong>将数据写入channel并将消息中包含的所有对象的句柄的所有权移动到Channel中去</li>
+  <li>消息的读取方用用原子化方式将所有的资源句柄移入调用方的句柄表里面，如果有失败发生，所有权依然再Channel对象中，但是用户指定了<code class="highlighter-rouge">ZX_CHANNEL_READ_MAY_DISCARD</code>选项的除外</li>
+</ul>
+
+<p>正式因为这个移动和所有权的设计，导致Channel对象不像其它内核对象一样可以被复制。Fuchsia设计的关于<strong>消息的顺序性保证异常严格</strong>：
+当一个Channel的所有权正在被内核从一个进程传递到另外一个进程的过程中的时候，即使是来自于同一个进程的同时进行的消息写入操作也不会破坏消息之间的相对次序。</p>
+
+<p>上述的顺序性保证是Channel独有的，其它的内核对象并没有该性质。</p>
+
+<h3 id="signalport和event">Signal，Port和Event</h3>
+<p>Signal和Event是用于实现进程间通知的一类内核对象。</p>
+
+<h4 id="signal">Signal</h4>
+<p>Zircon内核对象通过Signal接口来通知应用程序一些简单的信息：一个signal仅仅能传输<strong>信息容量为一即一个比特位</strong>的内核发生的具体事件。有些signal是多个内核对象共享的，而另外一些则是因内核对象的不同而定。</p>
+
+<p>用户空间的程序可以用如下的系统调用来捕捉内核对象的signal</p>
+<ul>
+  <li><code class="highlighter-rouge">zx_object_wait_one</code>会以阻塞的方式等待给定内核对象上的指定信号集中的某一个发生，直到超时或者关注的信号被触发</li>
+  <li><code class="highlighter-rouge">zx_object_wait_many</code>允许用户<strong>传入多个等待的内核对象以及它们上关联的</strong>信号集作为参数，并等到对应的信号通知，直到超时或者至少一个信号被触发</li>
+  <li><code class="highlighter-rouge">zx_object_wait_async</code>是异步等待的系统调用，它通过一个额外的Port类对象来协助完成</li>
+</ul>
+
+<p>最后一个异步的等待方式略微复杂，但是避免了同步等待阻塞应用程序的代价</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">zx_status_t</span> <span class="n">zx_object_wait_async</span><span class="p">(</span><span class="n">zx_handle_t</span> <span class="n">handle</span><span class="p">,</span>
+                                 <span class="n">zx_handle_t</span> <span class="n">port</span><span class="p">,</span>
+                                 <span class="kt">uint64_t</span> <span class="n">key</span><span class="p">,</span>
+                                 <span class="n">zx_signals_t</span> <span class="n">signals</span><span class="p">,</span>
+                                 <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="port和异步等待">port和异步等待</h4>
+<p>上面的系统调用通过<code class="highlighter-rouge">signals</code>参数指定对应handle所指向的内核对象上的哪些signal需要被关注，当对应的signal被触发的时候，一个新的包会被排队于Port对象上。</p>
+
+<p>而Port的队列里会<strong>包含所有已经发生的信号</strong>而不仅仅限于<code class="highlighter-rouge">zx_object_wait_async</code>所指定的那些signal；一旦排队发生，异步等到的操作即告完成，即不会有更多的信号引起的包被排队于Port上。</p>
+
+<p>Port对象的用户可以用<code class="highlighter-rouge">zx_port_wait</code>来获取这些得到的信号，也可以用<code class="highlighter-rouge">zx_port_cancel</code>系统调用终止整个异步等待操作。</p>
+
+<h5 id="port的逻辑概念">Port的逻辑概念</h5>
+<p>Port其实是一个更加底层的<strong>消息信箱</strong>的概念。它允许线程等待通过包发送的各种各样的事件；这些事件不但包含显示地排队于其上的包，也适用于通过异步IPC机制发送过来的消息数据。它通过三个系统调用来提供服务</p>
+<ul>
+  <li><code class="highlighter-rouge">zx_port_create</code>创建一个Port</li>
+  <li><code class="highlighter-rouge">zx_port_queue</code>发送数据包到某个Port对象</li>
+  <li><code class="highlighter-rouge">zx_port_wait</code>等待数据包</li>
+</ul>
+
+<p>Port既可以接收来自用户空间的包，也<strong>可以处理来自内核的包</strong>（如上面所述的Signal）；它还可以绑定于某种内核中断，此时<strong>内核中断的优先级比其它的非中断包的优先级要高</strong>因而会被优先处理。</p>
+
+<p>如果一个线程需要处理大量的内核对象Handle上过来的信号，<strong>Port机制是一种效率更高</strong>的方案所以应该被优先考虑。</p>
+
+<h4 id="event">Event</h4>
+<p>Event是一种包含了多个活跃信号集的简单内核对象，它代表了用户可以触发的信号对象集。目前预留了<code class="highlighter-rouge">ZX_USER_SIGNAL_0</code>到<code class="highlighter-rouge">ZX_USER_SIGNAL_7</code>总共8个用户可以设置、清理、等待的自定义信号。</p>
+
+<p>用户需要适用<code class="highlighter-rouge">zx_object_signal</code>来触发自定义的信号。</p>
+
+<p>Event Pair则是一对其中的信号会互相触发的Event对。用户可以适用<code class="highlighter-rouge">zx_object_signal</code>来向对方发送自定义的信号。
+当Event Pair上的一端上的所有资源句柄都被关闭的时候，另外一端则会自动收到<code class="highlighter-rouge">PEER_CLOSED</code>信号。</p>
+
+<h3 id="虚拟内存对象vmo">虚拟内存对象VMO</h3>
+<p>虚拟内存对象表示一系列<strong>物理内存页对象</strong>，或者是需要按需创建、惰性按需填充的内存页的集合。
+内核提供<code class="highlighter-rouge">zx_vmar_map</code>来允许用户将地址空间映射到进程里面；<code class="highlighter-rouge">zx_vmar_unmap</code>则执行相反的地址空间的卸映射。
+用户程序也通过<code class="highlighter-rouge">zx_vmar_protect</code>来设置或者调整页面的控制权限。</p>
+
+<p>同一个VMO对象可以被多个进程各自映射到他们的用户地址空间中。<strong>不同于Linux</strong>的内核空间和用户空间完全隔离的做法，
+Zircon用<strong>同样VMO对象</strong>来满足内核空间和用户空间的内存管理；它是一种通用的多进程之间共享内存的做法。</p>
+
+<h4 id="页面对齐和大小调整">页面对齐和大小调整</h4>
+<p>实际VMO的大小会被内核自动调整为和页面大小对齐，用户可以适用<code class="highlighter-rouge">zx_vmo_set_size</code>来指定一个希望设置的大小，而<code class="highlighter-rouge">zx_vmo_get_size</code>则接收内核调整过后向上对齐的实际大小。</p>
+
+<h4 id="页面映射和分配">页面映射和分配</h4>
+<p>内存页面被相关的系统调用以<strong>按需使用的方式分配</strong>给VMO对象，比如</p>
+<ul>
+  <li>系统调用<code class="highlighter-rouge">zx_vmo_read</code>/<code class="highlighter-rouge">zx_vmo_write</code>被触发的时候，或者</li>
+  <li><code class="highlighter-rouge">zx_vmar_map</code>创建的VMO对象被写入数据的时候</li>
+</ul>
+
+<p>内核也允许通过<code class="highlighter-rouge">zx_vmo_op_range</code>调用来分配或者释放对应的内存页，不过这些操作应该被当作是非常底层的系统调用来使用，一般可以应用于缓存或者锁算法；一般用户空间的代码还是不用为好。</p>
+
+<h2 id="libc库的支持">libc库的支持</h2>
+<p>Fuchsia实现了一个部分遵循POSIX标准（子集）的C标准库；它最初是基于musl这个容器世界里非常流行的迷你C库，但是修改了很多自己的实现；但是整体的代码布局依然和musl保持一致。</p>
+
+<p>由于系统设计的不同，Fuchsia的C库并不支持静态链接，所有的程序都必须使用动态链接，且libc.so本身就是一个动态链接器。
+另外，它也不支持Linux上的IO操作的功能，相反它提供了一个针对fdio.so的弱符号封装。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/04/reduce-cpp-template-overhead/">reduce-cpp-template-overhead</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/01/microservice-with-cpp/">微服务开发：C++语言是否真的不适用？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/08/24/learn-kubernetes-again/">重学Kubernetes - 读张磊的《深度剖析Kubernetes》</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/07/21/from-borg-to-kubernetes/">读Google著名的分布式设计论文－从Borg到Kubernetes的演进</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/23/cpp-20-modules-concepts-coroutine/">C++20 - 下一个大版本功能确定</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/22/regular-expression-optimize/">C++正则表达式比Python慢？</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/kernel" class="page__taxonomy-item" rel="tag">kernel</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/os" class="page__taxonomy-item" rel="tag">os</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/architecture" class="page__taxonomy-item" rel="tag">architecture</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-06T00:00:00+08:00">October 06, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Google的新操作系统Fuchsia的内核设计 https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="fuchsia-kernel-ziron-concepts">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

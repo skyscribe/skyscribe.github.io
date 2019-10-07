@@ -365,6 +365,10 @@
 <lastmod>2019-10-04T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/</loc>
+<lastmod>2019-10-06T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/about/</loc>
 </url>
 <url>
@@ -576,6 +580,12 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/tags/container/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/os/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/kernel/</loc>
 </url>
 <url>
 <loc>https://skyscribe.github.io/categories/cpp/</loc>
