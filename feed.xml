@@ -1,4 +1,462 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-10-07T21:04:35+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Google的新操作系统Fuchsia的内核设计</title><link href="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" rel="alternate" type="text/html" title="Google的新操作系统Fuchsia的内核设计" /><published>2019-10-06T00:00:00+08:00</published><updated>2019-10-06T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">&lt;p&gt;传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-11-13T21:52:12+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">现代C++的内存模型和高性能的多线程编程</title><link href="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" rel="alternate" type="text/html" title="现代C++的内存模型和高性能的多线程编程" /><published>2019-11-04T00:00:00+08:00</published><updated>2019-11-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">&lt;p&gt;内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。
+相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。&lt;/p&gt;
+
+&lt;p&gt;然而如果我们想追求极致的应用程序性能，又想追求&lt;strong&gt;可移植性、高性能&lt;/strong&gt;这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，
+这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;为什么需要内存模型&quot;&gt;为什么需要内存模型&lt;/h2&gt;
+&lt;p&gt;有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？&lt;/p&gt;
+
+&lt;p&gt;其实最简单的答案来自于&lt;strong&gt;多线程编程的需求驱动&lt;/strong&gt;和&lt;strong&gt;跨平台可移植性&lt;/strong&gt;的需求。&lt;/p&gt;
+
+&lt;h3 id=&quot;单线程环境的程序环境&quot;&gt;单线程环境的程序环境&lt;/h3&gt;
+&lt;p&gt;因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。
+承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。&lt;/p&gt;
+
+&lt;p&gt;不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。
+这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？&lt;/p&gt;
+
+&lt;h3 id=&quot;多线程环境的问题&quot;&gt;多线程环境的问题&lt;/h3&gt;
+&lt;p&gt;在多线程的环境下，情况就会变得复杂起来了，因为旧有的&lt;strong&gt;语言标准选择自动忽略&lt;/strong&gt;了多线程语义的约束。
+也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。&lt;/p&gt;
+
+&lt;p&gt;从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用&lt;strong&gt;语句重排序的方法&lt;/strong&gt;来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就&lt;strong&gt;看不到也无法理解&lt;/strong&gt;上层的某些代码块可能需要在多个线程里面调度执行。&lt;/p&gt;
+
+&lt;p&gt;当然这也并不意味之我们就不能写线程安全的代码了，只不过&lt;strong&gt;负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层&lt;/strong&gt;，程序员需要自己负责实现繁琐的同步和保护处理。
+此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。&lt;/p&gt;
+
+&lt;h3 id=&quot;跨平台问题&quot;&gt;跨平台问题&lt;/h3&gt;
+&lt;p&gt;由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是&lt;code class=&quot;highlighter-rouge&quot;&gt;pthread&lt;/code&gt;库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。&lt;/p&gt;
+
+&lt;p&gt;C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。&lt;/p&gt;
+
+&lt;h2 id=&quot;内存模型约束了什么东西&quot;&gt;内存模型约束了什么东西&lt;/h2&gt;
+&lt;p&gt;内存模型其实从本质上来说，是首先定义了一个&lt;strong&gt;可以运行C++多线程程序的抽象机器&lt;/strong&gt;，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。&lt;/p&gt;
+
+&lt;h3 id=&quot;抽象机器概念&quot;&gt;抽象机器概念&lt;/h3&gt;
+&lt;p&gt;因为不同的CPU和机器架构可能又完全不同的机器指令集，所以&lt;strong&gt;编译器本身的代码必然不是跨平台&lt;/strong&gt;的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。
+从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。&lt;/p&gt;
+
+&lt;p&gt;通过抽象机器概念的定义和C++语言提供的标准库，需要完成&lt;strong&gt;多线程编程任务的程序员的工作就得到了极大的简化&lt;/strong&gt;：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，
+最终程序呈现的多线程表现行为总是确定的。&lt;/p&gt;
+
+&lt;h3 id=&quot;抽象机器和内存模型&quot;&gt;抽象机器和内存模型&lt;/h3&gt;
+&lt;p&gt;因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到&lt;strong&gt;内存访问模型的行为&lt;/strong&gt;上来了。&lt;/p&gt;
+
+&lt;h3 id=&quot;从一个简单的例子说起&quot;&gt;从一个简单的例子说起&lt;/h3&gt;
+&lt;p&gt;C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//in thread1
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//in thread2
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。&lt;/p&gt;
+
+&lt;p&gt;可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。&lt;/p&gt;
+
+&lt;h4 id=&quot;用atomic操作的c11版本&quot;&gt;用atomic操作的C++11版本&lt;/h4&gt;
+&lt;p&gt;稍微将上面的例子改写一些，我们得到如下的版本&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread1
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread2
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这个程序的行为就只可能是以下三种情况的一种&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;如果第一个线程在第一个打印之前先做完，那么就输出&lt;code class=&quot;highlighter-rouge&quot;&gt;18 17&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;如果第一个线程在第二个线程打印完才开始执行，那么会输出&lt;code class=&quot;highlighter-rouge&quot;&gt;0 0&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;如果两个线程交叉着执行，会打印&lt;code class=&quot;highlighter-rouge&quot;&gt;0 17&lt;/code&gt;
+但是其它的情况都不会发生，因为默认的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic&lt;/code&gt;定义的读取和写入操作的行为约束为&lt;strong&gt;线性一致&lt;/strong&gt;，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;原子操作和内存顺序&quot;&gt;原子操作和内存顺序&lt;/h2&gt;
+&lt;p&gt;上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是&lt;strong&gt;实现高性能无锁算法的最底层的设施&lt;/strong&gt;，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。&lt;/p&gt;
+
+&lt;p&gt;值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。&lt;/p&gt;
+
+&lt;h3 id=&quot;上面例子中的性能问题&quot;&gt;上面例子中的性能问题&lt;/h3&gt;
+&lt;p&gt;如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的&lt;strong&gt;顺序一致性&lt;/strong&gt;要求，然而这个要求有些时候又显得&lt;strong&gt;代价过于高昂而影响性能&lt;/strong&gt;，
+以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。&lt;/p&gt;
+
+&lt;p&gt;如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来&lt;strong&gt;允许用户指定内存顺序&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;atomic_load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;noexcept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;atomic_load_explicit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;noexcept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其中的第二个重载版本允许用户传入一个类型为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order&lt;/code&gt;的枚举值，该枚举值则定义了各种各样的内存访问模型。&lt;/p&gt;
+
+&lt;h3 id=&quot;memory_order定义&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order&lt;/code&gt;定义&lt;/h3&gt;
+&lt;p&gt;现有的定义如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_consume&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_acquire&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_acq_rel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用&lt;code class=&quot;highlighter-rouge&quot;&gt;constexpr&lt;/code&gt;方式定义成下面的方式&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*unspecified*/&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;consume&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;acquire&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;acq_rel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;seq_cst&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_consume&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;consume&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_acquire&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;acquire&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_release&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_acq_rel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;acq_rel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;inline&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;constexpr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;memory_order&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;内存顺序的简单解释&quot;&gt;内存顺序的简单解释&lt;/h3&gt;
+&lt;p&gt;这几个枚举值使用于不同的原子量操作。&lt;/p&gt;
+
+&lt;h4 id=&quot;最放松的内存顺序&quot;&gt;最放松的内存顺序&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_relaxed&lt;/code&gt;完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。&lt;/p&gt;
+
+&lt;h4 id=&quot;适用于读取操作的内存顺序&quot;&gt;适用于读取操作的内存顺序&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_consume&lt;/code&gt;通常和对原子量的读取操作结合起来使用，用于约束如下的情况&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;在同一个线程中的&lt;strong&gt;依赖于本次读取操作的值&lt;/strong&gt;的、其它的相关的读取和写入操作语句的顺序&lt;strong&gt;不允许被重新排列&lt;/strong&gt;到该读取操作前面&lt;/li&gt;
+  &lt;li&gt;其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果&lt;strong&gt;在本线程中可见&lt;/strong&gt;，该情况其实是和&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;相互配对使用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acquire&lt;/code&gt;形成了一个更强的读取操作的屏障&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;本线程中的依赖于同样内存位置的&lt;strong&gt;原子量的读写操作&lt;/strong&gt;不允许被重排于该操作之前&lt;/li&gt;
+  &lt;li&gt;其它线程中的写入释放原子量的操作在本线程中可见；该情况和&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;配对使用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;适用于单写入操作的内存顺序&quot;&gt;适用于单写入操作的内存顺序&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;用于写入操作之后的原子量释放的顺序约束&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;当前线程中的其它的依赖于本原子量的读取和写入操作&lt;strong&gt;不许重排在本语句之前&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;本线程中的&lt;strong&gt;其它写入操作&lt;/strong&gt;对&lt;strong&gt;其它线程中的需要获取&lt;/strong&gt;同一个原子变量对应的位置的采用&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acquire&lt;/code&gt;的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_consumed&lt;/code&gt;)可见&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;前者的内存访问顺序符合&lt;code class=&quot;highlighter-rouge&quot;&gt;Release-Acquire&lt;/code&gt;顺序，而后者符合&lt;code class=&quot;highlighter-rouge&quot;&gt;Release-Consume&lt;/code&gt;顺序。&lt;/p&gt;
+
+&lt;h4 id=&quot;适用于读取并修改操作的内存顺序&quot;&gt;适用于读取并修改操作的内存顺序&lt;/h4&gt;
+&lt;p&gt;这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acq_rel&lt;/code&gt;保证操作本身同时满足&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt;；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的&lt;strong&gt;操作对应的修改在本线程的修改之前&lt;/strong&gt;可见，并且本线程中对原子量的&lt;strong&gt;修改操作本身在其它线程的读取操作中也可见&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;适用于所有操作的默认值&quot;&gt;适用于所有操作的默认值&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;是默认的操作顺序，它提供了顺序一致性顺序保证&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;读取操作采用该内存顺序时，等价于&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire&lt;/code&gt;操作&lt;/li&gt;
+  &lt;li&gt;写入操作采用该内存顺序是，等价于&lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt;操作&lt;/li&gt;
+  &lt;li&gt;读取并修改操作采用该内存顺序时，等同于叠加了&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt;操作的同时，还额外保证所有的线程都能看到对&lt;strong&gt;多个原子量修改的一种全局顺序&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;形式化定义和解释&quot;&gt;形式化定义和解释&lt;/h3&gt;
+&lt;p&gt;跨线程的同步和内存顺序问题其实是用于界定&lt;strong&gt;赋值表达式和这些表达式的副作用&lt;/strong&gt;在多个线程并发执行的时候相互顺序表现的怎么样的问题。
+正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Sequenced-before&lt;/code&gt; 表示在单线程中，两个表达式语句的&lt;strong&gt;赋值先后关系&lt;/strong&gt;；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。&lt;/li&gt;
+  &lt;li&gt;依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;传递依赖&quot;&gt;传递依赖&lt;/h4&gt;
+&lt;p&gt;赋值表达式A满足&lt;code class=&quot;highlighter-rouge&quot;&gt;sequenced-before&lt;/code&gt;表达式B，并且在下面&lt;strong&gt;任何一个条件成立&lt;/strong&gt;的时候，称为A传递依赖到B&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;表达式A是表达式B的一个&lt;strong&gt;操作对象&lt;/strong&gt;，但是不是一个对&lt;code class=&quot;highlighter-rouge&quot;&gt;std::kill_dependency&lt;/code&gt;的调用，也不是&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;amp;&amp;amp;&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;||&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;?:&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;,&lt;/code&gt;操作符的左操作数。排除掉的这些操作要么有短路操作，要么是&lt;strong&gt;旧的语言标准故意允许编译器可以选择自己方便的实现&lt;/strong&gt;，因而不能定义跨平台的时许关系&lt;/li&gt;
+  &lt;li&gt;A写入了一个标量对象M，而B需要从M中读取值&lt;/li&gt;
+  &lt;li&gt;A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的&lt;strong&gt;间接传递&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;修改顺序&quot;&gt;修改顺序&lt;/h4&gt;
+&lt;p&gt;对任何一个原子量的多线程修改由于&lt;strong&gt;原子量本身的不可并发&lt;/strong&gt;，而最终形成了一个在多线程环境中，关于该原子量本身的&lt;strong&gt;全局顺序&lt;/strong&gt;。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。&lt;/p&gt;
+
+&lt;p&gt;为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。
+对于原子量的所有操作都满足下述的&lt;strong&gt;一致性要求&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;读取－读取一致性：如果一个计算值的关于&lt;strong&gt;读取原子量M&lt;/strong&gt;的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于&lt;strong&gt;X所写入的原子量的值&lt;/strong&gt;，要么等于一个修改顺序上&lt;strong&gt;晚于X的操作Y的作用于M的副作用&lt;/strong&gt;所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上&lt;strong&gt;早于B的一次写入操作&lt;/strong&gt;X的副作用；即&lt;strong&gt;先读取后写入&lt;/strong&gt;的情况下，读取的一定是早于写入之前的某次修改的值&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;释放顺序&quot;&gt;释放顺序&lt;/h4&gt;
+&lt;p&gt;在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的&lt;strong&gt;最长的连续序列&lt;/strong&gt;包含&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;同一个线程中关于M的修改操作&lt;/li&gt;
+  &lt;li&gt;其它任意一个线程中的原子性读取－修改－写入操作&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;该序列被成为A的&lt;strong&gt;释放序列&lt;/strong&gt;；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。&lt;/p&gt;
+
+&lt;h4 id=&quot;依赖顺序上的先序dependency-order-before&quot;&gt;依赖顺序上的先序（Dependency-order before）&lt;/h4&gt;
+&lt;p&gt;多线程之间，当如下任意一个条件成立的时候，赋值A为&lt;strong&gt;依赖顺序上先于&lt;/strong&gt;赋值B&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的&lt;code class=&quot;highlighter-rouge&quot;&gt;consume&lt;/code&gt;操作，并且B读取了A的释放顺序上的任何一部分的值&lt;/li&gt;
+  &lt;li&gt;A在依赖顺序上先于X，而&lt;strong&gt;X传递依赖至B&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这里的第二个定义其实是一种递归定义。&lt;/p&gt;
+
+&lt;h4 id=&quot;跨线程的先序关系-inter-thread-happens-before&quot;&gt;跨线程的先序关系 (Inter-thread happens-before)&lt;/h4&gt;
+&lt;p&gt;多线程之间，如下&lt;strong&gt;任意一个条件&lt;/strong&gt;成立的时候，成为A跨线程先于B&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A同步于B&lt;/li&gt;
+  &lt;li&gt;A依赖顺序上先于B&lt;/li&gt;
+  &lt;li&gt;A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)&lt;/li&gt;
+  &lt;li&gt;A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义&lt;/li&gt;
+  &lt;li&gt;A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最终的先序关系happens-before&quot;&gt;最终的先序关系(happens-before)&lt;/h4&gt;
+&lt;p&gt;不管是否跨线程，先序关系定义为&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A单线程中先于B&lt;/li&gt;
+  &lt;li&gt;A跨线程先于B&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。&lt;/p&gt;
+
+&lt;h4 id=&quot;强先序关系strong-happens-before&quot;&gt;强先序关系（Strong happens-before）&lt;/h4&gt;
+&lt;p&gt;如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而&lt;strong&gt;至少有一个操作不是原子操作，则程序的行为就是未定义&lt;/strong&gt;的，除非是这些赋值操作本身之间存在强先序关系。&lt;/p&gt;
+
+&lt;p&gt;C++20之前的内存模型做如下的定义&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;要么A、B在同一个线程中，且满足顺序先于B&lt;/li&gt;
+  &lt;li&gt;要么A和B进行显式的同步&lt;/li&gt;
+  &lt;li&gt;要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于B&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;C++20标准对该定义进行了进一步修正，并引入了两个概念&lt;/p&gt;
+
+&lt;h5 id=&quot;简单先序-simply-happens-before&quot;&gt;简单先序 (Simply happens-before)&lt;/h5&gt;
+&lt;p&gt;A和B之间符合如下的任何一个条件可以称之为简单先序的&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A顺序先于B，这是同线程的约束&lt;/li&gt;
+  &lt;li&gt;A同步于B&lt;/li&gt;
+  &lt;li&gt;A简单先序于X，而X简单先序于B
+该定义基本是&lt;strong&gt;上述定义的简单替换&lt;/strong&gt;，目的是为更复杂的强先序关系做铺垫。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;强先序则被定义为如下某一个条件成立&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A顺序先于B&lt;/li&gt;
+  &lt;li&gt;A同步于B，并且A和B的操作都是&lt;strong&gt;顺序一致性的原子量操作&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的&lt;strong&gt;两个传递关系&lt;/strong&gt;在多线程情况下，是通过两个跨线程的简单线序关系来进行的&lt;/li&gt;
+  &lt;li&gt;A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;简单来说，强先序关系保证了A的赋值&lt;strong&gt;一定在任何情况下，都会&lt;/strong&gt;早于B的赋值；它本身就排除了&lt;code class=&quot;highlighter-rouge&quot;&gt;consume&lt;/code&gt;操作。&lt;/p&gt;
+
+&lt;h4 id=&quot;副作用可见性&quot;&gt;副作用可见性&lt;/h4&gt;
+&lt;p&gt;某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A先序于B&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;不存在其它的副作用X&lt;/strong&gt;，满足A先于X而X先于B；即中间不存在可以插入的其它副作用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的&lt;strong&gt;最长的&lt;/strong&gt;满足&lt;strong&gt;B不先于这些副作用&lt;/strong&gt;的集合成为可见的副作用集。
+根据这个定义可见，跨线程的同步问题其实可以简单归结为&lt;strong&gt;建立确定的先序关系&lt;/strong&gt;来避免静态条件，明确说明&lt;strong&gt;哪些副作用在哪些条件下可见&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h4 id=&quot;consume操作acquire操作和release操作&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Consume&lt;/code&gt;操作、&lt;code class=&quot;highlighter-rouge&quot;&gt;Acquire&lt;/code&gt;操作和&lt;code class=&quot;highlighter-rouge&quot;&gt;Release&lt;/code&gt;操作&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Consume&lt;/code&gt;操作指的是在读取操作中使用了&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_consume&lt;/code&gt;内存顺序类型（&lt;strong&gt;或者更强&lt;/strong&gt;）的操作；比它更强的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;提供了更强的同步要求。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Acquire&lt;/code&gt;操作指的是在读操作里使用了&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acquire&lt;/code&gt;（或者更强内存顺序的操作）;还有一个&lt;strong&gt;隐式的例子是&lt;/strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;std::mutex&lt;/code&gt;里面的&lt;code class=&quot;highlighter-rouge&quot;&gt;lock&lt;/code&gt;操作本身其实包含一种&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire&lt;/code&gt;操作，而同样的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;提供的同步性要求更强。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Release&lt;/code&gt;操作则对应于比&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;或者更强的一种写操作；而类似地，&lt;code class=&quot;highlighter-rouge&quot;&gt;mutex::unlock&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;因为同步性更强，也满足release操作要求。&lt;/p&gt;
+
+&lt;h3 id=&quot;再看内存顺序定义&quot;&gt;再看内存顺序定义&lt;/h3&gt;
+&lt;p&gt;有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。&lt;/p&gt;
+
+&lt;h4 id=&quot;relaxed-ordering&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Relaxed Ordering&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_relaxed&lt;/code&gt;的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。&lt;/p&gt;
+
+&lt;p&gt;比如如下的例子，假设&lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;都以及被初始化为&lt;code class=&quot;highlighter-rouge&quot;&gt;0&lt;/code&gt;，则如下的代码&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//in thread 1
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//in thread 2
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;结果将可能出现&lt;code class=&quot;highlighter-rouge&quot;&gt;r1=42, r2=42&lt;/code&gt;的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;然后写入到&lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。&lt;/p&gt;
+
+&lt;p&gt;当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//thread1
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread2
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_relaxed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。&lt;/p&gt;
+
+&lt;h5 id=&quot;常见的使用relaxed_order的情况&quot;&gt;常见的使用&lt;code class=&quot;highlighter-rouge&quot;&gt;relaxed_order&lt;/code&gt;的情况&lt;/h5&gt;
+&lt;p&gt;最常见的用法是实现计数器，比如&lt;code class=&quot;highlighter-rouge&quot;&gt;std::shared_ptr&lt;/code&gt;中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire-release&lt;/code&gt;同步。&lt;/p&gt;
+
+&lt;h4 id=&quot;release-acquire&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Release-Acquire&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;这是一种成对的同步读、写关系；某个标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;的操作的之前的这些&lt;strong&gt;符合或者不符合原子性的副作用都会被&lt;/strong&gt;另外一个线程中的&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acquire&lt;/code&gt;的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。&lt;/p&gt;
+
+&lt;p&gt;这种同步的先后关系&lt;strong&gt;仅仅对读写同一个原子量的操作&lt;/strong&gt;提供保证，不同的原子量的读写操作不受影响。&lt;/p&gt;
+
+&lt;p&gt;在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是&lt;strong&gt;禁止一些编译器的指令重排序&lt;/strong&gt;即可&lt;/li&gt;
+  &lt;li&gt;对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最常见的使用该模型的例子就是&lt;code class=&quot;highlighter-rouge&quot;&gt;std::mutex&lt;/code&gt;的lock/unlock操作。&lt;/p&gt;
+
+&lt;h5 id=&quot;一个传递的例子&quot;&gt;一个传递的例子&lt;/h5&gt;
+&lt;p&gt;如下的代码显示了在多个线程中传递这种顺序关系的例子&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;flag&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread1
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread2
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expected&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compare_exchange_strong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;expected&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_acq_rel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;expected&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread3
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_acquire&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;at&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;第一个线程中，通过&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对&lt;code class=&quot;highlighter-rouge&quot;&gt;data&lt;/code&gt;的写入已经可见。
+线程二则用&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_acq_rel&lt;/code&gt;关系确保在在第一个线程写入１可见的情况下，将其替换为2；
+第三个线程则需要在第二个线程完毕之后才会退出循环;
+三个线程对原子量的修改是线性的，并且是完成了显式的同步。&lt;/p&gt;
+
+&lt;h4 id=&quot;release-consuming&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Release-Consuming&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;和上述的&lt;code class=&quot;highlighter-rouge&quot;&gt;Acquire-Release&lt;/code&gt;关系略有不同的是：当线程A的写入操作采用&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_release&lt;/code&gt;而线程B中的读取操作采用&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_consume&lt;/code&gt;的时候，线程A视角看到的&lt;strong&gt;所有的依赖顺序上先于原子量写入操作的&lt;/strong&gt;其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。&lt;/p&gt;
+
+&lt;p&gt;换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。&lt;/p&gt;
+
+&lt;p&gt;这种同步模式仅仅是在&lt;strong&gt;获取和释放同一个原子量&lt;/strong&gt;的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。&lt;/p&gt;
+
+&lt;p&gt;典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。&lt;/p&gt;
+
+&lt;p&gt;另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种&lt;code class=&quot;highlighter-rouge&quot;&gt;release-consume&lt;/code&gt;内存顺序约束，从C++17开始，这种用法又变得&lt;strong&gt;不推荐使用&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;h5 id=&quot;一个实现订阅发布的例子&quot;&gt;一个实现订阅、发布的例子&lt;/h5&gt;
+&lt;p&gt;加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread producer
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//thread consumer
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_consume&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//p2 carries dependency from ptr
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;/// may or may not be true!
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。
+可见&lt;code class=&quot;highlighter-rouge&quot;&gt;Release-Consume&lt;/code&gt;是一种相对较弱的同步保障机制。&lt;/p&gt;
+
+&lt;h4 id=&quot;sequentially-consistent&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Sequentially-consistent&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的原子量操作不光保证了同样的&lt;code class=&quot;highlighter-rouge&quot;&gt;release/acquire&lt;/code&gt;顺序保证，还建立了一种&lt;strong&gt;关于所有的带有该标记的原子量修改操作&lt;/strong&gt;的顺序。&lt;/p&gt;
+
+&lt;h5 id=&quot;c20之前的形式化定义&quot;&gt;C++20之前的形式化定义&lt;/h5&gt;
+&lt;p&gt;对于某个用&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;方式来加载原子量M的操作B而言，它可以观察到如下的情况&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;在修改顺序上早于B的某个修改M的操作A的结果&lt;/li&gt;
+  &lt;li&gt;如果存在上述的A，B可以观测到A中没有标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的M的修改，这些修改本身也不在A之前发生&lt;/li&gt;
+  &lt;li&gt;如果不存在上述的A，B可以观测到没有标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的内存顺序无关的对M的修改&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果存在一个标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;std::atomic_thread_fence&lt;/code&gt;的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;全局修改顺序中的先于X的最后一个标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的M的修改操作&lt;/li&gt;
+  &lt;li&gt;晚于M的修改顺序中的无关的对M的修改&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;A操作的副作用&lt;/li&gt;
+  &lt;li&gt;或者A中对M的修改之后的一个不相关的对M的修改&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;存在一个&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;的X，使得A线性早于X，而X在全局修改序上早于B&lt;/li&gt;
+  &lt;li&gt;或者存在一个满足同样要求的&lt;code class=&quot;highlighter-rouge&quot;&gt;atmoic_thread_fence&lt;/code&gt;Y，使得Y线性早于B，而A在全局修改序上早于X&lt;/li&gt;
+  &lt;li&gt;或者存在两个&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的&lt;code class=&quot;highlighter-rouge&quot;&gt;atomic_thread_fence&lt;/code&gt;的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这样的定义意味着&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;只要我们看到没有标记为&lt;code class=&quot;highlighter-rouge&quot;&gt;memory_order_seq_cst&lt;/code&gt;的原子操作的时候，顺序一致性保证就会丧失&lt;/li&gt;
+  &lt;li&gt;顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h5 id=&quot;c20定义&quot;&gt;C++20定义&lt;/h5&gt;
+&lt;p&gt;C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。&lt;/p&gt;
+
+&lt;h4 id=&quot;使用场景&quot;&gt;使用场景&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Sequential Ordering&lt;/code&gt;对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须&lt;strong&gt;以同样的顺序看到&lt;/strong&gt;对应的修改。&lt;/p&gt;
+
+&lt;p&gt;然而由于该内存顺序要求在多个CPU核上在指令级别&lt;strong&gt;施加完全的内存栅&lt;/strong&gt;，因此它带来的性能损失在某些情况下不能忽略。&lt;/p&gt;
+
+&lt;p&gt;使用这种顺序的一个强同步的例子如下&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;write_x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;write_y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;x_then_y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;y_then_x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。&lt;/p&gt;
+
+&lt;h2 id=&quot;和volatile的关系&quot;&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;volatile&lt;/code&gt;的关系&lt;/h2&gt;
+&lt;p&gt;其实和Java语言中的有些类似，&lt;code class=&quot;highlighter-rouge&quot;&gt;volatile&lt;/code&gt;仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并&lt;strong&gt;不保证这些副作用在跨线程环境下&lt;/strong&gt;的可见性。
+同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。&lt;/p&gt;
+
+&lt;p&gt;当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有&lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt;语义，而所有的读操作有&lt;code class=&quot;highlighter-rouge&quot;&gt;acquire&lt;/code&gt;语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。
+除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="design" /><category term="engineering" /><category term="cpp" /><category term="performance" /><category term="multi-threading" /><summary type="html">内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。 相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。 然而如果我们想追求极致的应用程序性能，又想追求可移植性、高性能这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施， 这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。 为什么需要内存模型 有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？ 其实最简单的答案来自于多线程编程的需求驱动和跨平台可移植性的需求。 单线程环境的程序环境 因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。 承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。 不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。 这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？ 多线程环境的问题 在多线程的环境下，情况就会变得复杂起来了，因为旧有的语言标准选择自动忽略了多线程语义的约束。 也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。 从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用语句重排序的方法来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就看不到也无法理解上层的某些代码块可能需要在多个线程里面调度执行。 当然这也并不意味之我们就不能写线程安全的代码了，只不过负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层，程序员需要自己负责实现繁琐的同步和保护处理。 此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。 跨平台问题 由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是pthread库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。 C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。 内存模型约束了什么东西 内存模型其实从本质上来说，是首先定义了一个可以运行C++多线程程序的抽象机器，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。 抽象机器概念 因为不同的CPU和机器架构可能又完全不同的机器指令集，所以编译器本身的代码必然不是跨平台的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。 从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。 通过抽象机器概念的定义和C++语言提供的标准库，需要完成多线程编程任务的程序员的工作就得到了极大的简化：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码， 最终程序呈现的多线程表现行为总是确定的。 抽象机器和内存模型 因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到内存访问模型的行为上来了。 从一个简单的例子说起 C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子 static int x, y; //in thread1 x = 1; y = 2; //in thread2 cout &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl; cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; endl; 这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。 可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。 用atomic操作的C++11版本 稍微将上面的例子改写一些，我们得到如下的版本 atomic&amp;lt;int&amp;gt; x, y; //thread1 x.store(17); y.store(18); //thread2 cout &amp;lt;&amp;lt; y.load() &amp;lt;&amp;lt; &quot; &quot;; cout &amp;lt;&amp;lt; x.load() &amp;lt;&amp;lt; endl; 这个程序的行为就只可能是以下三种情况的一种 如果第一个线程在第一个打印之前先做完，那么就输出18 17 如果第一个线程在第二个线程打印完才开始执行，那么会输出0 0 如果两个线程交叉着执行，会打印0 17 但是其它的情况都不会发生，因为默认的atomic定义的读取和写入操作的行为约束为线性一致，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。 原子操作和内存顺序 上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是实现高性能无锁算法的最底层的设施，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。 值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。 上面例子中的性能问题 如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的顺序一致性要求，然而这个要求有些时候又显得代价过于高昂而影响性能， 以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。 如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来允许用户指定内存顺序 template&amp;lt; class T &amp;gt; T atomic_load( const std::atomic&amp;lt;T&amp;gt;* obj ) noexcept; template&amp;lt; class T &amp;gt; T atomic_load_explicit( const std::atomic&amp;lt;T&amp;gt;* obj, std::memory_order order ) noexcept; 其中的第二个重载版本允许用户传入一个类型为memory_order的枚举值，该枚举值则定义了各种各样的内存访问模型。 memory_order定义 现有的定义如下 typedef enum memory_order { memory_order_relaxed, memory_order_consume, memory_order_acquire, memory_order_release, memory_order_acq_rel, memory_order_seq_cst } memory_order; 在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用constexpr方式定义成下面的方式 enum class memory_order : /*unspecified*/ { relaxed, consume, acquire, release, acq_rel, seq_cst }; inline constexpr memory_order memory_order_relaxed = memory_order::relaxed; inline constexpr memory_order memory_order_consume = memory_order::consume; inline constexpr memory_order memory_order_acquire = memory_order::acquire; inline constexpr memory_order memory_order_release = memory_order::release; inline constexpr memory_order memory_order_acq_rel = memory_order::acq_rel; inline constexpr memory_order memory_order_seq_cst = memory_order::seq_cst; 内存顺序的简单解释 这几个枚举值使用于不同的原子量操作。 最放松的内存顺序 memory_order_relaxed完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。 适用于读取操作的内存顺序 memory_order_consume通常和对原子量的读取操作结合起来使用，用于约束如下的情况 在同一个线程中的依赖于本次读取操作的值的、其它的相关的读取和写入操作语句的顺序不允许被重新排列到该读取操作前面 其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果在本线程中可见，该情况其实是和memory_order_release相互配对使用 memory_order_acquire形成了一个更强的读取操作的屏障 本线程中的依赖于同样内存位置的原子量的读写操作不允许被重排于该操作之前 其它线程中的写入释放原子量的操作在本线程中可见；该情况和memory_order_release配对使用 适用于单写入操作的内存顺序 memory_order_release用于写入操作之后的原子量释放的顺序约束 当前线程中的其它的依赖于本原子量的读取和写入操作不许重排在本语句之前 本线程中的其它写入操作对其它线程中的需要获取同一个原子变量对应的位置的采用memory_order_acquire的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(memory_order_consumed)可见 前者的内存访问顺序符合Release-Acquire顺序，而后者符合Release-Consume顺序。 适用于读取并修改操作的内存顺序 这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合 memory_order_acq_rel保证操作本身同时满足acquire和release；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的操作对应的修改在本线程的修改之前可见，并且本线程中对原子量的修改操作本身在其它线程的读取操作中也可见 适用于所有操作的默认值 memory_order_seq_cst是默认的操作顺序，它提供了顺序一致性顺序保证 读取操作采用该内存顺序时，等价于acquire操作 写入操作采用该内存顺序是，等价于release操作 读取并修改操作采用该内存顺序时，等同于叠加了acquire/release操作的同时，还额外保证所有的线程都能看到对多个原子量修改的一种全局顺序 形式化定义和解释 跨线程的同步和内存顺序问题其实是用于界定赋值表达式和这些表达式的副作用在多个线程并发执行的时候相互顺序表现的怎么样的问题。 正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析 Sequenced-before 表示在单线程中，两个表达式语句的赋值先后关系；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。 依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为 传递依赖 赋值表达式A满足sequenced-before表达式B，并且在下面任何一个条件成立的时候，称为A传递依赖到B 表达式A是表达式B的一个操作对象，但是不是一个对std::kill_dependency的调用，也不是&amp;amp;&amp;amp;/||/?:/,操作符的左操作数。排除掉的这些操作要么有短路操作，要么是旧的语言标准故意允许编译器可以选择自己方便的实现，因而不能定义跨平台的时许关系 A写入了一个标量对象M，而B需要从M中读取值 A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的间接传递 修改顺序 对任何一个原子量的多线程修改由于原子量本身的不可并发，而最终形成了一个在多线程环境中，关于该原子量本身的全局顺序。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。 为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。 对于原子量的所有操作都满足下述的一致性要求 写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。 读取－读取一致性：如果一个计算值的关于读取原子量M的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于X所写入的原子量的值，要么等于一个修改顺序上晚于X的操作Y的作用于M的副作用所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插 读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上早于B的一次写入操作X的副作用；即先读取后写入的情况下，读取的一定是早于写入之前的某次修改的值 写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值 释放顺序 在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的最长的连续序列包含 同一个线程中关于M的修改操作 其它任意一个线程中的原子性读取－修改－写入操作 该序列被成为A的释放序列；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。 依赖顺序上的先序（Dependency-order before） 多线程之间，当如下任意一个条件成立的时候，赋值A为依赖顺序上先于赋值B A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的consume操作，并且B读取了A的释放顺序上的任何一部分的值 A在依赖顺序上先于X，而X传递依赖至B 这里的第二个定义其实是一种递归定义。 跨线程的先序关系 (Inter-thread happens-before) 多线程之间，如下任意一个条件成立的时候，成为A跨线程先于B A同步于B A依赖顺序上先于B A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序) A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义 A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义 最终的先序关系(happens-before) 不管是否跨线程，先序关系定义为 A单线程中先于B A跨线程先于B 实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。 强先序关系（Strong happens-before） 如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而至少有一个操作不是原子操作，则程序的行为就是未定义的，除非是这些赋值操作本身之间存在强先序关系。 C++20之前的内存模型做如下的定义 要么A、B在同一个线程中，且满足顺序先于B 要么A和B进行显式的同步 要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于B C++20标准对该定义进行了进一步修正，并引入了两个概念 简单先序 (Simply happens-before) A和B之间符合如下的任何一个条件可以称之为简单先序的 A顺序先于B，这是同线程的约束 A同步于B A简单先序于X，而X简单先序于B 该定义基本是上述定义的简单替换，目的是为更复杂的强先序关系做铺垫。 强先序则被定义为如下某一个条件成立 A顺序先于B A同步于B，并且A和B的操作都是顺序一致性的原子量操作 A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的两个传递关系在多线程情况下，是通过两个跨线程的简单线序关系来进行的 A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义 简单来说，强先序关系保证了A的赋值一定在任何情况下，都会早于B的赋值；它本身就排除了consume操作。 副作用可见性 某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见 A先序于B 不存在其它的副作用X，满足A先于X而X先于B；即中间不存在可以插入的其它副作用 如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的最长的满足B不先于这些副作用的集合成为可见的副作用集。 根据这个定义可见，跨线程的同步问题其实可以简单归结为建立确定的先序关系来避免静态条件，明确说明哪些副作用在哪些条件下可见。 Consume操作、Acquire操作和Release操作 Consume操作指的是在读取操作中使用了memory_order_consume内存顺序类型（或者更强）的操作；比它更强的atomic_thread_fence提供了更强的同步要求。 Acquire操作指的是在读操作里使用了memory_order_acquire（或者更强内存顺序的操作）;还有一个隐式的例子是std::mutex里面的lock操作本身其实包含一种acquire操作，而同样的atomic_thread_fence提供的同步性要求更强。 Release操作则对应于比memory_order_release或者更强的一种写操作；而类似地，mutex::unlock或者atomic_thread_fence因为同步性更强，也满足release操作要求。 再看内存顺序定义 有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。 Relaxed Ordering 标记为memory_order_relaxed的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。 比如如下的例子，假设x和y都以及被初始化为0，则如下的代码 //in thread 1 r1 = y.load(std::memory_order_relaxed); x.store(r1, std::memory_order_relaxed); //in thread 2 r2 = x.load(std::memory_order_relaxed); y.store(42, std::memory_order_relaxed); 结果将可能出现r1=42, r2=42的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取y然后写入到x中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。 当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子 //thread1 r1 = x.load(std::memory_order_relaxed); if (r1==42) y.store(r1, std::memory_order_relaxed); //thread2 r2 = y.load(std::memory_order_relaxed); if (r2 == 42) x.store(42, std::memory_order_relaxed); 不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。 常见的使用relaxed_order的情况 最常见的用法是实现计数器，比如std::shared_ptr中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用acquire-release同步。 Release-Acquire 这是一种成对的同步读、写关系；某个标记为memory_order_release的操作的之前的这些符合或者不符合原子性的副作用都会被另外一个线程中的memory_order_acquire的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。 这种同步的先后关系仅仅对读写同一个原子量的操作提供保证，不同的原子量的读写操作不受影响。 在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别 基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是禁止一些编译器的指令重排序即可 对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步 最常见的使用该模型的例子就是std::mutex的lock/unlock操作。 一个传递的例子 如下的代码显示了在多个线程中传递这种顺序关系的例子 std::vector&amp;lt;int&amp;gt; data; std::atomic&amp;lt;int&amp;gt; flag = {0}; //thread1 data.push_back(42); flag.store(1, std::memory_order_release); //thread2 int expected = 1; while (!flag.compare_exchange_strong(expected, 2, std::memory_order_acq_rel)) expected = 1; //thread3 while (flag.load(std::memory_order_acquire) &amp;lt; 2); assert(data.at(0) == 42); 第一个线程中，通过memory_order_release的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对data的写入已经可见。 线程二则用memory_order_acq_rel关系确保在在第一个线程写入１可见的情况下，将其替换为2； 第三个线程则需要在第二个线程完毕之后才会退出循环; 三个线程对原子量的修改是线性的，并且是完成了显式的同步。 Release-Consuming 和上述的Acquire-Release关系略有不同的是：当线程A的写入操作采用memory_order_release而线程B中的读取操作采用memory_order_consume的时候，线程A视角看到的所有的依赖顺序上先于原子量写入操作的其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。 换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。 这种同步模式仅仅是在获取和释放同一个原子量的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。 典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。 另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种release-consume内存顺序约束，从C++17开始，这种用法又变得不推荐使用。 一个实现订阅、发布的例子 加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值 std::atomic&amp;lt;std::string*&amp;gt; ptr; int data; //thread producer std::string *p = new std::string(&quot;hello&quot;); data = 42; ptr.store(p, std::memory_order_release); //thread consumer std::string* p2; while (!(p2 = ptr.load(std::memory_order_consume))); assert(*p2 == &quot;hello&quot;); //p2 carries dependency from ptr assert(data == 42); /// may or may not be true! 需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。 可见Release-Consume是一种相对较弱的同步保障机制。 Sequentially-consistent 标记为memory_order_seq_cst的原子量操作不光保证了同样的release/acquire顺序保证，还建立了一种关于所有的带有该标记的原子量修改操作的顺序。 C++20之前的形式化定义 对于某个用memory_order_seq_cst方式来加载原子量M的操作B而言，它可以观察到如下的情况 在修改顺序上早于B的某个修改M的操作A的结果 如果存在上述的A，B可以观测到A中没有标记为memory_order_seq_cst的M的修改，这些修改本身也不在A之前发生 如果不存在上述的A，B可以观测到没有标记为memory_order_seq_cst的内存顺序无关的对M的修改 如果存在一个标记为memory_order_seq_cst的std::atomic_thread_fence的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个 全局修改顺序中的先于X的最后一个标记为memory_order_seq_cst的M的修改操作 晚于M的修改顺序中的无关的对M的修改 对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个memory_order_seq_cst的atomic_thread_fence操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到 A操作的副作用 或者A中对M的修改之后的一个不相关的对M的修改 对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果 存在一个memory_order_seq_cst的atomic_thread_fence的X，使得A线性早于X，而X在全局修改序上早于B 或者存在一个满足同样要求的atmoic_thread_fenceY，使得Y线性早于B，而A在全局修改序上早于X 或者存在两个memory_order_seq_cst的atomic_thread_fence的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y 这样的定义意味着 只要我们看到没有标记为memory_order_seq_cst的原子操作的时候，顺序一致性保证就会丧失 顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序 C++20定义 C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。 使用场景 Sequential Ordering对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须以同样的顺序看到对应的修改。 然而由于该内存顺序要求在多个CPU核上在指令级别施加完全的内存栅，因此它带来的性能损失在某些情况下不能忽略。 使用这种顺序的一个强同步的例子如下 std::atomic&amp;lt;bool&amp;gt; x = {false}; std::atomic&amp;lt;bool&amp;gt; y = {false}; std::atomic&amp;lt;int&amp;gt; z = {0}; void write_x() { x.store(true, std::memory_order_seq_cst);} void write_y() { y.store(true, std::memory_order_seq_cst);} void x_then_y() { while (!x.load(std::memory_order_seq_cst)); if (y.load(std::memory_order_seq_cst)) ++z; } void y_then_x() { while (!y.load(std::memory_order_seq_cst)); if (x.load(std::memory_order_seq_cst)) ++z; } 这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。 和volatile的关系 其实和Java语言中的有些类似，volatile仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并不保证这些副作用在跨线程环境下的可见性。 同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。 当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有release语义，而所有的读操作有acquire语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。 除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。</summary></entry><entry><title type="html">Google的新操作系统Fuchsia的内核设计</title><link href="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/" rel="alternate" type="text/html" title="Google的新操作系统Fuchsia的内核设计" /><published>2019-10-06T00:00:00+08:00</published><updated>2019-10-06T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">&lt;p&gt;传说中的Google的下一代操作系统项目&lt;a href=&quot;https://fuchsia.dev/fuchsia-src&quot;&gt;Fuchsia&lt;/a&gt;一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测&lt;strong&gt;它是不是下一代的大杀器&lt;/strong&gt;，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。
 由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。
 &lt;!--more--&gt;&lt;/p&gt;
 
@@ -6,25 +464,25 @@
 
 &lt;h2 id=&quot;内核架构&quot;&gt;内核架构&lt;/h2&gt;
 &lt;p&gt;Fuchsia其实是基于一个微内核风格的架构，&lt;strong&gt;内核项目的名字叫做Zircon&lt;/strong&gt;。Fuchsia本身是程序员直接面对的操作系统环境，
-它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现底层的系统硬件资源管理，同时&lt;strong&gt;提供系统调用接口&lt;/strong&gt;给上层程序使用。&lt;/p&gt;
+它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现对底层的硬件资源管理，同时&lt;strong&gt;提供系统调用接口&lt;/strong&gt;给上层程序使用。&lt;/p&gt;
 
-&lt;p&gt;微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，因为两者的优势和劣势都非常明显&lt;/p&gt;
+&lt;p&gt;微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，几十年来争吵不休，因为两者的优势和劣势都非常明显&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;微内核由于选择将内核的组织&lt;strong&gt;用分布式的思路解耦&lt;/strong&gt;开来，从设计上来说比较漂亮容易扩展但是最大的不足是性能太差&lt;/li&gt;
   &lt;li&gt;宏内核则对应于软件架构上的&lt;strong&gt;大一统、集中式单体风格&lt;/strong&gt;，所有的东西都放在内核中；从设计上来说非常丑陋不看维护成本高昂但是胜在性能很好&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;学术界一致在讨伐以Linux为代表的&lt;strong&gt;宏内核架构是设计落后&lt;/strong&gt;的表现，却被Linus直接打脸说&lt;strong&gt;微内核的想法在现在的硬件条件下根本就是在浪费资源&lt;/strong&gt;，想要高效实现必须要采用宏内核的思路；
+&lt;p&gt;学术界一致在讨伐以Linux为代表的&lt;strong&gt;宏内核架构是设计落后&lt;/strong&gt;的表现，却被Linus直接打脸说&lt;strong&gt;微内核的想法在现在的硬件条件下根本就是在浪费资源&lt;/strong&gt;，想要高效地完成实际的复杂工作，必须要采用宏内核的思路；
 之前几十年的计算机系统发展历史印证了Linus实用主义思想的胜利，
-而Windows系统的内核干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。&lt;/p&gt;
+而普通的PC用户日常离不开的Windows系统，它的内核却干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。&lt;/p&gt;
 
 &lt;p&gt;Zircon直接旗帜鲜明地宣称它是一个微内核架构，让人自然而然地好奇它怎么设计来避免传统的微内核架构需要重复拷贝数据性能低下的弊端。&lt;/p&gt;
 
 &lt;h2 id=&quot;zircon顶层概念设计&quot;&gt;Zircon顶层概念设计&lt;/h2&gt;
-&lt;p&gt;传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在Unix变成哲学一书中详细地阐述了这一理念）；Zircon完全没有采用这一理念，它另起炉灶用&lt;strong&gt;面型对象的思想&lt;/strong&gt;来假设所有的内核所管理的东西都是对象;
-即&lt;strong&gt;一切接对象&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在&lt;a href=&quot;http://www.catb.org/~esr/writings/taoup/html/index.html&quot;&gt;Unix编程哲学&lt;/a&gt;一书中详细地阐述了这一理念并对这一简单设计推崇备至）；Zircon&lt;strong&gt;完全没有&lt;/strong&gt;采用这一理念，它另起炉灶用&lt;strong&gt;面型对象的思想&lt;/strong&gt;来假设所有的内核所管理的东西都是对象;即&lt;strong&gt;一切接对象&lt;/strong&gt;。
+Small Talk的发明人Alan Kay的思想终于照耀进了最底层的操作系统设计领域而不再是中看不中用不能解决实际问题的花架子。&lt;/p&gt;
 
-&lt;p&gt;这些对象是&lt;strong&gt;通过句柄handle的方式在系统调用中暴露&lt;/strong&gt;给用户使用的，对象本身则是通过继承自一个名字为&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;的抽象类;它的定义包含在&lt;code class=&quot;highlighter-rouge&quot;&gt;/kernel/object/include/object/dispatcher.h&lt;/code&gt;中。&lt;/p&gt;
+&lt;p&gt;这些对象是&lt;strong&gt;通过句柄（handle）的方式在系统调用中直接&lt;/strong&gt;暴露给用户使用的，对象本身在实现上均继承自一个名字为&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;的抽象类;稍微翻阅它的代码，就可以找到其定义包含在&lt;code class=&quot;highlighter-rouge&quot;&gt;/kernel/object/include/object/dispatcher.h&lt;/code&gt;中。&lt;/p&gt;
 
 &lt;h3 id=&quot;dispatcher定义&quot;&gt;Dispatcher定义&lt;/h3&gt;
 &lt;p&gt;Dispatcher的定义声明如下&lt;/p&gt;
@@ -39,8 +497,9 @@
 &lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// and locking differently.
 &lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;从类体系结构上看，它用私有继承的方式（C++中私有继承一般用来复用实现）实现了&lt;strong&gt;基于引用计数&lt;/strong&gt;的生存周期管理。
-因而有引用计数的接口操作定义&lt;/p&gt;
+&lt;p&gt;从类体系结构上看，它用私有继承的方式（C++中私有继承一般并不用来提供传统的接口继承而是仅仅复用代码）实现了&lt;strong&gt;基于引用计数&lt;/strong&gt;的生存周期管理。&lt;/p&gt;
+
+&lt;p&gt;于此同时它还提供了&lt;strong&gt;基于引用计数&lt;/strong&gt;的接口操作定义&lt;/p&gt;
 &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;increment_handle_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;handle_count_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetch_add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ktl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;memory_order_seq_cst&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;// Returns true exactly when the handle count goes to zero.
 &lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;decrement_handle_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -67,19 +526,21 @@
     &lt;span class=&quot;c1&quot;&gt;//...
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;h4 id=&quot;内核对象的id&quot;&gt;内核对象的ID&lt;/h4&gt;
-&lt;p&gt;内核中的所有对象都有一个唯一的ID标识符，用&lt;code class=&quot;highlighter-rouge&quot;&gt;koid&lt;/code&gt;来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。&lt;/p&gt;
+&lt;p&gt;内核中的所有对象都有一个唯一的ID标识符，用&lt;code class=&quot;highlighter-rouge&quot;&gt;koid&lt;/code&gt;来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。
+理论上来说，有边界的正整数总会有用完的一天，只是在务实主义者的严重，这个其实完全都不能算作一个问题，因为系统中出现重复的概率实在堪比行星撞地球了。&lt;/p&gt;
 
 &lt;h4 id=&quot;handle&quot;&gt;Handle&lt;/h4&gt;
-&lt;p&gt;用户空间的代码如果想访问内核服务中的对象，必须通过&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;句柄来完成。&lt;strong&gt;句柄的概念和Linux里面的文件描述符&lt;/strong&gt;的概３念比较类似，它是一种设计上的资源索引和具体资源实现的隔离；这样的隔离使得更灵活的系统演进和扩展变得更加容易。&lt;/p&gt;
+&lt;p&gt;用户空间的代码如果想访问内核服务中的对象，必须通过&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;句柄来完成。&lt;strong&gt;句柄的概念和Linux里面的文件描述符&lt;/strong&gt;的概念比较类似。
+设计思路上来说，它采用了将&lt;strong&gt;资源索引和具体资源实现隔离&lt;/strong&gt;的方法；使得更灵活的系统演进和扩展变得更加容易。&lt;/p&gt;
 
-&lt;p&gt;Handle在用户空间的程序看来其实是一个32位的整数值，用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_t&lt;/code&gt;来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;对象作为系统调用的参数传递进去，
+&lt;p&gt;Handle在用户空间的程序看来其实是一个32位的整数值，用&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_t&lt;/code&gt;来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;对象(通过一系列创建资源的系统调用)作为参数传递进去；指明需要操作的对象。
 这样系统调用的格式上&lt;strong&gt;大都携带一个所要操作的资源的标识&lt;/strong&gt;，从而让内核直到作用在哪个内核对象上。&lt;/p&gt;
 
 &lt;h5 id=&quot;handle和object的对应和校验&quot;&gt;handle和object的对应和校验&lt;/h5&gt;
 &lt;p&gt;显然，对于用户空间的进程来说，多个不同的进程可能需要访问同一个内核资源，此时它们需要有不同的handle而不能共享同一个handle;
 任何时候用户通过系统调用传入一个&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;的时候，内核都会做相应的校验&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;合法性校验：对应的资源&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;是否存在内核为用户进程创建的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车&lt;/li&gt;
+  &lt;li&gt;合法性校验：对应的资源&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;&lt;strong&gt;是否存在内核为用户进程创建&lt;/strong&gt;的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车；同时这也暗含了每个进程必然有一个类似于handle资源表的数据结构以供内核来查验&lt;/li&gt;
   &lt;li&gt;类型校验：对应的资源的类型和系统调用所对应的&lt;strong&gt;类型是否一致&lt;/strong&gt;&lt;/li&gt;
   &lt;li&gt;安全校验：用户空间的程序是否有&lt;strong&gt;合理的权限&lt;/strong&gt;来操作访问对应的内核资源；这个设计在当今的网络安全环境下尤其重要&lt;/li&gt;
 &lt;/ul&gt;
@@ -143,8 +604,8 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h6 id=&quot;内核对象的封装&quot;&gt;内核对象的封装&lt;/h6&gt;
-&lt;p&gt;同样的头文件中还包含了一个管理内核对象生存周期的&lt;code class=&quot;highlighter-rouge&quot;&gt;KenelHandle&lt;/code&gt;类，从它的定义可以看出&lt;strong&gt;内核对象使用的是典型的移动语义&lt;/strong&gt;，即不允许复制但是可以移动。
-因为这是内核的代码，并且&lt;strong&gt;C++标准库中的智能指针被禁用&lt;/strong&gt;了(参考这里的&lt;a href=&quot;https://fuchsia.dev/fuchsia-src/zircon/cxx&quot;&gt;C++语言使用&lt;/a&gt;说明)，所以该类的实现基本就是重复了C++标准库的做法&lt;/p&gt;
+&lt;p&gt;同样的头文件中还包含了一个管理内核对象生存周期的&lt;code class=&quot;highlighter-rouge&quot;&gt;KernelHandle&lt;/code&gt;类。因为这里都是C++代码，我们可以借用C++语言的语义，从它的定义可以看出&lt;strong&gt;内核对象使用的是典型的移动语义&lt;/strong&gt;，即不允许复制但是可以移动。
+由于这是内核的代码，并且&lt;strong&gt;C++标准库中的智能指针被禁用&lt;/strong&gt;了(参考这里的&lt;a href=&quot;https://fuchsia.dev/fuchsia-src/zircon/cxx&quot;&gt;C++语言使用&lt;/a&gt;说明)，所以该类的实现基本就是重复了C++标准库的做法&lt;/p&gt;
 &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;typename&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;KernelHandle&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
@@ -202,8 +663,9 @@
 这些函数在创建对应资源的同时，也返回了一个用户空间可用的指向对应资源的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;。&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Handle本身可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_duplicate&lt;/code&gt;调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来&lt;strong&gt;降低需要访问的资源权限&lt;/strong&gt;。
-&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_replace&lt;/code&gt;用来替换一个已有的handle,用户甚至可以在这个API中添加新的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;的权限。
+&lt;p&gt;Handle本身可以通过&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_duplicate&lt;/code&gt;调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来&lt;strong&gt;降低需要访问的资源权限&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_replace&lt;/code&gt;用来替换一个已有的handle,用户甚至可以在这个API中添加新的&lt;code class=&quot;highlighter-rouge&quot;&gt;handle&lt;/code&gt;的权限。
 &lt;code class=&quot;highlighter-rouge&quot;&gt;zx_handle_close&lt;/code&gt;顾名思义完成关闭handle的目的。&lt;/p&gt;
 
 &lt;h5 id=&quot;用户空间和内核空间的迁移&quot;&gt;用户空间和内核空间的迁移&lt;/h5&gt;
@@ -461,7 +923,7 @@ Zircon用&lt;strong&gt;同样VMO对象&lt;/strong&gt;来满足内核空间和用
 &lt;p&gt;Fuchsia实现了一个部分遵循POSIX标准（子集）的C标准库；它最初是基于musl这个容器世界里非常流行的迷你C库，但是修改了很多自己的实现；但是整体的代码布局依然和musl保持一致。&lt;/p&gt;
 
 &lt;p&gt;由于系统设计的不同，Fuchsia的C库并不支持静态链接，所有的程序都必须使用动态链接，且libc.so本身就是一个动态链接器。
-另外，它也不支持Linux上的IO操作的功能，相反它提供了一个针对fdio.so的弱符号封装。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="os" /><category term="kernel" /><category term="design" /><category term="architecture" /><category term="engineering" /><summary type="html">传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。 由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。</summary></entry><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
+另外，它也不支持Linux上的IO操作的功能，相反它提供了一个针对fdio.so的弱符号封装。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="os" /><category term="kernel" /><category term="design" /><category term="architecture" /><category term="engineering" /><summary type="html">传说中的Google的下一代操作系统项目Fuchsia一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测它是不是下一代的大杀器，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。 由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。</summary></entry><entry><title type="html">reduce-cpp-template-overhead</title><link href="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/" rel="alternate" type="text/html" title="reduce-cpp-template-overhead" /><published>2019-10-04T00:00:00+08:00</published><updated>2019-10-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/10/04/reduce-cpp-template-overhead/">&lt;p&gt;新的C++语言标准的演进越来越强调静态编译（即运行期计算）的优势，因为这一发展方向无疑更贴合现代的C++语言&lt;strong&gt;Zero Cost Abstraction&lt;/strong&gt;的目标；
 可惜这样做有个非常明显的副作用就是给编译器带来了巨大的挑战，乃至于稍微复杂一点的项目也动辄需要数个小时才能编译完成。&lt;/p&gt;
 
 &lt;p&gt;之前除了一些社区的抱怨
@@ -3676,290 +4138,4 @@ Bob大叔则旗帜鲜明地指出&lt;strong&gt;嵌入式架构本质上没有太
 很多时候我们面对的是一个需要维护很长时间的软件，它从&lt;strong&gt;被创建之日起，就肩负着可以被不断修改完善以便重用&lt;/strong&gt;的使命。
 人们很少有奢侈的机会去重头开始写一切需要的东西，因为这样做往往无法实现软件所承载的商业价值。
 软件架构师之所以要努力搭建这些不时被嘲笑是“叠床架屋”的复杂设计，其实也不过是希望有朝一日某些部分需要被修改的时候，付出的代价要小一些。
-忽视这些代价而只顾一时之快的经验不足的程序员们，很难避免以后自己也踏入“以使后人而复笑后人也”的境地。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市； 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。</summary></entry><entry><title type="html">Rust2018版：生产力提升的开始</title><link href="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/" rel="alternate" type="text/html" title="Rust2018版：生产力提升的开始" /><published>2019-01-19T00:00:00+08:00</published><updated>2019-01-19T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/19/rust-2018-edition-overview/">&lt;p&gt;不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型，
-基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。
-社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产，
-之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在&lt;strong&gt;接近年底的时候迟到但是没有爽约&lt;/strong&gt;，官方将1.31版本宣布为正式的2018版本。&lt;/p&gt;
-
-&lt;p&gt;这个版本和其它小版本的不同在于，这种年份命名的版本的上一个还要追溯于2015年，所以在设计上有很多预留的考量，并且在工具上也给予了特殊照顾。
-&lt;!--more--&gt;
-正式的版本是于12月中旬发布的，前面因为时间关系并没有投入多大精力来仔细关注变更和改进之处。好在过了一个月，社区中的介绍文字也多了起来，
-可以在读官方文档的基础上，再查引其它作者的解读，并且尝试着按照文档的介绍，改写了自己之前缩写的代码，加深对这些改变的理解。&lt;/p&gt;
-
-&lt;h2 id=&quot;官方介绍&quot;&gt;官方介绍&lt;/h2&gt;
-
-&lt;p&gt;官方社区维护了一个关于年份版本的电子书，是用&lt;a href=&quot;https://rust-lang-nursery.github.io/edition-guide/introduction.html&quot;&gt;GitBook&lt;/a&gt;方式发布在语言项目的页面上，
-包含了三个部分的介绍&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;什么是“年份版本”以及它和每六周发布的常规版本的关系&lt;/li&gt;
-  &lt;li&gt;每个版本包含了那些内容，目前有２个版本，那么分别有两个章节介绍2015版本和2018版本&lt;/li&gt;
-  &lt;li&gt;如何做项目版本的迁移&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;年份版本的意义&quot;&gt;年份版本的意义&lt;/h2&gt;
-&lt;p&gt;年份版本的用意其实跟多是出于宣传的需要，相当于软件项目中的里程碑版本；如果没有这样吸引人眼球的打包处理方式，普通的用户可能或觉得无所适从，
-因为每六个星期就发布一个版本的方法虽然更加敏捷，不想跟着升级的用户或者新用户就会觉得无所适从，不知道该选择哪个版本做项目。&lt;/p&gt;
-
-&lt;p&gt;年份版本其实是通过将一段时间内发布的语言特性和工具、库等集中起来，用特殊的版本标识符展现出来，&lt;strong&gt;给用户提供一个选择的基准&lt;/strong&gt;。
-在这个新版本之前，其实只有一个2015版本，并且被设置为是默认的版本，因而如果抛去默认版本不算，2018版本可以算作是第一个新版本。
-从编译器的角度来看，所有在这个编译器版本对应的&lt;strong&gt;小版本被发布之前所提供的语言特性都是可以支持和编译&lt;/strong&gt;的，不同的依赖库也可以用不同的版本编译和链接，都没有问题。&lt;/p&gt;
-
-&lt;p&gt;从兼容性上来说，官方保证了所有的新版本都是后向兼容的，并且有些关键的语言特性也会向后加入到老的版本中。
-大部分情况下如果吃不准，总是&lt;strong&gt;用新的版本&lt;/strong&gt;就没错了。&lt;/p&gt;
-
-&lt;p&gt;新版本支持一个新的cargo属性，默认没有设置的情况下，编译器会按照2015版本来解析和编译代码；如果需要使用新版本，需要指定如下的属性&lt;/p&gt;
-&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;py&quot;&gt;edition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;2018&quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;新版本的改进可以看做两个部分，一个是语言特性上的改进就是纯粹的语言改进，另一个是工具链和生态系统中重要软件和工具的改进。
-传统的编程语言版本更新往往只侧重于第一个方面，但是进入最近十几年的软件工程实践表明，一门语言要想维持和发展，
-&lt;strong&gt;生态系统中工具的支持是至关重要&lt;/strong&gt;的；Rust社区很明智的仔细考虑了这一趋势，并花了比较大的力气改进程序员的生产效率。&lt;/p&gt;
-
-&lt;h2 id=&quot;rust语言本身的改进&quot;&gt;Rust语言本身的改进&lt;/h2&gt;
-
-&lt;p&gt;语言特性本身的改进比较多，大的特性方面主要包括如下几个&lt;/p&gt;
-
-&lt;h3 id=&quot;非作用域生命周期-nll&quot;&gt;非作用域生命周期 (NLL)&lt;/h3&gt;
-
-&lt;p&gt;这个特性其实主要是用于解决&lt;strong&gt;变量访问的引用检查过于严格&lt;/strong&gt;引起的”误杀”的问题，提高引用检查的智能化水平，
-使一些人眼看起来完全没有问题的代码，也可以被编译器正确识别而编译通过，在不损失正确性的前提下，减少程序员取悦编译器的不方便之处，&lt;strong&gt;减少程序员的心智负担&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;具体来说，在老的语言版本中，下面的代码将无法通过编译器的引用声明周期检查&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;c&quot;&gt;//y not used any more&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;失败的原因在于，编译器的生存周期检查是和作用域绑定在一起的；在函数第二行的时候，我们声明了&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;是前面可变变量的一个不可变引用，
-编译器认为从这一行开始到当前作用域结束（这里是函数作用域，靠大括号约束）前，这个不可变引用总是存在的。
-因而在&lt;strong&gt;作用域没有结束之前，编译器又发现了对同一个变量的一个可变的引用&lt;/strong&gt;，那么编译器无法放置潜在的访问冲突，为了保证安全，编译器选择不让代码编译通过。&lt;/p&gt;
-
-&lt;p&gt;事实上，写代码的程序员却很清楚，这里的y已经不再使用了，因此再声明一个新的可变引用是没有问题的。
-因为编译器不知道，在老版本的编译环境中，程序员&lt;strong&gt;不得不想办法创建一个临时的作用域&lt;/strong&gt;，绕过这个问题&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;c&quot;&gt;//y not used any more, out of scope here&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;对用户而言，这是一个比较麻烦的心智负担，新版本通过让编译器变得更聪明，来自动检测这一情况，
-自动判断这里的&lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt;两个引用是进水不犯河水的，编译仍然可以畅通无阻。&lt;/p&gt;
-
-&lt;p&gt;如果用户犯了错误，在新的可变引用之后，还想重新使用前面的不可变引用，那么编译器依然会正确的拦截这一做法，
-并且给出的编译错误也会更加直观一些，&lt;strong&gt;直接了当的告诉用户&lt;/strong&gt;，两个引用冲突的点在于实际产生冲突的地方，
-而不会像老版本一样给出相对混淆一些的标记于作用域结束处的错误信息。这样便极大地降低了新用户学习的门槛，
-即使他们没有完全掌握引用检查的原理和机制，也可以按照编译器的指示讲代码修改正确。&lt;/p&gt;
-
-&lt;p&gt;基于这个改进对用户的影响实在太大，同样的改进也会在后续加入到2015版本中。&lt;/p&gt;
-
-&lt;h3 id=&quot;减少不必要的重复&quot;&gt;减少不必要的&lt;code class=&quot;highlighter-rouge&quot;&gt;?&lt;/code&gt;重复&lt;/h3&gt;
-
-&lt;p&gt;这个主要是用于清理宏中的复杂的样板代码，比如如下的宏定义因为第二个表达式部分是可选的，必须重复地写成复杂的形式&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;macro_rules!&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b:expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//similar like above&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;新版本力争优化这一重复，通过可选部分的 &lt;code class=&quot;highlighter-rouge&quot;&gt;$(...)?&lt;/code&gt; 结构，让宏的设计者可以写出&lt;strong&gt;更干净&lt;/strong&gt;的代码&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;allow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unused_variables&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;macro_rules!&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a:ident&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b:expr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-        &lt;span class=&quot;nv&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-            &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-         &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;?&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;不过宏的部分目前被很多人认为是语言设计中不太成熟的部分，不管写的很啰嗦，理解起来也很不直观，
-距离成熟还有不断的路程要走；且看后面会怎样进一步发展。&lt;/p&gt;
-
-&lt;h3 id=&quot;模块系统和库路径的简化&quot;&gt;模块系统和库路径的简化&lt;/h3&gt;
-
-&lt;p&gt;模块系统是Rust里面比较让新手感觉迷惑的一块知识；虽然它的基本规则还是比较清晰和直观的，
-但是当多个复杂的概念混合在一起的时候，滋生出来的一些&lt;strong&gt;复杂的情况却往往违反人的直觉&lt;/strong&gt;，
-这一块明显会成为新手学习的”拦路虎”，使很多人忘而退却。
-新版本通过引入一些小的变化来放松一些死板的规则带来的约束，宁可让编译器处理稍微复杂一点，对用户的要求更宽松一些，降低使用的门槛。&lt;/p&gt;
-
-&lt;p&gt;主要的变化在于&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;删除了大部分强制的&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate&lt;/code&gt;声明，大部分情况下，只要在配置文件中引入了依赖的模块，代码里面就可以直接使用了，不用再啰嗦地声明一大堆的&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;crate&lt;/code&gt;关键字指向当前的模块&lt;/li&gt;
-  &lt;li&gt;用&lt;strong&gt;模块名来标记其它引用模块的绝对路径&lt;/strong&gt;，而用｀crate`来标记当前模块&lt;/li&gt;
-  &lt;li&gt;模块嵌套子模块的情况下，同名文件夹和文件夹名字命名的模块声明文件可以同时存在，不需要在文件夹下面再专门声明一个&lt;code class=&quot;highlighter-rouge&quot;&gt;mod.rs&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;去除臃肿的外部模块声明&quot;&gt;去除臃肿的外部模块声明&lt;/h4&gt;
-&lt;p&gt;第一个改动非常直观，原来版本中繁琐而笨拙的一大堆&lt;code class=&quot;highlighter-rouge&quot;&gt;extern crate xxx&lt;/code&gt;可以全部删掉了，留下&lt;code class=&quot;highlighter-rouge&quot;&gt;use xxx::yyy&lt;/code&gt;;
-这里有两个例外情况,对应于系统模块中的&lt;code class=&quot;highlighter-rouge&quot;&gt;crates&lt;/code&gt;，分别是&lt;code class=&quot;highlighter-rouge&quot;&gt;std&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt;这两个模块；
-前者已经被编译器默认当做隐式包含而用户不需要指定（否则可以设想代码会变得臃肿不堪），而&lt;code class=&quot;highlighter-rouge&quot;&gt;core&lt;/code&gt;模块大部分情况下也不会用到。
-还有一个例外情况是&lt;code class=&quot;highlighter-rouge&quot;&gt;proc_macro&lt;/code&gt;的使用，显然&lt;strong&gt;这些都是非常罕见&lt;/strong&gt;的情况。&lt;/p&gt;
-
-&lt;h4 id=&quot;模块和路径&quot;&gt;模块和路径&lt;/h4&gt;
-
-&lt;p&gt;对于复杂的库实现来说，为了封装内部的细节，往往需要借助于子模块嵌套的办法实现更好的逻辑拆分以提高可维护性；
-而旧版本的含糊的子模块规则往往会把初学者绕晕，尤其是当某个嵌套很深的子模块需要引用比较靠顶层的模块中的结构或者函数时，
-必须将库本身的名字填上来，或者用&lt;code class=&quot;highlighter-rouge&quot;&gt;super::super&lt;/code&gt;这样的方式来绕过&lt;strong&gt;重命名模块名带来的尴尬&lt;/strong&gt;。
-新版本通过指定&lt;code class=&quot;highlighter-rouge&quot;&gt;crate&lt;/code&gt;本身总是指向根路径来简化重命名操作带来的代码改动。&lt;/p&gt;
-
-&lt;p&gt;具体来说，假设我们有这样的模块结构&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;＃inside a libary named &lt;span class=&quot;s2&quot;&gt;&quot;mylib&quot;&lt;/span&gt;
-lib
-|-- top.rs
-|-- foo
-    |-- funfoo.rs
-    |-- bar
-        |-- funbar.rs
-        |-- sub
-            |-- foosub.rs
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;当我们在最内层的&lt;code class=&quot;highlighter-rouge&quot;&gt;foosub.rs&lt;/code&gt;里面想引用&lt;code class=&quot;highlighter-rouge&quot;&gt;top.rs&lt;/code&gt;里面定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;top_func&lt;/code&gt;,则必须要在代码里面写做&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;//inside foosub.rs &lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;//old 2015 edition code, need to adapt for module renaming&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;mylib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;//or use super to indirect, no code change needed for renaming&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;而新的语言版本允许我们简单地写作&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;top&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;top_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h4 id=&quot;无需啰嗦的modrs&quot;&gt;无需啰嗦的&lt;code class=&quot;highlighter-rouge&quot;&gt;mod.rs&lt;/code&gt;&lt;/h4&gt;
-&lt;p&gt;这个小改进也是一个使用上的简化，更符合人的直觉一点；反过来看，老的版本必须强制程序员在创建子模块的时候，
-在文件夹里面添加一个&lt;code class=&quot;highlighter-rouge&quot;&gt;modrs&lt;/code&gt;，并且上层目录里面不准有和文件夹同名的源代码文件出现，反而有点麻烦了。
-现在可以很愉快地写这样的目录结构了&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;lib&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.rs&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//same module and rs co-exist!&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.rs&lt;/span&gt; 
-    &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bar&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;//no need to put dummy mod.rs here!&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h4 id=&quot;统一的use语法&quot;&gt;统一的&lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt;语法&lt;/h4&gt;
-&lt;p&gt;老版本允许一些含混的&lt;code class=&quot;highlighter-rouge&quot;&gt;use&lt;/code&gt;声明，尤其是在某些情况下允许声明文件中定义的默写子模块函数，而&lt;strong&gt;新版本统一了&lt;/strong&gt;可以被声明使用的具体类型，只能是如下几者之一&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;正式的模块名字&lt;/li&gt;
-  &lt;li&gt;self用来表明是当前文件中的定义&lt;/li&gt;
-  &lt;li&gt;super用来指明是上一级文件目录中的子模块的定义&lt;/li&gt;
-  &lt;li&gt;crate用来指明是本模块顶层路径下的子模块&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;因此相应的代码变化是&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Bar&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;// use foo::Bar; //valid in 2015 but not valid in 2018&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//must specify top level &lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;在不引入更多麻烦的情况下，&lt;strong&gt;一致性总是好于过分混乱的简洁&lt;/strong&gt;；这样才能更好的减少用户的心智负担。&lt;/p&gt;
-
-&lt;h3 id=&quot;去除匿名trait类型的参数&quot;&gt;去除匿名&lt;code class=&quot;highlighter-rouge&quot;&gt;trait&lt;/code&gt;类型的参数&lt;/h3&gt;
-
-&lt;p&gt;这个小改动也是为了提高代码的一致性，虽然稍微复杂了一些。具体来说，就是老的版本允许这样写&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;新版本必须给一个参数名字，或者用&lt;code class=&quot;highlighter-rouge&quot;&gt;_&lt;/code&gt;来代替&lt;/p&gt;
-&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;baz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//use _:u8 if not used inside &lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;关键字上的改进&quot;&gt;关键字上的改进&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;dyn&lt;/code&gt;被提升为一个更严格的关键字，而之前的版本中它是一个弱关键字；这意味着编译器会做更多的检查，
-确保它没用被使用在不合适的上下文中，如变量和函数声明，结构属性定义，类型参数，生命周期限定，宏，模块等。&lt;/li&gt;
-  &lt;li&gt;预留了下面几个关键字，主要原因还是对应的功能没用实现完整，先占着再说
-    &lt;ol&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt; 用于异步编程的异步函数声明&lt;/li&gt;
-      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt; 用于异步等待，和前一个结合支持协程；这方面的机制在很多语言中都支持的比较完善了&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;try&lt;/code&gt; 这方面的处理还不是很成熟，还需要观察后续语言如何进一步演化&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;编译检查改进&quot;&gt;编译检查改进&lt;/h3&gt;
-
-&lt;p&gt;编译器检查列表中新加了２个默认的编译检查，如果不符合则会被编译器标记为拒绝&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;整数字面量越界（向上溢出）检查 -  简单来说，给出的整数值超出了类型所能表达的范围的时候编译器会明确的拒绝；
-这会破坏一些从C语言迁移过来的编程习惯，比如把-1赋值给一个无符号８位数，就会被认为是越界。&lt;/li&gt;
-  &lt;li&gt;未指明类型信息的裸指针解引用会被明确拒绝，避免一些低级而诡异的错误，使得底层编程更加安全&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;大部分日常使用中的程序都不会被上面的２个新的检查影响到。&lt;/p&gt;
-
-&lt;h2 id=&quot;工具的改进&quot;&gt;工具的改进&lt;/h2&gt;
-
-&lt;p&gt;新版本带来了不少新的工具来&lt;strong&gt;提高程序员的生产效率&lt;/strong&gt;；包括官方的打包工具，格式检查，新语言特性风格上的检查
-(类似于有名的质量检查工具&lt;code class=&quot;highlighter-rouge&quot;&gt;sonar&lt;/code&gt;),可惜的是不少工具还处于&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;阶段，距离正式推出还需要一些时间。&lt;/p&gt;
-
-&lt;h3 id=&quot;cargo工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cargo&lt;/code&gt;工具&lt;/h3&gt;
-
-&lt;p&gt;这一官方的打包和测试工具做了如下的改动&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;多&lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;发现机制在用户制定了&lt;code class=&quot;highlighter-rouge&quot;&gt;target&lt;/code&gt;属性的情况下，还会继续扫描和发现其它的平台架构&lt;/li&gt;
-  &lt;li&gt;没有给出&lt;code class=&quot;highlighter-rouge&quot;&gt;path&lt;/code&gt;属性的情况下，即使代码里面有&lt;code class=&quot;highlighter-rouge&quot;&gt;src/{target_name}.rs&lt;/code&gt;的存在，cargo也不会自动推断对应的路径；这个改动应该是修复一些已有的bug&lt;/li&gt;
-  &lt;li&gt;默认情况下，&lt;code class=&quot;highlighter-rouge&quot;&gt;install&lt;/code&gt;不会再安装于默认的当前路径，如果用户坚持想这么做，那么必须提供“&lt;code class=&quot;highlighter-rouge&quot;&gt;--path .&lt;/code&gt;”参数来显示指定。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;fmt工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;fmt工具&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;目前自动格式化代码的工具还处于预览阶段，没有放在正式的&lt;code class=&quot;highlighter-rouge&quot;&gt;rustup component&lt;/code&gt;中，需要通过添加&lt;code class=&quot;highlighter-rouge&quot;&gt;-preview&lt;/code&gt;后缀来获取。
-看起来&lt;strong&gt;新的编程语言都不约而同地强迫大家用同一种编程风格，减少对编码风格的争吵&lt;/strong&gt;，无疑是比较明智的；
-因为绝大部分人一开始在学习一门语言的时候，并没有很强烈的习惯支撑，而编码风格本身又无所谓好坏，
-先入为主是个很普遍的现象，减少这方面的无畏的精力消耗，没有什么不好。&lt;/p&gt;
-
-&lt;h3 id=&quot;clippy代码检查工具&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;clippy&lt;/code&gt;代码检查工具&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/rust-lang/rust-clippy&quot;&gt;clippy&lt;/a&gt; 是一个用于Rust的代码质量检查工具，目前也是处于&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;阶段，
-尤其是Windows上需要加&lt;code class=&quot;highlighter-rouge&quot;&gt;preview&lt;/code&gt;才可以下载使用。它本身已经提供了超过290个检查项，
-对于每个失败的检查项，它还会提供链接告诉你应该怎么去修改，不少检查是基于对语言更深入的理解才能做到的，
-因此运行的时候需要先编译项目的代码。&lt;/p&gt;
-
-&lt;p&gt;clippy自己定义了一些检查集供用户选择，包括&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;style 检查会检查是否遵循语言本身定义的一些惯用法&lt;/li&gt;
-  &lt;li&gt;complexity 则检查是否代码的复杂度可以降低却用了一些难以理解的代码&lt;/li&gt;
-  &lt;li&gt;perf 检查判断是否代码可以使用更为高效的方式来实现&lt;/li&gt;
-  &lt;li&gt;correctness 检查代码的行为是否总是正确的,其中如果发现无用的代码也会给出警告&lt;/li&gt;
-  &lt;li&gt;cargo 附带检查项目的cargo声明文件是否符合规范&lt;/li&gt;
-  &lt;li&gt;nursery开启一些尚未稳定下的检查项&lt;/li&gt;
-  &lt;li&gt;pedantic模式会开启所有的检查项&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;项目本身配置通过&lt;code class=&quot;highlighter-rouge&quot;&gt;clippy.toml&lt;/code&gt;或者&lt;code class=&quot;highlighter-rouge&quot;&gt;.clippy.toml&lt;/code&gt;来指定具体的开关，打开哪些检查项，配置复杂度阈值，
-设置黑名单等功能。用户也可以通过相应的代码属性，加入&lt;code class=&quot;highlighter-rouge&quot;&gt;allow/deny/warn&lt;/code&gt;宏的方式，按需开启或者跳过某段代码的检查。&lt;/p&gt;
-
-&lt;p&gt;该项目的文档可以从&lt;a href=&quot;https://rust-lang.github.io/rust-clippy/master/index.html&quot;&gt;这里&lt;/a&gt;找到。&lt;/p&gt;
-
-&lt;h2 id=&quot;一点遗憾&quot;&gt;一点遗憾&lt;/h2&gt;
-&lt;p&gt;新的2018版本带来的改动不光有语言特性上的增强，还有侧重于生产率方面的工具增强和一致性改进。
-略微有些美中不足的是，异步编程和协程的支持还没有很完备，不得不通过预留关键字的做法留待后续版本继续解决。&lt;/p&gt;
-
-&lt;p&gt;另外一个没有提到的方面是关于Windows上工具链的支持和某些大的IDE工具对Nightly版本的依赖。
-尤其是RLS/Racer这两个比较重要的工具时不时会出现循环的重启，还必须依赖于Nightly版本，继续社区加大bug改进力度，早日加到文档版本中去。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="rust" /><category term="tools" /><summary type="html">不同于传统的工业标准的C++/Java语言缓慢的更新节奏（最近几年大家都加快了演进的节奏），Rust从一开始就采用了滚动发布的模型， 基本上是按照固定的步伐每个六个星期就会放出来一个新版本，并且从正式发布了1.0开始，最近两年来一直是保持向后兼容的。 社区在2018年初的时候，就约定好会在18年发一个大版本出来，以便对外界宣布语言上面的一些重要变化来引起用户的关注；只是这个选择过程似乎一直难产， 之前一直时不时关注着每个新版本的进展，可惜一直没有等到官方宣布；幸好最终在接近年底的时候迟到但是没有爽约，官方将1.31版本宣布为正式的2018版本。</summary></entry></feed>
+忽视这些代价而只顾一时之快的经验不足的程序员们，很难避免以后自己也踏入“以使后人而复笑后人也”的境地。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市； 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。</summary></entry></feed>

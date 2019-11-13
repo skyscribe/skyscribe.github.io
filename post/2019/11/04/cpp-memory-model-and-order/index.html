@@ -1,0 +1,1309 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>现代C++的内存模型和高性能的多线程编程 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。然而如果我们想追求极致的应用程序性能，又想追求可移植性、高性能这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。为什么需要内存模型有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？其实最简单的答案来自于多线程编程的需求驱动和跨平台可移植性的需求。单线程环境的程序环境因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？多线程环境的问题在多线程的环境下，情况就会变得复杂起来了，因为旧有的语言标准选择自动忽略了多线程语义的约束。也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用语句重排序的方法来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就看不到也无法理解上层的某些代码块可能需要在多个线程里面调度执行。当然这也并不意味之我们就不能写线程安全的代码了，只不过负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层，程序员需要自己负责实现繁琐的同步和保护处理。此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。跨平台问题由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是pthread库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。内存模型约束了什么东西内存模型其实从本质上来说，是首先定义了一个可以运行C++多线程程序的抽象机器，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。抽象机器概念因为不同的CPU和机器架构可能又完全不同的机器指令集，所以编译器本身的代码必然不是跨平台的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。通过抽象机器概念的定义和C++语言提供的标准库，需要完成多线程编程任务的程序员的工作就得到了极大的简化：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，最终程序呈现的多线程表现行为总是确定的。抽象机器和内存模型因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到内存访问模型的行为上来了。从一个简单的例子说起C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子static int x, y;//in thread1x = 1;y = 2;//in thread2cout &lt;&lt; y &lt;&lt; endl;cout &lt;&lt; x &lt;&lt; endl;这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。用atomic操作的C++11版本稍微将上面的例子改写一些，我们得到如下的版本atomic&lt;int&gt; x, y;//thread1x.store(17);y.store(18);//thread2cout &lt;&lt; y.load() &lt;&lt; &quot; &quot;;cout &lt;&lt; x.load() &lt;&lt; endl;这个程序的行为就只可能是以下三种情况的一种  如果第一个线程在第一个打印之前先做完，那么就输出18 17  如果第一个线程在第二个线程打印完才开始执行，那么会输出0 0  如果两个线程交叉着执行，会打印0 17但是其它的情况都不会发生，因为默认的atomic定义的读取和写入操作的行为约束为线性一致，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。原子操作和内存顺序上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是实现高性能无锁算法的最底层的设施，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。上面例子中的性能问题如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的顺序一致性要求，然而这个要求有些时候又显得代价过于高昂而影响性能，以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来允许用户指定内存顺序template&lt; class T &gt;T atomic_load( const std::atomic&lt;T&gt;* obj ) noexcept;template&lt; class T &gt;T atomic_load_explicit( const std::atomic&lt;T&gt;* obj,                        std::memory_order order ) noexcept;其中的第二个重载版本允许用户传入一个类型为memory_order的枚举值，该枚举值则定义了各种各样的内存访问模型。memory_order定义现有的定义如下typedef enum memory_order {    memory_order_relaxed,    memory_order_consume,    memory_order_acquire,    memory_order_release,    memory_order_acq_rel,    memory_order_seq_cst} memory_order;在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用constexpr方式定义成下面的方式enum class memory_order : /*unspecified*/ {    relaxed, consume, acquire, release, acq_rel, seq_cst};inline constexpr memory_order memory_order_relaxed = memory_order::relaxed;inline constexpr memory_order memory_order_consume = memory_order::consume;inline constexpr memory_order memory_order_acquire = memory_order::acquire;inline constexpr memory_order memory_order_release = memory_order::release;inline constexpr memory_order memory_order_acq_rel = memory_order::acq_rel;inline constexpr memory_order memory_order_seq_cst = memory_order::seq_cst;内存顺序的简单解释这几个枚举值使用于不同的原子量操作。最放松的内存顺序memory_order_relaxed完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。适用于读取操作的内存顺序memory_order_consume通常和对原子量的读取操作结合起来使用，用于约束如下的情况  在同一个线程中的依赖于本次读取操作的值的、其它的相关的读取和写入操作语句的顺序不允许被重新排列到该读取操作前面  其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果在本线程中可见，该情况其实是和memory_order_release相互配对使用memory_order_acquire形成了一个更强的读取操作的屏障  本线程中的依赖于同样内存位置的原子量的读写操作不允许被重排于该操作之前  其它线程中的写入释放原子量的操作在本线程中可见；该情况和memory_order_release配对使用适用于单写入操作的内存顺序memory_order_release用于写入操作之后的原子量释放的顺序约束  当前线程中的其它的依赖于本原子量的读取和写入操作不许重排在本语句之前  本线程中的其它写入操作对其它线程中的需要获取同一个原子变量对应的位置的采用memory_order_acquire的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(memory_order_consumed)可见前者的内存访问顺序符合Release-Acquire顺序，而后者符合Release-Consume顺序。适用于读取并修改操作的内存顺序这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合  memory_order_acq_rel保证操作本身同时满足acquire和release；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的操作对应的修改在本线程的修改之前可见，并且本线程中对原子量的修改操作本身在其它线程的读取操作中也可见适用于所有操作的默认值memory_order_seq_cst是默认的操作顺序，它提供了顺序一致性顺序保证  读取操作采用该内存顺序时，等价于acquire操作  写入操作采用该内存顺序是，等价于release操作  读取并修改操作采用该内存顺序时，等同于叠加了acquire/release操作的同时，还额外保证所有的线程都能看到对多个原子量修改的一种全局顺序形式化定义和解释跨线程的同步和内存顺序问题其实是用于界定赋值表达式和这些表达式的副作用在多个线程并发执行的时候相互顺序表现的怎么样的问题。正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析  Sequenced-before 表示在单线程中，两个表达式语句的赋值先后关系；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。  依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为传递依赖赋值表达式A满足sequenced-before表达式B，并且在下面任何一个条件成立的时候，称为A传递依赖到B  表达式A是表达式B的一个操作对象，但是不是一个对std::kill_dependency的调用，也不是&amp;&amp;/||/?:/,操作符的左操作数。排除掉的这些操作要么有短路操作，要么是旧的语言标准故意允许编译器可以选择自己方便的实现，因而不能定义跨平台的时许关系  A写入了一个标量对象M，而B需要从M中读取值  A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的间接传递修改顺序对任何一个原子量的多线程修改由于原子量本身的不可并发，而最终形成了一个在多线程环境中，关于该原子量本身的全局顺序。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。对于原子量的所有操作都满足下述的一致性要求      写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。        读取－读取一致性：如果一个计算值的关于读取原子量M的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于X所写入的原子量的值，要么等于一个修改顺序上晚于X的操作Y的作用于M的副作用所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插        读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上早于B的一次写入操作X的副作用；即先读取后写入的情况下，读取的一定是早于写入之前的某次修改的值        写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值  释放顺序在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的最长的连续序列包含  同一个线程中关于M的修改操作  其它任意一个线程中的原子性读取－修改－写入操作该序列被成为A的释放序列；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。依赖顺序上的先序（Dependency-order before）多线程之间，当如下任意一个条件成立的时候，赋值A为依赖顺序上先于赋值B  A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的consume操作，并且B读取了A的释放顺序上的任何一部分的值  A在依赖顺序上先于X，而X传递依赖至B这里的第二个定义其实是一种递归定义。跨线程的先序关系 (Inter-thread happens-before)多线程之间，如下任意一个条件成立的时候，成为A跨线程先于B  A同步于B  A依赖顺序上先于B  A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)  A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义  A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义最终的先序关系(happens-before)不管是否跨线程，先序关系定义为  A单线程中先于B  A跨线程先于B实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。强先序关系（Strong happens-before）如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而至少有一个操作不是原子操作，则程序的行为就是未定义的，除非是这些赋值操作本身之间存在强先序关系。C++20之前的内存模型做如下的定义  要么A、B在同一个线程中，且满足顺序先于B  要么A和B进行显式的同步  要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于BC++20标准对该定义进行了进一步修正，并引入了两个概念简单先序 (Simply happens-before)A和B之间符合如下的任何一个条件可以称之为简单先序的  A顺序先于B，这是同线程的约束  A同步于B  A简单先序于X，而X简单先序于B该定义基本是上述定义的简单替换，目的是为更复杂的强先序关系做铺垫。强先序则被定义为如下某一个条件成立  A顺序先于B  A同步于B，并且A和B的操作都是顺序一致性的原子量操作  A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的两个传递关系在多线程情况下，是通过两个跨线程的简单线序关系来进行的  A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义简单来说，强先序关系保证了A的赋值一定在任何情况下，都会早于B的赋值；它本身就排除了consume操作。副作用可见性某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见  A先序于B  不存在其它的副作用X，满足A先于X而X先于B；即中间不存在可以插入的其它副作用如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的最长的满足B不先于这些副作用的集合成为可见的副作用集。根据这个定义可见，跨线程的同步问题其实可以简单归结为建立确定的先序关系来避免静态条件，明确说明哪些副作用在哪些条件下可见。Consume操作、Acquire操作和Release操作Consume操作指的是在读取操作中使用了memory_order_consume内存顺序类型（或者更强）的操作；比它更强的atomic_thread_fence提供了更强的同步要求。Acquire操作指的是在读操作里使用了memory_order_acquire（或者更强内存顺序的操作）;还有一个隐式的例子是std::mutex里面的lock操作本身其实包含一种acquire操作，而同样的atomic_thread_fence提供的同步性要求更强。Release操作则对应于比memory_order_release或者更强的一种写操作；而类似地，mutex::unlock或者atomic_thread_fence因为同步性更强，也满足release操作要求。再看内存顺序定义有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。Relaxed Ordering标记为memory_order_relaxed的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。比如如下的例子，假设x和y都以及被初始化为0，则如下的代码//in thread 1r1 = y.load(std::memory_order_relaxed);x.store(r1, std::memory_order_relaxed);//in thread 2r2 = x.load(std::memory_order_relaxed);y.store(42, std::memory_order_relaxed);结果将可能出现r1=42, r2=42的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取y然后写入到x中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子//thread1r1 = x.load(std::memory_order_relaxed);if (r1==42)    y.store(r1, std::memory_order_relaxed);//thread2r2 = y.load(std::memory_order_relaxed);if (r2 == 42)    x.store(42, std::memory_order_relaxed);不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。常见的使用relaxed_order的情况最常见的用法是实现计数器，比如std::shared_ptr中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用acquire-release同步。Release-Acquire这是一种成对的同步读、写关系；某个标记为memory_order_release的操作的之前的这些符合或者不符合原子性的副作用都会被另外一个线程中的memory_order_acquire的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。这种同步的先后关系仅仅对读写同一个原子量的操作提供保证，不同的原子量的读写操作不受影响。在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别  基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是禁止一些编译器的指令重排序即可  对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步最常见的使用该模型的例子就是std::mutex的lock/unlock操作。一个传递的例子如下的代码显示了在多个线程中传递这种顺序关系的例子std::vector&lt;int&gt; data;std::atomic&lt;int&gt; flag = {0};//thread1data.push_back(42);flag.store(1, std::memory_order_release);//thread2int expected = 1;while (!flag.compare_exchange_strong(expected, 2, std::memory_order_acq_rel))    expected = 1;//thread3while (flag.load(std::memory_order_acquire) &lt; 2);assert(data.at(0) == 42);第一个线程中，通过memory_order_release的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对data的写入已经可见。线程二则用memory_order_acq_rel关系确保在在第一个线程写入１可见的情况下，将其替换为2；第三个线程则需要在第二个线程完毕之后才会退出循环;三个线程对原子量的修改是线性的，并且是完成了显式的同步。Release-Consuming和上述的Acquire-Release关系略有不同的是：当线程A的写入操作采用memory_order_release而线程B中的读取操作采用memory_order_consume的时候，线程A视角看到的所有的依赖顺序上先于原子量写入操作的其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。这种同步模式仅仅是在获取和释放同一个原子量的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种release-consume内存顺序约束，从C++17开始，这种用法又变得不推荐使用。一个实现订阅、发布的例子加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值std::atomic&lt;std::string*&gt; ptr;int data;//thread producerstd::string *p = new std::string(&quot;hello&quot;);data = 42;ptr.store(p, std::memory_order_release);//thread consumerstd::string* p2;while (!(p2 = ptr.load(std::memory_order_consume)));assert(*p2 == &quot;hello&quot;); //p2 carries dependency from ptrassert(data == 42); /// may or may not be true!需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。可见Release-Consume是一种相对较弱的同步保障机制。Sequentially-consistent标记为memory_order_seq_cst的原子量操作不光保证了同样的release/acquire顺序保证，还建立了一种关于所有的带有该标记的原子量修改操作的顺序。C++20之前的形式化定义对于某个用memory_order_seq_cst方式来加载原子量M的操作B而言，它可以观察到如下的情况  在修改顺序上早于B的某个修改M的操作A的结果  如果存在上述的A，B可以观测到A中没有标记为memory_order_seq_cst的M的修改，这些修改本身也不在A之前发生  如果不存在上述的A，B可以观测到没有标记为memory_order_seq_cst的内存顺序无关的对M的修改如果存在一个标记为memory_order_seq_cst的std::atomic_thread_fence的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个  全局修改顺序中的先于X的最后一个标记为memory_order_seq_cst的M的修改操作  晚于M的修改顺序中的无关的对M的修改对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个memory_order_seq_cst的atomic_thread_fence操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到  A操作的副作用  或者A中对M的修改之后的一个不相关的对M的修改对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果  存在一个memory_order_seq_cst的atomic_thread_fence的X，使得A线性早于X，而X在全局修改序上早于B  或者存在一个满足同样要求的atmoic_thread_fenceY，使得Y线性早于B，而A在全局修改序上早于X  或者存在两个memory_order_seq_cst的atomic_thread_fence的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y这样的定义意味着  只要我们看到没有标记为memory_order_seq_cst的原子操作的时候，顺序一致性保证就会丧失  顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序C++20定义C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。使用场景Sequential Ordering对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须以同样的顺序看到对应的修改。然而由于该内存顺序要求在多个CPU核上在指令级别施加完全的内存栅，因此它带来的性能损失在某些情况下不能忽略。使用这种顺序的一个强同步的例子如下std::atomic&lt;bool&gt; x = {false};std::atomic&lt;bool&gt; y = {false};std::atomic&lt;int&gt; z = {0};void write_x() { x.store(true, std::memory_order_seq_cst);}void write_y() { y.store(true, std::memory_order_seq_cst);}void x_then_y() {    while (!x.load(std::memory_order_seq_cst));    if (y.load(std::memory_order_seq_cst)) ++z;}void y_then_x() {    while (!y.load(std::memory_order_seq_cst));    if (x.load(std::memory_order_seq_cst)) ++z;    }这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。和volatile的关系其实和Java语言中的有些类似，volatile仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并不保证这些副作用在跨线程环境下的可见性。同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有release语义，而所有的读操作有acquire语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="现代C++的内存模型和高性能的多线程编程">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">
+
+
+
+  <meta property="og:description" content="内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。然而如果我们想追求极致的应用程序性能，又想追求可移植性、高性能这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。为什么需要内存模型有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？其实最简单的答案来自于多线程编程的需求驱动和跨平台可移植性的需求。单线程环境的程序环境因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？多线程环境的问题在多线程的环境下，情况就会变得复杂起来了，因为旧有的语言标准选择自动忽略了多线程语义的约束。也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用语句重排序的方法来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就看不到也无法理解上层的某些代码块可能需要在多个线程里面调度执行。当然这也并不意味之我们就不能写线程安全的代码了，只不过负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层，程序员需要自己负责实现繁琐的同步和保护处理。此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。跨平台问题由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是pthread库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。内存模型约束了什么东西内存模型其实从本质上来说，是首先定义了一个可以运行C++多线程程序的抽象机器，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。抽象机器概念因为不同的CPU和机器架构可能又完全不同的机器指令集，所以编译器本身的代码必然不是跨平台的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。通过抽象机器概念的定义和C++语言提供的标准库，需要完成多线程编程任务的程序员的工作就得到了极大的简化：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，最终程序呈现的多线程表现行为总是确定的。抽象机器和内存模型因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到内存访问模型的行为上来了。从一个简单的例子说起C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子static int x, y;//in thread1x = 1;y = 2;//in thread2cout &lt;&lt; y &lt;&lt; endl;cout &lt;&lt; x &lt;&lt; endl;这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。用atomic操作的C++11版本稍微将上面的例子改写一些，我们得到如下的版本atomic&lt;int&gt; x, y;//thread1x.store(17);y.store(18);//thread2cout &lt;&lt; y.load() &lt;&lt; &quot; &quot;;cout &lt;&lt; x.load() &lt;&lt; endl;这个程序的行为就只可能是以下三种情况的一种  如果第一个线程在第一个打印之前先做完，那么就输出18 17  如果第一个线程在第二个线程打印完才开始执行，那么会输出0 0  如果两个线程交叉着执行，会打印0 17但是其它的情况都不会发生，因为默认的atomic定义的读取和写入操作的行为约束为线性一致，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。原子操作和内存顺序上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是实现高性能无锁算法的最底层的设施，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。上面例子中的性能问题如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的顺序一致性要求，然而这个要求有些时候又显得代价过于高昂而影响性能，以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来允许用户指定内存顺序template&lt; class T &gt;T atomic_load( const std::atomic&lt;T&gt;* obj ) noexcept;template&lt; class T &gt;T atomic_load_explicit( const std::atomic&lt;T&gt;* obj,                        std::memory_order order ) noexcept;其中的第二个重载版本允许用户传入一个类型为memory_order的枚举值，该枚举值则定义了各种各样的内存访问模型。memory_order定义现有的定义如下typedef enum memory_order {    memory_order_relaxed,    memory_order_consume,    memory_order_acquire,    memory_order_release,    memory_order_acq_rel,    memory_order_seq_cst} memory_order;在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用constexpr方式定义成下面的方式enum class memory_order : /*unspecified*/ {    relaxed, consume, acquire, release, acq_rel, seq_cst};inline constexpr memory_order memory_order_relaxed = memory_order::relaxed;inline constexpr memory_order memory_order_consume = memory_order::consume;inline constexpr memory_order memory_order_acquire = memory_order::acquire;inline constexpr memory_order memory_order_release = memory_order::release;inline constexpr memory_order memory_order_acq_rel = memory_order::acq_rel;inline constexpr memory_order memory_order_seq_cst = memory_order::seq_cst;内存顺序的简单解释这几个枚举值使用于不同的原子量操作。最放松的内存顺序memory_order_relaxed完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。适用于读取操作的内存顺序memory_order_consume通常和对原子量的读取操作结合起来使用，用于约束如下的情况  在同一个线程中的依赖于本次读取操作的值的、其它的相关的读取和写入操作语句的顺序不允许被重新排列到该读取操作前面  其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果在本线程中可见，该情况其实是和memory_order_release相互配对使用memory_order_acquire形成了一个更强的读取操作的屏障  本线程中的依赖于同样内存位置的原子量的读写操作不允许被重排于该操作之前  其它线程中的写入释放原子量的操作在本线程中可见；该情况和memory_order_release配对使用适用于单写入操作的内存顺序memory_order_release用于写入操作之后的原子量释放的顺序约束  当前线程中的其它的依赖于本原子量的读取和写入操作不许重排在本语句之前  本线程中的其它写入操作对其它线程中的需要获取同一个原子变量对应的位置的采用memory_order_acquire的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(memory_order_consumed)可见前者的内存访问顺序符合Release-Acquire顺序，而后者符合Release-Consume顺序。适用于读取并修改操作的内存顺序这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合  memory_order_acq_rel保证操作本身同时满足acquire和release；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的操作对应的修改在本线程的修改之前可见，并且本线程中对原子量的修改操作本身在其它线程的读取操作中也可见适用于所有操作的默认值memory_order_seq_cst是默认的操作顺序，它提供了顺序一致性顺序保证  读取操作采用该内存顺序时，等价于acquire操作  写入操作采用该内存顺序是，等价于release操作  读取并修改操作采用该内存顺序时，等同于叠加了acquire/release操作的同时，还额外保证所有的线程都能看到对多个原子量修改的一种全局顺序形式化定义和解释跨线程的同步和内存顺序问题其实是用于界定赋值表达式和这些表达式的副作用在多个线程并发执行的时候相互顺序表现的怎么样的问题。正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析  Sequenced-before 表示在单线程中，两个表达式语句的赋值先后关系；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。  依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为传递依赖赋值表达式A满足sequenced-before表达式B，并且在下面任何一个条件成立的时候，称为A传递依赖到B  表达式A是表达式B的一个操作对象，但是不是一个对std::kill_dependency的调用，也不是&amp;&amp;/||/?:/,操作符的左操作数。排除掉的这些操作要么有短路操作，要么是旧的语言标准故意允许编译器可以选择自己方便的实现，因而不能定义跨平台的时许关系  A写入了一个标量对象M，而B需要从M中读取值  A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的间接传递修改顺序对任何一个原子量的多线程修改由于原子量本身的不可并发，而最终形成了一个在多线程环境中，关于该原子量本身的全局顺序。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。对于原子量的所有操作都满足下述的一致性要求      写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。        读取－读取一致性：如果一个计算值的关于读取原子量M的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于X所写入的原子量的值，要么等于一个修改顺序上晚于X的操作Y的作用于M的副作用所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插        读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上早于B的一次写入操作X的副作用；即先读取后写入的情况下，读取的一定是早于写入之前的某次修改的值        写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值  释放顺序在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的最长的连续序列包含  同一个线程中关于M的修改操作  其它任意一个线程中的原子性读取－修改－写入操作该序列被成为A的释放序列；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。依赖顺序上的先序（Dependency-order before）多线程之间，当如下任意一个条件成立的时候，赋值A为依赖顺序上先于赋值B  A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的consume操作，并且B读取了A的释放顺序上的任何一部分的值  A在依赖顺序上先于X，而X传递依赖至B这里的第二个定义其实是一种递归定义。跨线程的先序关系 (Inter-thread happens-before)多线程之间，如下任意一个条件成立的时候，成为A跨线程先于B  A同步于B  A依赖顺序上先于B  A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)  A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义  A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义最终的先序关系(happens-before)不管是否跨线程，先序关系定义为  A单线程中先于B  A跨线程先于B实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。强先序关系（Strong happens-before）如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而至少有一个操作不是原子操作，则程序的行为就是未定义的，除非是这些赋值操作本身之间存在强先序关系。C++20之前的内存模型做如下的定义  要么A、B在同一个线程中，且满足顺序先于B  要么A和B进行显式的同步  要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于BC++20标准对该定义进行了进一步修正，并引入了两个概念简单先序 (Simply happens-before)A和B之间符合如下的任何一个条件可以称之为简单先序的  A顺序先于B，这是同线程的约束  A同步于B  A简单先序于X，而X简单先序于B该定义基本是上述定义的简单替换，目的是为更复杂的强先序关系做铺垫。强先序则被定义为如下某一个条件成立  A顺序先于B  A同步于B，并且A和B的操作都是顺序一致性的原子量操作  A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的两个传递关系在多线程情况下，是通过两个跨线程的简单线序关系来进行的  A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义简单来说，强先序关系保证了A的赋值一定在任何情况下，都会早于B的赋值；它本身就排除了consume操作。副作用可见性某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见  A先序于B  不存在其它的副作用X，满足A先于X而X先于B；即中间不存在可以插入的其它副作用如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的最长的满足B不先于这些副作用的集合成为可见的副作用集。根据这个定义可见，跨线程的同步问题其实可以简单归结为建立确定的先序关系来避免静态条件，明确说明哪些副作用在哪些条件下可见。Consume操作、Acquire操作和Release操作Consume操作指的是在读取操作中使用了memory_order_consume内存顺序类型（或者更强）的操作；比它更强的atomic_thread_fence提供了更强的同步要求。Acquire操作指的是在读操作里使用了memory_order_acquire（或者更强内存顺序的操作）;还有一个隐式的例子是std::mutex里面的lock操作本身其实包含一种acquire操作，而同样的atomic_thread_fence提供的同步性要求更强。Release操作则对应于比memory_order_release或者更强的一种写操作；而类似地，mutex::unlock或者atomic_thread_fence因为同步性更强，也满足release操作要求。再看内存顺序定义有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。Relaxed Ordering标记为memory_order_relaxed的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。比如如下的例子，假设x和y都以及被初始化为0，则如下的代码//in thread 1r1 = y.load(std::memory_order_relaxed);x.store(r1, std::memory_order_relaxed);//in thread 2r2 = x.load(std::memory_order_relaxed);y.store(42, std::memory_order_relaxed);结果将可能出现r1=42, r2=42的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取y然后写入到x中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子//thread1r1 = x.load(std::memory_order_relaxed);if (r1==42)    y.store(r1, std::memory_order_relaxed);//thread2r2 = y.load(std::memory_order_relaxed);if (r2 == 42)    x.store(42, std::memory_order_relaxed);不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。常见的使用relaxed_order的情况最常见的用法是实现计数器，比如std::shared_ptr中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用acquire-release同步。Release-Acquire这是一种成对的同步读、写关系；某个标记为memory_order_release的操作的之前的这些符合或者不符合原子性的副作用都会被另外一个线程中的memory_order_acquire的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。这种同步的先后关系仅仅对读写同一个原子量的操作提供保证，不同的原子量的读写操作不受影响。在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别  基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是禁止一些编译器的指令重排序即可  对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步最常见的使用该模型的例子就是std::mutex的lock/unlock操作。一个传递的例子如下的代码显示了在多个线程中传递这种顺序关系的例子std::vector&lt;int&gt; data;std::atomic&lt;int&gt; flag = {0};//thread1data.push_back(42);flag.store(1, std::memory_order_release);//thread2int expected = 1;while (!flag.compare_exchange_strong(expected, 2, std::memory_order_acq_rel))    expected = 1;//thread3while (flag.load(std::memory_order_acquire) &lt; 2);assert(data.at(0) == 42);第一个线程中，通过memory_order_release的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对data的写入已经可见。线程二则用memory_order_acq_rel关系确保在在第一个线程写入１可见的情况下，将其替换为2；第三个线程则需要在第二个线程完毕之后才会退出循环;三个线程对原子量的修改是线性的，并且是完成了显式的同步。Release-Consuming和上述的Acquire-Release关系略有不同的是：当线程A的写入操作采用memory_order_release而线程B中的读取操作采用memory_order_consume的时候，线程A视角看到的所有的依赖顺序上先于原子量写入操作的其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。这种同步模式仅仅是在获取和释放同一个原子量的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种release-consume内存顺序约束，从C++17开始，这种用法又变得不推荐使用。一个实现订阅、发布的例子加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值std::atomic&lt;std::string*&gt; ptr;int data;//thread producerstd::string *p = new std::string(&quot;hello&quot;);data = 42;ptr.store(p, std::memory_order_release);//thread consumerstd::string* p2;while (!(p2 = ptr.load(std::memory_order_consume)));assert(*p2 == &quot;hello&quot;); //p2 carries dependency from ptrassert(data == 42); /// may or may not be true!需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。可见Release-Consume是一种相对较弱的同步保障机制。Sequentially-consistent标记为memory_order_seq_cst的原子量操作不光保证了同样的release/acquire顺序保证，还建立了一种关于所有的带有该标记的原子量修改操作的顺序。C++20之前的形式化定义对于某个用memory_order_seq_cst方式来加载原子量M的操作B而言，它可以观察到如下的情况  在修改顺序上早于B的某个修改M的操作A的结果  如果存在上述的A，B可以观测到A中没有标记为memory_order_seq_cst的M的修改，这些修改本身也不在A之前发生  如果不存在上述的A，B可以观测到没有标记为memory_order_seq_cst的内存顺序无关的对M的修改如果存在一个标记为memory_order_seq_cst的std::atomic_thread_fence的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个  全局修改顺序中的先于X的最后一个标记为memory_order_seq_cst的M的修改操作  晚于M的修改顺序中的无关的对M的修改对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个memory_order_seq_cst的atomic_thread_fence操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到  A操作的副作用  或者A中对M的修改之后的一个不相关的对M的修改对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果  存在一个memory_order_seq_cst的atomic_thread_fence的X，使得A线性早于X，而X在全局修改序上早于B  或者存在一个满足同样要求的atmoic_thread_fenceY，使得Y线性早于B，而A在全局修改序上早于X  或者存在两个memory_order_seq_cst的atomic_thread_fence的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y这样的定义意味着  只要我们看到没有标记为memory_order_seq_cst的原子操作的时候，顺序一致性保证就会丧失  顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序C++20定义C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。使用场景Sequential Ordering对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须以同样的顺序看到对应的修改。然而由于该内存顺序要求在多个CPU核上在指令级别施加完全的内存栅，因此它带来的性能损失在某些情况下不能忽略。使用这种顺序的一个强同步的例子如下std::atomic&lt;bool&gt; x = {false};std::atomic&lt;bool&gt; y = {false};std::atomic&lt;int&gt; z = {0};void write_x() { x.store(true, std::memory_order_seq_cst);}void write_y() { y.store(true, std::memory_order_seq_cst);}void x_then_y() {    while (!x.load(std::memory_order_seq_cst));    if (y.load(std::memory_order_seq_cst)) ++z;}void y_then_x() {    while (!y.load(std::memory_order_seq_cst));    if (x.load(std::memory_order_seq_cst)) ++z;    }这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。和volatile的关系其实和Java语言中的有些类似，volatile仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并不保证这些副作用在跨线程环境下的可见性。同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有release语义，而所有的读操作有acquire语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="现代C++的内存模型和高性能的多线程编程">
+  <meta name="twitter:description" content="内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。然而如果我们想追求极致的应用程序性能，又想追求可移植性、高性能这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。为什么需要内存模型有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？其实最简单的答案来自于多线程编程的需求驱动和跨平台可移植性的需求。单线程环境的程序环境因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？多线程环境的问题在多线程的环境下，情况就会变得复杂起来了，因为旧有的语言标准选择自动忽略了多线程语义的约束。也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用语句重排序的方法来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就看不到也无法理解上层的某些代码块可能需要在多个线程里面调度执行。当然这也并不意味之我们就不能写线程安全的代码了，只不过负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层，程序员需要自己负责实现繁琐的同步和保护处理。此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。跨平台问题由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是pthread库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。内存模型约束了什么东西内存模型其实从本质上来说，是首先定义了一个可以运行C++多线程程序的抽象机器，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。抽象机器概念因为不同的CPU和机器架构可能又完全不同的机器指令集，所以编译器本身的代码必然不是跨平台的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。通过抽象机器概念的定义和C++语言提供的标准库，需要完成多线程编程任务的程序员的工作就得到了极大的简化：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，最终程序呈现的多线程表现行为总是确定的。抽象机器和内存模型因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到内存访问模型的行为上来了。从一个简单的例子说起C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子static int x, y;//in thread1x = 1;y = 2;//in thread2cout &lt;&lt; y &lt;&lt; endl;cout &lt;&lt; x &lt;&lt; endl;这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。用atomic操作的C++11版本稍微将上面的例子改写一些，我们得到如下的版本atomic&lt;int&gt; x, y;//thread1x.store(17);y.store(18);//thread2cout &lt;&lt; y.load() &lt;&lt; &quot; &quot;;cout &lt;&lt; x.load() &lt;&lt; endl;这个程序的行为就只可能是以下三种情况的一种  如果第一个线程在第一个打印之前先做完，那么就输出18 17  如果第一个线程在第二个线程打印完才开始执行，那么会输出0 0  如果两个线程交叉着执行，会打印0 17但是其它的情况都不会发生，因为默认的atomic定义的读取和写入操作的行为约束为线性一致，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。原子操作和内存顺序上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是实现高性能无锁算法的最底层的设施，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。上面例子中的性能问题如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的顺序一致性要求，然而这个要求有些时候又显得代价过于高昂而影响性能，以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来允许用户指定内存顺序template&lt; class T &gt;T atomic_load( const std::atomic&lt;T&gt;* obj ) noexcept;template&lt; class T &gt;T atomic_load_explicit( const std::atomic&lt;T&gt;* obj,                        std::memory_order order ) noexcept;其中的第二个重载版本允许用户传入一个类型为memory_order的枚举值，该枚举值则定义了各种各样的内存访问模型。memory_order定义现有的定义如下typedef enum memory_order {    memory_order_relaxed,    memory_order_consume,    memory_order_acquire,    memory_order_release,    memory_order_acq_rel,    memory_order_seq_cst} memory_order;在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用constexpr方式定义成下面的方式enum class memory_order : /*unspecified*/ {    relaxed, consume, acquire, release, acq_rel, seq_cst};inline constexpr memory_order memory_order_relaxed = memory_order::relaxed;inline constexpr memory_order memory_order_consume = memory_order::consume;inline constexpr memory_order memory_order_acquire = memory_order::acquire;inline constexpr memory_order memory_order_release = memory_order::release;inline constexpr memory_order memory_order_acq_rel = memory_order::acq_rel;inline constexpr memory_order memory_order_seq_cst = memory_order::seq_cst;内存顺序的简单解释这几个枚举值使用于不同的原子量操作。最放松的内存顺序memory_order_relaxed完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。适用于读取操作的内存顺序memory_order_consume通常和对原子量的读取操作结合起来使用，用于约束如下的情况  在同一个线程中的依赖于本次读取操作的值的、其它的相关的读取和写入操作语句的顺序不允许被重新排列到该读取操作前面  其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果在本线程中可见，该情况其实是和memory_order_release相互配对使用memory_order_acquire形成了一个更强的读取操作的屏障  本线程中的依赖于同样内存位置的原子量的读写操作不允许被重排于该操作之前  其它线程中的写入释放原子量的操作在本线程中可见；该情况和memory_order_release配对使用适用于单写入操作的内存顺序memory_order_release用于写入操作之后的原子量释放的顺序约束  当前线程中的其它的依赖于本原子量的读取和写入操作不许重排在本语句之前  本线程中的其它写入操作对其它线程中的需要获取同一个原子变量对应的位置的采用memory_order_acquire的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(memory_order_consumed)可见前者的内存访问顺序符合Release-Acquire顺序，而后者符合Release-Consume顺序。适用于读取并修改操作的内存顺序这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合  memory_order_acq_rel保证操作本身同时满足acquire和release；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的操作对应的修改在本线程的修改之前可见，并且本线程中对原子量的修改操作本身在其它线程的读取操作中也可见适用于所有操作的默认值memory_order_seq_cst是默认的操作顺序，它提供了顺序一致性顺序保证  读取操作采用该内存顺序时，等价于acquire操作  写入操作采用该内存顺序是，等价于release操作  读取并修改操作采用该内存顺序时，等同于叠加了acquire/release操作的同时，还额外保证所有的线程都能看到对多个原子量修改的一种全局顺序形式化定义和解释跨线程的同步和内存顺序问题其实是用于界定赋值表达式和这些表达式的副作用在多个线程并发执行的时候相互顺序表现的怎么样的问题。正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析  Sequenced-before 表示在单线程中，两个表达式语句的赋值先后关系；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。  依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为传递依赖赋值表达式A满足sequenced-before表达式B，并且在下面任何一个条件成立的时候，称为A传递依赖到B  表达式A是表达式B的一个操作对象，但是不是一个对std::kill_dependency的调用，也不是&amp;&amp;/||/?:/,操作符的左操作数。排除掉的这些操作要么有短路操作，要么是旧的语言标准故意允许编译器可以选择自己方便的实现，因而不能定义跨平台的时许关系  A写入了一个标量对象M，而B需要从M中读取值  A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的间接传递修改顺序对任何一个原子量的多线程修改由于原子量本身的不可并发，而最终形成了一个在多线程环境中，关于该原子量本身的全局顺序。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。对于原子量的所有操作都满足下述的一致性要求      写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。        读取－读取一致性：如果一个计算值的关于读取原子量M的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于X所写入的原子量的值，要么等于一个修改顺序上晚于X的操作Y的作用于M的副作用所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插        读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上早于B的一次写入操作X的副作用；即先读取后写入的情况下，读取的一定是早于写入之前的某次修改的值        写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值  释放顺序在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的最长的连续序列包含  同一个线程中关于M的修改操作  其它任意一个线程中的原子性读取－修改－写入操作该序列被成为A的释放序列；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。依赖顺序上的先序（Dependency-order before）多线程之间，当如下任意一个条件成立的时候，赋值A为依赖顺序上先于赋值B  A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的consume操作，并且B读取了A的释放顺序上的任何一部分的值  A在依赖顺序上先于X，而X传递依赖至B这里的第二个定义其实是一种递归定义。跨线程的先序关系 (Inter-thread happens-before)多线程之间，如下任意一个条件成立的时候，成为A跨线程先于B  A同步于B  A依赖顺序上先于B  A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)  A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义  A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义最终的先序关系(happens-before)不管是否跨线程，先序关系定义为  A单线程中先于B  A跨线程先于B实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。强先序关系（Strong happens-before）如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而至少有一个操作不是原子操作，则程序的行为就是未定义的，除非是这些赋值操作本身之间存在强先序关系。C++20之前的内存模型做如下的定义  要么A、B在同一个线程中，且满足顺序先于B  要么A和B进行显式的同步  要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于BC++20标准对该定义进行了进一步修正，并引入了两个概念简单先序 (Simply happens-before)A和B之间符合如下的任何一个条件可以称之为简单先序的  A顺序先于B，这是同线程的约束  A同步于B  A简单先序于X，而X简单先序于B该定义基本是上述定义的简单替换，目的是为更复杂的强先序关系做铺垫。强先序则被定义为如下某一个条件成立  A顺序先于B  A同步于B，并且A和B的操作都是顺序一致性的原子量操作  A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的两个传递关系在多线程情况下，是通过两个跨线程的简单线序关系来进行的  A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义简单来说，强先序关系保证了A的赋值一定在任何情况下，都会早于B的赋值；它本身就排除了consume操作。副作用可见性某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见  A先序于B  不存在其它的副作用X，满足A先于X而X先于B；即中间不存在可以插入的其它副作用如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的最长的满足B不先于这些副作用的集合成为可见的副作用集。根据这个定义可见，跨线程的同步问题其实可以简单归结为建立确定的先序关系来避免静态条件，明确说明哪些副作用在哪些条件下可见。Consume操作、Acquire操作和Release操作Consume操作指的是在读取操作中使用了memory_order_consume内存顺序类型（或者更强）的操作；比它更强的atomic_thread_fence提供了更强的同步要求。Acquire操作指的是在读操作里使用了memory_order_acquire（或者更强内存顺序的操作）;还有一个隐式的例子是std::mutex里面的lock操作本身其实包含一种acquire操作，而同样的atomic_thread_fence提供的同步性要求更强。Release操作则对应于比memory_order_release或者更强的一种写操作；而类似地，mutex::unlock或者atomic_thread_fence因为同步性更强，也满足release操作要求。再看内存顺序定义有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。Relaxed Ordering标记为memory_order_relaxed的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。比如如下的例子，假设x和y都以及被初始化为0，则如下的代码//in thread 1r1 = y.load(std::memory_order_relaxed);x.store(r1, std::memory_order_relaxed);//in thread 2r2 = x.load(std::memory_order_relaxed);y.store(42, std::memory_order_relaxed);结果将可能出现r1=42, r2=42的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取y然后写入到x中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子//thread1r1 = x.load(std::memory_order_relaxed);if (r1==42)    y.store(r1, std::memory_order_relaxed);//thread2r2 = y.load(std::memory_order_relaxed);if (r2 == 42)    x.store(42, std::memory_order_relaxed);不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。常见的使用relaxed_order的情况最常见的用法是实现计数器，比如std::shared_ptr中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用acquire-release同步。Release-Acquire这是一种成对的同步读、写关系；某个标记为memory_order_release的操作的之前的这些符合或者不符合原子性的副作用都会被另外一个线程中的memory_order_acquire的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。这种同步的先后关系仅仅对读写同一个原子量的操作提供保证，不同的原子量的读写操作不受影响。在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别  基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是禁止一些编译器的指令重排序即可  对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步最常见的使用该模型的例子就是std::mutex的lock/unlock操作。一个传递的例子如下的代码显示了在多个线程中传递这种顺序关系的例子std::vector&lt;int&gt; data;std::atomic&lt;int&gt; flag = {0};//thread1data.push_back(42);flag.store(1, std::memory_order_release);//thread2int expected = 1;while (!flag.compare_exchange_strong(expected, 2, std::memory_order_acq_rel))    expected = 1;//thread3while (flag.load(std::memory_order_acquire) &lt; 2);assert(data.at(0) == 42);第一个线程中，通过memory_order_release的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对data的写入已经可见。线程二则用memory_order_acq_rel关系确保在在第一个线程写入１可见的情况下，将其替换为2；第三个线程则需要在第二个线程完毕之后才会退出循环;三个线程对原子量的修改是线性的，并且是完成了显式的同步。Release-Consuming和上述的Acquire-Release关系略有不同的是：当线程A的写入操作采用memory_order_release而线程B中的读取操作采用memory_order_consume的时候，线程A视角看到的所有的依赖顺序上先于原子量写入操作的其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。这种同步模式仅仅是在获取和释放同一个原子量的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种release-consume内存顺序约束，从C++17开始，这种用法又变得不推荐使用。一个实现订阅、发布的例子加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值std::atomic&lt;std::string*&gt; ptr;int data;//thread producerstd::string *p = new std::string(&quot;hello&quot;);data = 42;ptr.store(p, std::memory_order_release);//thread consumerstd::string* p2;while (!(p2 = ptr.load(std::memory_order_consume)));assert(*p2 == &quot;hello&quot;); //p2 carries dependency from ptrassert(data == 42); /// may or may not be true!需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。可见Release-Consume是一种相对较弱的同步保障机制。Sequentially-consistent标记为memory_order_seq_cst的原子量操作不光保证了同样的release/acquire顺序保证，还建立了一种关于所有的带有该标记的原子量修改操作的顺序。C++20之前的形式化定义对于某个用memory_order_seq_cst方式来加载原子量M的操作B而言，它可以观察到如下的情况  在修改顺序上早于B的某个修改M的操作A的结果  如果存在上述的A，B可以观测到A中没有标记为memory_order_seq_cst的M的修改，这些修改本身也不在A之前发生  如果不存在上述的A，B可以观测到没有标记为memory_order_seq_cst的内存顺序无关的对M的修改如果存在一个标记为memory_order_seq_cst的std::atomic_thread_fence的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个  全局修改顺序中的先于X的最后一个标记为memory_order_seq_cst的M的修改操作  晚于M的修改顺序中的无关的对M的修改对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个memory_order_seq_cst的atomic_thread_fence操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到  A操作的副作用  或者A中对M的修改之后的一个不相关的对M的修改对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果  存在一个memory_order_seq_cst的atomic_thread_fence的X，使得A线性早于X，而X在全局修改序上早于B  或者存在一个满足同样要求的atmoic_thread_fenceY，使得Y线性早于B，而A在全局修改序上早于X  或者存在两个memory_order_seq_cst的atomic_thread_fence的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y这样的定义意味着  只要我们看到没有标记为memory_order_seq_cst的原子操作的时候，顺序一致性保证就会丧失  顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序C++20定义C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。使用场景Sequential Ordering对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须以同样的顺序看到对应的修改。然而由于该内存顺序要求在多个CPU核上在指令级别施加完全的内存栅，因此它带来的性能损失在某些情况下不能忽略。使用这种顺序的一个强同步的例子如下std::atomic&lt;bool&gt; x = {false};std::atomic&lt;bool&gt; y = {false};std::atomic&lt;int&gt; z = {0};void write_x() { x.store(true, std::memory_order_seq_cst);}void write_y() { y.store(true, std::memory_order_seq_cst);}void x_then_y() {    while (!x.load(std::memory_order_seq_cst));    if (y.load(std::memory_order_seq_cst)) ++z;}void y_then_x() {    while (!y.load(std::memory_order_seq_cst));    if (x.load(std::memory_order_seq_cst)) ++z;    }这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。和volatile的关系其实和Java语言中的有些类似，volatile仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并不保证这些副作用在跨线程环境下的可见性。同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有release语义，而所有的读操作有acquire语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2019-11-04T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(17)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(25)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(29)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(47)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(21)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(27)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(10)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(6)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="现代C++的内存模型和高性能的多线程编程">
+    <meta itemprop="description" content="内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。然而如果我们想追求极致的应用程序性能，又想追求可移植性、高性能这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。为什么需要内存模型有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？其实最简单的答案来自于多线程编程的需求驱动和跨平台可移植性的需求。单线程环境的程序环境因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？多线程环境的问题在多线程的环境下，情况就会变得复杂起来了，因为旧有的语言标准选择自动忽略了多线程语义的约束。也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用语句重排序的方法来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就看不到也无法理解上层的某些代码块可能需要在多个线程里面调度执行。当然这也并不意味之我们就不能写线程安全的代码了，只不过负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层，程序员需要自己负责实现繁琐的同步和保护处理。此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。跨平台问题由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是pthread库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。内存模型约束了什么东西内存模型其实从本质上来说，是首先定义了一个可以运行C++多线程程序的抽象机器，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。抽象机器概念因为不同的CPU和机器架构可能又完全不同的机器指令集，所以编译器本身的代码必然不是跨平台的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。通过抽象机器概念的定义和C++语言提供的标准库，需要完成多线程编程任务的程序员的工作就得到了极大的简化：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，最终程序呈现的多线程表现行为总是确定的。抽象机器和内存模型因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到内存访问模型的行为上来了。从一个简单的例子说起C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子static int x, y;//in thread1x = 1;y = 2;//in thread2cout &lt;&lt; y &lt;&lt; endl;cout &lt;&lt; x &lt;&lt; endl;这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。用atomic操作的C++11版本稍微将上面的例子改写一些，我们得到如下的版本atomic&lt;int&gt; x, y;//thread1x.store(17);y.store(18);//thread2cout &lt;&lt; y.load() &lt;&lt; &quot; &quot;;cout &lt;&lt; x.load() &lt;&lt; endl;这个程序的行为就只可能是以下三种情况的一种  如果第一个线程在第一个打印之前先做完，那么就输出18 17  如果第一个线程在第二个线程打印完才开始执行，那么会输出0 0  如果两个线程交叉着执行，会打印0 17但是其它的情况都不会发生，因为默认的atomic定义的读取和写入操作的行为约束为线性一致，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。原子操作和内存顺序上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是实现高性能无锁算法的最底层的设施，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。上面例子中的性能问题如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的顺序一致性要求，然而这个要求有些时候又显得代价过于高昂而影响性能，以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来允许用户指定内存顺序template&lt; class T &gt;T atomic_load( const std::atomic&lt;T&gt;* obj ) noexcept;template&lt; class T &gt;T atomic_load_explicit( const std::atomic&lt;T&gt;* obj,                        std::memory_order order ) noexcept;其中的第二个重载版本允许用户传入一个类型为memory_order的枚举值，该枚举值则定义了各种各样的内存访问模型。memory_order定义现有的定义如下typedef enum memory_order {    memory_order_relaxed,    memory_order_consume,    memory_order_acquire,    memory_order_release,    memory_order_acq_rel,    memory_order_seq_cst} memory_order;在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用constexpr方式定义成下面的方式enum class memory_order : /*unspecified*/ {    relaxed, consume, acquire, release, acq_rel, seq_cst};inline constexpr memory_order memory_order_relaxed = memory_order::relaxed;inline constexpr memory_order memory_order_consume = memory_order::consume;inline constexpr memory_order memory_order_acquire = memory_order::acquire;inline constexpr memory_order memory_order_release = memory_order::release;inline constexpr memory_order memory_order_acq_rel = memory_order::acq_rel;inline constexpr memory_order memory_order_seq_cst = memory_order::seq_cst;内存顺序的简单解释这几个枚举值使用于不同的原子量操作。最放松的内存顺序memory_order_relaxed完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。适用于读取操作的内存顺序memory_order_consume通常和对原子量的读取操作结合起来使用，用于约束如下的情况  在同一个线程中的依赖于本次读取操作的值的、其它的相关的读取和写入操作语句的顺序不允许被重新排列到该读取操作前面  其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果在本线程中可见，该情况其实是和memory_order_release相互配对使用memory_order_acquire形成了一个更强的读取操作的屏障  本线程中的依赖于同样内存位置的原子量的读写操作不允许被重排于该操作之前  其它线程中的写入释放原子量的操作在本线程中可见；该情况和memory_order_release配对使用适用于单写入操作的内存顺序memory_order_release用于写入操作之后的原子量释放的顺序约束  当前线程中的其它的依赖于本原子量的读取和写入操作不许重排在本语句之前  本线程中的其它写入操作对其它线程中的需要获取同一个原子变量对应的位置的采用memory_order_acquire的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(memory_order_consumed)可见前者的内存访问顺序符合Release-Acquire顺序，而后者符合Release-Consume顺序。适用于读取并修改操作的内存顺序这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合  memory_order_acq_rel保证操作本身同时满足acquire和release；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的操作对应的修改在本线程的修改之前可见，并且本线程中对原子量的修改操作本身在其它线程的读取操作中也可见适用于所有操作的默认值memory_order_seq_cst是默认的操作顺序，它提供了顺序一致性顺序保证  读取操作采用该内存顺序时，等价于acquire操作  写入操作采用该内存顺序是，等价于release操作  读取并修改操作采用该内存顺序时，等同于叠加了acquire/release操作的同时，还额外保证所有的线程都能看到对多个原子量修改的一种全局顺序形式化定义和解释跨线程的同步和内存顺序问题其实是用于界定赋值表达式和这些表达式的副作用在多个线程并发执行的时候相互顺序表现的怎么样的问题。正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析  Sequenced-before 表示在单线程中，两个表达式语句的赋值先后关系；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。  依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为传递依赖赋值表达式A满足sequenced-before表达式B，并且在下面任何一个条件成立的时候，称为A传递依赖到B  表达式A是表达式B的一个操作对象，但是不是一个对std::kill_dependency的调用，也不是&amp;&amp;/||/?:/,操作符的左操作数。排除掉的这些操作要么有短路操作，要么是旧的语言标准故意允许编译器可以选择自己方便的实现，因而不能定义跨平台的时许关系  A写入了一个标量对象M，而B需要从M中读取值  A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的间接传递修改顺序对任何一个原子量的多线程修改由于原子量本身的不可并发，而最终形成了一个在多线程环境中，关于该原子量本身的全局顺序。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。对于原子量的所有操作都满足下述的一致性要求      写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。        读取－读取一致性：如果一个计算值的关于读取原子量M的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于X所写入的原子量的值，要么等于一个修改顺序上晚于X的操作Y的作用于M的副作用所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插        读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上早于B的一次写入操作X的副作用；即先读取后写入的情况下，读取的一定是早于写入之前的某次修改的值        写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值  释放顺序在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的最长的连续序列包含  同一个线程中关于M的修改操作  其它任意一个线程中的原子性读取－修改－写入操作该序列被成为A的释放序列；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。依赖顺序上的先序（Dependency-order before）多线程之间，当如下任意一个条件成立的时候，赋值A为依赖顺序上先于赋值B  A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的consume操作，并且B读取了A的释放顺序上的任何一部分的值  A在依赖顺序上先于X，而X传递依赖至B这里的第二个定义其实是一种递归定义。跨线程的先序关系 (Inter-thread happens-before)多线程之间，如下任意一个条件成立的时候，成为A跨线程先于B  A同步于B  A依赖顺序上先于B  A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)  A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义  A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义最终的先序关系(happens-before)不管是否跨线程，先序关系定义为  A单线程中先于B  A跨线程先于B实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。强先序关系（Strong happens-before）如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而至少有一个操作不是原子操作，则程序的行为就是未定义的，除非是这些赋值操作本身之间存在强先序关系。C++20之前的内存模型做如下的定义  要么A、B在同一个线程中，且满足顺序先于B  要么A和B进行显式的同步  要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于BC++20标准对该定义进行了进一步修正，并引入了两个概念简单先序 (Simply happens-before)A和B之间符合如下的任何一个条件可以称之为简单先序的  A顺序先于B，这是同线程的约束  A同步于B  A简单先序于X，而X简单先序于B该定义基本是上述定义的简单替换，目的是为更复杂的强先序关系做铺垫。强先序则被定义为如下某一个条件成立  A顺序先于B  A同步于B，并且A和B的操作都是顺序一致性的原子量操作  A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的两个传递关系在多线程情况下，是通过两个跨线程的简单线序关系来进行的  A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义简单来说，强先序关系保证了A的赋值一定在任何情况下，都会早于B的赋值；它本身就排除了consume操作。副作用可见性某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见  A先序于B  不存在其它的副作用X，满足A先于X而X先于B；即中间不存在可以插入的其它副作用如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的最长的满足B不先于这些副作用的集合成为可见的副作用集。根据这个定义可见，跨线程的同步问题其实可以简单归结为建立确定的先序关系来避免静态条件，明确说明哪些副作用在哪些条件下可见。Consume操作、Acquire操作和Release操作Consume操作指的是在读取操作中使用了memory_order_consume内存顺序类型（或者更强）的操作；比它更强的atomic_thread_fence提供了更强的同步要求。Acquire操作指的是在读操作里使用了memory_order_acquire（或者更强内存顺序的操作）;还有一个隐式的例子是std::mutex里面的lock操作本身其实包含一种acquire操作，而同样的atomic_thread_fence提供的同步性要求更强。Release操作则对应于比memory_order_release或者更强的一种写操作；而类似地，mutex::unlock或者atomic_thread_fence因为同步性更强，也满足release操作要求。再看内存顺序定义有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。Relaxed Ordering标记为memory_order_relaxed的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。比如如下的例子，假设x和y都以及被初始化为0，则如下的代码//in thread 1r1 = y.load(std::memory_order_relaxed);x.store(r1, std::memory_order_relaxed);//in thread 2r2 = x.load(std::memory_order_relaxed);y.store(42, std::memory_order_relaxed);结果将可能出现r1=42, r2=42的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取y然后写入到x中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子//thread1r1 = x.load(std::memory_order_relaxed);if (r1==42)    y.store(r1, std::memory_order_relaxed);//thread2r2 = y.load(std::memory_order_relaxed);if (r2 == 42)    x.store(42, std::memory_order_relaxed);不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。常见的使用relaxed_order的情况最常见的用法是实现计数器，比如std::shared_ptr中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用acquire-release同步。Release-Acquire这是一种成对的同步读、写关系；某个标记为memory_order_release的操作的之前的这些符合或者不符合原子性的副作用都会被另外一个线程中的memory_order_acquire的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。这种同步的先后关系仅仅对读写同一个原子量的操作提供保证，不同的原子量的读写操作不受影响。在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别  基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是禁止一些编译器的指令重排序即可  对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步最常见的使用该模型的例子就是std::mutex的lock/unlock操作。一个传递的例子如下的代码显示了在多个线程中传递这种顺序关系的例子std::vector&lt;int&gt; data;std::atomic&lt;int&gt; flag = {0};//thread1data.push_back(42);flag.store(1, std::memory_order_release);//thread2int expected = 1;while (!flag.compare_exchange_strong(expected, 2, std::memory_order_acq_rel))    expected = 1;//thread3while (flag.load(std::memory_order_acquire) &lt; 2);assert(data.at(0) == 42);第一个线程中，通过memory_order_release的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对data的写入已经可见。线程二则用memory_order_acq_rel关系确保在在第一个线程写入１可见的情况下，将其替换为2；第三个线程则需要在第二个线程完毕之后才会退出循环;三个线程对原子量的修改是线性的，并且是完成了显式的同步。Release-Consuming和上述的Acquire-Release关系略有不同的是：当线程A的写入操作采用memory_order_release而线程B中的读取操作采用memory_order_consume的时候，线程A视角看到的所有的依赖顺序上先于原子量写入操作的其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。这种同步模式仅仅是在获取和释放同一个原子量的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种release-consume内存顺序约束，从C++17开始，这种用法又变得不推荐使用。一个实现订阅、发布的例子加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值std::atomic&lt;std::string*&gt; ptr;int data;//thread producerstd::string *p = new std::string(&quot;hello&quot;);data = 42;ptr.store(p, std::memory_order_release);//thread consumerstd::string* p2;while (!(p2 = ptr.load(std::memory_order_consume)));assert(*p2 == &quot;hello&quot;); //p2 carries dependency from ptrassert(data == 42); /// may or may not be true!需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。可见Release-Consume是一种相对较弱的同步保障机制。Sequentially-consistent标记为memory_order_seq_cst的原子量操作不光保证了同样的release/acquire顺序保证，还建立了一种关于所有的带有该标记的原子量修改操作的顺序。C++20之前的形式化定义对于某个用memory_order_seq_cst方式来加载原子量M的操作B而言，它可以观察到如下的情况  在修改顺序上早于B的某个修改M的操作A的结果  如果存在上述的A，B可以观测到A中没有标记为memory_order_seq_cst的M的修改，这些修改本身也不在A之前发生  如果不存在上述的A，B可以观测到没有标记为memory_order_seq_cst的内存顺序无关的对M的修改如果存在一个标记为memory_order_seq_cst的std::atomic_thread_fence的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个  全局修改顺序中的先于X的最后一个标记为memory_order_seq_cst的M的修改操作  晚于M的修改顺序中的无关的对M的修改对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个memory_order_seq_cst的atomic_thread_fence操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到  A操作的副作用  或者A中对M的修改之后的一个不相关的对M的修改对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果  存在一个memory_order_seq_cst的atomic_thread_fence的X，使得A线性早于X，而X在全局修改序上早于B  或者存在一个满足同样要求的atmoic_thread_fenceY，使得Y线性早于B，而A在全局修改序上早于X  或者存在两个memory_order_seq_cst的atomic_thread_fence的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y这样的定义意味着  只要我们看到没有标记为memory_order_seq_cst的原子操作的时候，顺序一致性保证就会丧失  顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序C++20定义C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。使用场景Sequential Ordering对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须以同样的顺序看到对应的修改。然而由于该内存顺序要求在多个CPU核上在指令级别施加完全的内存栅，因此它带来的性能损失在某些情况下不能忽略。使用这种顺序的一个强同步的例子如下std::atomic&lt;bool&gt; x = {false};std::atomic&lt;bool&gt; y = {false};std::atomic&lt;int&gt; z = {0};void write_x() { x.store(true, std::memory_order_seq_cst);}void write_y() { y.store(true, std::memory_order_seq_cst);}void x_then_y() {    while (!x.load(std::memory_order_seq_cst));    if (y.load(std::memory_order_seq_cst)) ++z;}void y_then_x() {    while (!y.load(std::memory_order_seq_cst));    if (x.load(std::memory_order_seq_cst)) ++z;    }这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。和volatile的关系其实和Java语言中的有些类似，volatile仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并不保证这些副作用在跨线程环境下的可见性。同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有release语义，而所有的读操作有acquire语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。">
+    <meta itemprop="datePublished" content="November 04, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">现代C++的内存模型和高性能的多线程编程
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+
+
+本文有 12812 字，大约需要 32 分钟可以读完, 创建于 2019-11-04
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。
+相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。</p>
+
+<p>然而如果我们想追求极致的应用程序性能，又想追求<strong>可移植性、高性能</strong>这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，
+这时候我们就没法绕过C++11开始所引入的内存模型和内存访问顺序的基本语义了。
+<!--more--></p>
+
+<h2 id="为什么需要内存模型">为什么需要内存模型</h2>
+<p>有一个最简单的问题可能很多人没有意识到：为什么我们需要一个标准定义的内存模型？没有不可以吗？现代C++标准出来之前，一切都不是工作的很好吗？</p>
+
+<p>其实最简单的答案来自于<strong>多线程编程的需求驱动</strong>和<strong>跨平台可移植性</strong>的需求。</p>
+
+<h3 id="单线程环境的程序环境">单线程环境的程序环境</h3>
+<p>因为如果按照传统的UNIX编程哲学所倡导的那样：一个程序就实用一个线程，然后用进程间通信的IPC的方式来交换数据，我们根本就不需要任何的内存模型限制，因为程序的执行逻辑和代码所呈现的时许总是一一对应的。
+承担程序代码到机器码翻译角色的编译器有其自身的义务要保证我们写出来的代码在经历各种复杂微妙的汇编级别的代码优化之后依然可以保证正确的语义：唯一的前提是程序员书写的代码必须得符合语言标准的定义。</p>
+
+<p>不能符合标准定义的程序会产生未定义的行为，即编译器可以按照它自己的实现来产生性能最好的代码，即使该行为不是程序员期望的。
+这种情况下，程序员也怪不得别人了，谁让你不好好写程序呢？</p>
+
+<h3 id="多线程环境的问题">多线程环境的问题</h3>
+<p>在多线程的环境下，情况就会变得复杂起来了，因为旧有的<strong>语言标准选择自动忽略</strong>了多线程语义的约束。
+也就是说从编译器的角度来说，它不知道你写就的代码里面用的是多线程处理逻辑，它依然按照原来的单线程的处理方式去优化汇编代码在执行。</p>
+
+<p>从编译器的角度来说，只要有利于产生更加高效执行的二进制代码，它可以利用<strong>语句重排序的方法</strong>来生成“更快”的代码，然而这种排序却完全不考虑可能的线程之间的同步错误，因为从它的角度来看，根本就<strong>看不到也无法理解</strong>上层的某些代码块可能需要在多个线程里面调度执行。</p>
+
+<p>当然这也并不意味之我们就不能写线程安全的代码了，只不过<strong>负责约束程序代码之间的同步和禁止代码排序的处理被转嫁到了应用程序层</strong>，程序员需要自己负责实现繁琐的同步和保护处理。
+此时可以实用的技术手段就比较繁琐，可能需要实用线程库封装的特殊的API来实现内存访问保护。</p>
+
+<h3 id="跨平台问题">跨平台问题</h3>
+<p>由于旧的语言标准没有提供线程、Mutex等程序库，可移植性也无从谈起，即便是<code class="highlighter-rouge">pthread</code>库早就成了事实上的标准的跨平台线程库，从和平台无关的“语言律师”的角度来看，这一现状远非完美。</p>
+
+<p>C++11通过标准库的方式提供了关于多线程编程的各种工具类和函数的支持，进而实现一个跨平台的抽象的内存模型就是题中之义了，否则这些标准库的行为自身也会变得表现不一了。</p>
+
+<h2 id="内存模型约束了什么东西">内存模型约束了什么东西</h2>
+<p>内存模型其实从本质上来说，是首先定义了一个<strong>可以运行C++多线程程序的抽象机器</strong>，该机器必须是一种概念上的具有多线程处理能力的机器，但是又需要超脱出所有可能的具体的物理实现。</p>
+
+<h3 id="抽象机器概念">抽象机器概念</h3>
+<p>因为不同的CPU和机器架构可能又完全不同的机器指令集，所以<strong>编译器本身的代码必然不是跨平台</strong>的，而该抽象物理机所定义的语义模型其实是针对编译器而言的。
+从这个角度看，不同的CPU架构和物理指令集其实可以看作是该抽象物理机的一种具体实现，实现这种翻译的正是编译器程序自身。</p>
+
+<p>通过抽象机器概念的定义和C++语言提供的标准库，需要完成<strong>多线程编程任务的程序员的工作就得到了极大的简化</strong>：他们不再需要关心某些平台特有的API或者CPU架构的行为，只需要按照该抽象机器定义的概念模型来编写代码，不管采用哪种编译器来编译代码，
+最终程序呈现的多线程表现行为总是确定的。</p>
+
+<h3 id="抽象机器和内存模型">抽象机器和内存模型</h3>
+<p>因为现代的CPU架构都遵循冯诺依曼架构，而多线程处理的实体是工作在一个操作系统上的多个物理CPU（或者线程），它们在执行过程中往往不得不借助于同一个物理内存来交换数据，所以多线程编程的难题就可以简单归结到<strong>内存访问模型的行为</strong>上来了。</p>
+
+<h3 id="从一个简单的例子说起">从一个简单的例子说起</h3>
+<p>C++的抽象机器模型是面向多线程设计概念的，考虑一个简单的例子</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+
+<span class="c1">//in thread1
+</span><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+<span class="c1">//in thread2
+</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</code></pre></div></div>
+<p>这里两个线程的代码的输出在旧的C++语言中表现得行为是不确定的，因为如果代码在不同的函数栈中被执行，那么编译器完全可以重排代码，导致第二个线程中输出的值呈现不确定性，因为它完全取决于第一个线程执行到了哪一步。</p>
+
+<p>可惜同样的代码在新的C++中也是未定义的，因为程序员没有给编译器足够的提示应该怎么处理同步问题。</p>
+
+<h4 id="用atomic操作的c11版本">用atomic操作的C++11版本</h4>
+<p>稍微将上面的例子改写一些，我们得到如下的版本</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+
+<span class="c1">//thread1
+</span><span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">17</span><span class="p">);</span>
+<span class="n">y</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">18</span><span class="p">);</span>
+
+<span class="c1">//thread2
+</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">y</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</code></pre></div></div>
+<p>这个程序的行为就只可能是以下三种情况的一种</p>
+<ol>
+  <li>如果第一个线程在第一个打印之前先做完，那么就输出<code class="highlighter-rouge">18 17</code></li>
+  <li>如果第一个线程在第二个线程打印完才开始执行，那么会输出<code class="highlighter-rouge">0 0</code></li>
+  <li>如果两个线程交叉着执行，会打印<code class="highlighter-rouge">0 17</code>
+但是其它的情况都不会发生，因为默认的<code class="highlighter-rouge">atomic</code>定义的读取和写入操作的行为约束为<strong>线性一致</strong>，即在同一个线程中，对多个原子量的操作需要按照代码书写顺序的方式来执行，编译器不得重排改变它们的相对顺序。</li>
+</ol>
+
+<h2 id="原子操作和内存顺序">原子操作和内存顺序</h2>
+<p>上面例子中的关于原子量的操作行为其实就是C++的内存模型中最复杂的部分，因为原子量是<strong>实现高性能无锁算法的最底层的设施</strong>，并且其它高级的同步设施(互斥锁、信号量、条件变量等)都可以用原子量来实现。</p>
+
+<p>值得注意意的是，现代C++标准中定义的内存模型其实包含了关于字节、地址、内存位置、线程和数据静态条件、线程执行进度（progress）等内容，其它的部分相对比较简单，我们这里仅关注atomic原子量的操作。</p>
+
+<h3 id="上面例子中的性能问题">上面例子中的性能问题</h3>
+<p>如上所述，默认的原子量操作实现了同一个线程中关于多个原子量的读、写的<strong>顺序一致性</strong>要求，然而这个要求有些时候又显得<strong>代价过于高昂而影响性能</strong>，
+以至于在某些条件下出于性能的考虑我们喜欢降低这个要求。</p>
+
+<p>如果我们翻下原子量操作的API，就会发现它其实携带了一个额外的可选参数来<strong>允许用户指定内存顺序</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span> <span class="k">class</span> <span class="nc">T</span> <span class="o">&gt;</span>
+<span class="n">T</span> <span class="n">atomic_load</span><span class="p">(</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;*</span> <span class="n">obj</span> <span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+
+<span class="k">template</span><span class="o">&lt;</span> <span class="k">class</span> <span class="nc">T</span> <span class="o">&gt;</span>
+<span class="n">T</span> <span class="n">atomic_load_explicit</span><span class="p">(</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;*</span> <span class="n">obj</span><span class="p">,</span>
+                        <span class="n">std</span><span class="o">::</span><span class="n">memory_order</span> <span class="n">order</span> <span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>其中的第二个重载版本允许用户传入一个类型为<code class="highlighter-rouge">memory_order</code>的枚举值，该枚举值则定义了各种各样的内存访问模型。</p>
+
+<h3 id="memory_order定义"><code class="highlighter-rouge">memory_order</code>定义</h3>
+<p>现有的定义如下</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">enum</span> <span class="n">memory_order</span> <span class="p">{</span>
+    <span class="n">memory_order_relaxed</span><span class="p">,</span>
+    <span class="n">memory_order_consume</span><span class="p">,</span>
+    <span class="n">memory_order_acquire</span><span class="p">,</span>
+    <span class="n">memory_order_release</span><span class="p">,</span>
+    <span class="n">memory_order_acq_rel</span><span class="p">,</span>
+    <span class="n">memory_order_seq_cst</span>
+<span class="p">}</span> <span class="n">memory_order</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>在更新的C++20(还没有发布的下一个大版本)中，允许编译器实现提供自己的定义，并且将里面的枚举值用<code class="highlighter-rouge">constexpr</code>方式定义成下面的方式</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">memory_order</span> <span class="o">:</span> <span class="cm">/*unspecified*/</span> <span class="p">{</span>
+    <span class="n">relaxed</span><span class="p">,</span> <span class="n">consume</span><span class="p">,</span> <span class="n">acquire</span><span class="p">,</span> <span class="n">release</span><span class="p">,</span> <span class="n">acq_rel</span><span class="p">,</span> <span class="n">seq_cst</span>
+<span class="p">};</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_relaxed</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">relaxed</span><span class="p">;</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_consume</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">consume</span><span class="p">;</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_acquire</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">acquire</span><span class="p">;</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_release</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">release</span><span class="p">;</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_acq_rel</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">acq_rel</span><span class="p">;</span>
+<span class="kr">inline</span> <span class="k">constexpr</span> <span class="n">memory_order</span> <span class="n">memory_order_seq_cst</span> <span class="o">=</span> <span class="n">memory_order</span><span class="o">::</span><span class="n">seq_cst</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="内存顺序的简单解释">内存顺序的简单解释</h3>
+<p>这几个枚举值使用于不同的原子量操作。</p>
+
+<h4 id="最放松的内存顺序">最放松的内存顺序</h4>
+<p><code class="highlighter-rouge">memory_order_relaxed</code>完全不提供任何的顺序性约束保证，多线程的读写操作和跨线程的可见性完全放由编译器来选择适合自身特征的实现；唯一提供的保证就是操作本身是符合原子性的。</p>
+
+<h4 id="适用于读取操作的内存顺序">适用于读取操作的内存顺序</h4>
+<p><code class="highlighter-rouge">memory_order_consume</code>通常和对原子量的读取操作结合起来使用，用于约束如下的情况</p>
+<ul>
+  <li>在同一个线程中的<strong>依赖于本次读取操作的值</strong>的、其它的相关的读取和写入操作语句的顺序<strong>不允许被重新排列</strong>到该读取操作前面</li>
+  <li>其它线程中的对同样的内存位置的变量的写入操作的释放性顺序的效果<strong>在本线程中可见</strong>，该情况其实是和<code class="highlighter-rouge">memory_order_release</code>相互配对使用</li>
+</ul>
+
+<p><code class="highlighter-rouge">memory_order_acquire</code>形成了一个更强的读取操作的屏障</p>
+<ul>
+  <li>本线程中的依赖于同样内存位置的<strong>原子量的读写操作</strong>不允许被重排于该操作之前</li>
+  <li>其它线程中的写入释放原子量的操作在本线程中可见；该情况和<code class="highlighter-rouge">memory_order_release</code>配对使用</li>
+</ul>
+
+<h4 id="适用于单写入操作的内存顺序">适用于单写入操作的内存顺序</h4>
+<p><code class="highlighter-rouge">memory_order_release</code>用于写入操作之后的原子量释放的顺序约束</p>
+<ul>
+  <li>当前线程中的其它的依赖于本原子量的读取和写入操作<strong>不许重排在本语句之前</strong></li>
+  <li>本线程中的<strong>其它写入操作</strong>对<strong>其它线程中的需要获取</strong>同一个原子变量对应的位置的采用<code class="highlighter-rouge">memory_order_acquire</code>的读取操作可见，同时对其它线程中的传递依赖于原子量值的读取操作(<code class="highlighter-rouge">memory_order_consumed</code>)可见</li>
+</ul>
+
+<p>前者的内存访问顺序符合<code class="highlighter-rouge">Release-Acquire</code>顺序，而后者符合<code class="highlighter-rouge">Release-Consume</code>顺序。</p>
+
+<h4 id="适用于读取并修改操作的内存顺序">适用于读取并修改操作的内存顺序</h4>
+<p>这类的操作适用于比较并交换这种特殊的原子操作；和上面的类似有如下两种组合</p>
+<ul>
+  <li><code class="highlighter-rouge">memory_order_acq_rel</code>保证操作本身同时满足<code class="highlighter-rouge">acquire</code>和<code class="highlighter-rouge">release</code>；同一线程中的该语句前后的读取或者写入操作均不允许被重新排序，而其它线程中的写入并释放原子量的<strong>操作对应的修改在本线程的修改之前</strong>可见，并且本线程中对原子量的<strong>修改操作本身在其它线程的读取操作中也可见</strong></li>
+</ul>
+
+<h4 id="适用于所有操作的默认值">适用于所有操作的默认值</h4>
+<p><code class="highlighter-rouge">memory_order_seq_cst</code>是默认的操作顺序，它提供了顺序一致性顺序保证</p>
+<ul>
+  <li>读取操作采用该内存顺序时，等价于<code class="highlighter-rouge">acquire</code>操作</li>
+  <li>写入操作采用该内存顺序是，等价于<code class="highlighter-rouge">release</code>操作</li>
+  <li>读取并修改操作采用该内存顺序时，等同于叠加了<code class="highlighter-rouge">acquire</code>/<code class="highlighter-rouge">release</code>操作的同时，还额外保证所有的线程都能看到对<strong>多个原子量修改的一种全局顺序</strong></li>
+</ul>
+
+<h3 id="形式化定义和解释">形式化定义和解释</h3>
+<p>跨线程的同步和内存顺序问题其实是用于界定<strong>赋值表达式和这些表达式的副作用</strong>在多个线程并发执行的时候相互顺序表现的怎么样的问题。
+正式的定义需要借助于如下的术语；这些术语比较抽象，但是却可以用来做严谨的定义和分析</p>
+<ul>
+  <li><code class="highlighter-rouge">Sequenced-before</code> 表示在单线程中，两个表达式语句的<strong>赋值先后关系</strong>；这个本身是最老的语言标准以及定义，没有什么新鲜的。并发语境下的内存模型依赖于这样简单的定义无足为奇。</li>
+  <li>依赖顺序传递：这个定义稍微复杂一些，但是依赖于前一个的定义，定义为</li>
+</ul>
+
+<h4 id="传递依赖">传递依赖</h4>
+<p>赋值表达式A满足<code class="highlighter-rouge">sequenced-before</code>表达式B，并且在下面<strong>任何一个条件成立</strong>的时候，称为A传递依赖到B</p>
+<ul>
+  <li>表达式A是表达式B的一个<strong>操作对象</strong>，但是不是一个对<code class="highlighter-rouge">std::kill_dependency</code>的调用，也不是<code class="highlighter-rouge">&amp;&amp;</code>/<code class="highlighter-rouge">||</code>/<code class="highlighter-rouge">?:</code>/<code class="highlighter-rouge">,</code>操作符的左操作数。排除掉的这些操作要么有短路操作，要么是<strong>旧的语言标准故意允许编译器可以选择自己方便的实现</strong>，因而不能定义跨平台的时许关系</li>
+  <li>A写入了一个标量对象M，而B需要从M中读取值</li>
+  <li>A传递依赖到一个表达式X，而X又传递依赖于B，即产生了对传递依赖链的<strong>间接传递</strong></li>
+</ul>
+
+<h4 id="修改顺序">修改顺序</h4>
+<p>对任何一个原子量的多线程修改由于<strong>原子量本身的不可并发</strong>，而最终形成了一个在多线程环境中，关于该原子量本身的<strong>全局顺序</strong>。这个全局顺序其实可以认为是实际反应在内存中的所有时间线上的一个一个随着各个线程中的修改而变化的值的序列，因为多线程执行是CPU的行为，而某个执行线程要想看到其它线程写入的值，必须通过内存的修改的通知得到反馈。</p>
+
+<p>为了便于叙述，下面的例子都假设操作的顺序和某个原子量M的值相关。
+对于原子量的所有操作都满足下述的<strong>一致性要求</strong></p>
+
+<ul>
+  <li>
+    <p>写入－写入一致性：如果赋值A对原子量M的修改先于修改同一个原子量M的修改的赋值B，则在修改顺序上看来是A早于B发生；这个规则显然比较清楚，因为写入必须是一一进行的。</p>
+  </li>
+  <li>
+    <p>读取－读取一致性：如果一个计算值的关于<strong>读取原子量M</strong>的赋值A先于另外一个作用于M的赋值B的计算，并且A的值来自于对M的写入操作X，那么B的值要么等于<strong>X所写入的原子量的值</strong>，要么等于一个修改顺序上<strong>晚于X的操作Y的作用于M的副作用</strong>所产生的结果；这一**要求其实是要求读取原子量的多个操作必须符合固定的先后顺序，而不允许有穿插</p>
+  </li>
+  <li>
+    <p>读取－写入一致性：如果基于原子量M的读取操作的计算A先于作用域M的写入操作的B发生，则A的值来自于在修改顺序上<strong>早于B的一次写入操作</strong>X的副作用；即<strong>先读取后写入</strong>的情况下，读取的一定是早于写入之前的某次修改的值</p>
+  </li>
+  <li>
+    <p>写入－读取一致性：如果一个写入M的操作X的副作用早于读取M的操作B，则B的赋值结果取自于X本身，或者来自于紧跟X的内存修改的值，即先写入后读取的情况下，读取的一定是写入赋值之后的原子量的值</p>
+  </li>
+</ul>
+
+<h4 id="释放顺序">释放顺序</h4>
+<p>在一个关于原子量对象M的释放操作A执行后，在M的修改顺序上的<strong>最长的连续序列</strong>包含</p>
+<ul>
+  <li>同一个线程中关于M的修改操作</li>
+  <li>其它任意一个线程中的原子性读取－修改－写入操作</li>
+</ul>
+
+<p>该序列被成为A的<strong>释放序列</strong>；从定义上来看，它表示同线程中可能的写入操作和跨线程中发生的读取－修改－写入操作的集合。</p>
+
+<h4 id="依赖顺序上的先序dependency-order-before">依赖顺序上的先序（Dependency-order before）</h4>
+<p>多线程之间，当如下任意一个条件成立的时候，赋值A为<strong>依赖顺序上先于</strong>赋值B</p>
+<ul>
+  <li>A执行了原子量M的释放操作，另外一个线程中，B执行了一个对M的<code class="highlighter-rouge">consume</code>操作，并且B读取了A的释放顺序上的任何一部分的值</li>
+  <li>A在依赖顺序上先于X，而<strong>X传递依赖至B</strong></li>
+</ul>
+
+<p>这里的第二个定义其实是一种递归定义。</p>
+
+<h4 id="跨线程的先序关系-inter-thread-happens-before">跨线程的先序关系 (Inter-thread happens-before)</h4>
+<p>多线程之间，如下<strong>任意一个条件</strong>成立的时候，成为A跨线程先于B</p>
+<ul>
+  <li>A同步于B</li>
+  <li>A依赖顺序上先于B</li>
+  <li>A同步于某个赋值X，而X顺序先于B(同一个线程上的赋值顺序)</li>
+  <li>A顺序先于X，而X跨线程先于B　－　这里叠加了同线程里面的顺序关系和自身的递归定义</li>
+  <li>A跨线程先于赋值X，而X跨线程先于B - 这里前后部分都用了递归定义</li>
+</ul>
+
+<h4 id="最终的先序关系happens-before">最终的先序关系(happens-before)</h4>
+<p>不管是否跨线程，先序关系定义为</p>
+<ul>
+  <li>A单线程中先于B</li>
+  <li>A跨线程先于B</li>
+</ul>
+
+<p>实现上语言标准要求先序关系不能出现环结构，编译器可以在需要的时候在内部引入同步机制。</p>
+
+<h4 id="强先序关系strong-happens-before">强先序关系（Strong happens-before）</h4>
+<p>如果一个赋值操作修改了某个内存位置，而另外一个线程读取或者修改了同样的内存位置，而<strong>至少有一个操作不是原子操作，则程序的行为就是未定义</strong>的，除非是这些赋值操作本身之间存在强先序关系。</p>
+
+<p>C++20之前的内存模型做如下的定义</p>
+<ul>
+  <li>要么A、B在同一个线程中，且满足顺序先于B</li>
+  <li>要么A和B进行显式的同步</li>
+  <li>要么A和B中间有一个可以传递这种强先序关系的X，使得A先序于X而X先序于B</li>
+</ul>
+
+<p>C++20标准对该定义进行了进一步修正，并引入了两个概念</p>
+
+<h5 id="简单先序-simply-happens-before">简单先序 (Simply happens-before)</h5>
+<p>A和B之间符合如下的任何一个条件可以称之为简单先序的</p>
+<ul>
+  <li>A顺序先于B，这是同线程的约束</li>
+  <li>A同步于B</li>
+  <li>A简单先序于X，而X简单先序于B
+该定义基本是<strong>上述定义的简单替换</strong>，目的是为更复杂的强先序关系做铺垫。</li>
+</ul>
+
+<p>强先序则被定义为如下某一个条件成立</p>
+<ul>
+  <li>A顺序先于B</li>
+  <li>A同步于B，并且A和B的操作都是<strong>顺序一致性的原子量操作</strong></li>
+  <li>A顺序先于X，X简单先序于Y，而Y顺序先于B；这里的<strong>两个传递关系</strong>在多线程情况下，是通过两个跨线程的简单线序关系来进行的</li>
+  <li>A强先序于X，而X强先序于B，这是一个关于自身的递归传递定义</li>
+</ul>
+
+<p>简单来说，强先序关系保证了A的赋值<strong>一定在任何情况下，都会</strong>早于B的赋值；它本身就排除了<code class="highlighter-rouge">consume</code>操作。</p>
+
+<h4 id="副作用可见性">副作用可见性</h4>
+<p>某个作用于标量M的操作A的副作用在如下条件成立的时候，会对读取M的运算B可见</p>
+<ul>
+  <li>A先序于B</li>
+  <li><strong>不存在其它的副作用X</strong>，满足A先于X而X先于B；即中间不存在可以插入的其它副作用</li>
+</ul>
+
+<p>如果一个副作用A对计算Ｂ来说是可见的，那么在修改顺序上对M的<strong>最长的</strong>满足<strong>B不先于这些副作用</strong>的集合成为可见的副作用集。
+根据这个定义可见，跨线程的同步问题其实可以简单归结为<strong>建立确定的先序关系</strong>来避免静态条件，明确说明<strong>哪些副作用在哪些条件下可见</strong>。</p>
+
+<h4 id="consume操作acquire操作和release操作"><code class="highlighter-rouge">Consume</code>操作、<code class="highlighter-rouge">Acquire</code>操作和<code class="highlighter-rouge">Release</code>操作</h4>
+<p><code class="highlighter-rouge">Consume</code>操作指的是在读取操作中使用了<code class="highlighter-rouge">memory_order_consume</code>内存顺序类型（<strong>或者更强</strong>）的操作；比它更强的<code class="highlighter-rouge">atomic_thread_fence</code>提供了更强的同步要求。</p>
+
+<p><code class="highlighter-rouge">Acquire</code>操作指的是在读操作里使用了<code class="highlighter-rouge">memory_order_acquire</code>（或者更强内存顺序的操作）;还有一个<strong>隐式的例子是</strong><code class="highlighter-rouge">std::mutex</code>里面的<code class="highlighter-rouge">lock</code>操作本身其实包含一种<code class="highlighter-rouge">acquire</code>操作，而同样的<code class="highlighter-rouge">atomic_thread_fence</code>提供的同步性要求更强。</p>
+
+<p><code class="highlighter-rouge">Release</code>操作则对应于比<code class="highlighter-rouge">memory_order_release</code>或者更强的一种写操作；而类似地，<code class="highlighter-rouge">mutex::unlock</code>或者<code class="highlighter-rouge">atomic_thread_fence</code>因为同步性更强，也满足release操作要求。</p>
+
+<h3 id="再看内存顺序定义">再看内存顺序定义</h3>
+<p>有了上述的形式化术语定义，再来看内存顺序的枚举定义就会比较清晰一些。</p>
+
+<h4 id="relaxed-ordering"><code class="highlighter-rouge">Relaxed Ordering</code></h4>
+<p>标记为<code class="highlighter-rouge">memory_order_relaxed</code>的原子量操作其实是不保证同步的，它们不对并发的内存访问施加任何同步性要求，仅仅保证多线程之间是用没有中间状态的方式来写入内存，即多线程的写入操作之间一定有全局顺序。</p>
+
+<p>比如如下的例子，假设<code class="highlighter-rouge">x</code>和<code class="highlighter-rouge">y</code>都以及被初始化为<code class="highlighter-rouge">0</code>，则如下的代码</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//in thread 1
+</span><span class="n">r1</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+<span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+
+<span class="c1">//in thread 2
+</span><span class="n">r2</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+<span class="n">y</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+</code></pre></div></div>
+<p>结果将可能出现<code class="highlighter-rouge">r1=42, r2=42</code>的情况，因为这里允许第二个线程执行完毕之后，第一个线程才进来读取<code class="highlighter-rouge">y</code>然后写入到<code class="highlighter-rouge">x</code>中。这里甚至允许第二个线程中的两个语句被编译器重排序，导致r2的值后加载的情况。</p>
+
+<p>当然这个机制也不是像一眼看上去那么一无是处，考虑下面的例子</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//thread1
+</span><span class="n">r1</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">r1</span><span class="o">==</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+
+<span class="c1">//thread2
+</span><span class="n">r2</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">r2</span> <span class="o">==</span> <span class="mi">42</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
+</code></pre></div></div>
+<p>不可能产生两个变量都被写为42的情况，因为第一个线程中的写入操作仅仅当第一个加载操作成功之后才会发生，而第二个线程中的两个判断则是反过来，如果有这样的情况就说明编译器实现中出现了环。</p>
+
+<h5 id="常见的使用relaxed_order的情况">常见的使用<code class="highlighter-rouge">relaxed_order</code>的情况</h5>
+<p>最常见的用法是实现计数器，比如<code class="highlighter-rouge">std::shared_ptr</code>中的引用计数本身的累加操作就仅仅要求原子性，但是不需要同步；然而需要注意的是减小计数器的行为需要用<code class="highlighter-rouge">acquire-release</code>同步。</p>
+
+<h4 id="release-acquire"><code class="highlighter-rouge">Release-Acquire</code></h4>
+<p>这是一种成对的同步读、写关系；某个标记为<code class="highlighter-rouge">memory_order_release</code>的操作的之前的这些<strong>符合或者不符合原子性的副作用都会被</strong>另外一个线程中的<code class="highlighter-rouge">memory_order_acquire</code>的操作所读取到；即一旦原子性的写入完毕，那么另外一个读取就可以获得这里写入的值。</p>
+
+<p>这种同步的先后关系<strong>仅仅对读写同一个原子量的操作</strong>提供保证，不同的原子量的读写操作不受影响。</p>
+
+<p>在底层的CPU架构实现上，编译器将会为程序员隐藏如下的细微差别</p>
+<ul>
+  <li>基于强顺序保证的诸如X86、SPARC、IBM大型机这样的架构在指令级别就提供了这种同步模型的支持，因此底层上不需要额外的机器指令，仅仅是<strong>禁止一些编译器的指令重排序</strong>即可</li>
+  <li>对于像ARM、PowerPC这样的弱序机器而言，特殊的CPU保护栅指令则需要被显式的加进来以保证同步</li>
+</ul>
+
+<p>最常见的使用该模型的例子就是<code class="highlighter-rouge">std::mutex</code>的lock/unlock操作。</p>
+
+<h5 id="一个传递的例子">一个传递的例子</h5>
+<p>如下的代码显示了在多个线程中传递这种顺序关系的例子</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">flag</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+
+<span class="c1">//thread1
+</span><span class="n">data</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>
+<span class="n">flag</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span>
+
+<span class="c1">//thread2
+</span><span class="kt">int</span> <span class="n">expected</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">flag</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_acq_rel</span><span class="p">))</span>
+    <span class="n">expected</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="c1">//thread3
+</span><span class="k">while</span> <span class="p">(</span><span class="n">flag</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_acquire</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">42</span><span class="p">);</span>
+</code></pre></div></div>
+<p>第一个线程中，通过<code class="highlighter-rouge">memory_order_release</code>的方式写入了flag，保证当其它的线程看到了值为1的flag的时候，对<code class="highlighter-rouge">data</code>的写入已经可见。
+线程二则用<code class="highlighter-rouge">memory_order_acq_rel</code>关系确保在在第一个线程写入１可见的情况下，将其替换为2；
+第三个线程则需要在第二个线程完毕之后才会退出循环;
+三个线程对原子量的修改是线性的，并且是完成了显式的同步。</p>
+
+<h4 id="release-consuming"><code class="highlighter-rouge">Release-Consuming</code></h4>
+<p>和上述的<code class="highlighter-rouge">Acquire-Release</code>关系略有不同的是：当线程A的写入操作采用<code class="highlighter-rouge">memory_order_release</code>而线程B中的读取操作采用<code class="highlighter-rouge">memory_order_consume</code>的时候，线程A视角看到的<strong>所有的依赖顺序上先于原子量写入操作的</strong>其它的内存修改操作，不管它们是否为原子量写入，这些操作的副作用都传递依赖到线程B中的load操作。</p>
+
+<p>换言之，一旦原子量写入操作完成，B中的使用读取的原子量的值作为操作符或者使用原子量的函数都可以看到线程A中写入内存的值。</p>
+
+<p>这种同步模式仅仅是在<strong>获取和释放同一个原子量</strong>的多个线程之间建立同步关系。大部分的物理CPU架构（除了DEC Alpha机外）都无需增加额外指令就可以支持这种同步模型。</p>
+
+<p>典型的应用场景是当我们需要实现很少需要修改的并发安全的数据结构的时候，这些数据结构包括路由表、配置、安全策略、防火墙规则等。另外一种常见的场景是实现使用指针转发的订阅、发布模型的时候的通过代理指针的发布操作的时候。</p>
+
+<p>另外需要注意的是，因为几乎没有多少生产环境的编译器支持这种<code class="highlighter-rouge">release-consume</code>内存顺序约束，从C++17开始，这种用法又变得<strong>不推荐使用</strong>。</p>
+
+<h5 id="一个实现订阅发布的例子">一个实现订阅、发布的例子</h5>
+<p>加入我们用一个指针来传递内容的变更，当生产者修改原子操作的指针里面存储的内容的时候，消费者可以读取到指针的变化而重新加载修改的值</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*&gt;</span> <span class="n">ptr</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">data</span><span class="p">;</span>
+
+<span class="c1">//thread producer
+</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+<span class="n">data</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="n">ptr</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span>
+
+<span class="c1">//thread consumer
+</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">p2</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">p2</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_consume</span><span class="p">)));</span>
+<span class="n">assert</span><span class="p">(</span><span class="o">*</span><span class="n">p2</span> <span class="o">==</span> <span class="s">"hello"</span><span class="p">);</span> <span class="c1">//p2 carries dependency from ptr
+</span><span class="n">assert</span><span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="mi">42</span><span class="p">);</span> <span class="c1">/// may or may not be true!
+</span></code></pre></div></div>
+<p>需要注意的是，因为data不满足传递依赖的顺序关系，所以data的写入操作可能会被重排序而导致读取不到期望的值。
+可见<code class="highlighter-rouge">Release-Consume</code>是一种相对较弱的同步保障机制。</p>
+
+<h4 id="sequentially-consistent"><code class="highlighter-rouge">Sequentially-consistent</code></h4>
+<p>标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的原子量操作不光保证了同样的<code class="highlighter-rouge">release/acquire</code>顺序保证，还建立了一种<strong>关于所有的带有该标记的原子量修改操作</strong>的顺序。</p>
+
+<h5 id="c20之前的形式化定义">C++20之前的形式化定义</h5>
+<p>对于某个用<code class="highlighter-rouge">memory_order_seq_cst</code>方式来加载原子量M的操作B而言，它可以观察到如下的情况</p>
+<ul>
+  <li>在修改顺序上早于B的某个修改M的操作A的结果</li>
+  <li>如果存在上述的A，B可以观测到A中没有标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的M的修改，这些修改本身也不在A之前发生</li>
+  <li>如果不存在上述的A，B可以观测到没有标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的内存顺序无关的对M的修改</li>
+</ul>
+
+<p>如果存在一个标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的<code class="highlighter-rouge">std::atomic_thread_fence</code>的操作X，且X和B在同一个线程中先于B，那么B可以观测到如下的其中一个</p>
+<ul>
+  <li>全局修改顺序中的先于X的最后一个标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的M的修改操作</li>
+  <li>晚于M的修改顺序中的无关的对M的修改</li>
+</ul>
+
+<p>对于一对操作原子量M的操作A和B，假设A修改原子量，而B读取原子量；如果存在两个<code class="highlighter-rouge">memory_order_seq_cst</code>的<code class="highlighter-rouge">atomic_thread_fence</code>操作X和Y，满足A线性先于X，而Y线性早于B，且X在全局修改顺序上早于Y，则B可以观察到</p>
+<ul>
+  <li>A操作的副作用</li>
+  <li>或者A中对M的修改之后的一个不相关的对M的修改</li>
+</ul>
+
+<p>对于一对修改原子量M的操作A和B，称对M的修改顺序上B晚于A，如果</p>
+<ul>
+  <li>存在一个<code class="highlighter-rouge">memory_order_seq_cst</code>的<code class="highlighter-rouge">atomic_thread_fence</code>的X，使得A线性早于X，而X在全局修改序上早于B</li>
+  <li>或者存在一个满足同样要求的<code class="highlighter-rouge">atmoic_thread_fence</code>Y，使得Y线性早于B，而A在全局修改序上早于X</li>
+  <li>或者存在两个<code class="highlighter-rouge">memory_order_seq_cst</code>的<code class="highlighter-rouge">atomic_thread_fence</code>的X和Y，满足A线性早于X，Y线性早于B，且X在全局修改序上早于Y</li>
+</ul>
+
+<p>这样的定义意味着</p>
+<ul>
+  <li>只要我们看到没有标记为<code class="highlighter-rouge">memory_order_seq_cst</code>的原子操作的时候，顺序一致性保证就会丧失</li>
+  <li>顺序一致性的栅fence仅仅是建立了栅之间的全局顺序，而不是原子操作之间的全局顺序</li>
+</ul>
+
+<h5 id="c20定义">C++20定义</h5>
+<p>C++20的定义更为细微，它采用了内在一致性的模型来定义，更加负责，这里暂不深入琢磨。</p>
+
+<h4 id="使用场景">使用场景</h4>
+<p><code class="highlighter-rouge">Sequential Ordering</code>对于多生产者、多消费者模型的系统中是必须的，因为多个生产者在做修改操作的时候，所有的消费者必须<strong>以同样的顺序看到</strong>对应的修改。</p>
+
+<p>然而由于该内存顺序要求在多个CPU核上在指令级别<strong>施加完全的内存栅</strong>，因此它带来的性能损失在某些情况下不能忽略。</p>
+
+<p>使用这种顺序的一个强同步的例子如下</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="nb">false</span><span class="p">};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="p">{</span><span class="nb">false</span><span class="p">};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">z</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+
+<span class="kt">void</span> <span class="nf">write_x</span><span class="p">()</span> <span class="p">{</span> <span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">);}</span>
+<span class="kt">void</span> <span class="nf">write_y</span><span class="p">()</span> <span class="p">{</span> <span class="n">y</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">);}</span>
+
+<span class="kt">void</span> <span class="nf">x_then_y</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">))</span> <span class="o">++</span><span class="n">z</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">y_then_x</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">y</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">))</span> <span class="o">++</span><span class="n">z</span><span class="p">;</span>    
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这里有两个生产者、两个消费者，因为消费者的行为依赖于生产者的顺序而执行操作，因此我们需要借助完全的顺序一致内存顺序来施加这样的保障。</p>
+
+<h2 id="和volatile的关系">和<code class="highlighter-rouge">volatile</code>的关系</h2>
+<p>其实和Java语言中的有些类似，<code class="highlighter-rouge">volatile</code>仅仅保证在单线程中通过标记为volatile的变量的操作产生的副作用不允许被编译器重新排序，因此它可以强制保证一个线程中的顺序关系，但是它并<strong>不保证这些副作用在跨线程环境下</strong>的可见性。
+同时，volatile本身并不保证操作的原子性，因而并发的读写可能会产生未定义的行为。</p>
+
+<p>当然这里有一个显著的例外就是在Visual Studio中，默认设置情况下，所有的volatile变量的写操作都有<code class="highlighter-rouge">release</code>语义，而所有的读操作有<code class="highlighter-rouge">acquire</code>语义，因此volatile也可以在Visual Studio环境下用于跨线程的同步。
+除此之外，C++标准定义的volatile并不适用于多线程编程，即使它们在和std::signal的处理函数通信的时候，用于处理sig_atomic_t变量绰绰有余了。</p>
+
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/06/fuchsia-kernel-ziron-concepts/">Google的新操作系统Fuchsia的内核设计</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/04/reduce-cpp-template-overhead/">reduce-cpp-template-overhead</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/01/microservice-with-cpp/">微服务开发：C++语言是否真的不适用？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/08/24/learn-kubernetes-again/">重学Kubernetes - 读张磊的《深度剖析Kubernetes》</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/07/21/from-borg-to-kubernetes/">读Google著名的分布式设计论文－从Borg到Kubernetes的演进</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/06/23/cpp-20-modules-concepts-coroutine/">C++20 - 下一个大版本功能确定</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/multi-threading" class="page__taxonomy-item" rel="tag">multi-threading</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/performance" class="page__taxonomy-item" rel="tag">performance</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/cpp" class="page__taxonomy-item" rel="tag">cpp</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/design" class="page__taxonomy-item" rel="tag">design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-11-04T00:00:00+08:00">November 04, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=现代C++的内存模型和高性能的多线程编程 https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="cpp-memory-model-and-order">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

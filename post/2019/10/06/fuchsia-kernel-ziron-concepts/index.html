@@ -24,7 +24,7 @@
 
 
 
-<meta name="description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+<meta name="description" content="传说中的Google的下一代操作系统项目Fuchsia一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测它是不是下一代的大杀器，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
 
 
 
@@ -41,13 +41,13 @@
 
 
 
-  <meta property="og:description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+  <meta property="og:description" content="传说中的Google的下一代操作系统项目Fuchsia一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测它是不是下一代的大杀器，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
 
 
 
   <meta name="twitter:site" content="@skyscribe">
   <meta name="twitter:title" content="Google的新操作系统Fuchsia的内核设计">
-  <meta name="twitter:description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+  <meta name="twitter:description" content="传说中的Google的下一代操作系统项目Fuchsia一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测它是不是下一代的大杀器，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
   <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/10/06/fuchsia-kernel-ziron-concepts/">
 
   
@@ -313,7 +313,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/cpp/index.html">cpp(16)</a>
+      <a href="/categories/cpp/index.html">cpp(17)</a>
   </span>
   </li>
   
@@ -394,7 +394,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/programming/index.html">programming(46)</a>
+      <a href="/categories/programming/index.html">programming(47)</a>
   </span>
   </li>
   
@@ -448,7 +448,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/design/index.html">design(26)</a>
+      <a href="/categories/design/index.html">design(27)</a>
   </span>
   </li>
   
@@ -457,7 +457,7 @@
   
   <li>
   <span class="tag">
-      <a href="/categories/engineering/index.html">engineering(9)</a>
+      <a href="/categories/engineering/index.html">engineering(10)</a>
   </span>
   </li>
   
@@ -491,7 +491,7 @@
 
   <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
     <meta itemprop="headline" content="Google的新操作系统Fuchsia的内核设计">
-    <meta itemprop="description" content="传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
+    <meta itemprop="description" content="传说中的Google的下一代操作系统项目Fuchsia一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测它是不是下一代的大杀器，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。">
     <meta itemprop="datePublished" content="October 06, 2019">
     
 
@@ -508,7 +508,7 @@
 
 
 
-本文有 15125 字，大约需要 37 分钟可以读完, 创建于 2019-10-06
+本文有 15492 字，大约需要 38 分钟可以读完, 创建于 2019-10-06
 
 
 
@@ -518,7 +518,7 @@
       
 
       <section class="page__content" itemprop="text">
-        <p>传说中的Google的下一代操作系统项目Fuchsia一致处于犹抱琵琶半遮面的半公开状态，它的代码早就开源出来一段时间了，官方的说法却一致是含糊不清。
+        <p>传说中的Google的下一代操作系统项目<a href="https://fuchsia.dev/fuchsia-src">Fuchsia</a>一直处于“犹抱琵琶半遮面”的半公开状态，只是它的代码早就开源出来一段时间了，多有人猜测<strong>它是不是下一代的大杀器</strong>，将来会通吃目前的Android和Chrome OS生态圈；然而官方的说法却一致是含糊不清。
 由于最近的一些政治事件引起的余波，技术圈又有不少人讨论这个稍微有些神秘的操作系统来。
 <!--more--></p>
 
@@ -526,25 +526,25 @@
 
 <h2 id="内核架构">内核架构</h2>
 <p>Fuchsia其实是基于一个微内核风格的架构，<strong>内核项目的名字叫做Zircon</strong>。Fuchsia本身是程序员直接面对的操作系统环境，
-它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现底层的系统硬件资源管理，同时<strong>提供系统调用接口</strong>给上层程序使用。</p>
+它和Ziron的关系就像Ubuntu和Linux之间的关系一样类似。Zircon作为一个内核项目，它所提供的功能和传统的Linux、Windows、MacOS/Darwin的功能类似，都是实现对底层的硬件资源管理，同时<strong>提供系统调用接口</strong>给上层程序使用。</p>
 
-<p>微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，因为两者的优势和劣势都非常明显</p>
+<p>微内核和宏内核的争论已经是一个历久弥新的话题，从学术界到工业界双方各执一词，几十年来争吵不休，因为两者的优势和劣势都非常明显</p>
 <ul>
   <li>微内核由于选择将内核的组织<strong>用分布式的思路解耦</strong>开来，从设计上来说比较漂亮容易扩展但是最大的不足是性能太差</li>
   <li>宏内核则对应于软件架构上的<strong>大一统、集中式单体风格</strong>，所有的东西都放在内核中；从设计上来说非常丑陋不看维护成本高昂但是胜在性能很好</li>
 </ul>
 
-<p>学术界一致在讨伐以Linux为代表的<strong>宏内核架构是设计落后</strong>的表现，却被Linus直接打脸说<strong>微内核的想法在现在的硬件条件下根本就是在浪费资源</strong>，想要高效实现必须要采用宏内核的思路；
+<p>学术界一致在讨伐以Linux为代表的<strong>宏内核架构是设计落后</strong>的表现，却被Linus直接打脸说<strong>微内核的想法在现在的硬件条件下根本就是在浪费资源</strong>，想要高效地完成实际的复杂工作，必须要采用宏内核的思路；
 之前几十年的计算机系统发展历史印证了Linus实用主义思想的胜利，
-而Windows系统的内核干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。</p>
+而普通的PC用户日常离不开的Windows系统，它的内核却干脆在多年的打磨和演化中，坚持用混合内核的思路来不断权衡两种设计的比重。</p>
 
 <p>Zircon直接旗帜鲜明地宣称它是一个微内核架构，让人自然而然地好奇它怎么设计来避免传统的微内核架构需要重复拷贝数据性能低下的弊端。</p>
 
 <h2 id="zircon顶层概念设计">Zircon顶层概念设计</h2>
-<p>传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在Unix变成哲学一书中详细地阐述了这一理念）；Zircon完全没有采用这一理念，它另起炉灶用<strong>面型对象的思想</strong>来假设所有的内核所管理的东西都是对象;
-即<strong>一切接对象</strong>。</p>
+<p>传统的Unix/Linux内核设计秉承一切皆文件的设计理念（Eric S Raymond在<a href="http://www.catb.org/~esr/writings/taoup/html/index.html">Unix编程哲学</a>一书中详细地阐述了这一理念并对这一简单设计推崇备至）；Zircon<strong>完全没有</strong>采用这一理念，它另起炉灶用<strong>面型对象的思想</strong>来假设所有的内核所管理的东西都是对象;即<strong>一切接对象</strong>。
+Small Talk的发明人Alan Kay的思想终于照耀进了最底层的操作系统设计领域而不再是中看不中用不能解决实际问题的花架子。</p>
 
-<p>这些对象是<strong>通过句柄handle的方式在系统调用中暴露</strong>给用户使用的，对象本身则是通过继承自一个名字为<code class="highlighter-rouge">Dispatcher</code>的抽象类;它的定义包含在<code class="highlighter-rouge">/kernel/object/include/object/dispatcher.h</code>中。</p>
+<p>这些对象是<strong>通过句柄（handle）的方式在系统调用中直接</strong>暴露给用户使用的，对象本身在实现上均继承自一个名字为<code class="highlighter-rouge">Dispatcher</code>的抽象类;稍微翻阅它的代码，就可以找到其定义包含在<code class="highlighter-rouge">/kernel/object/include/object/dispatcher.h</code>中。</p>
 
 <h3 id="dispatcher定义">Dispatcher定义</h3>
 <p>Dispatcher的定义声明如下</p>
@@ -559,8 +559,9 @@
 </span>    <span class="c1">// and locking differently.
 </span>    <span class="k">virtual</span> <span class="o">~</span><span class="n">Dispatcher</span><span class="p">();</span>
 </code></pre></div></div>
-<p>从类体系结构上看，它用私有继承的方式（C++中私有继承一般用来复用实现）实现了<strong>基于引用计数</strong>的生存周期管理。
-因而有引用计数的接口操作定义</p>
+<p>从类体系结构上看，它用私有继承的方式（C++中私有继承一般并不用来提供传统的接口继承而是仅仅复用代码）实现了<strong>基于引用计数</strong>的生存周期管理。</p>
+
+<p>于此同时它还提供了<strong>基于引用计数</strong>的接口操作定义</p>
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">increment_handle_count</span><span class="p">()</span> <span class="p">{</span> <span class="n">handle_count_</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ktl</span><span class="o">::</span><span class="n">memory_order_seq_cst</span><span class="p">);</span> <span class="p">}</span>
 <span class="c1">// Returns true exactly when the handle count goes to zero.
 </span><span class="kt">bool</span> <span class="nf">decrement_handle_count</span><span class="p">()</span> <span class="p">{</span>
@@ -587,19 +588,21 @@
     <span class="c1">//...
 </span></code></pre></div></div>
 <h4 id="内核对象的id">内核对象的ID</h4>
-<p>内核中的所有对象都有一个唯一的ID标识符，用<code class="highlighter-rouge">koid</code>来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。</p>
+<p>内核中的所有对象都有一个唯一的ID标识符，用<code class="highlighter-rouge">koid</code>来表示；它本身是一个64bit的整形无符号数字；并且该ID在系统运行期间从来不会被回收重用。
+理论上来说，有边界的正整数总会有用完的一天，只是在务实主义者的严重，这个其实完全都不能算作一个问题，因为系统中出现重复的概率实在堪比行星撞地球了。</p>
 
 <h4 id="handle">Handle</h4>
-<p>用户空间的代码如果想访问内核服务中的对象，必须通过<code class="highlighter-rouge">handle</code>句柄来完成。<strong>句柄的概念和Linux里面的文件描述符</strong>的概３念比较类似，它是一种设计上的资源索引和具体资源实现的隔离；这样的隔离使得更灵活的系统演进和扩展变得更加容易。</p>
+<p>用户空间的代码如果想访问内核服务中的对象，必须通过<code class="highlighter-rouge">handle</code>句柄来完成。<strong>句柄的概念和Linux里面的文件描述符</strong>的概念比较类似。
+设计思路上来说，它采用了将<strong>资源索引和具体资源实现隔离</strong>的方法；使得更灵活的系统演进和扩展变得更加容易。</p>
 
-<p>Handle在用户空间的程序看来其实是一个32位的整数值，用<code class="highlighter-rouge">zx_handle_t</code>来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的<code class="highlighter-rouge">handle</code>对象作为系统调用的参数传递进去，
+<p>Handle在用户空间的程序看来其实是一个32位的整数值，用<code class="highlighter-rouge">zx_handle_t</code>来定义。用户程序和内核打交道的时候，需要将一个事先从内核获取的<code class="highlighter-rouge">handle</code>对象(通过一系列创建资源的系统调用)作为参数传递进去；指明需要操作的对象。
 这样系统调用的格式上<strong>大都携带一个所要操作的资源的标识</strong>，从而让内核直到作用在哪个内核对象上。</p>
 
 <h5 id="handle和object的对应和校验">handle和object的对应和校验</h5>
 <p>显然，对于用户空间的进程来说，多个不同的进程可能需要访问同一个内核资源，此时它们需要有不同的handle而不能共享同一个handle;
 任何时候用户通过系统调用传入一个<code class="highlighter-rouge">handle</code>的时候，内核都会做相应的校验</p>
 <ul>
-  <li>合法性校验：对应的资源<code class="highlighter-rouge">handle</code>是否存在内核为用户进程创建的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车</li>
+  <li>合法性校验：对应的资源<code class="highlighter-rouge">handle</code><strong>是否存在内核为用户进程创建</strong>的handle表里，即用户不能随意创建一个自定义的handle;这样可以有效避免意外的资源撞车；同时这也暗含了每个进程必然有一个类似于handle资源表的数据结构以供内核来查验</li>
   <li>类型校验：对应的资源的类型和系统调用所对应的<strong>类型是否一致</strong></li>
   <li>安全校验：用户空间的程序是否有<strong>合理的权限</strong>来操作访问对应的内核资源；这个设计在当今的网络安全环境下尤其重要</li>
 </ul>
@@ -663,8 +666,8 @@
 </code></pre></div></div>
 
 <h6 id="内核对象的封装">内核对象的封装</h6>
-<p>同样的头文件中还包含了一个管理内核对象生存周期的<code class="highlighter-rouge">KenelHandle</code>类，从它的定义可以看出<strong>内核对象使用的是典型的移动语义</strong>，即不允许复制但是可以移动。
-因为这是内核的代码，并且<strong>C++标准库中的智能指针被禁用</strong>了(参考这里的<a href="https://fuchsia.dev/fuchsia-src/zircon/cxx">C++语言使用</a>说明)，所以该类的实现基本就是重复了C++标准库的做法</p>
+<p>同样的头文件中还包含了一个管理内核对象生存周期的<code class="highlighter-rouge">KernelHandle</code>类。因为这里都是C++代码，我们可以借用C++语言的语义，从它的定义可以看出<strong>内核对象使用的是典型的移动语义</strong>，即不允许复制但是可以移动。
+由于这是内核的代码，并且<strong>C++标准库中的智能指针被禁用</strong>了(参考这里的<a href="https://fuchsia.dev/fuchsia-src/zircon/cxx">C++语言使用</a>说明)，所以该类的实现基本就是重复了C++标准库的做法</p>
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">KernelHandle</span> <span class="p">{</span>
 <span class="k">private</span><span class="o">:</span>
@@ -722,8 +725,9 @@
 这些函数在创建对应资源的同时，也返回了一个用户空间可用的指向对应资源的<code class="highlighter-rouge">handle</code>。</li>
 </ul>
 
-<p>Handle本身可以通过<code class="highlighter-rouge">zx_handle_duplicate</code>调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来<strong>降低需要访问的资源权限</strong>。
-<code class="highlighter-rouge">zx_handle_replace</code>用来替换一个已有的handle,用户甚至可以在这个API中添加新的<code class="highlighter-rouge">handle</code>的权限。
+<p>Handle本身可以通过<code class="highlighter-rouge">zx_handle_duplicate</code>调用被复制，这种情况下新创建的handle指向和旧的handle完全相同的内核资源;一般情况下惯用的做法是通过该API来<strong>降低需要访问的资源权限</strong>。</p>
+
+<p><code class="highlighter-rouge">zx_handle_replace</code>用来替换一个已有的handle,用户甚至可以在这个API中添加新的<code class="highlighter-rouge">handle</code>的权限。
 <code class="highlighter-rouge">zx_handle_close</code>顾名思义完成关闭handle的目的。</p>
 
 <h5 id="用户空间和内核空间的迁移">用户空间和内核空间的迁移</h5>
@@ -1002,6 +1006,25 @@ Zircon用<strong>同样VMO对象</strong>来满足内核空间和用户空间的
         
 
         
+            <li>
+                <a href="/post/2019/11/04/cpp-memory-model-and-order/">现代C++的内存模型和高性能的多线程编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/06/fuchsia-kernel-ziron-concepts/">Google的新操作系统Fuchsia的内核设计</a>
+            </li>
+            
+            
+        
 
     
         
@@ -1050,32 +1073,6 @@ Zircon用<strong>同样VMO对象</strong>来满足内核空间和用户空间的
         
             <li>
                 <a href="/post/2019/07/21/from-borg-to-kubernetes/">读Google著名的分布式设计论文－从Borg到Kubernetes的演进</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2019/06/23/cpp-20-modules-concepts-coroutine/">C++20 - 下一个大版本功能确定</a>
-            </li>
-            
-            
-        
-
-    
-        
-
-        
-
-        
-            <li>
-                <a href="/post/2019/06/22/regular-expression-optimize/">C++正则表达式比Python慢？</a>
             </li>
             
             
