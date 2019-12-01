@@ -1,4 +1,312 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-11-13T21:53:41+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">现代C++的内存模型和高性能的多线程编程</title><link href="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" rel="alternate" type="text/html" title="现代C++的内存模型和高性能的多线程编程" /><published>2019-11-04T00:00:00+08:00</published><updated>2019-11-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">&lt;p&gt;内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-12-01T17:28:11+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust文本处理的性能及优化</title><link href="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" rel="alternate" type="text/html" title="Rust文本处理的性能及优化" /><published>2019-11-29T00:00:00+08:00</published><updated>2019-11-29T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">&lt;p&gt;作为一门秉承&lt;strong&gt;零成本抽象&lt;/strong&gt;这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。
+但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即&lt;strong&gt;需要进一步优化&lt;/strong&gt;，可能还不得不额外下一些功夫才能做到。&lt;/p&gt;
+
+&lt;!--more--&gt;
+&lt;h2 id=&quot;背景&quot;&gt;背景&lt;/h2&gt;
+&lt;p&gt;大概一年前，出于实际工作内容的需要，我写过一个简单的针对产品问题报告系统上的数据到处记录的分析程序；最初的目标是在解决问题的同时顺便提高自己对Rust语言的理解；
+毕竟对于学习一门难度比较高的技术而言，读多少文档和书都不如拿&lt;strong&gt;一些实践中需要解决实际的问题来练手&lt;/strong&gt;效率更高。&lt;/p&gt;
+
+&lt;p&gt;这个问题的核心技术是典型的CSV文本文件格式解析，CSV格式本来就是一种由严格语法定义的文本格式，因而毋宁说这里的&lt;strong&gt;核心编程问题域就是文本处理&lt;/strong&gt;。
+只不过因为内部流程的复杂性和牵扯到这一流程之中的人员数量的庞大，导出数据中的文本字段内还有各种各样没有经过良好格式化的数据，需要从解析好的CSV格式中做二次分解和提炼。&lt;/p&gt;
+
+&lt;h3 id=&quot;二次解析复杂性&quot;&gt;二次解析复杂性&lt;/h3&gt;
+&lt;p&gt;因此在既有的csv库的处理之上，问题本身还需要&lt;strong&gt;大量的二次解析&lt;/strong&gt;处理，甚至包括在一个&lt;strong&gt;长度可能超过数万个字符&lt;/strong&gt;的单一字段内，分解出内部较为复杂的结构集合，以便做后续的统计、归并和显示。实现这一功能本身不是特别困难，
+熟悉了Rust的语法之后，适用它自身内置的&lt;code class=&quot;highlighter-rouge&quot;&gt;Option&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Map&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;Iterator&lt;/code&gt;等基础核心数据结构之后，配合它自身优雅的函数式编程设施和模式匹配，可以很快熟练写出想要的各种变换逻辑。&lt;/p&gt;
+
+&lt;p&gt;具体到文本解析，则不能不提到正则表达式处理，毕竟手写的字符串搜索和子串引用&lt;code class=&quot;highlighter-rouge&quot;&gt;slice&lt;/code&gt;机制虽然好用，却往往可能会沦为&lt;strong&gt;不成熟优化&lt;/strong&gt;，因为复杂文本的处理最好还是交给专业的正则表达式库更合理。&lt;/p&gt;
+
+&lt;h3 id=&quot;数据量增大之下的性能考验&quot;&gt;数据量增大之下的性能考验&lt;/h3&gt;
+&lt;p&gt;一开始版本的程序仅仅是处理几千条记录，此时的输入文件虽然超过80MB，里面的记录有数千条，总体而言不到两秒钟的运行效率还算是差强人意，实际使用的时候，基本鼠标单击一下稍微停顿即可以完成。
+随着报表数据越来越多（做出基本的功能之后，总想让它发挥更大的效力），对输入数据的要求就更高，慢慢地它需要能高效地处理300MB以上的报表输入，于此同时内部二次解析的复杂度也随着新需求的加入而变得更加复杂。&lt;/p&gt;
+
+&lt;p&gt;此时处理时间已经接近了10秒，这么长的运行时间对于一个迷你的小工具而言太长了一点，以至于实际用鼠标单击它的时候&lt;strong&gt;能够感受到明显的停顿&lt;/strong&gt;，优化的需求迫在眉睫。&lt;/p&gt;
+
+&lt;h2 id=&quot;优化分析&quot;&gt;优化分析&lt;/h2&gt;
+&lt;p&gt;基于程序本身所使用到的基本技术，可以有下面几个优化方向&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;运算缓存&lt;/li&gt;
+  &lt;li&gt;多线程并行化处理&lt;/li&gt;
+  &lt;li&gt;第三方库&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;火焰图&quot;&gt;火焰图&lt;/h3&gt;
+&lt;p&gt;当然没有benchmark数据的性能优化都是很危险的，由于Rust的底层采用的是LLVM的编译工具链，因此生成火焰图的方法也非常简单直接。只需要在&lt;code class=&quot;highlighter-rouge&quot;&gt;Cargo.toml&lt;/code&gt;中加入如下的选项确保生成的二级制文件中包含符号表&lt;/p&gt;
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[profile.release]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;为了解析Rust自身的符号，我们可以&lt;strong&gt;借助rust-unmangle工具&lt;/strong&gt;在C++符号被解析之后，二次调用它进行转换即可。在Rust的项目目录下，只要执行如下的命令即可生成火焰图文件：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;perf record --call-graph dwarf,16384 -e cpu-clock -F 997 target/release/analyzer 
+perf script | stackcollapse-perf.pl | stackcollapse-recursive.pl | c++filt | rust-unmangle | flamegraph.pl &amp;gt; flame.svg
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;需要注意的是生成的&lt;strong&gt;SVG矢量图文件&lt;/strong&gt;是可以点击缩放的，但是需要用合适的工具打开而不能使用默认的图片查看器。
+图形里面的每一个图形的柱体是可以点击层层深入进去的；如果没有合适的工具，使用FireFox浏览器也是一个不错的选择。&lt;/p&gt;
+
+&lt;h2 id=&quot;运算缓存&quot;&gt;运算缓存&lt;/h2&gt;
+
+&lt;p&gt;这种优化其实是算法级别的优化，关键是找到有很多重复、或者循环的运算，将其缓存起来&lt;strong&gt;减少重复计算或者不必要的循环&lt;/strong&gt;。
+这类的手法&lt;strong&gt;实施起来没有多少难度&lt;/strong&gt;，和别的编程语言中的做法也是类似的，可惜的是很多时候能做的也不是很多。&lt;/p&gt;
+
+&lt;p&gt;更多缓存和封装的做法其实相对&lt;strong&gt;不那么符合函数式编程的思想一些&lt;/strong&gt;，有时候不得不将很漂亮优雅的函数式pipeline用法拆开，或者将中间的缓存结果放入新的参数传入函数，从而使得代码的可读性变得更差一些。&lt;/p&gt;
+
+&lt;h2 id=&quot;第三方库&quot;&gt;第三方库&lt;/h2&gt;
+&lt;p&gt;这里主要的第三方库有两个，一个是解析字符串正则表达式的&lt;code class=&quot;highlighter-rouge&quot;&gt;regex&lt;/code&gt;库。&lt;/p&gt;
+
+&lt;h3 id=&quot;regex解析&quot;&gt;Regex解析&lt;/h3&gt;
+&lt;p&gt;本身使用的时候&lt;strong&gt;已经有意选择了性能最高&lt;/strong&gt;的一个可用的正则库，因此换用其它正则表达式库的思路就不太可行了。&lt;/p&gt;
+
+&lt;p&gt;还有一个思路是尽量去简化正则表达式的复杂性，比如&lt;strong&gt;减少不必要的正则表达式分组&lt;/strong&gt;操作，减少正则匹配算法中的回溯操作。可惜这一方法在第一次写就的时候已经优化过了，没有多少剩余的空间可以做文章了。&lt;/p&gt;
+
+&lt;p&gt;唯一剩下的思路就是看是否自己使用的方法不对，或者库本身是否提供了一些&lt;strong&gt;底层API或者高级技巧&lt;/strong&gt;等。
+稍微翻阅一下Regex的文档，发现该库的作者提供了两个优化性能的思路&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;减少拷贝&lt;/strong&gt;，使用解析时候的生存周期里的字符串引用，而不是采用显式的&lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt;对象来保存解析的字段&lt;/li&gt;
+  &lt;li&gt;减少不必要的&lt;strong&gt;按解析次数执行的内存分配&lt;/strong&gt;，而采用复用匹配组捕获的数据结构的方法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;减少拷贝&quot;&gt;减少拷贝&lt;/h4&gt;
+&lt;p&gt;其实CSV文本格式的规范已经决定了在读入文本字段的时候，不得不对从磁盘读取出来的文本内容做拷贝，而不能用直接引用。因为对于复杂的CSV格式而言，分隔符之间可能会出现转义字段，符合规范的解析器&lt;strong&gt;不得不将转移的字符提取出来&lt;/strong&gt;做连接，返回给用户修改之后的字符串。这是第一道从操作系统的IO缓冲区到用户接口数据结构的拷贝。&lt;/p&gt;
+
+&lt;p&gt;CSV库所建议的不必要的拷贝，其实是发生在上述的解析之后的临时内存区域经由&lt;code class=&quot;highlighter-rouge&quot;&gt;serde&lt;/code&gt;这一抽象的接口(&lt;code class=&quot;highlighter-rouge&quot;&gt;trait&lt;/code&gt;)&lt;strong&gt;反序列化到用户自定义的数据结构&lt;/strong&gt;的时候的拷贝。显然去掉这一层拷贝可以节约大量操作系统用于内存分配的时间；这一开销在很多情况下是惊人的，甚至是很多高性能的C、C++程序的秘密武器。&lt;/p&gt;
+
+&lt;p&gt;可惜这种方法对我的工具并没有很好的借鉴意义，其深层次的原因是我的程序需要将解析出来的数据结构临时保存起来，等所有的数据都解析完之后，做排序和二次处理；而文档建议的优化方法要求&lt;strong&gt;引用的内存上的相关处理必须要在解析下一条记录的时候被释放&lt;/strong&gt;。
+如果regex库内部提供可以使用生存周期更长的内存的方法，那么这种方法也不失为一个很好的优化；可惜它没有这样的机制。
+此时如果强行引用解析器提供的内存，Rust贴心的编译器检查利器&lt;code class=&quot;highlighter-rouge&quot;&gt;Borrow Checker&lt;/code&gt;就会拦截非法的内存引用。&lt;/p&gt;
+
+&lt;h4 id=&quot;使用高级api&quot;&gt;使用高级API&lt;/h4&gt;
+&lt;p&gt;优化的第一步是理清默认API的底层大概做了什么事情。
+由于最复杂的解析需要从&lt;strong&gt;一个字段中搜索几十甚至上百个&lt;/strong&gt;子记录，因而关注的重心就是&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_iter&lt;/code&gt;方法（严格的性能分析其实需要按照&lt;strong&gt;perf和flamegraph的工具&lt;/strong&gt;来判断和检验，这里直觉和实际的火焰图分析是重合的）。&lt;/p&gt;
+
+&lt;h5 id=&quot;captures_iter的内存开销&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_iter&lt;/code&gt;的内存开销&lt;/h5&gt;
+
+&lt;p&gt;正则表达式运算库的内部往往是通过DFA状态机来实现的，默认的库API很好地隐藏了内部的解析细节，用户只需要调用&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_iter&lt;/code&gt;方法就可以得到一个&lt;strong&gt;实现了迭代器类型&lt;/strong&gt;的结构，很方便地和其它的函数式pipeline连接起来。
+实际接收代码则会根据其返回的封装过的&lt;code class=&quot;highlighter-rouge&quot;&gt;CapturesMatch&lt;/code&gt;结构来读取内部的分组的匹配信息。&lt;/p&gt;
+
+&lt;p&gt;其结构的实现如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;captures_iter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CaptureMatches&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;CaptureMatches&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.searcher_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.captures_iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;返回的结构其实是使用了&lt;code class=&quot;highlighter-rouge&quot;&gt;Captures&lt;/code&gt;结构&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CaptureMatches&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;re_trait&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CaptureMatches&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExecNoSyncStr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Iterator&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CaptureMatches&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Captures&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Captures&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Captures&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;named_groups&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.capture_name_idx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;显然默认的&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_iter()&lt;/code&gt;方法会每次新构造一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Catpures&lt;/code&gt;结构体出来，这里产生的对象其实是一个&lt;strong&gt;临时的对象&lt;/strong&gt;，因为每次解析完毕之后，用户代码仅仅是取出内部匹配的分组，就不再使用了。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Captures&lt;/code&gt;的实际封装数据如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Captures&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;re_trait&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;named_groups&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Arc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;高效的captures_read方法&quot;&gt;高效的&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_read&lt;/code&gt;方法&lt;/h5&gt;
+&lt;p&gt;按照文档的建议，这里使用&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_read&lt;/code&gt;方法可以实现&lt;strong&gt;复用返回匹配结果的缓冲区&lt;/strong&gt;的目的，减少不必要的临时对象分配。
+它的实现如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;captures_read&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Match&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.captures_read_at&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;locs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;显然解决问题的关键在于这个&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocations&lt;/code&gt;结构，其实在上面的默认API的实现里面已经出现了。&lt;/p&gt;
+
+&lt;p&gt;不出意外它果然是一个保存匹配位置的一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Vec&lt;/code&gt;,这才是内部&lt;strong&gt;无法将临时对象分配在栈上的关键原因&lt;/strong&gt;，而动态堆内存的分配代价又比较高，这个事实对C/C++程序员而言完全不陌生。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocations&lt;/code&gt;的定义如下：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;re_trait&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Slot&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Slot&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;usize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;为了复用这个对象，我们需要在外侧循环调用的地方，自行定义一个&lt;code class=&quot;highlighter-rouge&quot;&gt;mutable&lt;/code&gt;的对象，然后在每次调用之前，传入即可。
+考虑到我们想达到最佳的性能，在单线程的处理中，同一个正则表达式，我们仅仅需要一个对象即可，而不需要每次去分配。&lt;/p&gt;
+
+&lt;h2 id=&quot;多线程并行化处理&quot;&gt;多线程并行化处理&lt;/h2&gt;
+&lt;p&gt;默认情况下，这类简单的文本处理程序都是采用单线程的思路来写就的，改造为多线程就会多多少少面临一些挑战，尤其是需要共享变量读写的情况居多的时候，&lt;strong&gt;多线程的挑战比单线程要多得多&lt;/strong&gt;，因为程序的执行状态会变得更见难以用走读代码的方式来分析。&lt;/p&gt;
+
+&lt;p&gt;借助于火焰图分析工具，可以看出该处理程序的大部分CPU时间耗费在基于正则表达式的二次结构化解析上。这些&lt;strong&gt;操作本身互相之间的关联比较小&lt;/strong&gt;，是显然可以被并行化的，多线程应该可以大大加速处理过程。
+这方面使用经典的&lt;code class=&quot;highlighter-rouge&quot;&gt;map/reduce&lt;/code&gt;思路，只需要将实际解析的部分放入类似线程池一样的调度器中执行即可。&lt;/p&gt;
+
+&lt;p&gt;由于Rust本身提供了强大的用于&lt;strong&gt;确保线程安全的静态代码检查&lt;/strong&gt;；绝大部分情况下，只要保证代码可以编译通过，运行期出错的可能性基本就很小了。&lt;/p&gt;
+
+&lt;h3 id=&quot;使用rayon库&quot;&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;rayon&lt;/code&gt;库&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rayon&lt;/code&gt;库提供了方便易用的&lt;code class=&quot;highlighter-rouge&quot;&gt;par_iter&lt;/code&gt;，允许我们将代码稍微改动之后，将自动获取并发执行的好处，比如原来的代码&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ParsedRecords&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// parsed raw records from csv&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;raw_records&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;parse_from_csv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;raw_records&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;.iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;.map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;ParsedRecords&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;group&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;.collect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;//further transformation on parsed results&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;只需要修改&lt;code class=&quot;highlighter-rouge&quot;&gt;iter()&lt;/code&gt;为&lt;code class=&quot;highlighter-rouge&quot;&gt;par_iter()&lt;/code&gt;的调用，并将最后的&lt;code class=&quot;highlighter-rouge&quot;&gt;collect&lt;/code&gt;方法替换为&lt;code class=&quot;highlighter-rouge&quot;&gt;rayon&lt;/code&gt;自己实现的&lt;code class=&quot;highlighter-rouge&quot;&gt;collect&lt;/code&gt;方法&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;raw_records&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;.par_iter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;.map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;ParsedRecord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;group&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;.collect_into_vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;由于事先已经用火焰图确认过这个二次解析构造耗费最大部分的CPU时间，这次替换和改造可以看到立竿见影的性能提升：&lt;strong&gt;运行时间瞬间减小到原来的30%~50%&lt;/strong&gt;，几乎有两三倍的性能提升!&lt;/p&gt;
+
+&lt;h3 id=&quot;并行版本的regex问题&quot;&gt;并行版本的&lt;code class=&quot;highlighter-rouge&quot;&gt;regex&lt;/code&gt;问题&lt;/h3&gt;
+&lt;p&gt;并行版本能工作的前提是&lt;strong&gt;没有数据的多线程访问问题&lt;/strong&gt;，当然如果有问题，编译器会自动拦截阻止编译通过。
+大部分的解析工作没有什么障碍，因为Rust默认的移动语义和显示mutable设计使得这些潜在的问题马上&lt;strong&gt;自动显现&lt;/strong&gt;出来，只要按照错误提示修改&lt;strong&gt;然后在编译器的胁迫下乖乖就范&lt;/strong&gt;即可。&lt;/p&gt;
+
+&lt;p&gt;唯一麻烦的问题就是上述的正则表达式；使用该库的同时，我们不得不面对如下两个麻烦的问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;regex对象的capturelocation共享&quot;&gt;Regex对象的&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocation&lt;/code&gt;共享&lt;/h3&gt;
+&lt;p&gt;库的官方文档提供了很好的例子，建议我们用&lt;code class=&quot;highlighter-rouge&quot;&gt;lazy_static!&lt;/code&gt;宏来避免多次编译正则表达式，实现更好的性能；可惜如果我们想使用上述提到的共享&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocation&lt;/code&gt;对象，我们需要一个mutable的对象。&lt;/p&gt;
+
+&lt;p&gt;这里的限制应该是目前&lt;code class=&quot;highlighter-rouge&quot;&gt;regex&lt;/code&gt;库自己施加的使用限制，我们无法自由地构造一个可以复用的&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocation&lt;/code&gt;对象出来，而必须由一个编译好的Regex对象来获取；由于Mutable的需要，我们不得不将Regex本身从&lt;code class=&quot;highlighter-rouge&quot;&gt;lazy_static!&lt;/code&gt;宏中提取出来，单独保存。
+好在这个&lt;strong&gt;Regex对象本身还是可以保持只读&lt;/strong&gt;，多个线程引用一个只读的变量状态毫无问题。&lt;/p&gt;
+
+&lt;p&gt;不妙的是，&lt;code class=&quot;highlighter-rouge&quot;&gt;par_iter&lt;/code&gt;显式地将我们卷入多线程环境（我们想要更好的性能），编译器不允许在多个线程中共享mutable正则表达式，当然那样做也是错误的。
+好在多线程编程的工具箱中，我们还可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;ThreadLocal&lt;/code&gt;这样的数据结构，只要保证每个线程使用自己的mutable对象就好了，问题自然而然得到解决。&lt;/p&gt;
+
+&lt;p&gt;####　封装多个正则表达式
+可以用一个简单的enum来表述各种正则表达式类型，然后提供给外部调用&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LocalKey&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexCategory&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;FieldSep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;StateChange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;StateChangeEx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;同时我们需要给外部提供一个看起来像全局但是多线程安全的接口&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexReposiotry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;field_sep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state_change&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;state_change_ex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexReposiotry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;category&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RegexCategory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;category&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;FieldSep&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.field_sep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;StateChange&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.state_change&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;StateChangeEx&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.state_change_ex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;c&quot;&gt;//...&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;thread-local变量的创建和维护&quot;&gt;Thread Local变量的创建和维护&lt;/h4&gt;
+&lt;p&gt;为了构造Thread Local的变量，我们不得不借助于&lt;code class=&quot;highlighter-rouge&quot;&gt;thread_local!&lt;/code&gt;宏来构造，因此可以用一些临时的值先填充之&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;lazy_static!&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ref&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DUMMY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+        &lt;span class=&quot;nn&quot;&gt;Regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;(.*) xxxx ([a-zA-Z ]+) to ([a-zA-Z ]+)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nd&quot;&gt;thread_local!&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOC_FIELDSEP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DUMMY&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.capture_locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOC_STAGECHAGE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DUMMY&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.capture_locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOC_STAGECHAGE_EX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;RefCell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DUMMY&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.capture_locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//.... more&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;静态的指针值指向的并不是我们真正用于解析的正则表达式的匹配缓冲。
+实际的正则表达式构造的时候，我们再重新替换真正的正则表达式对应的变量，并且拷贝之。&lt;/p&gt;
+
+&lt;p&gt;构造的实现如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_regexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexReposiotry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;RegexCategory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;RegexReposiotry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;field_sep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_regex_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;(, )?(201[789]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FieldSep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;state_change&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_regex_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+            &lt;span class=&quot;s&quot;&gt;&quot;(.*) The state of the problem changed from ([a-zA-Z ]+) [tT]o ([a-zA-Z ]+)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StateChange&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;state_change_ex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_regex_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;(.*) State changed from ([a-zA-Z ]+) to ([a-zA-Z ]+)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StateChangeEx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;//...&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这里为简化起见，将正则表达式静态地写入在构造实现中，但是其实也可以经由创建者自己指定的方法传入。
+实际的结构初始化由下面的内部函数来实现：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create_regex_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexCategory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pat&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;FieldSep&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LOC_FIELDSEP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;StateChange&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LOC_STAGECHAGE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;StateChangeEx&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LOC_STAGECHAGE_EX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;//...&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.with&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.borrow_mut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.capture_locations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;RegexInfo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;其中的中间初始化&lt;code class=&quot;highlighter-rouge&quot;&gt;location&lt;/code&gt;变量的部分，我们采用&lt;code class=&quot;highlighter-rouge&quot;&gt;RefCell&lt;/code&gt;本身提供的&lt;code class=&quot;highlighter-rouge&quot;&gt;with&lt;/code&gt;方法，调用&lt;code class=&quot;highlighter-rouge&quot;&gt;*f.borrow_mut()&lt;/code&gt;来修改内部的捕获位置缓冲区为真正的正则表达式对象对应的缓冲区向量。&lt;/p&gt;
+
+&lt;h4 id=&quot;多线程解析&quot;&gt;多线程解析&lt;/h4&gt;
+&lt;p&gt;实际解析的代码则可以经由上述的正则封装，实现如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parsing_using_regex_and_key_string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;rem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;regexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RegexReposiotry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RegexCategory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExtraInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;where&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CaptureLocations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExtraInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rem&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;None&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;regex_info&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;regexes&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.get_regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExtraInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;regex_info&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.location&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.with&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;marker_loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RefMut&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.borrow_mut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;regex_info&lt;/span&gt;
+                    &lt;span class=&quot;py&quot;&gt;.regex&lt;/span&gt;
+                    &lt;span class=&quot;nf&quot;&gt;.captures_read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;marker_loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                    &lt;span class=&quot;nf&quot;&gt;.map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;marker_loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里的关键在于中间的&lt;code class=&quot;highlighter-rouge&quot;&gt;regex_info.location.with(|loc| {})&lt;/code&gt;调用实际发生的时候，不同的线程会得到不同的&lt;code class=&quot;highlighter-rouge&quot;&gt;CaptureLocation&lt;/code&gt;内容；其内容在实际被写入的时候，会&lt;strong&gt;基于线程的不同而写入不同的内存&lt;/strong&gt;位置。&lt;/p&gt;
+
+&lt;p&gt;唯一有些不太符合直接的地方在于mutable变量的获取的地方，不得不借助于&lt;code class=&quot;highlighter-rouge&quot;&gt;RefMut&lt;/code&gt;结构将其传递如&lt;code class=&quot;highlighter-rouge&quot;&gt;captures_read&lt;/code&gt;中，而不能直接采用实际的类型。或许将来的Rust语言版本会改进这一难以理解的做法。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="rust" /><category term="engineering" /><category term="performance" /><category term="multi-threading" /><summary type="html">作为一门秉承零成本抽象这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。 但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即需要进一步优化，可能还不得不额外下一些功夫才能做到。</summary></entry><entry><title type="html">现代C++的内存模型和高性能的多线程编程</title><link href="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/" rel="alternate" type="text/html" title="现代C++的内存模型和高性能的多线程编程" /><published>2019-11-04T00:00:00+08:00</published><updated>2019-11-04T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/04/cpp-memory-model-and-order/">&lt;p&gt;内存模型是现代C++语言标准里面的一个经常不太为人重视的特性；这种忽视大概是由于大部分的程序员关注的还是核心语言特性或者库设施这样的一些比较实用的“硬特性”。
 相对而言，内存模型这样的底层的概念和机制看起来更像是给面向程序库编程的底层程序员用的。&lt;/p&gt;
 
 &lt;p&gt;然而如果我们想追求极致的应用程序性能，又想追求&lt;strong&gt;可移植性、高性能&lt;/strong&gt;这样一些极具挑战的目标，我们不得不借助于一些极端的编程技法，寻求尽量高效地实用标准库提供的设施，
@@ -3679,463 +3987,4 @@ Event Sourcing技术通过&lt;strong&gt;记录实体上所发生的所有事件�
   &lt;li&gt;工厂类，工厂方法、抽象工厂等，这些概念在传统的设计模式中已经得到了广泛的研究，DDD只是拿来使用。&lt;/li&gt;
   &lt;li&gt;仓库概念和传统的数据库中的DAO或者对象集合的技术很接近，可以用传统的Hibernate技术也可以用NoSQL的方法来实现仓库，Spring等开源库已经提供了很好的封装手段。&lt;/li&gt;
   &lt;li&gt;集成领域上下文的技术，可以是用基于传统的RPC的方式，也可以采用基于REST API的方法来完成，相关的软件架构技术已经探讨的比较充分了。&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry><entry><title type="html">读Uncle Bob新书-Clean Archtiecture</title><link href="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/" rel="alternate" type="text/html" title="读Uncle Bob新书-Clean Archtiecture" /><published>2019-01-26T00:00:00+08:00</published><updated>2019-01-26T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/01/26/clean-architecture-notes/">&lt;p&gt;不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市；
-刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。
-Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;历史的回顾和架构师的主要职责&quot;&gt;历史的回顾和架构师的主要职责&lt;/h2&gt;
-
-&lt;p&gt;作者在一开头就用讲故事的手法描述了一个要求保持匿名的市场领先的软件公司的例子来讲述软件架构失败可能带来的巨大危害 - 一个庞大的具有超过六百万行代码的项目，
-因为明显的架构问题导致8年的时间，项目组的人手越来越多，开发和添加新的功能的成功却又直线上升导致虽然增加了很多的人手却不能得到相对应的产出；
-这样的问题也就是很多书里所讲的&lt;strong&gt;可扩展性不足&lt;/strong&gt;导致的修改困难。&lt;/p&gt;
-
-&lt;h3 id=&quot;架构师的工作重心&quot;&gt;架构师的工作重心&lt;/h3&gt;
-&lt;p&gt;回头说起来软件项目和硬件项目的不同，Bob大叔认为这里主要的不同就来自于软件是可以被修改的，而硬件项目则是一旦完工就无法很容易地扩展和添加新的功能。
-软件架构师的主要核心职责&lt;strong&gt;不在于功能性的需求如何被实现出来，而是如何监控和设计软件系统的结构&lt;/strong&gt;使得添加新的功能保持简单、经济和高效。&lt;/p&gt;
-
-&lt;p&gt;虽然作者没有明确地提到，但是我们还是需要注意功能需求也是很重要的，因为很多架构的约束反而是来自于系统的功能性需求；
-只是现实生活中，大部分的项目经理和管理人员更容易看到功能需求的问题，而不会特意关注系统结构上的约束，那么我猜这里作者有意不提这方面也算合理，
-读者却不可不自己心神领会；如果生搬硬套就会走向歧路了。&lt;/p&gt;
-
-&lt;h3 id=&quot;计算机行业的历史&quot;&gt;计算机行业的历史&lt;/h3&gt;
-
-&lt;p&gt;讲起历史来，Bob大叔绝对算是行家中的行家；当初他的《Clen Code》系列视频中每一节都会加入一小部分关于天文学和物理学的历史知识作为铺垫；
-甚至于我一度以为大叔是学理论物理学或者科学史出身的（后来在其它的演进里面才发现不是）。为了讲述和探讨软件行业的本质工作性质，作者又不吝文墨地回顾了整个计算机程序设计的历史；
-作者给出的结论是，真正&lt;strong&gt;本质的计算机技术和程序设计思想在过去的几十年中并没有发生太大的变化&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;这可以说是一个既乐观又悲观的消息。好的方面是，行业经过几十年的摸索和积淀终于积累下来了很多供后辈好好重用的宝贵经验；
-可悲的地方却是商业上的超级多的&lt;strong&gt;浅层次的成功反而使得真正的技术被大部分人忽视&lt;/strong&gt;了。
-工业领域的应用招致了很多不懂计算机核心技术的软件工程师，用不太严谨的做法堆砌出大量的代码，而真正的生产模块化的代码的技术和方法都是在&lt;strong&gt;想方设法限制程序员的能力&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;编程范式的历史&quot;&gt;编程范式的历史&lt;/h3&gt;
-&lt;p&gt;虽然编程的本质是一样的，业界却先后流行起来三种变成编程范式，对这些范式的支持情况的不同导致了各种形形色色的编程语言的繁荣；
-但是仔细琢磨的话，我们会发现这些编程语言虽然外表看起来千差万别，分解之后里面的核心特性却没有多少。&lt;/p&gt;
-
-&lt;p&gt;面向过程的编程范式是很多人非常熟悉的范式，早期的先驱们（尤其是荷兰的牛人Dijkstra从理论物理专业转行来演进计算机理论）总结了几种基本的结构，
-并不惜通过在&lt;strong&gt;一片争论声中将Goto关入牢笼&lt;/strong&gt;来强迫大家&lt;strong&gt;采用事先定义好的顺序、分支和循环三种控制流转换&lt;/strong&gt;，编写出良好的软件。
-因为硬件执行过程的贴切的模拟对应，面向过程的编程范式一直是程序员的基石。&lt;/p&gt;
-
-&lt;p&gt;面向对象的编程范式其实并没有干太多新的事情，它里面总结的各种套路其实面向过程的方法也可以做到。
-有人总结了面性对象的本质特性是继承、封装和多态，然而本质上面向过程的语言用结构和函数指针的方法一样可以达到，
-甚至早期兴盛的C++语言就是通过虚函数表这一机制，在底下生成额外的控制带来控制程序逻辑跳转。
-从这个意义上来看，面向对象的编程范式其实是限制了程序员必须用&lt;strong&gt;间接控制流转移&lt;/strong&gt;的方法来提高可维护性。&lt;/p&gt;
-
-&lt;p&gt;函数式编程范式则是很早的一个范式，众所周知它的历史可以追溯到和图灵同时代的逻辑学家邱奇的lambda算子推演。
-这一思路的主要特征就是&lt;strong&gt;数据的不可变性&lt;/strong&gt;，同样的数据经过同样的处理必然产生同样的输出，同时数据一旦产生就不能被修改了，否则就会有副作用。
-这种范式之所以能够再度流行起来，恰好又是因为更为复杂的运算需求需要增加数据之间的隔离。
-前两种范式里面都有很明显的变量和赋值、操作的基本机制，而这一机制在函数式范式面前毫无用武之力。&lt;/p&gt;
-
-&lt;p&gt;软件架构师的任务就是需要清楚地认识到这些编程范式&lt;strong&gt;只是在不同的维度上对程序员加了各种各样的约束&lt;/strong&gt;，以解决它所适应的场景的问题而已。
-理顺问题的场景然后清楚地了解编程实现和交付中的各种困难，减小软件扩展和维护的成本，是架构师所面临的最根本的挑战。&lt;/p&gt;
-
-&lt;h3 id=&quot;计算机为什么是一门科学&quot;&gt;计算机为什么是一门科学&lt;/h3&gt;
-&lt;p&gt;作者不惜花费大量的笔墨来跟踪Dijkstra大师的人生轨迹和研究成功，其实是想为他最后的结论做铺垫，搞明白计算机能否成为严谨的数学。
-毕竟早期的计算机先驱们都是数学家乃至逻辑学家；他们都期望找到一种严格的方式来证明计算机程序的绝对正确性。
-现在大家都已经明白，这种努力无论从理论上还是时间上都已经破产了。&lt;/p&gt;
-
-&lt;p&gt;计算机软件和编程工作只能被认为是一种科学而不是一种数学。科学的主要特征是，你永远无法证明某个事情是真的，
-但是却可以用固定的重复手段去验证该事情，并有可能有一天发现这个事情不成立而推翻这个结论。
-这个&lt;strong&gt;证伪的方式其实就是我们所做的软件测试&lt;/strong&gt;；我们有各种方法做形形色色的测试，而测试不通过的时候，我们可以通过修改程序来变更程序的行为，使得它贴合我们的期望。&lt;/p&gt;
-
-&lt;p&gt;想通过分析和推倒来写出严格的没有问题的程序虽然没有指望了，我们仍然可以通过降低测试的成本，改进测试的手段和方法，
-通过持续、自动化的测试和即时反馈的方法提高工作效率。这方面的思考对于架构师而言是不可或缺的。&lt;/p&gt;
-
-&lt;h2 id=&quot;模块设计的原则和solid&quot;&gt;模块设计的原则和SOLID&lt;/h2&gt;
-
-&lt;p&gt;架构师所关心的应该是更高层次的抽象实体而不再是一样一行具体的实现代码，因为&lt;strong&gt;唯有关注于这些做过良好分离的抽象，才能做到纵览全局心中有数&lt;/strong&gt;。
-这些抽象实体之间的关系是架构师需要重点考量的；这个过程中需要用到的设计原则并不拘泥于某种编程语言或者编程范式，尽管这些设计原则是在长期的面向对象思想中被提炼总结出来的&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;单一职责原则&lt;/li&gt;
-  &lt;li&gt;开发闭合原则&lt;/li&gt;
-  &lt;li&gt;李氏替换原则&lt;/li&gt;
-  &lt;li&gt;接口隔离原则&lt;/li&gt;
-  &lt;li&gt;依赖导致原则&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这些设计原则以前一直被成为是面向对象的设计原则，一个很重要的原因应该是面向对象设计曾经风靡二十年之久；可惜的是&lt;strong&gt;大部分死背概念的架构师并没有真正的理解这些&lt;/strong&gt;设计原则。
-Bob大叔则旗帜鲜明地说&lt;strong&gt;这些原则其实都需要仔细地来揣摩和理解&lt;/strong&gt;，单单是粗浅的重复字面意思而不能灵活地应用，无异于是买椟还珠，空入宝山徒手而还了。&lt;/p&gt;
-
-&lt;h3 id=&quot;设计原则的目标和场景&quot;&gt;设计原则的目标和场景&lt;/h3&gt;
-&lt;p&gt;这些设计原则的目的是帮助我们实现简单而又可靠的软件模块乃至子系统，使得&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;变更它们的成本很低&lt;/strong&gt;，因为软件系统总是要添加新功能才更有生命力，修改困难的软件就会被慢慢放弃了&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;理解起来容易&lt;/strong&gt;，因为维护软件总是需要人来做，而参与其中的人总是在流动的&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;可以被轻易地重用在合适的地方&lt;/strong&gt;，因为永远也没有人可以预测未来的软件项目需求；重头再写类似的代码的代价又过于高昂&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;上述的五大设计原则往往被认为是处理复杂软件系统内处于&lt;strong&gt;中等抽象的实体结构和相互关系&lt;/strong&gt;的指导性方法论。
-这些中等粒度的抽象就是一般意义上所说的模块或者子模块；不同的模块或者子模块之间会按照这些原则来聚合而形成基本的可执行单元。
-在不太复杂的软件系统中，做到这一层就可以满足所有需要了；更复杂的大型的软件系统可能需要更高层次的组合，即组件。&lt;/p&gt;
-
-&lt;h3 id=&quot;关于设计原则的简单概括和去谬&quot;&gt;关于设计原则的简单概括和去谬&lt;/h3&gt;
-
-&lt;p&gt;简称为SOLID的五大设计原则对于现金的架构师而言都不是什么秘密了，然而对他们的认识上的谬误还是随处可见。作者又不惜花费一个大的章节来详细阐述其中关键的思想。&lt;/p&gt;
-
-&lt;h4 id=&quot;单一职责&quot;&gt;单一职责&lt;/h4&gt;
-&lt;p&gt;最简单却又被误解最深的一个原则非单一职责原则莫属了；很多人的第一印象解读就是，一个模块应该只做一件事儿并讲这件事儿做好。
-粗看起来这个解释很切合题中之义，也能在Unix编程哲学中找到KISS原则的呼应。只是这一原则的提出其实有更深刻的考虑因为&lt;strong&gt;怎么去界定前面所说的一件事儿&lt;/strong&gt;会非常困难。
-单一职责的真正含义是:&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;一个模块&lt;strong&gt;被改变的原因应该有并且只有一个&lt;/strong&gt;；或者说一个模块的&lt;strong&gt;利益相关者应该有并且只有一个&lt;/strong&gt;。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;不幸的是，这里面的原因也好，利益相关者也好，都还是有含糊而解释不清的地方，因此作者毋宁说：
-&lt;strong&gt;一个模块和他相关联交互的Actor只有一个&lt;/strong&gt;，这样用UML描述模块关系的时候就比较清楚的看出这一原则有没有呗违反了。&lt;/p&gt;
-
-&lt;h4 id=&quot;开闭原则&quot;&gt;开闭原则&lt;/h4&gt;
-
-&lt;p&gt;开放闭合原则倒是没有那么多的误解，因为它本身就是事关怎样划分子系统、子模块乃至基本单元的。它所要求的系统应该对修改闭合对扩展开放某种程度上可以看做是对模块高内聚的要求。
-要做到这一点，需要讲系统划分为不同的抽象层次的模块、子模块，并且实现良好的约束使得高层的模块不要以来于低层的实现，而&lt;strong&gt;扩展系统的方式总是维持核心模块的稳定性再增加新的低层模块&lt;/strong&gt;来完成。&lt;/p&gt;
-
-&lt;h4 id=&quot;李氏替换原则&quot;&gt;李氏替换原则&lt;/h4&gt;
-
-&lt;p&gt;李氏替换原则原本是来源于类型系统的定义；一般也不太会被理解错误，只是在软件设计和架构中，这里的&lt;strong&gt;类型被替换成了设计中的抽象&lt;/strong&gt;并加以深入考量。
-对于有类型的静态语言来说，这意味着接口或者基类的抽象需要有足够好的普适性，扩展出来的子类必须完全遵守事前定义好的契约，因为这里的&lt;strong&gt;耦合是非常强&lt;/strong&gt;的。
-对于弱类型的动态语言而言，这些约束可能是隐式的，虽然因为不必有源代码依赖上的麻烦而变得更加灵活，但是同样因为没有这些检查而使得所有违反约束的错误代码都只能在运行时才能发现。&lt;/p&gt;
-
-&lt;p&gt;某种程度上说，缺少了编译器的检查，&lt;strong&gt;动态语言易于修改代码的优势其实带来了维护设计一致性的额外麻烦&lt;/strong&gt;；这一点不可不察。&lt;/p&gt;
-
-&lt;h4 id=&quot;接口隔离原则&quot;&gt;接口隔离原则&lt;/h4&gt;
-
-&lt;p&gt;接口隔离原则强调的是模块化软件关于耦合方面的分离；它的最基本的思想可以认为是：&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;除了你必须要以来来完成模块定义的功能之外的东西，额外的依赖都不要引入进来。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;这里的要求是两个方面的&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;提供功能的模块在对外提供的接口上必须保证是高度内聚的，在对应的抽象等级、粒度上给出的接口需要职责明确&lt;/li&gt;
-  &lt;li&gt;使用接口的模块需要保证只引入自己使用的功能，而不能引入不必要的依赖&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h4 id=&quot;依赖倒置原则&quot;&gt;依赖倒置原则&lt;/h4&gt;
-
-&lt;p&gt;这个原则可以看作是传统的面向对象设计里面最为烧脑的一个原则，正确理解起来一直有些不容易，因为必须&lt;strong&gt;同时考虑到代码结构的组织和实际运行时的依赖来看&lt;/strong&gt;才能体会其中的精妙。
-它的核心是将程序组织的依赖和运行时的依赖跟分离开来看，构造代码的时候，从抽象角度来说需要保证&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;抽象层次高的代码必须依赖于抽象而不是具体实现；&lt;/li&gt;
-  &lt;li&gt;实际的具体实现的代码就只能看到这些抽象而看不到抽象背后所隐藏的实现；&lt;/li&gt;
-  &lt;li&gt;核心模块的业务规则只能看到其它外围模块的概念抽象，而看不到具体实现这些抽象的实体；这样当需要扩展新的实现方式的时候，只需要添加新的实现代码，而&lt;strong&gt;核心的业务规则可以保持稳定&lt;/strong&gt;。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;可以看出依赖导致原则其实潜在地暗含了其它几个原则。实际实现中还需要考虑下面一些因素&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;操作系统和平台软件的一来是不可避免的；但是这里的关键是期望减小系统的维护成本，
-而这些底层的稳定的部分很少变化，所以直接依赖他们的具体实现倒是也问题不大；
-如果是自己内部搭建的通用平台软件，那么则需要另外分析和斟酌；这方面的讨论也有很多。&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;核心业务逻辑层的稳定提炼需要依赖于领域知识&lt;/strong&gt;，因为什么是稳定的什么是可变的跟具体的目标业务场景息息相关，没有放之四海而皆准的模板可以套用。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;组件设计原则&quot;&gt;组件设计原则&lt;/h2&gt;
-
-&lt;p&gt;组件化技术已经成为搭建大型复杂软件系统的基础技术，如何组织系统的组件子系统，安排好这些子系统之间的接口、依赖和交互关系是软件系统架构师的主要工作职责。
-需要留意的是，这些技术是&lt;strong&gt;构建在基本的模块化设计开发方法之上的，因此很多模块设计的原则也被自然而然地升华和适配&lt;/strong&gt;；如果不能深刻地理解基础的模块化设计方法和里面的痛点，
-生搬硬套组件设计的方法弄不好就会弄巧成拙，变成浮沙之上筑高台的游戏就很容易招徕失败。&lt;/p&gt;
-
-&lt;h3 id=&quot;组件化技术的探索和演化历史&quot;&gt;组件化技术的探索和演化历史&lt;/h3&gt;
-&lt;p&gt;组件作为复杂的软件系统发布和部署的基本单元，其形式随编程语言和平台的研究和发展而呈现不同的具体形式，可能是Java环境中的Jar打包文件，
-或者是.NET环境中的动态库文件，也可能是Ruby中的Gem，Rust中的模块，NPM中的模块等。
-它们的共同特征就是&lt;strong&gt;可以独立打包、发布，并且和其它组件有形形色色的依赖共生&lt;/strong&gt;关系。&lt;/p&gt;
-
-&lt;p&gt;最早期的家算计程序不支持这些概念，所有人开发的源代码必须安置好在内存中被加载的位置，多人协作的场景下，
-大家协商好自己负责的部分的加载地址，但是这种很快就变得难以为继；
-于是新的可以支持重定位加载地址的技术就被发明出来，使得不同的程序可以在加载的时候，加载器通过计算给它安差一个位置，防止冲突。
-这种情况下，编译出来的程序的实际加载位置是未知的，而加载器需要根据它的算法为一个可执行文件中的所有的动态加载地址计算一个没有冲突的方案来。
-链接器则被用来对编译的程序安插一些可重定位的段和符号表，以便加载器在程序实际载入内存的时候安插实际的内存地址。&lt;/p&gt;
-
-&lt;p&gt;摩尔定律和墨菲定律的交替作用始终影响着计算机软件行业的发展和演进，程序的规模变得越来越大，业务系统越来越复杂，而&lt;strong&gt;新技术的出现总是被现实中遇到的限制所驱动&lt;/strong&gt;。
-传统的静态语言中，用连接器和加载器技术组织的组件化技术依然有各种各样的优势和不足，间接催生了采用不同技术决策的技术的繁荣共存；
-于此同时，希望绕开这一限制的先驱们则通过创建新的编程语言（如动态语言）或者平台技术（跨越多种语言的中间语言来促进互操作）来简化组件化开发的种种问题。&lt;/p&gt;
-
-&lt;p&gt;现在我们可以支持在程序执行的过程中，&lt;strong&gt;不重启主要系统，而将新开发的功能插入运行的系统中的办法&lt;/strong&gt;来实现功能的实时更新和扩展，
-这种插件化技术甚至在很多开发环境中成为默认的扩展方式；这一技术能够工作的前提是系统的架构必须有良好的考虑和组织。&lt;/p&gt;
-
-&lt;h3 id=&quot;组件内聚原则&quot;&gt;组件内聚原则&lt;/h3&gt;
-&lt;p&gt;Bob大叔讲使用用组件划分的原则总结为基本的三条；这三条原则也是前面所说的模块化设计原则的延伸&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;重用和发布等同原则 (Common Resue/Release Equivalence Principle)&lt;/li&gt;
-  &lt;li&gt;通用闭合原则 (Common Closure Principle)&lt;/li&gt;
-  &lt;li&gt;通用重用原则 (Common Reuse Principle)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;第一条原则是关于模块的聚合和发布，现代的软件工具已经隐含地要求我们放在一起的类或者模块必须同时发布出去，所以这一个原则看起来是不言自明的。
-只是这里面有个不太明显的部分在于，如果设计者将没有关联的东西随意放置在一起发布，那么不必要的&lt;strong&gt;偶然依赖就会出现使得系统变得难以维护&lt;/strong&gt;。
-这些被打包在一起发布，使用同样的测试、发布流程的组件内部模块必须共同服务于同一个设计目标，并且&lt;strong&gt;遵循前面单一职责原则的思想，应该有且只有一个原因而变更&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;后边两个原则则是从其它方面深入阐述了第一条原则的重要性和潜在假设。&lt;/p&gt;
-
-&lt;p&gt;通用闭合原则描述的是&lt;strong&gt;单一职责和开放闭合原则在组件化设计上的应用&lt;/strong&gt;；它建议我们讲同样职责并且提供单一变更或者有单一的Actor的类或者模块放置在一个组件中。
-响应地，具有不同的逻辑职责或者可能有多个原因引起重新发布控制的模块或者类应该被归类放置在不同的组件中。
-不同的是这里讨论的变更所在的抽象层次更高一些。&lt;/p&gt;
-
-&lt;p&gt;最后一个原则注重于组件的重用，要求我们&lt;strong&gt;仅仅使用本组件需要用到的其它功能组件&lt;/strong&gt;，不要引入不必要的组件之间的依赖。
-这个考虑之所以重要，是因为依赖关系总是有传递性的，引入不必要的依赖会使软件配置管理变得困难，测试和验证复杂度急剧上升，从而增加软件的维护成本。
-毕竟软件架构的目标就是尽力提高软件系统的可扩展性和降低维护变更的成本。&lt;/p&gt;
-
-&lt;h4 id=&quot;三个原则之间的关系&quot;&gt;三个原则之间的关系&lt;/h4&gt;
-
-&lt;p&gt;软件架构工作可以看做是充满了妥协和折中的艺术性活动，尽管它所依赖的基本工具是各种各样的技术和业务领域知识。
-这三个原则之间其实是相互掣肘，相互依赖的关系，实际应用的时候需要根据场景和需求分析和折中，而不能走向极端。&lt;/p&gt;
-
-&lt;p&gt;如果过分考虑重用性和发布重用等价两个原则，则会引入很多不必要的软件组件，带来极高的维护成本；
-过分考虑通用闭合原则和发布重用等价原则，则会违反重用原则，导致升级和发布困难。
-显然&lt;strong&gt;闭合原则强调聚合而重用强调拆分，两者是互斥的两面&lt;/strong&gt;，需要综合分析和考虑。&lt;/p&gt;
-
-&lt;p&gt;三个原则的使用和侧重也可能因为开发所处的阶段不同而变换。往往&lt;strong&gt;在项目的早期阶段，组件重用方面的考虑并不会太多&lt;/strong&gt;，否则就会因为选择困难而迟迟无法取得进展。
-等到越来越多的功能被加入进来，则需要适时地拆分组件，提高可重用性。&lt;/p&gt;
-
-&lt;h3 id=&quot;组件耦合处理原则&quot;&gt;组件耦合处理原则&lt;/h3&gt;
-
-&lt;p&gt;模块化的软件设计方法要求我们尽力减少组件之间的耦合，而正确地处理组件的耦合从来不是一个简单的工作，&lt;strong&gt;需要考虑技术、政治和环境变化等方面的因素&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h4 id=&quot;无依赖环原则&quot;&gt;无依赖环原则&lt;/h4&gt;
-&lt;p&gt;第一个重要的原则是，组件之间的依赖关系中不能出现环。&lt;/p&gt;
-
-&lt;p&gt;这一原则的基础想法是考虑组件之间的依赖关系，并用一幅有向图来描述各个组件之间的依赖关系，并检查最终的组件依赖关系图中是否存在有环。
-显然出现了依赖环的组件之间有很强的耦合，&lt;strong&gt;会带来代码改动和发布上的困难&lt;/strong&gt;，测试和集成工作也会寸步难行，&lt;strong&gt;必须依赖于高频度的同步开发，而过多的同步则必然带来并行开发效率的降低&lt;/strong&gt;。
-有时候复杂的组件依赖环还会带来组件构建和发不顺序选择上的困境，很多时候发布团队不得不小心选择构建的顺序和工作流以免带来不一致。&lt;/p&gt;
-
-&lt;p&gt;打破依赖环的常见办法有两种&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;采纳&lt;strong&gt;依赖导致原则，抽象出来接口组件&lt;/strong&gt;，然后让组件依赖于接口，而实现组件实现给定的接口组件；这样强依赖关系便被打破。&lt;/li&gt;
-  &lt;li&gt;创建一个新的组件，然后把产生环形依赖的组件糅合放置在新的组件中，这样原来的环就自然消失了。&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;这样的变更意味着传统的自顶向下方法的失效，但是如果我们考虑演进式架构的方法学，总是用发展的思维看到软件架构的工作，
-矛盾就自然迎刃而解了，因为复杂的组件依赖不是一夜之间突然冒出来的，
-只要在&lt;strong&gt;刚刚出现问题的时候，采用务实的思路分析业务问题和组件设计约束，尽快扑灭架构腐化的苗头&lt;/strong&gt;即可。
-这样的方法其实也是现在敏捷环境下软件设计的主要思路
-(&lt;a href=&quot;/ /post/2016/12/24/software-design-in-agile-development-context/&quot;&gt;之前的思考见这里&lt;/a&gt;)。&lt;/p&gt;
-
-&lt;h4 id=&quot;稳定依赖原则&quot;&gt;稳定依赖原则&lt;/h4&gt;
-
-&lt;p&gt;软件架构从来不是一个静态的概念，构成系统的组件总是会因为各种各样的原因而不时发生变化。
-这条原则讨论的是组件之间相互依赖方向的选择，即考虑哪个组件应该依赖于哪个组件的问题。
-作者的经验是，&lt;strong&gt;变化相对困难的组件应该依赖于稳定而易于修改的组件&lt;/strong&gt;，而不是相反方向；否则就会引起架构的腐化和演进困难。&lt;/p&gt;
-
-&lt;p&gt;这里的关键是，需要将&lt;strong&gt;组件的稳定性用变更的难易程度来衡量&lt;/strong&gt;，而不是实际变更的多少来衡量，因为软件组件从被设计出来的那一天开始，
-就不能避免发生变化，除非它因为无法重用而慢慢消亡失去生命力。影响稳定性的因素有很多，比如代码的行数，编程语言或者领域复杂性等，
-但是从架构设计的角度看，&lt;strong&gt;一个明显的因素是它所依赖的其它模块的数量和稳定性本身&lt;/strong&gt;。
-如果一个模块有很多的前向依赖，那么这些依赖模块的变更都会使该模块本身变得不稳定。&lt;/p&gt;
-
-&lt;p&gt;稳定性的度量可以用依赖关系图上面的扇入、扇出关系来简单计算，只需要简单数一下依赖于该组件的其它组件的数量（扇出值），
-并用这个数字除以所有扇入扇出的所有组件的数量，就可以得到一个简单的稳定性度量。
-当这个度量为１的时候，表明它没有使用其它组件，那么修改起来非常容易，不会有其它的影响。&lt;/p&gt;
-
-&lt;p&gt;如果用上面的依赖度量值来描述稳定性依赖原则，那么我们需要保证，在组件依赖关系图上，&lt;strong&gt;沿着依赖方向组件的稳定性值需要保持递减&lt;/strong&gt;。
-对于违反了这一原则的组件，一个简单的处理方法依然是&lt;strong&gt;使用依赖倒置原则创建新的抽象组件&lt;/strong&gt;，从而避免稳定的组件依赖于不稳定的组件。&lt;/p&gt;
-
-&lt;p&gt;这样会产生一个明显的结果是有一些&lt;strong&gt;纯粹抽象的组件被创建出来，不过无需惊讶的是，成熟的软件系统中，纯抽象的接口组件随处可见&lt;/strong&gt;。
-当然这个现象是静态语言编程环境中才会观察到的现象，因为静态类型系统总是需要检查声明和实现的一致性，以期及早发现编码中的问题。
-动态语言编程环境由于放松了对程序员代码一致性的检查，所有的依赖都是隐性的，所以没有必要创建抽象的接口组件。&lt;/p&gt;
-
-&lt;h4 id=&quot;稳定抽象原则&quot;&gt;稳定抽象原则&lt;/h4&gt;
-
-&lt;p&gt;这一原则可以用一句简单的表述概况，即&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;一个组件的稳定程度应该和它的抽象程度想匹配。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;它要求我们&lt;strong&gt;将业务逻辑相关的核心策略或者非常稳定的业务规则用高度抽象的组件接口描述出来&lt;/strong&gt;。而一些不是特别重要的或者易于变化的部分可以用具体的组件模块来实现。
-在面性对象系统中，这些高度稳定的部分有时候有一些默认的实现，这些实现可以用抽象类的办法来实现之。&lt;/p&gt;
-
-&lt;p&gt;组件的抽象程度可以用一个简单的公式来度量：用组件中的抽象接口和抽象类的总和除以组件中所有的接口、类的数量就可以得到其度量值。
-这种度量方法比较适合纯粹的如Java这样的面向对象语言。&lt;/p&gt;
-
-&lt;p&gt;Bob大叔还基于上述的两个度量方法，提出了一套定量分析组件设计的稳定性和抽象程度匹配度的模型。
-可以用常规的统计学方法来判断组件系统的设计是否处于良好的状态。
-在这一的关联图中，设计良好的软件组件总是处于对角线的位置，而偏离对角线的地方则可能意味着有连个极端&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;过度抽象却又鲜有变化的代码表明存在着&lt;strong&gt;过度设计&lt;/strong&gt;&lt;/li&gt;
-  &lt;li&gt;缺乏良好抽象却又不稳定的组件会带来&lt;strong&gt;维护泥潭&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;整洁之架构&quot;&gt;整洁之架构&lt;/h2&gt;
-
-&lt;p&gt;什么是架构和架构师，以及架构师应该需要做什么向来是充满争议的话题。
-写了很多经典著作的Martin Fowler写过著名的&lt;a href=&quot;http://files.catwell.info/misc/mirror/2003-martin-fowler-who-needs-an-architect.pdf&quot;&gt;Who Needs an Architect&lt;/a&gt;
-指出&lt;strong&gt;架构师应该是做出关键而重要的技术决策的资深开发者&lt;/strong&gt;。
-Bob大叔则进一步从软件开发人员的角阐述了架构师应该是什么而不是什么&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;架构师是最好的程序员，并且继续作为一个程序员&lt;/strong&gt;而存在；不应该相信那些架构师可以从代码中抽身而出的只关注于高级问题的砖家的说法。&lt;/li&gt;
-  &lt;li&gt;架构师需要关注于如何提高程序员团队的生产率，这一要求使得架构师不能脱离程序员队伍，否则他们就无法理解实际实现中的痛点和问题。&lt;/li&gt;
-  &lt;li&gt;软件架构需要关注于软件系统如何被开发、部署、运行、维护；其背后需要尽可能的少封闭一些具体实现相关的决策。&lt;/li&gt;
-  &lt;li&gt;软件架构的终极目标是&lt;strong&gt;用尽可能小的成本来支持系统的生存周期，最大化地提高程序员的生产效率&lt;/strong&gt;。这就要求我们尽可能多地留出更多的扩展接口，减少系统层面的写死设计。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;保留尽可能多的选项&quot;&gt;保留尽可能多的选项&lt;/h3&gt;
-
-&lt;p&gt;软件总是凸显两个方面的价值:&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;行为模式的价值，只有实现正确的行为模式，软件才能变得有用&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;结构模式的价值，唯有具备了合适的结构，软件才能成为软件&lt;/strong&gt;，而合理的结构应该是软件架构本身的重点所在；因为没有良好的架构的软件系统也能完成需要的行为&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;软件之所以能被称之为软件，最大的原因在于变更它的结构以便适应变化的需求的成本很小。如果想做到这一点，
-我们需要把软件系统分为两个部分：策略和细节。&lt;strong&gt;策略一旦选定变化起来就比较困难，而细节实现的变化往往容易&lt;/strong&gt;。
-策略的部分包括这些业务规则和过程，而细节则是具体的技术实现、数据库、通信协议、框架、库等。
-由于&lt;strong&gt;商业业务规则比较稳定而技术的变化比较快，我们需要保持这些稳定的部分&lt;/strong&gt;，而尽可能的不写死具体实现这些业务规则的技术细节。&lt;/p&gt;
-
-&lt;p&gt;举个例子来说，在系统开发的早期阶段，选择某个具体的数据库系统实现往往不是最重要的决策，因为
-关键的业务规则和逻辑并不需要依赖于具体的数据存储技术和细节。那么架构师可以将这些决定留到以后需要的时候再做；系统中需要用到数据存储系统的时候，使用抽象的接口隔离它就可以了。
-类似地，也不需要尽早地在系统开发的早期阶段部署REST接口，因为系统的核心业务规则并不依赖于具体的接口实现技术。是否需要使用某些SOA架构框架或者微服务框架。&lt;/p&gt;
-
-&lt;p&gt;如果这些细节已经被别人事先选择好了，那么保持业务规则灵活的另外一个办法是隔离这些细节，然后在核心业务规则的部分假设这些细节不存在；
-这样做的好处是以后万一需要修改采用另外一种方式，只需要增加一种新的实现就可以了。
-&lt;strong&gt;好的架构师总是想方设法地最大化未固化的技术决策&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;单体还是微服务&quot;&gt;单体还是微服务？&lt;/h3&gt;
-
-&lt;p&gt;微服务架构目前已经成为一门显学，而架构师则需要拨开这些喧嚣专注于自己的商业系统的核心业务规则。如果系统需要强烈的分布式架构，
-那么软件系统应该很容易地扩展为分布式系统，采用SOA或者微服务系统；良好的软件架构需要保留这些选项，
-使得&lt;strong&gt;扩展和变更轻而易举&lt;/strong&gt;。如果系统的所有部分都假设自己知道这些细节信息，实现这样的改变就会难于登天。&lt;/p&gt;
-
-&lt;p&gt;关键还是要做好适当的隔离和解耦，不做过多的假设使得核心的业务逻辑仅仅依赖于系统业务逻辑本身。
-所有这些应用服务器、依赖注入框架、微服务系统、容器&lt;strong&gt;技术本身是为了简化具体细节的实现&lt;/strong&gt;，而不是来替代软件架构本身。
-他们不应该是软件架构的中心；重心是&lt;strong&gt;如何做才能使易于变化的部分怎样以更低的成本实现以满足业务需要&lt;/strong&gt;；其手段就是预留出足够多的扩展空间。&lt;/p&gt;
-
-&lt;h3 id=&quot;系统边界划分&quot;&gt;系统边界划分&lt;/h3&gt;
-
-&lt;p&gt;为了解耦系统架构设计，我们需要设计子系统或者组件，然后分割组件的边界。如何划分系统边界以便更好地实现系统的用例模式，同时减小耦合提高组件复用度不是一件轻而易举的事儿。
-好的边界划分方法是&lt;strong&gt;尽可能降低一些不成熟的决策产生的影响，降低对这些容易变化的决策的依赖&lt;/strong&gt;。
-我们需要在在重要的模块或者子系统和不太重要的子系统之间划分出清晰的边界；
-比如数据库系统和界面显示系统往往和核心的商业业务逻辑之间有一条清晰的边界，因为数据库实现和用户界面相对于业务逻辑而言更不成熟和易于变化。
-实现边界隔离的常用办法是抽象出一个接口，然后让具体的实现来提供实现这些接口，而业务规则仅仅依赖于该抽象接口，这其实就是上面的依赖导致原则。&lt;/p&gt;
-
-&lt;p&gt;这样的架构设计方法催生的正是非常著名的允许第三方扩展的插件式架构；核心的系统业务逻辑规则被和其它的可以用各种方式实现的外围模块所分离开，
-这样&lt;strong&gt;外围的实现模块就成为核心系统的插件。这些插件部分是易于扩展和替换的&lt;/strong&gt;，从而整个软件系统都变得易于修改和变更以实现新的外围需求。
-具体的外围插件系统的例子包括图形界面子系统、数据库子系统等。并且大部分情况下的输入输出系统其实也应该是属于可替换的系统插件而被合适的接口所隔离。&lt;/p&gt;
-
-&lt;h3 id=&quot;策略和分层&quot;&gt;策略和分层&lt;/h3&gt;
-&lt;p&gt;核心的业务规则往往本身又可以被划分为很多子系统，这些子系统都是高度抽象的业务规则，
-却可以&lt;strong&gt;按照它们和外围的输入输出的远近而被分割为不同的层次&lt;/strong&gt;。
-那些和输入输出系统关系比较疏远的子系统处于比较高的层次，而较近的则处于比较低一些的层次。
-同时会因为同样的原因变更的部分需要被组合在一个层次中。高层次的策略应该是更稳定的部分，
-并且应该代表了更高层次的抽象，更不易发生变化。&lt;/p&gt;
-
-&lt;h3 id=&quot;业务规则识别&quot;&gt;业务规则识别&lt;/h3&gt;
-&lt;p&gt;既然业务规则是架构中最核心的部分，如何识别它们有时候不是一个显而易见的问题。
-简单地来看，业务规则就是&lt;strong&gt;这些商业系统赖于赚钱盈利的过程或者业务流程&lt;/strong&gt;，这些业务流程很多时候即使没有计算机软件也可以手工来达成。&lt;/p&gt;
-
-&lt;p&gt;这些部分是商业软件系统的核心，它们是软件系统之所以存在的核心价值所在，组成了系统的核心功能。
-理想情况下，实现核心业务规则的子系统应该处于软件架构的最核心处，应该是最容易被重用的稳定的代码系统。&lt;/p&gt;
-
-&lt;h3 id=&quot;架构意图呈现&quot;&gt;架构意图呈现&lt;/h3&gt;
-
-&lt;p&gt;良好的软件系统应该能够&lt;strong&gt;第一眼望去就自动呈现系统实现的核心业务，而不是具体的框架、库和基础技术&lt;/strong&gt;。
-新加入的程序员可以很容易地学习到系统的基本用力系统，即使他们没有办法很快熟悉系统的具体交付和支撑运行系统。&lt;/p&gt;
-
-&lt;p&gt;这样做的一个额外的好处是，&lt;strong&gt;软件系统本身就成为更容易被隔离测试的健壮的系统&lt;/strong&gt;，因为影响可测试性的一个很大的因素就是这些外围的框架、通信协议等繁杂的细节。
-反之以框架和复杂协议为中心组织的软件系统则很难被剥离出来做方便的自动化测试，系统维护的成本也会随之变高。&lt;/p&gt;
-
-&lt;h3 id=&quot;整洁架构的特征和分层&quot;&gt;整洁架构的特征和分层&lt;/h3&gt;
-
-&lt;p&gt;过去几十年来，先驱们发展了各种各样的想法来构建软件架构，这些方法论都致力于实现具有如下特征的软件系统&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;框架独立性：不依赖于任何库或者软件架构&lt;/li&gt;
-  &lt;li&gt;可测试性，各个部分可以独立测试&lt;/li&gt;
-  &lt;li&gt;界面隔离和独立，不管是命令行界面系统还是桌面客户端或者是浏览器等技术&lt;/li&gt;
-  &lt;li&gt;数据库独立性，可以替换各种SQL数据库，或者是文档数据库等，核心的业务逻辑不依赖于这些具体技术&lt;/li&gt;
-  &lt;li&gt;外部代理独立性，核心的业务系统并不知道外围的接口和协议&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Bob大叔据此把整洁的软件架构分离为四个环，从内层到外依次是&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;业务规则实体&lt;/li&gt;
-  &lt;li&gt;应用业务规则包括核心的业务用例&lt;/li&gt;
-  &lt;li&gt;接口适配器，包括控制器，展示层，网关等&lt;/li&gt;
-  &lt;li&gt;外围设备，Web，界面，数据库，具体设备等&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;这种结构可以用UML图描述如下&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/clean_architecture.png&quot; alt=&quot;clean-arch&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;根据上面讨论的架构规则，处于内侧的部分是核心的业务规则，外层的部分则是实现的细节和具体机制。
-依赖规则要求我们务必保证，源代码层次上的依赖顺序是，外层的代码需要依赖于内层的策略；相应地内层的部分需要对外层的实现一无所知。所有外层的部分的变化都不应该影响到内层的实现。
-图中没有直接描述的还有实际的控制流，依据依赖导致原则，实际运行的控制流和依赖关系是反转的，
-存在&lt;strong&gt;从Present和Controller到核心业务规则UseCaseInteractor的控制流&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;humble-object模式&quot;&gt;Humble Object模式&lt;/h3&gt;
-&lt;p&gt;上图中的展现层可以细分为Presenter和View两个层次，将距离用户更近的这一层挪到View中，同时放置在View中的部分需要尽量保持简单，以为界面相关的代码是出名的难以测试。
-这种做法其实是&lt;a href=&quot;http://xunitpatterns.com/Humble%20Object.html&quot;&gt;Humble Object模式&lt;/a&gt;的一种应用；
-该模式可以帮助我们&lt;strong&gt;识别和保护架构的边界&lt;/strong&gt;。它通过将系统的行为拆分为容易测试的部分和不易测试的部分，极大地简化了隔离测试。
-这种做法的关键是将难以测试的部分代码加以分解，只留下最基本的简单代码放在外部耦合比较大的模块中，而将比较纯粹的逻辑代码分离出来以便测试。
-被&lt;strong&gt;隔离出来的代码其实包含了更少的外围细节&lt;/strong&gt;，在方便测试的同时，模块的边界也变得更加清晰起来。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://xunitpatterns.com/Humble%20Object.gif&quot; alt=&quot;Humble Object Pattern&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这种做法很好地满足了好的软件架构总是易于测试的需要，换句话说&lt;strong&gt;具备可测性是良好的软件架构的一个重要属性&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;类似的做法也适用于以下一些场景&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;数据库隔离层网关，我们不希望我们的业务层代码知晓数据库操作的细节，也希望把SQL操作的细节隔离在外围，那么负责数据库访问的ORM就是同样类似的Humble Object。&lt;/li&gt;
-  &lt;li&gt;跨服务传递通信的细节同样也需要用Humble Ojbect来隔离，如何和其它的服务通信一样应该处于本服务的外围。
-基本上在系统架构的边界上，Humble Object模式可以得到广泛的应用。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;部分边界&quot;&gt;部分边界&lt;/h3&gt;
-&lt;p&gt;构造完整的模块边界的做法可以保证架构的灵活性和高扩展性；不幸的是这样做带来的额外开销也不小，并经常被敏捷开发专家嘲笑，他们经常用的一个敏捷术语是YAGNIT即你将来也不需要它！
-不得不承认很多时候他们说的也对，因为&lt;strong&gt;没有人可以预测到未来的需求，然而作为一个架构师却又不得不如此&lt;/strong&gt;做！
-变通的办法是简化这一边界隔离策略，采用&lt;strong&gt;简化版的边界来平衡潜在的扩展性需求和搭建隔离边界的开销&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;一种构造部分边界的做法是，准备所有的隔离设施和抽象，但是在&lt;strong&gt;代码组织和部署上并不将他们设置为相互分开的组件&lt;/strong&gt;，
-而是将它们暂时糅合在一个组件中。等到时机成熟的时候，再将他们分离开，这时候分离的代价将会很小。
-这样的做法只是简化了构建和运维的成本，软件内部的结构仍然保留了良好的抽象和隔离。&lt;/p&gt;
-
-&lt;p&gt;另外一种方法是维护单一维度的边界，即每一个服务都仅仅对服务提供者的实现做接口隔离，而在服务的调用侧，
-并不对其它服务的接口做隔离和保护。这样仅仅保证了服务使用者对具体服务实现的隔离。
-还有一种做法是采用门面模式讲一个服务的所有方法都放置在一个门面接口下面，这是一种更弱的隔离边界。&lt;/p&gt;
-
-&lt;p&gt;无论采用哪一种部分边界隔离办法，架构师&lt;strong&gt;都需要做到对其中的优缺点心中有数，并且在适当的来决定&lt;/strong&gt;
-是否采用部分边界的做法隔离不同的抽象模块，或者是否需要将部分边界升级为完整的边界隔离设施。
-具体采用哪种策略对架构师而言是一个巨大的挑战，因为过度设计和抽象不足的代价都是极为高昂的，都会给软件的修改和维护成本带来巨大的挑战。&lt;/p&gt;
-
-&lt;p&gt;合格的软件架构师必须能够审时度势，&lt;strong&gt;根据实际情况的需要，选择合理的抽象级别，既不落入过度设计的窠臼；
-也不能掉入抽象不足写的太死的尴尬境地&lt;/strong&gt;。通过自己的智慧和经验做出明智的判断；过犹不及，恰到好处才是最好却又最难做到。
-要想明智地做到这一点，很多时候甚至需要猜测和运气。幸运的是这不是一个一次性的决定，架构师可以在决定之后适时观察再谋定而后动。
-发现一些地方有过度厚重的边界的时候，及时地简化以提高维护成本；发现其它一些地方的抽象不足也需要及时加重隔离的边界，为后续的扩展留上余地。&lt;/p&gt;
-
-&lt;h3 id=&quot;主模块&quot;&gt;主模块&lt;/h3&gt;
-
-&lt;p&gt;几乎所有的软件系统中，我们都可以看到一个主模块(Main)，无论采用什么样的编程语言或者框架都不例外。
-这一模块几乎可以看到所有其它的模块（的边界），这种情况其实是一种正常的现象，因为静态结构的解耦最终反应到代码执行层面，必须有一个地方实现运行期的绑定以便执行真正的控制流运转。
-因为我们&lt;strong&gt;抽象设计的一个秘密武器依赖倒置实现的秘诀就是控制流反转；所以主模块必须有非常严重的耦合不可&lt;/strong&gt;，
-所以主模块必须作为一个特例并且是唯一的特例而存在。&lt;/p&gt;
-
-&lt;p&gt;主模块其实承担了串起所有整洁架构中的抽象模块的重任，它做的是所有的脏活累活，所以将其看做是插件式架构中的一个无关紧要的插件即可。
-它完成的任务正是加载外围的给定的配置和其它输入和输出设施，启动模块的主控制逻辑，然后使得整个系统按照预设的组合运转起来。&lt;/p&gt;
-
-&lt;h3 id=&quot;测试边界&quot;&gt;测试边界&lt;/h3&gt;
-
-&lt;p&gt;整洁的软件架构中，测试必须是架构的一部分，它是保证软件系统能够以低成本运作和维护的重要设施，所以测试也需要一个清晰的边界。
-模块的设计必须要要保证考虑到可测性，&lt;strong&gt;需要避免在测试中引入一些昂贵的测试依赖和耦合&lt;/strong&gt;，比如界面的细节，
-安全设施的依赖等。本质上来说，测试都依赖于非常具体的细节，所以从架构环的角度考虑，可以认为测试位于最外层的一环。
-采用的手法和上面构建边界的方法类似，可以用API接口的方式提高模块或者组件的可测试性。&lt;/p&gt;
-
-&lt;p&gt;测试的设计必须要作为软件架构设计的一个部分仔细考虑，没有加以详细考虑的测试组件必然因为过度脆弱、难以维护而逐渐被抛弃，
-最终软件系统本身的维护成本反而会大幅增加而招致项目的失败。&lt;/p&gt;
-
-&lt;h3 id=&quot;嵌入式系统架构&quot;&gt;嵌入式系统架构&lt;/h3&gt;
-
-&lt;p&gt;嵌入式系统经常被当做一个非常特殊的存在，因为这一领域的软件总是显得和其它计算平台的软件差异巨大；因此是否可以套用上面的整洁架构技术是个值得思考的问题。
-Bob大叔则旗帜鲜明地指出&lt;strong&gt;嵌入式架构本质上没有太大的特别之处&lt;/strong&gt;，即便这个领域有它自身的特别之处，这主要是因为嵌入式软件环境必须估计到它特殊的硬件、固件环境和形形色色的定制行为。&lt;/p&gt;
-
-&lt;p&gt;作者认为从架构设计的角度来说，嵌入式软件的设计者们需要多多向外部的世界学习软件抽象和架构设计的智慧，做好良好的硬件和固件层封装是至关重要的，
-考虑好上面的那些结构设计原则，总是将固件和硬件相关的部分隔离开，使得大部分核心的软件系统总是可测试的，
-才能提高程序员的效率，降低改动和维护的成本：这在嵌入式开发中是一笔很大的开销，不能脱离具体固件环境的开发和测试的嵌入式开发成本是极度高昂的。&lt;/p&gt;
-
-&lt;h2 id=&quot;总结和回顾&quot;&gt;总结和回顾&lt;/h2&gt;
-&lt;p&gt;作为一个具有几十年开发经验的领域老兵，BoB大叔的软件开发生涯比我自己的声明还要长。在这样一本以文字为主的讲方法论的书中，他穿插了很多他所见到的、听到的、成功的或者失败的故事；
-每一个故事背后都有很深的教训和经验值得人们深思和学习。计算机行业本身都是一个很新的行业，
-更不要提专业的大规模软件开发的历史更加短暂；计算机世界里，
-解决一个&lt;strong&gt;复杂问题的最本质方法之一就是分而治之&lt;/strong&gt;；很多复杂的问题的解决之道都不过是添加一些新的抽象。
-这些简单的思想背后却蕴藏着巨大的威力，这一巨大的威力背后也不竟然带来巨大的风险，运用不当又很容易造成过犹不及而伤及自身。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;软件开发本身又不单单是一个纯粹的技术问题&lt;/strong&gt;，因为对绝大部分商业软件来说，我们需要考虑它的建造、维护和变更的成本。
-很多时候我们面对的是一个需要维护很长时间的软件，它从&lt;strong&gt;被创建之日起，就肩负着可以被不断修改完善以便重用&lt;/strong&gt;的使命。
-人们很少有奢侈的机会去重头开始写一切需要的东西，因为这样做往往无法实现软件所承载的商业价值。
-软件架构师之所以要努力搭建这些不时被嘲笑是“叠床架屋”的复杂设计，其实也不过是希望有朝一日某些部分需要被修改的时候，付出的代价要小一些。
-忽视这些代价而只顾一时之快的经验不足的程序员们，很难避免以后自己也踏入“以使后人而复笑后人也”的境地。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="programming" /><category term="language" /><category term="architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">不经意发现Bob大叔出版了新书，延续之前的命名风格定名为《Clean Architecture》，英文版已经于2017年底正式上市； 刚好公司的账户可以访问Orielly公司的在线书城，于是就断断续续地读了起来。 Bob大叔讲故事的能力即使在久负盛名的技术作家圈里面也是闪耀出众的，可以算作是高手中的高手，行文由浅入深层层递进，可读性一向很好，这本书读起来也不例外。</summary></entry></feed>
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry></feed>

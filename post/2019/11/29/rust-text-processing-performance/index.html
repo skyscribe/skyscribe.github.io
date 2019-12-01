@@ -1,0 +1,1150 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.4.1 by Michael Rose
+  Copyright 2017 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE.txt
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin SEO -->
+
+
+
+
+
+
+
+
+
+<title>Rust文本处理的性能及优化 - 驭风万里无垠</title>
+
+
+
+
+<meta name="description" content="作为一门秉承零成本抽象这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即需要进一步优化，可能还不得不额外下一些功夫才能做到。">
+
+
+
+
+<meta name="author" content="Fei Yan">
+
+<meta property="og:locale" content="en">
+<meta property="og:site_name" content="驭风万里无垠">
+<meta property="og:title" content="Rust文本处理的性能及优化">
+
+
+  <link rel="canonical" href="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">
+  <meta property="og:url" content="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">
+
+
+
+  <meta property="og:description" content="作为一门秉承零成本抽象这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即需要进一步优化，可能还不得不额外下一些功夫才能做到。">
+
+
+
+  <meta name="twitter:site" content="@skyscribe">
+  <meta name="twitter:title" content="Rust文本处理的性能及优化">
+  <meta name="twitter:description" content="作为一门秉承零成本抽象这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即需要进一步优化，可能还不得不额外下一些功夫才能做到。">
+  <meta name="twitter:url" content="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+    <meta name="twitter:creator" content="@Fei Yan">
+  
+
+
+
+
+
+
+
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2019-11-29T00:00:00+08:00">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end SEO -->
+
+
+<link href="https://skyscribe.github.io/feed.xml" type="application/atom+xml" rel="alternate" title="驭风万里无垠 Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="https://skyscribe.github.io/assets/css/main.css">
+
+<!--[if lte IE 9]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+<meta http-equiv="cleartype" content="on">
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use http://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <a class="site-title" href="https://skyscribe.github.io/">驭风万里无垠</a>
+        <ul class="visible-links">
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/programming/index.html">编程相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/notes/index.html">个人笔记</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/tools/index.html">工具相关</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/engineering/index.html">软件工程</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/design/index.html">软件设计</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/haskell/index.html">Haskell</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/cpp/index.html">C++</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/year-archive/index.html">按年份归档</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/tags/index.html">标签汇总</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/categories/index.html">所有分类</a></li>
+          
+            
+            <li class="masthead__menu-item"><a href="https://skyscribe.github.io/about/">关于...</a></li>
+          
+        </ul>
+        <button><div class="navicon"></div></button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+<div itemscope itemtype="http://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="https://skyscribe.github.io/assets/images/me.jpg" class="author__avatar" alt="Fei Yan" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name" itemprop="name">Fei Yan</h3>
+    
+      <p class="author__bio" itemprop="description">
+        A curious programmer
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="http://schema.org/Place">
+          <i class="fa fa-fw fa-map-marker" aria-hidden="true"></i> <span itemprop="name">Hangzhou</span>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:skyscribe.yf@gmail.com">
+            <meta itemprop="email" content="skyscribe.yf@gmail.com" />
+            <i class="fa fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-linkedin-square" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/skyscribe" itemprop="sameAs">
+            <i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="https://www.stackoverflow.com/users/222167/fei" itemprop="sameAs">
+            <i class="fa fa-fw fa-stack-overflow" aria-hidden="true"></i> Stackoverflow
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fa fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+
+  
+<h3>
+  <a href="/categories/index.html">Categories</a>
+</h3>
+<div class="tagCloud">
+  <ul>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/cpp/index.html">cpp(17)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tools/index.html">tools(25)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/debugging/index.html">debugging(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/linux/index.html">linux(9)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/build/index.html">build(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/tips/index.html">tips(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/test/index.html">test(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/study/index.html">study(16)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/notes/index.html">notes(29)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/programming/index.html">programming(48)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/language/index.html">language(22)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/blog/index.html">blog(5)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/doc/index.html">doc(6)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/fp/index.html">fp(7)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/haskell/index.html">haskell(8)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/design/index.html">design(27)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/engineering/index.html">engineering(11)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/protocol/index.html">protocol(1)</a>
+  </span>
+  </li>
+  
+  
+  
+  
+  <li>
+  <span class="tag">
+      <a href="/categories/architecture/index.html">architecture(6)</a>
+  </span>
+  </li>
+  
+  </ul>
+</div>
+
+
+  
+  </div>
+
+
+
+
+  <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Rust文本处理的性能及优化">
+    <meta itemprop="description" content="作为一门秉承零成本抽象这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即需要进一步优化，可能还不得不额外下一些功夫才能做到。">
+    <meta itemprop="datePublished" content="November 29, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 class="page__title" itemprop="headline">Rust文本处理的性能及优化
+</h1>
+          
+            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> 
+
+
+
+
+
+
+本文有 9807 字，大约需要 24 分钟可以读完, 创建于 2019-11-29
+
+
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        <p>作为一门秉承<strong>零成本抽象</strong>这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。
+但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即<strong>需要进一步优化</strong>，可能还不得不额外下一些功夫才能做到。</p>
+
+<!--more-->
+<h2 id="背景">背景</h2>
+<p>大概一年前，出于实际工作内容的需要，我写过一个简单的针对产品问题报告系统上的数据到处记录的分析程序；最初的目标是在解决问题的同时顺便提高自己对Rust语言的理解；
+毕竟对于学习一门难度比较高的技术而言，读多少文档和书都不如拿<strong>一些实践中需要解决实际的问题来练手</strong>效率更高。</p>
+
+<p>这个问题的核心技术是典型的CSV文本文件格式解析，CSV格式本来就是一种由严格语法定义的文本格式，因而毋宁说这里的<strong>核心编程问题域就是文本处理</strong>。
+只不过因为内部流程的复杂性和牵扯到这一流程之中的人员数量的庞大，导出数据中的文本字段内还有各种各样没有经过良好格式化的数据，需要从解析好的CSV格式中做二次分解和提炼。</p>
+
+<h3 id="二次解析复杂性">二次解析复杂性</h3>
+<p>因此在既有的csv库的处理之上，问题本身还需要<strong>大量的二次解析</strong>处理，甚至包括在一个<strong>长度可能超过数万个字符</strong>的单一字段内，分解出内部较为复杂的结构集合，以便做后续的统计、归并和显示。实现这一功能本身不是特别困难，
+熟悉了Rust的语法之后，适用它自身内置的<code class="highlighter-rouge">Option</code>/<code class="highlighter-rouge">Map</code>/<code class="highlighter-rouge">Vec</code>/<code class="highlighter-rouge">Iterator</code>等基础核心数据结构之后，配合它自身优雅的函数式编程设施和模式匹配，可以很快熟练写出想要的各种变换逻辑。</p>
+
+<p>具体到文本解析，则不能不提到正则表达式处理，毕竟手写的字符串搜索和子串引用<code class="highlighter-rouge">slice</code>机制虽然好用，却往往可能会沦为<strong>不成熟优化</strong>，因为复杂文本的处理最好还是交给专业的正则表达式库更合理。</p>
+
+<h3 id="数据量增大之下的性能考验">数据量增大之下的性能考验</h3>
+<p>一开始版本的程序仅仅是处理几千条记录，此时的输入文件虽然超过80MB，里面的记录有数千条，总体而言不到两秒钟的运行效率还算是差强人意，实际使用的时候，基本鼠标单击一下稍微停顿即可以完成。
+随着报表数据越来越多（做出基本的功能之后，总想让它发挥更大的效力），对输入数据的要求就更高，慢慢地它需要能高效地处理300MB以上的报表输入，于此同时内部二次解析的复杂度也随着新需求的加入而变得更加复杂。</p>
+
+<p>此时处理时间已经接近了10秒，这么长的运行时间对于一个迷你的小工具而言太长了一点，以至于实际用鼠标单击它的时候<strong>能够感受到明显的停顿</strong>，优化的需求迫在眉睫。</p>
+
+<h2 id="优化分析">优化分析</h2>
+<p>基于程序本身所使用到的基本技术，可以有下面几个优化方向</p>
+<ul>
+  <li>运算缓存</li>
+  <li>多线程并行化处理</li>
+  <li>第三方库</li>
+</ul>
+
+<h3 id="火焰图">火焰图</h3>
+<p>当然没有benchmark数据的性能优化都是很危险的，由于Rust的底层采用的是LLVM的编译工具链，因此生成火焰图的方法也非常简单直接。只需要在<code class="highlighter-rouge">Cargo.toml</code>中加入如下的选项确保生成的二级制文件中包含符号表</p>
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[profile.release]</span>
+<span class="py">debug</span><span class="p">=</span><span class="kc">true</span>
+</code></pre></div></div>
+
+<p>为了解析Rust自身的符号，我们可以<strong>借助rust-unmangle工具</strong>在C++符号被解析之后，二次调用它进行转换即可。在Rust的项目目录下，只要执行如下的命令即可生成火焰图文件：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>perf record --call-graph dwarf,16384 -e cpu-clock -F 997 target/release/analyzer 
+perf script | stackcollapse-perf.pl | stackcollapse-recursive.pl | c++filt | rust-unmangle | flamegraph.pl &gt; flame.svg
+</code></pre></div></div>
+
+<p>需要注意的是生成的<strong>SVG矢量图文件</strong>是可以点击缩放的，但是需要用合适的工具打开而不能使用默认的图片查看器。
+图形里面的每一个图形的柱体是可以点击层层深入进去的；如果没有合适的工具，使用FireFox浏览器也是一个不错的选择。</p>
+
+<h2 id="运算缓存">运算缓存</h2>
+
+<p>这种优化其实是算法级别的优化，关键是找到有很多重复、或者循环的运算，将其缓存起来<strong>减少重复计算或者不必要的循环</strong>。
+这类的手法<strong>实施起来没有多少难度</strong>，和别的编程语言中的做法也是类似的，可惜的是很多时候能做的也不是很多。</p>
+
+<p>更多缓存和封装的做法其实相对<strong>不那么符合函数式编程的思想一些</strong>，有时候不得不将很漂亮优雅的函数式pipeline用法拆开，或者将中间的缓存结果放入新的参数传入函数，从而使得代码的可读性变得更差一些。</p>
+
+<h2 id="第三方库">第三方库</h2>
+<p>这里主要的第三方库有两个，一个是解析字符串正则表达式的<code class="highlighter-rouge">regex</code>库。</p>
+
+<h3 id="regex解析">Regex解析</h3>
+<p>本身使用的时候<strong>已经有意选择了性能最高</strong>的一个可用的正则库，因此换用其它正则表达式库的思路就不太可行了。</p>
+
+<p>还有一个思路是尽量去简化正则表达式的复杂性，比如<strong>减少不必要的正则表达式分组</strong>操作，减少正则匹配算法中的回溯操作。可惜这一方法在第一次写就的时候已经优化过了，没有多少剩余的空间可以做文章了。</p>
+
+<p>唯一剩下的思路就是看是否自己使用的方法不对，或者库本身是否提供了一些<strong>底层API或者高级技巧</strong>等。
+稍微翻阅一下Regex的文档，发现该库的作者提供了两个优化性能的思路</p>
+<ul>
+  <li><strong>减少拷贝</strong>，使用解析时候的生存周期里的字符串引用，而不是采用显式的<code class="highlighter-rouge">String</code>对象来保存解析的字段</li>
+  <li>减少不必要的<strong>按解析次数执行的内存分配</strong>，而采用复用匹配组捕获的数据结构的方法</li>
+</ul>
+
+<h4 id="减少拷贝">减少拷贝</h4>
+<p>其实CSV文本格式的规范已经决定了在读入文本字段的时候，不得不对从磁盘读取出来的文本内容做拷贝，而不能用直接引用。因为对于复杂的CSV格式而言，分隔符之间可能会出现转义字段，符合规范的解析器<strong>不得不将转移的字符提取出来</strong>做连接，返回给用户修改之后的字符串。这是第一道从操作系统的IO缓冲区到用户接口数据结构的拷贝。</p>
+
+<p>CSV库所建议的不必要的拷贝，其实是发生在上述的解析之后的临时内存区域经由<code class="highlighter-rouge">serde</code>这一抽象的接口(<code class="highlighter-rouge">trait</code>)<strong>反序列化到用户自定义的数据结构</strong>的时候的拷贝。显然去掉这一层拷贝可以节约大量操作系统用于内存分配的时间；这一开销在很多情况下是惊人的，甚至是很多高性能的C、C++程序的秘密武器。</p>
+
+<p>可惜这种方法对我的工具并没有很好的借鉴意义，其深层次的原因是我的程序需要将解析出来的数据结构临时保存起来，等所有的数据都解析完之后，做排序和二次处理；而文档建议的优化方法要求<strong>引用的内存上的相关处理必须要在解析下一条记录的时候被释放</strong>。
+如果regex库内部提供可以使用生存周期更长的内存的方法，那么这种方法也不失为一个很好的优化；可惜它没有这样的机制。
+此时如果强行引用解析器提供的内存，Rust贴心的编译器检查利器<code class="highlighter-rouge">Borrow Checker</code>就会拦截非法的内存引用。</p>
+
+<h4 id="使用高级api">使用高级API</h4>
+<p>优化的第一步是理清默认API的底层大概做了什么事情。
+由于最复杂的解析需要从<strong>一个字段中搜索几十甚至上百个</strong>子记录，因而关注的重心就是<code class="highlighter-rouge">captures_iter</code>方法（严格的性能分析其实需要按照<strong>perf和flamegraph的工具</strong>来判断和检验，这里直觉和实际的火焰图分析是重合的）。</p>
+
+<h5 id="captures_iter的内存开销"><code class="highlighter-rouge">captures_iter</code>的内存开销</h5>
+
+<p>正则表达式运算库的内部往往是通过DFA状态机来实现的，默认的库API很好地隐藏了内部的解析细节，用户只需要调用<code class="highlighter-rouge">captures_iter</code>方法就可以得到一个<strong>实现了迭代器类型</strong>的结构，很方便地和其它的函数式pipeline连接起来。
+实际接收代码则会根据其返回的封装过的<code class="highlighter-rouge">CapturesMatch</code>结构来读取内部的分组的匹配信息。</p>
+
+<p>其结构的实现如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="n">captures_iter</span><span class="o">&lt;</span><span class="nv">'r</span><span class="p">,</span> <span class="nv">'t</span><span class="o">&gt;</span><span class="p">(</span>
+        <span class="o">&amp;</span><span class="nv">'r</span> <span class="k">self</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'t</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">-&gt;</span> <span class="n">CaptureMatches</span><span class="o">&lt;</span><span class="nv">'r</span><span class="p">,</span> <span class="nv">'t</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">CaptureMatches</span><span class="p">(</span><span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.searcher_str</span><span class="p">()</span><span class="nf">.captures_iter</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>返回的结构其实是使用了<code class="highlighter-rouge">Captures</code>结构</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">CaptureMatches</span><span class="o">&lt;</span><span class="nv">'r</span><span class="p">,</span> <span class="nv">'t</span><span class="o">&gt;</span><span class="p">(</span><span class="nn">re_trait</span><span class="p">::</span><span class="n">CaptureMatches</span><span class="o">&lt;</span><span class="nv">'t</span><span class="p">,</span> <span class="n">ExecNoSyncStr</span><span class="o">&lt;</span><span class="nv">'r</span><span class="o">&gt;&gt;</span><span class="p">);</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="nv">'r</span><span class="p">,</span> <span class="nv">'t</span><span class="o">&gt;</span> <span class="n">Iterator</span> <span class="k">for</span> <span class="n">CaptureMatches</span><span class="o">&lt;</span><span class="nv">'r</span><span class="p">,</span> <span class="nv">'t</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="n">Item</span> <span class="o">=</span> <span class="n">Captures</span><span class="o">&lt;</span><span class="nv">'t</span><span class="o">&gt;</span><span class="p">;</span>
+
+    <span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Captures</span><span class="o">&lt;</span><span class="nv">'t</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+        <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.next</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">locs</span><span class="p">|</span> <span class="n">Captures</span> <span class="p">{</span>
+            <span class="n">text</span><span class="p">:</span> <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.text</span><span class="p">(),</span>
+            <span class="n">locs</span><span class="p">:</span> <span class="n">locs</span><span class="p">,</span>
+            <span class="n">named_groups</span><span class="p">:</span> <span class="k">self</span><span class="err">.</span><span class="mi">0</span><span class="nf">.regex</span><span class="p">()</span><span class="nf">.capture_name_idx</span><span class="p">()</span><span class="nf">.clone</span><span class="p">(),</span>
+        <span class="p">})</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>显然默认的<code class="highlighter-rouge">captures_iter()</code>方法会每次新构造一个<code class="highlighter-rouge">Catpures</code>结构体出来，这里产生的对象其实是一个<strong>临时的对象</strong>，因为每次解析完毕之后，用户代码仅仅是取出内部匹配的分组，就不再使用了。</p>
+
+<p><code class="highlighter-rouge">Captures</code>的实际封装数据如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Captures</span><span class="o">&lt;</span><span class="nv">'t</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">text</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'t</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">locs</span><span class="p">:</span> <span class="nn">re_trait</span><span class="p">::</span><span class="n">Locations</span><span class="p">,</span>
+    <span class="n">named_groups</span><span class="p">:</span> <span class="nb">Arc</span><span class="o">&lt;</span><span class="n">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span> <span class="nb">usize</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h5 id="高效的captures_read方法">高效的<code class="highlighter-rouge">captures_read</code>方法</h5>
+<p>按照文档的建议，这里使用<code class="highlighter-rouge">captures_read</code>方法可以实现<strong>复用返回匹配结果的缓冲区</strong>的目的，减少不必要的临时对象分配。
+它的实现如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="n">captures_read</span><span class="o">&lt;</span><span class="nv">'t</span><span class="o">&gt;</span><span class="p">(</span>
+    <span class="o">&amp;</span><span class="k">self</span><span class="p">,</span>
+    <span class="n">locs</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">CaptureLocations</span><span class="p">,</span>
+    <span class="n">text</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'t</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Match</span><span class="o">&lt;</span><span class="nv">'t</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+    <span class="k">self</span><span class="nf">.captures_read_at</span><span class="p">(</span><span class="n">locs</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>显然解决问题的关键在于这个<code class="highlighter-rouge">CaptureLocations</code>结构，其实在上面的默认API的实现里面已经出现了。</p>
+
+<p>不出意外它果然是一个保存匹配位置的一个<code class="highlighter-rouge">Vec</code>,这才是内部<strong>无法将临时对象分配在栈上的关键原因</strong>，而动态堆内存的分配代价又比较高，这个事实对C/C++程序员而言完全不陌生。</p>
+
+<p><code class="highlighter-rouge">CaptureLocations</code>的定义如下：</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="nf">CaptureLocations</span><span class="p">(</span><span class="nn">re_trait</span><span class="p">::</span><span class="n">Locations</span><span class="p">);</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="nf">Locations</span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Slot</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">pub</span> <span class="k">type</span> <span class="n">Slot</span> <span class="o">=</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">usize</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+<p>为了复用这个对象，我们需要在外侧循环调用的地方，自行定义一个<code class="highlighter-rouge">mutable</code>的对象，然后在每次调用之前，传入即可。
+考虑到我们想达到最佳的性能，在单线程的处理中，同一个正则表达式，我们仅仅需要一个对象即可，而不需要每次去分配。</p>
+
+<h2 id="多线程并行化处理">多线程并行化处理</h2>
+<p>默认情况下，这类简单的文本处理程序都是采用单线程的思路来写就的，改造为多线程就会多多少少面临一些挑战，尤其是需要共享变量读写的情况居多的时候，<strong>多线程的挑战比单线程要多得多</strong>，因为程序的执行状态会变得更见难以用走读代码的方式来分析。</p>
+
+<p>借助于火焰图分析工具，可以看出该处理程序的大部分CPU时间耗费在基于正则表达式的二次结构化解析上。这些<strong>操作本身互相之间的关联比较小</strong>，是显然可以被并行化的，多线程应该可以大大加速处理过程。
+这方面使用经典的<code class="highlighter-rouge">map/reduce</code>思路，只需要将实际解析的部分放入类似线程池一样的调度器中执行即可。</p>
+
+<p>由于Rust本身提供了强大的用于<strong>确保线程安全的静态代码检查</strong>；绝大部分情况下，只要保证代码可以编译通过，运行期出错的可能性基本就很小了。</p>
+
+<h3 id="使用rayon库">使用<code class="highlighter-rouge">rayon</code>库</h3>
+<p><code class="highlighter-rouge">rayon</code>库提供了方便易用的<code class="highlighter-rouge">par_iter</code>，允许我们将代码稍微改动之后，将自动获取并发执行的好处，比如原来的代码</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">results</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">ParsedRecords</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">Vec</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
+<span class="c">// parsed raw records from csv</span>
+<span class="k">let</span> <span class="n">raw_records</span> <span class="o">=</span> <span class="nf">parse_from_csv</span><span class="p">(</span><span class="n">reader</span><span class="p">);</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">raw_records</span>
+        <span class="nf">.iter</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|</span><span class="n">rc</span><span class="p">|</span> <span class="nn">ParsedRecords</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">rc</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regexes</span><span class="p">))</span>
+        <span class="nf">.collect</span><span class="p">();</span>
+<span class="c">//further transformation on parsed results</span>
+</code></pre></div></div>
+
+<p>只需要修改<code class="highlighter-rouge">iter()</code>为<code class="highlighter-rouge">par_iter()</code>的调用，并将最后的<code class="highlighter-rouge">collect</code>方法替换为<code class="highlighter-rouge">rayon</code>自己实现的<code class="highlighter-rouge">collect</code>方法</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">raw_records</span>
+    <span class="nf">.par_iter</span><span class="p">()</span>
+    <span class="nf">.map</span><span class="p">(|</span><span class="n">rc</span><span class="p">|</span> <span class="p">{</span>
+            <span class="nn">ParsedRecord</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">rc</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">regexes</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+    <span class="nf">.collect_into_vec</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">result</span><span class="p">);</span>
+</code></pre></div></div>
+<p>由于事先已经用火焰图确认过这个二次解析构造耗费最大部分的CPU时间，这次替换和改造可以看到立竿见影的性能提升：<strong>运行时间瞬间减小到原来的30%~50%</strong>，几乎有两三倍的性能提升!</p>
+
+<h3 id="并行版本的regex问题">并行版本的<code class="highlighter-rouge">regex</code>问题</h3>
+<p>并行版本能工作的前提是<strong>没有数据的多线程访问问题</strong>，当然如果有问题，编译器会自动拦截阻止编译通过。
+大部分的解析工作没有什么障碍，因为Rust默认的移动语义和显示mutable设计使得这些潜在的问题马上<strong>自动显现</strong>出来，只要按照错误提示修改<strong>然后在编译器的胁迫下乖乖就范</strong>即可。</p>
+
+<p>唯一麻烦的问题就是上述的正则表达式；使用该库的同时，我们不得不面对如下两个麻烦的问题。</p>
+
+<h3 id="regex对象的capturelocation共享">Regex对象的<code class="highlighter-rouge">CaptureLocation</code>共享</h3>
+<p>库的官方文档提供了很好的例子，建议我们用<code class="highlighter-rouge">lazy_static!</code>宏来避免多次编译正则表达式，实现更好的性能；可惜如果我们想使用上述提到的共享<code class="highlighter-rouge">CaptureLocation</code>对象，我们需要一个mutable的对象。</p>
+
+<p>这里的限制应该是目前<code class="highlighter-rouge">regex</code>库自己施加的使用限制，我们无法自由地构造一个可以复用的<code class="highlighter-rouge">CaptureLocation</code>对象出来，而必须由一个编译好的Regex对象来获取；由于Mutable的需要，我们不得不将Regex本身从<code class="highlighter-rouge">lazy_static!</code>宏中提取出来，单独保存。
+好在这个<strong>Regex对象本身还是可以保持只读</strong>，多个线程引用一个只读的变量状态毫无问题。</p>
+
+<p>不妙的是，<code class="highlighter-rouge">par_iter</code>显式地将我们卷入多线程环境（我们想要更好的性能），编译器不允许在多个线程中共享mutable正则表达式，当然那样做也是错误的。
+好在多线程编程的工具箱中，我们还可以使用<code class="highlighter-rouge">ThreadLocal</code>这样的数据结构，只要保证每个线程使用自己的mutable对象就好了，问题自然而然得到解决。</p>
+
+<p>####　封装多个正则表达式
+可以用一个简单的enum来表述各种正则表达式类型，然后提供给外部调用</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">RegexInfo</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">regex</span><span class="p">:</span> <span class="n">Regex</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">location</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="n">LocalKey</span><span class="o">&lt;</span><span class="n">RefCell</span><span class="o">&lt;</span><span class="n">CaptureLocations</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">RegexCategory</span> <span class="p">{</span>
+    <span class="n">FieldSep</span><span class="p">,</span>
+    <span class="n">StateChange</span><span class="p">,</span>
+    <span class="n">StateChangeEx</span><span class="p">,</span>
+    <span class="c">//...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>同时我们需要给外部提供一个看起来像全局但是多线程安全的接口</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">RegexReposiotry</span> <span class="p">{</span>
+    <span class="n">field_sep</span><span class="p">:</span> <span class="n">RegexInfo</span><span class="p">,</span>
+    <span class="n">state_change</span><span class="p">:</span> <span class="n">RegexInfo</span><span class="p">,</span>
+    <span class="n">state_change_ex</span><span class="p">:</span> <span class="n">RegexInfo</span><span class="p">,</span>
+    <span class="c">//...</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">RegexReposiotry</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_regex</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">RegexCategory</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="n">RegexInfo</span> <span class="p">{</span>
+        <span class="k">match</span> <span class="n">category</span> <span class="p">{</span>
+            <span class="n">FieldSep</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.field_sep</span><span class="p">,</span>
+            <span class="n">StateChange</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.state_change</span><span class="p">,</span>
+            <span class="n">StateChangeEx</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="k">self</span><span class="py">.state_change_ex</span><span class="p">,</span>
+            <span class="c">//...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="thread-local变量的创建和维护">Thread Local变量的创建和维护</h4>
+<p>为了构造Thread Local的变量，我们不得不借助于<code class="highlighter-rouge">thread_local!</code>宏来构造，因此可以用一些临时的值先填充之</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">lazy_static!</span> <span class="p">{</span>
+    <span class="k">static</span> <span class="k">ref</span> <span class="n">DUMMY</span><span class="p">:</span> <span class="n">Regex</span> <span class="o">=</span>
+        <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"(.*) xxxx ([a-zA-Z ]+) to ([a-zA-Z ]+)"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nd">thread_local!</span> <span class="p">{</span>
+    <span class="k">static</span> <span class="n">LOC_FIELDSEP</span><span class="p">:</span> <span class="n">RefCell</span><span class="o">&lt;</span><span class="n">CaptureLocations</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">RefCell</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">DUMMY</span><span class="nf">.capture_locations</span><span class="p">()</span><span class="nf">.clone</span><span class="p">());</span>
+    <span class="k">static</span> <span class="n">LOC_STAGECHAGE</span><span class="p">:</span> <span class="n">RefCell</span><span class="o">&lt;</span><span class="n">CaptureLocations</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">RefCell</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">DUMMY</span><span class="nf">.capture_locations</span><span class="p">()</span><span class="nf">.clone</span><span class="p">());</span>
+    <span class="k">static</span> <span class="n">LOC_STAGECHAGE_EX</span><span class="p">:</span> <span class="n">RefCell</span><span class="o">&lt;</span><span class="n">CaptureLocations</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nn">RefCell</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">DUMMY</span><span class="nf">.capture_locations</span><span class="p">()</span><span class="nf">.clone</span><span class="p">());</span>
+    <span class="c">//.... more</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>静态的指针值指向的并不是我们真正用于解析的正则表达式的匹配缓冲。
+实际的正则表达式构造的时候，我们再重新替换真正的正则表达式对应的变量，并且拷贝之。</p>
+
+<p>构造的实现如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">create_regexes</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">RegexReposiotry</span> <span class="p">{</span>
+    <span class="k">use</span> <span class="nn">RegexCategory</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
+    <span class="n">RegexReposiotry</span><span class="p">{</span>
+        <span class="n">field_sep</span><span class="p">:</span> <span class="nf">create_regex_info</span><span class="p">(</span><span class="s">"(, )?(201[789]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}) "</span><span class="p">,</span> <span class="n">FieldSep</span><span class="p">),</span>
+        <span class="n">state_change</span><span class="p">:</span> <span class="nf">create_regex_info</span><span class="p">(</span>
+            <span class="s">"(.*) The state of the problem changed from ([a-zA-Z ]+) [tT]o ([a-zA-Z ]+)"</span><span class="p">,</span> <span class="n">StateChange</span>
+        <span class="p">),</span>
+        <span class="n">state_change_ex</span><span class="p">:</span> <span class="nf">create_regex_info</span><span class="p">(</span><span class="s">"(.*) State changed from ([a-zA-Z ]+) to ([a-zA-Z ]+)"</span><span class="p">,</span> <span class="n">StateChangeEx</span><span class="p">),</span>
+        <span class="c">//...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里为简化起见，将正则表达式静态地写入在构造实现中，但是其实也可以经由创建者自己指定的方法传入。
+实际的结构初始化由下面的内部函数来实现：</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">create_regex_info</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">pat</span><span class="p">:</span> <span class="n">RegexCategory</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">RegexInfo</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">regex</span> <span class="o">=</span> <span class="nn">Regex</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">loc</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="n">_</span> <span class="o">=</span> <span class="k">match</span> <span class="n">pat</span> <span class="p">{</span>
+        <span class="n">FieldSep</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="n">LOC_FIELDSEP</span><span class="p">,</span>
+        <span class="n">StateChange</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="n">LOC_STAGECHAGE</span><span class="p">,</span>
+        <span class="n">StateChangeEx</span> <span class="k">=&gt;</span> <span class="o">&amp;</span><span class="n">LOC_STAGECHAGE_EX</span><span class="p">,</span>
+        <span class="c">//...</span>
+    <span class="p">};</span>
+    <span class="n">loc</span><span class="nf">.with</span><span class="p">(|</span><span class="n">f</span><span class="p">|</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">f</span><span class="nf">.borrow_mut</span><span class="p">()</span> <span class="o">=</span> <span class="n">regex</span><span class="nf">.capture_locations</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="n">RegexInfo</span> <span class="p">{</span>
+        <span class="n">location</span><span class="p">:</span> <span class="n">loc</span><span class="p">,</span>
+        <span class="n">regex</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>其中的中间初始化<code class="highlighter-rouge">location</code>变量的部分，我们采用<code class="highlighter-rouge">RefCell</code>本身提供的<code class="highlighter-rouge">with</code>方法，调用<code class="highlighter-rouge">*f.borrow_mut()</code>来修改内部的捕获位置缓冲区为真正的正则表达式对象对应的缓冲区向量。</p>
+
+<h4 id="多线程解析">多线程解析</h4>
+<p>实际解析的代码则可以经由上述的正则封装，实现如下</p>
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">parsing_using_regex_and_key_string</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">F</span><span class="o">&gt;</span><span class="p">(</span>
+    <span class="n">rem</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">regexes</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">RegexReposiotry</span><span class="p">,</span>
+    <span class="n">pattern</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">cat</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">RegexCategory</span><span class="p">,</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">F</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ExtraInfo</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">where</span>
+    <span class="n">F</span><span class="p">:</span> <span class="nf">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">CaptureLocations</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ExtraInfo</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">),</span>
+<span class="p">{</span>
+    <span class="k">match</span> <span class="n">rem</span><span class="nf">.find</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">None</span> <span class="k">=&gt;</span> <span class="nb">None</span><span class="p">,</span>
+        <span class="nf">Some</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">regex_info</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">regexes</span><span class="nf">.get_regex</span><span class="p">(</span><span class="n">cat</span><span class="p">);</span>
+            <span class="k">let</span> <span class="k">mut</span> <span class="n">ret</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="p">(</span><span class="o">&amp;</span><span class="nv">'a</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ExtraInfo</span><span class="o">&lt;</span><span class="nv">'a</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nb">None</span><span class="p">;</span>
+            <span class="n">regex_info</span><span class="py">.location</span><span class="nf">.with</span><span class="p">(|</span><span class="n">loc</span><span class="p">|</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="k">mut</span> <span class="n">marker_loc</span><span class="p">:</span> <span class="n">RefMut</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">loc</span><span class="nf">.borrow_mut</span><span class="p">();</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">regex_info</span>
+                    <span class="py">.regex</span>
+                    <span class="nf">.captures_read</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">marker_loc</span><span class="p">,</span> <span class="n">rem</span><span class="p">)</span>
+                    <span class="nf">.map</span><span class="p">(|</span><span class="n">_</span><span class="p">|</span> <span class="nf">func</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="o">*</span><span class="n">marker_loc</span><span class="p">,</span> <span class="n">rem</span><span class="p">))</span>
+            <span class="p">});</span>
+            <span class="n">ret</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>这里的关键在于中间的<code class="highlighter-rouge">regex_info.location.with(|loc| {})</code>调用实际发生的时候，不同的线程会得到不同的<code class="highlighter-rouge">CaptureLocation</code>内容；其内容在实际被写入的时候，会<strong>基于线程的不同而写入不同的内存</strong>位置。</p>
+
+<p>唯一有些不太符合直接的地方在于mutable变量的获取的地方，不得不借助于<code class="highlighter-rouge">RefMut</code>结构将其传递如<code class="highlighter-rouge">captures_read</code>中，而不能直接采用实际的类型。或许将来的Rust语言版本会改进这一难以理解的做法。</p>
+
+        
+      </section>
+
+      <div class="relatedPosts">
+
+    <h2>相关文章</h2> 
+    <hr/>
+    <ul>
+
+    
+    
+    
+
+    
+        
+
+        
+
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/11/04/cpp-memory-model-and-order/">现代C++的内存模型和高性能的多线程编程</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/06/fuchsia-kernel-ziron-concepts/">Google的新操作系统Fuchsia的内核设计</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/04/reduce-cpp-template-overhead/">reduce-cpp-template-overhead</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/10/01/microservice-with-cpp/">微服务开发：C++语言是否真的不适用？</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/08/24/learn-kubernetes-again/">重学Kubernetes - 读张磊的《深度剖析Kubernetes》</a>
+            </li>
+            
+            
+        
+
+    
+        
+
+        
+
+        
+            <li>
+                <a href="/post/2019/07/21/from-borg-to-kubernetes/">读Google著名的分布式设计论文－从Borg到Kubernetes的演进</a>
+            </li>
+            
+            
+                
+    </ul>
+
+</div>
+
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/multi-threading" class="page__taxonomy-item" rel="tag">multi-threading</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/performance" class="page__taxonomy-item" rel="tag">performance</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/programming" class="page__taxonomy-item" rel="tag">programming</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/tags/rust" class="page__taxonomy-item" rel="tag">rust</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fa fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/engineering" class="page__taxonomy-item" rel="tag">engineering</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/language" class="page__taxonomy-item" rel="tag">language</a><span class="sep">, </span>
+    
+      
+      
+      <a href="https://skyscribe.github.io/categories/programming" class="page__taxonomy-item" rel="tag">programming</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-11-29T00:00:00+08:00">November 29, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=skyscribe&text=Rust文本处理的性能及优化 https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" class="btn btn--twitter" title="Share on Twitter"><i class="fa fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" class="btn btn--facebook" title="Share on Facebook"><i class="fa fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" class="btn btn--google-plus" title="Share on Google Plus"><i class="fa fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" class="btn btn--linkedin" title="Share on LinkedIn"><i class="fa fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <section id="static-comments">
+        
+          <!-- Start static comments -->
+          <div class="js-comments">
+            
+          </div>
+          <!-- End static comments -->
+
+          <!-- Start new comment form -->
+          <div class="page__comments-form">
+            <h4 class="page__comments-title">Leave a Comment</h4>
+            <p class="small">Your email address will not be published. Required fields are marked <span class="required">*</span></p>
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/skyscribe/my-new-blog-source/master/comments">
+              <div class="form__spinner">
+                <i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+              </div>
+
+              <div class="form-group">
+                <label for="comment-form-message">Comment <small class="required">*</small></label>
+                <textarea type="text" rows="3" id="comment-form-message" name="fields[message]" tabindex="1"></textarea>
+                <div class="small help-block"><a href="https://daringfireball.net/projects/markdown/">Markdown is supported.</a></div>
+              </div>
+              <div class="form-group">
+                <label for="comment-form-name">Name <small class="required">*</small></label>
+                <input type="text" id="comment-form-name" name="fields[name]" tabindex="2" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-email">Email address <small class="required">*</small></label>
+                <input type="email" id="comment-form-email" name="fields[email]" tabindex="3" />
+              </div>
+              <div class="form-group">
+                <label for="comment-form-url">Website (optional)</label>
+                <input type="url" id="comment-form-url" name="fields[url]" tabindex="4"/>
+              </div>
+              <div class="form-group hidden" style="display: none;">
+                <input type="hidden" name="options[slug]" value="rust-text-processing-performance">
+                <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
+                <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="hidden" name="options[reCaptcha][siteKey]" value="">
+                <input type="hidden" name="options[reCaptcha][secret]" value="">
+              </div>
+              <!-- Start comment form alert messaging -->
+              <p class="hidden js-notice">
+                <strong class="js-notice-text"></strong>
+              </p>
+              <!-- End comment form alert messaging -->
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey=""></div>
+              </div>
+              <div class="form-group">
+                <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--primary btn--large">Submit Comment</button>
+              </div>
+            </form>
+          </div>
+          <!-- End new comment form -->
+          
+        
+      </section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+    
+      <li><a href="https://twitter.com/skyscribe"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+      <li><a href="http://github.com/skyscribe"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    <li><a href="https://skyscribe.github.io/feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright"><a href=https://en.wikipedia.org/wiki/Creative_Commons_license#Types_of_licenses><img src=https://upload.wikimedia.org/wikipedia/commons/d/d0/CC-BY-SA_icon.svg></a> 2019 skyscribe. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a></div>
+
+      </footer>
+    </div>
+
+    <script src="https://skyscribe.github.io/assets/js/main.min.js"></script>
+
+
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-101727556-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
