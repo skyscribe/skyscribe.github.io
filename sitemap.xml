@@ -377,6 +377,10 @@
 <lastmod>2019-11-29T00:00:00+08:00</lastmod>
 </url>
 <url>
+<loc>https://skyscribe.github.io/post/2019/12/07/rust-asynchronous-model-and-features/</loc>
+<lastmod>2019-12-07T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>https://skyscribe.github.io/about/</loc>
 </url>
 <url>
@@ -597,6 +601,12 @@
 </url>
 <url>
 <loc>https://skyscribe.github.io/tags/multi-threading/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/async/</loc>
+</url>
+<url>
+<loc>https://skyscribe.github.io/tags/future/</loc>
 </url>
 <url>
 <loc>https://skyscribe.github.io/categories/cpp/</loc>

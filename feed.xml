@@ -1,4 +1,382 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-12-02T10:25:27+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust文本处理的性能及优化</title><link href="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" rel="alternate" type="text/html" title="Rust文本处理的性能及优化" /><published>2019-11-29T00:00:00+08:00</published><updated>2019-11-29T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">&lt;p&gt;作为一门秉承&lt;strong&gt;零成本抽象&lt;/strong&gt;这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="https://skyscribe.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://skyscribe.github.io/" rel="alternate" type="text/html" /><updated>2019-12-09T11:03:34+08:00</updated><id>https://skyscribe.github.io/feed.xml</id><title type="html">驭风万里无垠</title><subtitle>汇小流以成江海，积跬步以至千里</subtitle><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><entry><title type="html">Rust语言的异步编程模型和协程支持</title><link href="https://skyscribe.github.io/post/2019/12/07/rust-asynchronous-model-and-features/" rel="alternate" type="text/html" title="Rust语言的异步编程模型和协程支持" /><published>2019-12-07T00:00:00+08:00</published><updated>2019-12-07T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/12/07/rust-asynchronous-model-and-features</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/12/07/rust-asynchronous-model-and-features/">&lt;p&gt;通用的注重性能的现代编程语言都在慢慢地加入对异步编程和协程模型的支持，作为一门强调性能和零成本抽象的语言，Rust自然也不甘落人之后。&lt;/p&gt;
+
+&lt;p&gt;可能是因为Rust语言社区出于对自身特殊的&lt;strong&gt;生存周期管理机制&lt;/strong&gt;多带来的&lt;strong&gt;其它语言所有没有的额外的编译器实现复杂性&lt;/strong&gt;，以及开放语言生态系统中的功能开发优先级（它迄今为止还在快速演进中）考虑，在去年年底发布的2018版本中，协程的支持并[没有完工]
+(//post/2019/01/19/rust-2018-edition-overview/)
+而是仅仅留下了一个预留关键字，有点“强制占位”的味道。&lt;/p&gt;
+
+&lt;p&gt;换个角度看，也可以认为Rust社区对&lt;strong&gt;尽快支持基于async/await风格的协程&lt;/strong&gt;还是非常重视的。
+果不其然，经过快一年的打磨，这些复杂的特性随着最新&lt;strong&gt;稳定版本的发布&lt;/strong&gt;而正式进入了一般程序员的视野（之前的支持放在Nightly发布频道里面给早期吃螃蟹的用户尝鲜）。
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;协程和它之前的历史背景&quot;&gt;协程和它之前的历史背景&lt;/h2&gt;
+&lt;p&gt;协程并不是一个怎么新鲜的编程概念，起码在上个世纪９０年代或者更早的编程语言大发展的时候已经出现在某些语言中；只是因为当时最主流的C++和Java（还没有今天这么流行）的语言并不在语言层面提供对协程的支持而不被主流程序员所熟知。&lt;/p&gt;
+
+&lt;h3 id=&quot;多线程编程的挑战&quot;&gt;多线程编程的挑战&lt;/h3&gt;
+&lt;p&gt;那个时代主流的模型还是基于操作系统提供的线程的概念来实现并发编程；典型的如Apache服务器引入的一个连接一个线程的概念：每次有一个新的用户连接请求进来，服务器就会为其创建一个线程；这样可以做到多个线程之间互相不干扰。&lt;/p&gt;
+
+&lt;p&gt;这样的处理机制非常简单优雅，可惜在连接数目渐渐增多的时候，可扩展性很差，因为&lt;strong&gt;操作系统本身并不擅长处理大量的线程&lt;/strong&gt;：任何一个线程的创建都需要设计到栈空间的分配、线程私有资源的创建和维护；同时大量的线程在操作系统层面被调度的时候，也很难保证调度策略的公平和有效。&lt;/p&gt;
+
+&lt;p&gt;曾经一度引发热烈讨论的C10K问题就是针对这一模型的不足：超过一定数量的连接之后，操作系统甚至将&lt;strong&gt;大量的CPU处理资源浪费在线程之间的切换和控制&lt;/strong&gt;，而不能很好地处理用户层的实际应用需求。
+标准的POSIX socket调用的多路处理函数&lt;code class=&quot;highlighter-rouge&quot;&gt;select&lt;/code&gt;在传入的socket句柄数量超过一定数量之后也会&lt;strong&gt;耗费大量的CPU运算资源于内核态&lt;/strong&gt;，而用户层程序则束手无策。&lt;/p&gt;
+
+&lt;p&gt;显然将用户层面的并发问题直接抛给操作系统并不是一个非常明智的选择；随着应用领域的需求对并发性的要求愈加严苛，这些问题需要找到更好的解决方案。&lt;/p&gt;
+
+&lt;h4 id=&quot;操作系统层面的探索&quot;&gt;操作系统层面的探索&lt;/h4&gt;
+&lt;p&gt;以Unix和Linux为主流的非Windows系统自身是从解决并发连接的角度来考虑的，它们通过在内核层面的IO多路复用角度触发，通过引入epoll/kqueue等技术来允许一个单一的用户线程的IO调用可以管理海量的网络连接而完美地解决了传统的&lt;code class=&quot;highlighter-rouge&quot;&gt;select&lt;/code&gt;调用层面的问题。当然Windows自己也提供了类似的IOCP的概念实现类似的高性能IO多路复用方案。&lt;/p&gt;
+
+&lt;p&gt;这方面的探索解决了一个线程处理海量网络IO的系统资源过耗问题，但是这些改进对&lt;strong&gt;和网络无关的本地的耗费CPU的任务的并发&lt;/strong&gt;挑战并没有多少帮助。
+同时这些IO方面的处理暗含了用户必须书写异步代码的挑战：对于可能阻塞的IO调用，用户必须通过回调函数的方式将原来简单、直接的顺序代码改写为支离破碎的异步代码。
+只需要看看boost.asio库的实例代码，就会明白这样的编程方式如何可耻地损伤了代码的可读性，显然代码的可维护性也很糟糕。&lt;/p&gt;
+
+&lt;h5 id=&quot;优化内核线程处理的尝试&quot;&gt;优化内核线程处理的尝试&lt;/h5&gt;
+&lt;p&gt;这方面的尝试应该以Solaris的线程模型最为典型：对应的pthread接口低下的实现虽然也映射到了操作系统的内核线程，但是这些用户层面的线程和操作系统线程的&lt;strong&gt;对应关系不是1:1而是M:N&lt;/strong&gt;的。&lt;/p&gt;
+
+&lt;p&gt;只是这个配置的&lt;strong&gt;灵活度并不是太高&lt;/strong&gt;，其性能表现还是令人刮目相看的，用户可以轻松地创建上万个线程而内核还可以很高效的使用CPU资源来调度用户的处理。&lt;/p&gt;
+
+&lt;p&gt;当然因为一些非技术上的原因，Solaris的这些创举并&lt;strong&gt;没有在它自身意外的领域发扬光大&lt;/strong&gt;，而是随着Sun公司的垮台和被收购，Solaris系统最终停止开发而烟消云散了。
+主流的Linux系统和其它Unix变种依然在采用一一对应的线程模型。&lt;/p&gt;
+
+&lt;h4 id=&quot;用户态线程&quot;&gt;用户态”线程”&lt;/h4&gt;
+&lt;p&gt;另外一个有趣的探索方向是用户态线程的概念，或者成为Green Thread，它的基本思路是将&lt;strong&gt;逻辑线程的管理逻辑都放在操作系统的用户态来管理，而操作系统层面对这些机制一无所知&lt;/strong&gt;。
+运行在用户态的线程管理程序（往往是比较底层的基础库或者组件）自己负责这些线程状态的管理和调度。&lt;/p&gt;
+
+&lt;p&gt;这方面比较典型的例子是早期的Python所支持的线程模型，和来自爱立信的Erlang语言底层平台OTP；甚至于有一段实际Java语言的线程库也采用过Green Thread（尽管现在已经不再使用）。
+Python的Green Thread实现一度由于它自身历史承袭的GIL锁的性能噩梦而终被弃之高阁了。&lt;/p&gt;
+
+&lt;h3 id=&quot;异步编程的心智负担&quot;&gt;异步编程的心智负担&lt;/h3&gt;
+&lt;p&gt;随着上面所说的各种尝试逐渐式微，主流的编程语言不得不回到多线程编程的路上继续探索，这一次随着进入新世纪依赖多核CPU的日渐流行，各种编程语言都&lt;strong&gt;不得不寻求其它办法来简化程序员的心智负担&lt;/strong&gt;，因为编写没有问题的多线程、异步程序实在不是一个轻松的差事。&lt;/p&gt;
+
+&lt;p&gt;一方面不管是程序员还是底层的编译器乃至CPU硬件都更加适应一步接一步走下去的顺序执行的逻辑，已有的底层编译器可以对顺序执行程序做深入的分析和优化，处理器可以对指令流水线做高效的预测和预判执行；另一方面程序员却不得不面对顺序代码的效率不高的现实：不管是读取磁盘上的文件，还是从网络上下载内容，碰到这些情况的时候，要想高效地利用CPU，在不创建更多底层线程的情况下，程序员不得不将&lt;strong&gt;顺序执行的代码切割为多个部分&lt;/strong&gt;，然后在阻塞的地方加入一个回调：当阻塞的外部条件满足的时候，由操作系统回调回来执行后面的部分。&lt;/p&gt;
+
+&lt;h3 id=&quot;协程&quot;&gt;协程&lt;/h3&gt;
+&lt;p&gt;协程的引入其实就是为了缓解这一艰巨的挑战：它通过&lt;strong&gt;引入一个逻辑上抽象的概念来简化编程&lt;/strong&gt;模型。某种程度上说，可以将一个协程看作是一段可以以非阻塞的方式高效执行的代码；
+而多个协程之间可以通过特定关键字或者语句的方式进行组合，以便程序员可以直接写出&lt;strong&gt;看起来是同步执行而实际上底层却是被异步调度执行&lt;/strong&gt;的代码。&lt;/p&gt;
+
+&lt;h4 id=&quot;future&quot;&gt;Future&lt;/h4&gt;
+&lt;p&gt;不同的编程语言和环境对于协程的具体实现可以是大相径庭的，只是大多编程语言多通过&lt;code class=&quot;highlighter-rouge&quot;&gt;Future/Promise&lt;/code&gt;这样的机制来实现。
+一个Future代表一个现在&lt;strong&gt;可能还没有结果&lt;/strong&gt;（或者在等待IO完毕或者还没有被调度到CPU上去实际执行），但是&lt;strong&gt;将来会返回某个结果&lt;/strong&gt;的抽象过程。将来会返回的结果抽象为&lt;code class=&quot;highlighter-rouge&quot;&gt;Promise&lt;/code&gt;，即承诺一定会返回的某个东西。这两个概念如果存在，一定是成对存在的。&lt;/p&gt;
+
+&lt;h4 id=&quot;executor&quot;&gt;Executor&lt;/h4&gt;
+&lt;p&gt;异步的Future最后必然要被底层的调度程序来驱动和执行，这个负责执行用户定义的抽象的Future的实体成为Executor，它底层的执行体可以是按需创建的线程池，也可以是共享固定大小的线程池甚至于单个线程等。
+最好的Executor抽象应该是从JDK5开始流行开来的，目前已经成为一个跨编程语言的抽象。&lt;/p&gt;
+
+&lt;h4 id=&quot;asyncawait&quot;&gt;async/await&lt;/h4&gt;
+&lt;p&gt;对协程的组合和等待则通过&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;这样的关键字来标识。&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;用于标记某个可以返回Future的语句或者调用，&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;用来异步的等待某个Future的执行结果，即&lt;strong&gt;await的逻辑看起来同步的，但是其实依赖于底层协程的调度结果，即实际执行完毕之后才能得到&lt;/strong&gt;结果。
+如果有后续的逻辑处理依赖于await的结果，那么它们将被自动调度为顺序执行。&lt;/p&gt;
+
+&lt;h2 id=&quot;rust的future&quot;&gt;Rust的&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;Future本身是一个抽象的概念，对应的Rust语言里面的动态抽象机制是Trait，因此毫不意外地看到，Rust语言定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;就是一个Trait。&lt;/p&gt;
+
+&lt;p&gt;逻辑上来说，Rust的&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;可以简单的被认为是定义为如下的形式&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;// Warning: this is not the offical definition&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;该Trait的核心是定义了一个&lt;strong&gt;输出的类型&lt;/strong&gt;，即实际执行结束之后的结果返回类型，以及一个相关的&lt;code class=&quot;highlighter-rouge&quot;&gt;poll&lt;/code&gt;函数。
+顾名思义这是一个底层的协程Executor提供的”轮询”执行结果的函数，返回的结果是操作是否完毕，它是一个枚举类型&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Rust自身的&lt;strong&gt;类型安全机制很好地封装&lt;/strong&gt;了其它语言中不得不需要的Promise:这里我们不需要专门的Promise类型，仅仅根据枚举值来做模式匹配即可。&lt;/p&gt;
+
+&lt;p&gt;用户程序可以主动调用这个轮询函数，驱动底层的Executor来执行一次调用，然后检查实际结果；
+只是绝大部分情况下，这并不是最佳的使用方式：因为这一的执行方式和协程底层封装的思路想违背了。大部分情况下，&lt;strong&gt;用户需要的是关注多个协程之间的互相组合&lt;/strong&gt;，确定它们之间的逻辑依赖关系即可，Executor的驱动甚至可以是自动封装驱动的。&lt;/p&gt;
+
+&lt;h3 id=&quot;wake函数&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;wake&lt;/code&gt;函数&lt;/h3&gt;
+&lt;p&gt;如果没有这个函数，Executor在需要多次驱动用户提供的Future来持续运行的时候，将没有办法知道如何继续下去。
+这个函数的作用&lt;strong&gt;就是一个唤醒回调&lt;/strong&gt;，在Future被实际执行的时候，如果一次没有执行完毕，那么下次被调用的时候，可以从上次中断的地方继续执行下去。&lt;/p&gt;
+
+&lt;h3 id=&quot;socket的例子&quot;&gt;Socket的例子&lt;/h3&gt;
+&lt;p&gt;假设我们有一个从Socket读取数据的Future，它在有数据的时候，直接返回读取到的数据，没有数据的时候，则留待下次调度的时候继续执行；它可以被实现为&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SocketRead&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SocketRead&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.socket&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.has_data_to_read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.socket&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.read_buf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.socket&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.set_readable_callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;实现join的例子&quot;&gt;实现&lt;code class=&quot;highlighter-rouge&quot;&gt;Join&lt;/code&gt;的例子&lt;/h3&gt;
+&lt;p&gt;这种实现方式允许我们自由地组合多个Future而&lt;strong&gt;不需要额外的中间内存分配&lt;/strong&gt;，从而兼得抽象的好处而不损失一毫性能，比如我们需要组合两个Future而让它们可以并发执行的时候，可以用如下的实现：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; 
+        &lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.a&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.b&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.b&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.a&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.is_none&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.b&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.is_none&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(())&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;这个轮询的过程非常简单直接，分别轮询传入的两个Future，并且在两个都完成的时候，返回结果。否则返回Pending以便后续的调度继续执行。&lt;/p&gt;
+
+&lt;h3 id=&quot;实现andthen&quot;&gt;实现&lt;code class=&quot;highlighter-rouge&quot;&gt;AndThen&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;另外一种场景的协程操作是实现穿行逻辑，即第一个future结束后才执行第二个。类似于上面的定义，我们先定义这种顺序组合的Future如下：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AndThenFut&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;second&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;它的实现则为&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AndThenFut&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; 
+        &lt;span class=&quot;n&quot;&gt;FutureA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;FutureB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.first&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;match&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.first&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+                &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.second&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;这里我们简化了处理逻辑，仅当第一个FutureA完毕的时候，才会轮询第二个Future，如果第一个Future没有完毕，则继续等待下一次的查询调度。&lt;/p&gt;
+
+&lt;h3 id=&quot;真正的future定义&quot;&gt;真正的&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;定义&lt;/h3&gt;
+&lt;p&gt;上述的逻辑定义其实是一种简化模型，而真正的标准库中的Future定义其实如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::(&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;最显著的不同在于函数的两个参数类型&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;self&lt;/code&gt;类型被定义为&lt;code class=&quot;highlighter-rouge&quot;&gt;Pin&lt;/code&gt;的分装，这个封装简单的来说，就是允许我们&lt;strong&gt;创建不可移动的Future类型&lt;/strong&gt;；所谓的不可移动对象，是指对象里面可以出现某个字段的指针指向对象的其它字段的情况；这对于实现&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;是至关重要的。&lt;/li&gt;
+  &lt;li&gt;第二个参数用一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Context&lt;/code&gt;对象替换了简单的&lt;code class=&quot;highlighter-rouge&quot;&gt;wake&lt;/code&gt;函数&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;我们之所以需要一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Context&lt;/code&gt;对象，是因为我们需要在其中存储哪一个Future对象被轮询执行了；这在复杂的多线程程序中是不可或缺的。&lt;/p&gt;
+
+&lt;h4 id=&quot;context对象和waker类型&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Context&lt;/code&gt;对象和&lt;code class=&quot;highlighter-rouge&quot;&gt;Waker&lt;/code&gt;类型&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Context&lt;/code&gt;的定义如下&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;_marker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PhantomData&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;它里面仅仅是封装了一个额外的&lt;code class=&quot;highlighter-rouge&quot;&gt;Waker&lt;/code&gt;对象，以便用户定义的Future和底层的Executor进行通信，通知对方&lt;strong&gt;自身已经准备好了&lt;/strong&gt;下一步对应的结果就可以返回给外部，其本身提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;clone&lt;/code&gt;操作，并且可以可以在多线程环境中移动和共享，因为它标记自己实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;Sync&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;Send&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RawWaker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Unpin&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Send&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sync&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;其中嵌套的内部实现里面封装了一个满足具体的Executor要求的、可以&lt;strong&gt;包含任意上下文数据&lt;/strong&gt;的指针&lt;code class=&quot;highlighter-rouge&quot;&gt;data&lt;/code&gt;，它的注释很好地阐述了数据的用途：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;derive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PartialEq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Debug&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RawWaker&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// A data pointer, which can be used to store arbitrary data as required&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// by the executor. This could be e.g. a type-erased pointer to an `Arc`&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// that is associated with the task.&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// The value of this field gets passed to all functions that are part of&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// the vtable as the first parameter.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;/// Virtual function pointer table that customizes the behavior of this waker.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;vtable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RawWakerVTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Waker&lt;/code&gt;自身提供了&lt;code class=&quot;highlighter-rouge&quot;&gt;wake()&lt;/code&gt;函数，和上面简化的例子类似&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.waker.vtable.wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.waker.data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nn&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;mem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;forget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;一个定时器实现的例子&quot;&gt;一个定时器实现的例子&lt;/h4&gt;
+&lt;p&gt;假设我们需要实现一个经过给定时间段后过期的名为&lt;code class=&quot;highlighter-rouge&quot;&gt;TimerFuture&lt;/code&gt;的future对象，我们需要一个上下文数据标识timer是否已经完成，并且出于简化起见，当Timer被创建的时候，我们启动一个线程来在创建的线程中将其激活，因此我们需要一个跨线程共享的上下文。&lt;/p&gt;
+
+&lt;h5 id=&quot;类型定义&quot;&gt;类型定义&lt;/h5&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Arc&lt;/code&gt;类型是用来封装上下文状态的最简单的封装类&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TimerFuture&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Arc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Mutex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SharedState&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SharedState&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;completed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Waker&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;new函数&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;new&lt;/code&gt;函数&lt;/h5&gt;
+&lt;p&gt;接下来是它的实现和&lt;code class=&quot;highlighter-rouge&quot;&gt;new&lt;/code&gt;函数&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TimerFuture&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;duration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Duration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Arc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Mutex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SharedState&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;completed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}));&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;因为需要创建一个线程来异步地标记Timer到期完毕，我们需要将该共享状态拷贝并移动到lambda对应的线程中去：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state_clone&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nn&quot;&gt;thread&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;spawn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;move&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;thread&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;duration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state_clone&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.completed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;当时间到期后，我们除了标记该共享状态的标志外，还需要在Future的使用方没有完成的情况下，&lt;strong&gt;主动唤醒&lt;/strong&gt;底层的调度，此时就可以使用&lt;code class=&quot;highlighter-rouge&quot;&gt;wake()&lt;/code&gt;函数了&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.waker&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;waker&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.wake&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;TimerFuture&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;future实现&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;实现&lt;/h5&gt;
+&lt;p&gt;该TimerFuture的trait实现其实就是对共享状态查询的封装；如果已经完毕，就返回Ready,否则就返回Pending。&lt;/p&gt;
+
+&lt;p&gt;这里有个非常细微的问题需要注意：因为waker对象可能随着Executor在&lt;strong&gt;线程之间的移动而被拷贝为其它的值&lt;/strong&gt;，为了避免对象自身保存的&lt;code class=&quot;highlighter-rouge&quot;&gt;waker&lt;/code&gt;对象指向了非法的上下文，我们需要在返回pending之前重新拷贝一次自身保存的&lt;code class=&quot;highlighter-rouge&quot;&gt;waker&lt;/code&gt;!&lt;/p&gt;
+
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TimerFuture&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Pin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nn&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.shared_state&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.lock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.completed&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(())&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;shared_state&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.waker&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.waker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.clone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+            &lt;span class=&quot;nn&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pending&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;rust的await和async&quot;&gt;Rust的&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;这次加入1.36稳定版的功能体验在语言层面的两个关键字&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;和&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;async&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;用于声明一个代码块为返回一个&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;，通过在某个普通的函数声明前面加上&lt;code class=&quot;highlighter-rouge&quot;&gt;async&lt;/code&gt;，Rust可以自动完成返回类型到&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;类型的封装和转换，如下面的代码&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;do_something&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//some heavy operation&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;的返回值会是一个Future.&lt;/p&gt;
+
+&lt;p&gt;Rust本身的Executor库也提供了阻塞执行的方法，允许我们在当前的调用线程里面阻塞执行直到封装的异步执行块允许完毕，即如下的代码&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;do_something&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;block_on&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;// proceeds until wrapped something is executed&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;await&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;await&lt;/code&gt;语句可以作用在Future上，用于非阻塞方式的同步逻辑，即异步地等待作用的Future对象的完成，然后读取返回的结果，考虑如下的三个异步的Future执行块，前两个有先后依赖而第三个可以同时进行：&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;learn_song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Song&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//dom something&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Song&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;sing_song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//sing the song&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;dance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//dance&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;可以用如下的逻辑来表述上面的并发执行行为&lt;/p&gt;
+&lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;learn_and_sing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;song&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;learn_song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.await&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;sing_song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;song&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.await&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;learn_and_sing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.await&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;dance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nn&quot;&gt;futures&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;标准库中的future和futures-crate&quot;&gt;标准库中的Future和&lt;code class=&quot;highlighter-rouge&quot;&gt;futures&lt;/code&gt; crate&lt;/h3&gt;
+&lt;p&gt;目前有两个Future库同时存在，一个是标准库中的&lt;code class=&quot;highlighter-rouge&quot;&gt;std::future::Future&lt;/code&gt;，另外一个则是&lt;code class=&quot;highlighter-rouge&quot;&gt;futures&lt;/code&gt;中定义的&lt;code class=&quot;highlighter-rouge&quot;&gt;futures::future::Future&lt;/code&gt;。这一重复定义多少让人感到困惑不解：其实这主要是由于&lt;strong&gt;Future特性正在被开发中还不算足够完善&lt;/strong&gt;的缘故。&lt;/p&gt;
+
+&lt;p&gt;早期的实现是通过&lt;code class=&quot;highlighter-rouge&quot;&gt;future-rs&lt;/code&gt;扩展库的方式提供的，最近的版本才将它加到了标准库中；甚至于实现也是移过去的；可以认为&lt;code class=&quot;highlighter-rouge&quot;&gt;std::future::Future&lt;/code&gt;实现了&lt;code class=&quot;highlighter-rouge&quot;&gt;future-rs&lt;/code&gt;里面的一个最小集。后续的功能演进也可能仍然采用类似的策略&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;标准库中的Future进来保持最小的接口&lt;/li&gt;
+  &lt;li&gt;更复杂的组合功能将会用类似&lt;code class=&quot;highlighter-rouge&quot;&gt;future&lt;/code&gt;库的方式来提供&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;futureext&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;FutureExt&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;这是基于&lt;code class=&quot;highlighter-rouge&quot;&gt;Future&lt;/code&gt;之上的一个扩展的Trait，可以实现很多方便的转换，包括&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;map&lt;/code&gt;将包含的输出值经过一个函数处理变换为另外一种输出&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;then&lt;/code&gt;实现两个Feature的链式操作，并且将前一个的输出传递为第二个闭包函数的输入，例如
+    &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f1&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sync&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;move&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;assert_eq!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.await&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;left_future&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;right_future&lt;/code&gt;实现根据不同的条件返回不同部分的EitherFuture功能，如
+    &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.left_future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.right_future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;into_stream&lt;/code&gt;将future转换为包含单个元素的stream，这个stream的输出是future本身，支持方便的stream操作，如
+    &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collected&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.into_stream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.collect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;py&quot;&gt;.await&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;flatten&lt;/code&gt;用于实现一次解封操作，等价于 &lt;code class=&quot;highlighter-rouge&quot;&gt;f.then(|x| x)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;inspect&lt;/code&gt;实现一个future传递之前的额外查看和处理，最简单的例子是打印计算的结果，如
+    &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.inspect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(|&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;will resolve as {}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;//nf = 1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="rust" /><category term="engineering" /><category term="performance" /><category term="multi-threading" /><category term="async" /><category term="future" /><summary type="html">通用的注重性能的现代编程语言都在慢慢地加入对异步编程和协程模型的支持，作为一门强调性能和零成本抽象的语言，Rust自然也不甘落人之后。 可能是因为Rust语言社区出于对自身特殊的生存周期管理机制多带来的其它语言所有没有的额外的编译器实现复杂性，以及开放语言生态系统中的功能开发优先级（它迄今为止还在快速演进中）考虑，在去年年底发布的2018版本中，协程的支持并[没有完工] (//post/2019/01/19/rust-2018-edition-overview/) 而是仅仅留下了一个预留关键字，有点“强制占位”的味道。 换个角度看，也可以认为Rust社区对尽快支持基于async/await风格的协程还是非常重视的。 果不其然，经过快一年的打磨，这些复杂的特性随着最新稳定版本的发布而正式进入了一般程序员的视野（之前的支持放在Nightly发布频道里面给早期吃螃蟹的用户尝鲜）。 协程和它之前的历史背景 协程并不是一个怎么新鲜的编程概念，起码在上个世纪９０年代或者更早的编程语言大发展的时候已经出现在某些语言中；只是因为当时最主流的C++和Java（还没有今天这么流行）的语言并不在语言层面提供对协程的支持而不被主流程序员所熟知。 多线程编程的挑战 那个时代主流的模型还是基于操作系统提供的线程的概念来实现并发编程；典型的如Apache服务器引入的一个连接一个线程的概念：每次有一个新的用户连接请求进来，服务器就会为其创建一个线程；这样可以做到多个线程之间互相不干扰。 这样的处理机制非常简单优雅，可惜在连接数目渐渐增多的时候，可扩展性很差，因为操作系统本身并不擅长处理大量的线程：任何一个线程的创建都需要设计到栈空间的分配、线程私有资源的创建和维护；同时大量的线程在操作系统层面被调度的时候，也很难保证调度策略的公平和有效。 曾经一度引发热烈讨论的C10K问题就是针对这一模型的不足：超过一定数量的连接之后，操作系统甚至将大量的CPU处理资源浪费在线程之间的切换和控制，而不能很好地处理用户层的实际应用需求。 标准的POSIX socket调用的多路处理函数select在传入的socket句柄数量超过一定数量之后也会耗费大量的CPU运算资源于内核态，而用户层程序则束手无策。 显然将用户层面的并发问题直接抛给操作系统并不是一个非常明智的选择；随着应用领域的需求对并发性的要求愈加严苛，这些问题需要找到更好的解决方案。 操作系统层面的探索 以Unix和Linux为主流的非Windows系统自身是从解决并发连接的角度来考虑的，它们通过在内核层面的IO多路复用角度触发，通过引入epoll/kqueue等技术来允许一个单一的用户线程的IO调用可以管理海量的网络连接而完美地解决了传统的select调用层面的问题。当然Windows自己也提供了类似的IOCP的概念实现类似的高性能IO多路复用方案。 这方面的探索解决了一个线程处理海量网络IO的系统资源过耗问题，但是这些改进对和网络无关的本地的耗费CPU的任务的并发挑战并没有多少帮助。 同时这些IO方面的处理暗含了用户必须书写异步代码的挑战：对于可能阻塞的IO调用，用户必须通过回调函数的方式将原来简单、直接的顺序代码改写为支离破碎的异步代码。 只需要看看boost.asio库的实例代码，就会明白这样的编程方式如何可耻地损伤了代码的可读性，显然代码的可维护性也很糟糕。 优化内核线程处理的尝试 这方面的尝试应该以Solaris的线程模型最为典型：对应的pthread接口低下的实现虽然也映射到了操作系统的内核线程，但是这些用户层面的线程和操作系统线程的对应关系不是1:1而是M:N的。 只是这个配置的灵活度并不是太高，其性能表现还是令人刮目相看的，用户可以轻松地创建上万个线程而内核还可以很高效的使用CPU资源来调度用户的处理。 当然因为一些非技术上的原因，Solaris的这些创举并没有在它自身意外的领域发扬光大，而是随着Sun公司的垮台和被收购，Solaris系统最终停止开发而烟消云散了。 主流的Linux系统和其它Unix变种依然在采用一一对应的线程模型。 用户态”线程” 另外一个有趣的探索方向是用户态线程的概念，或者成为Green Thread，它的基本思路是将逻辑线程的管理逻辑都放在操作系统的用户态来管理，而操作系统层面对这些机制一无所知。 运行在用户态的线程管理程序（往往是比较底层的基础库或者组件）自己负责这些线程状态的管理和调度。 这方面比较典型的例子是早期的Python所支持的线程模型，和来自爱立信的Erlang语言底层平台OTP；甚至于有一段实际Java语言的线程库也采用过Green Thread（尽管现在已经不再使用）。 Python的Green Thread实现一度由于它自身历史承袭的GIL锁的性能噩梦而终被弃之高阁了。 异步编程的心智负担 随着上面所说的各种尝试逐渐式微，主流的编程语言不得不回到多线程编程的路上继续探索，这一次随着进入新世纪依赖多核CPU的日渐流行，各种编程语言都不得不寻求其它办法来简化程序员的心智负担，因为编写没有问题的多线程、异步程序实在不是一个轻松的差事。 一方面不管是程序员还是底层的编译器乃至CPU硬件都更加适应一步接一步走下去的顺序执行的逻辑，已有的底层编译器可以对顺序执行程序做深入的分析和优化，处理器可以对指令流水线做高效的预测和预判执行；另一方面程序员却不得不面对顺序代码的效率不高的现实：不管是读取磁盘上的文件，还是从网络上下载内容，碰到这些情况的时候，要想高效地利用CPU，在不创建更多底层线程的情况下，程序员不得不将顺序执行的代码切割为多个部分，然后在阻塞的地方加入一个回调：当阻塞的外部条件满足的时候，由操作系统回调回来执行后面的部分。 协程 协程的引入其实就是为了缓解这一艰巨的挑战：它通过引入一个逻辑上抽象的概念来简化编程模型。某种程度上说，可以将一个协程看作是一段可以以非阻塞的方式高效执行的代码； 而多个协程之间可以通过特定关键字或者语句的方式进行组合，以便程序员可以直接写出看起来是同步执行而实际上底层却是被异步调度执行的代码。 Future 不同的编程语言和环境对于协程的具体实现可以是大相径庭的，只是大多编程语言多通过Future/Promise这样的机制来实现。 一个Future代表一个现在可能还没有结果（或者在等待IO完毕或者还没有被调度到CPU上去实际执行），但是将来会返回某个结果的抽象过程。将来会返回的结果抽象为Promise，即承诺一定会返回的某个东西。这两个概念如果存在，一定是成对存在的。 Executor 异步的Future最后必然要被底层的调度程序来驱动和执行，这个负责执行用户定义的抽象的Future的实体成为Executor，它底层的执行体可以是按需创建的线程池，也可以是共享固定大小的线程池甚至于单个线程等。 最好的Executor抽象应该是从JDK5开始流行开来的，目前已经成为一个跨编程语言的抽象。 async/await 对协程的组合和等待则通过async/await这样的关键字来标识。async用于标记某个可以返回Future的语句或者调用，await用来异步的等待某个Future的执行结果，即await的逻辑看起来同步的，但是其实依赖于底层协程的调度结果，即实际执行完毕之后才能得到结果。 如果有后续的逻辑处理依赖于await的结果，那么它们将被自动调度为顺序执行。 Rust的Future Future本身是一个抽象的概念，对应的Rust语言里面的动态抽象机制是Trait，因此毫不意外地看到，Rust语言定义的Future就是一个Trait。 逻辑上来说，Rust的Future可以简单的被认为是定义为如下的形式 // Warning: this is not the offical definition trait Future { type Output; fn poll(&amp;amp;mut self, wake: fn()) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt;; } 该Trait的核心是定义了一个输出的类型，即实际执行结束之后的结果返回类型，以及一个相关的poll函数。 顾名思义这是一个底层的协程Executor提供的”轮询”执行结果的函数，返回的结果是操作是否完毕，它是一个枚举类型 enum Poll&amp;lt;T&amp;gt; { Ready&amp;lt;T&amp;gt;, Pending, } Rust自身的类型安全机制很好地封装了其它语言中不得不需要的Promise:这里我们不需要专门的Promise类型，仅仅根据枚举值来做模式匹配即可。 用户程序可以主动调用这个轮询函数，驱动底层的Executor来执行一次调用，然后检查实际结果； 只是绝大部分情况下，这并不是最佳的使用方式：因为这一的执行方式和协程底层封装的思路想违背了。大部分情况下，用户需要的是关注多个协程之间的互相组合，确定它们之间的逻辑依赖关系即可，Executor的驱动甚至可以是自动封装驱动的。 wake函数 如果没有这个函数，Executor在需要多次驱动用户提供的Future来持续运行的时候，将没有办法知道如何继续下去。 这个函数的作用就是一个唤醒回调，在Future被实际执行的时候，如果一次没有执行完毕，那么下次被调用的时候，可以从上次中断的地方继续执行下去。 Socket的例子 假设我们有一个从Socket读取数据的Future，它在有数据的时候，直接返回读取到的数据，没有数据的时候，则留待下次调度的时候继续执行；它可以被实现为 pub struct SocketRead&amp;lt;'a&amp;gt; { socket: &amp;amp;'a Socket, } impl Future for SocketRead &amp;lt;'_&amp;gt; { type Output = Vec&amp;lt;u8&amp;gt;; fn poll(&amp;amp;mut self, wake: fn()) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt; { if self.socket.has_data_to_read() { Poll::Ready(self.socket.read_buf()) } else { self.socket.set_readable_callback(wake) Poll::Pending } } } 实现Join的例子 这种实现方式允许我们自由地组合多个Future而不需要额外的中间内存分配，从而兼得抽象的好处而不损失一毫性能，比如我们需要组合两个Future而让它们可以并发执行的时候，可以用如下的实现： pub struct Join&amp;lt;FutureA, FutureB&amp;gt; { a: Option&amp;lt;FutureA&amp;gt;, b: Option&amp;lt;FutureB&amp;gt;, } impl &amp;lt;FutureA, FutureB&amp;gt; Future for Join&amp;lt;FutureA, FutureB&amp;gt; where FutureA: Future&amp;lt;Output=()&amp;gt;, FutureB: Future&amp;lt;Output=()&amp;gt;, { type Output = (); fn poll(&amp;amp;mut self, wake: fn()) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt; { if let Some(a) = &amp;amp;mut self.a { if let Poll::Ready(()) = a.poll(wake) { self.a.take() } } if let Some(b) = &amp;amp;mut self.b { if let Poll::Ready(()) = b.poll(wake) { self.b.take() } } if self.a.is_none() &amp;amp;&amp;amp; self.b.is_none() { Poll::Ready(()) } else { Poll::Pending } } } 这个轮询的过程非常简单直接，分别轮询传入的两个Future，并且在两个都完成的时候，返回结果。否则返回Pending以便后续的调度继续执行。 实现AndThen 另外一种场景的协程操作是实现穿行逻辑，即第一个future结束后才执行第二个。类似于上面的定义，我们先定义这种顺序组合的Future如下： pub struct AndThenFut&amp;lt;FutureA, FutureB&amp;gt; { first: Option&amp;lt;FutureA&amp;gt;, second: FutureB, } 它的实现则为 impl &amp;lt;FutureA, FutureB&amp;gt; Future for AndThenFut&amp;lt;FutureA, FutureB&amp;gt; where FutureA: Future&amp;lt;Output=()&amp;gt;, FutureB: Future&amp;lt;Output=()&amp;gt;, { type Output = (); fn poll(&amp;amp;mut self, wake: fn()) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt; { if let Some(first) = &amp;amp;mut self.first { match first.poll(wake) { Poll:Ready(()) =&amp;gt; self.first.take(), Poll::Pending =&amp;gt; return Poll::Pending, } } self.second.poll(wake) } } 这里我们简化了处理逻辑，仅当第一个FutureA完毕的时候，才会轮询第二个Future，如果第一个Future没有完毕，则继续等待下一次的查询调度。 真正的Future定义 上述的逻辑定义其实是一种简化模型，而真正的标准库中的Future定义其实如下 trait Future { type Output; fn poll(self: Pin&amp;lt;&amp;amp;mut self&amp;gt;, ctx: &amp;amp;mut Context&amp;lt;'_&amp;gt;) -&amp;gt; Poll::(Self::Output); } 最显著的不同在于函数的两个参数类型 self类型被定义为Pin的分装，这个封装简单的来说，就是允许我们创建不可移动的Future类型；所谓的不可移动对象，是指对象里面可以出现某个字段的指针指向对象的其它字段的情况；这对于实现async/await是至关重要的。 第二个参数用一个Context对象替换了简单的wake函数 我们之所以需要一个Context对象，是因为我们需要在其中存储哪一个Future对象被轮询执行了；这在复杂的多线程程序中是不可或缺的。 Context对象和Waker类型 Context的定义如下 pub struct Context&amp;lt;'a&amp;gt; { waker: &amp;amp;'a Waker, _marker: PhantomData&amp;lt;fn(&amp;amp;'a ()) -&amp;gt; &amp;amp;'a ()&amp;gt;, } 它里面仅仅是封装了一个额外的Waker对象，以便用户定义的Future和底层的Executor进行通信，通知对方自身已经准备好了下一步对应的结果就可以返回给外部，其本身提供了clone操作，并且可以可以在多线程环境中移动和共享，因为它标记自己实现了Sync和Send pub struct Waker { waker: RawWaker, } impl Unpin for Waker {} unsafe impl Send for Waker {} unsafe impl Sync for Waker {} 其中嵌套的内部实现里面封装了一个满足具体的Executor要求的、可以包含任意上下文数据的指针data，它的注释很好地阐述了数据的用途： #[derive(PartialEq, Debug)] pub struct RawWaker { /// A data pointer, which can be used to store arbitrary data as required /// by the executor. This could be e.g. a type-erased pointer to an `Arc` /// that is associated with the task. /// The value of this field gets passed to all functions that are part of /// the vtable as the first parameter. data: *const (), /// Virtual function pointer table that customizes the behavior of this waker. vtable: &amp;amp;'static RawWakerVTable, } Waker自身提供了wake()函数，和上面简化的例子类似 #[inline] pub fn wake(self) { let wake = self.waker.vtable.wake; let data = self.waker.data; crate::mem::forget(self); unsafe { (wake)(data) }; } 一个定时器实现的例子 假设我们需要实现一个经过给定时间段后过期的名为TimerFuture的future对象，我们需要一个上下文数据标识timer是否已经完成，并且出于简化起见，当Timer被创建的时候，我们启动一个线程来在创建的线程中将其激活，因此我们需要一个跨线程共享的上下文。 类型定义 Arc类型是用来封装上下文状态的最简单的封装类 pub struct TimerFuture { shared_state: Arc&amp;lt;Mutex&amp;lt;SharedState&amp;gt;&amp;gt;, } struct SharedState { completed: bool, waker: Option&amp;lt;Waker&amp;gt;, } new函数 接下来是它的实现和new函数 impl TimerFuture { pub fn new(duration: Duration) -&amp;gt; Self { let shared_state = Arc::new(Mutex::new(SharedState { completed: false, waker: None, })); 因为需要创建一个线程来异步地标记Timer到期完毕，我们需要将该共享状态拷贝并移动到lambda对应的线程中去： let shared_state_clone = shared_state.clone(); thread::spawn(move || { thread::sleep(duration); let mut shared_state = shared_state_clone.lock().unwrap(); shared_state.completed = true; 当时间到期后，我们除了标记该共享状态的标志外，还需要在Future的使用方没有完成的情况下，主动唤醒底层的调度，此时就可以使用wake()函数了 if let Some(waker) = shared_state.waker.take() { waker.wake(); } }); TimerFuture { shared_state } } } Future实现 该TimerFuture的trait实现其实就是对共享状态查询的封装；如果已经完毕，就返回Ready,否则就返回Pending。 这里有个非常细微的问题需要注意：因为waker对象可能随着Executor在线程之间的移动而被拷贝为其它的值，为了避免对象自身保存的waker对象指向了非法的上下文，我们需要在返回pending之前重新拷贝一次自身保存的waker! impl Future for TimerFuture { type Output = (); fn poll(self: Pin&amp;lt;&amp;amp;mut Self&amp;gt;, ctx: &amp;amp;mut Context&amp;lt;'_&amp;gt;) -&amp;gt; Poll&amp;lt;Self::Output&amp;gt; { let mut shared_state = self.shared_state.lock().unwrap(); if shared_state.completed { Poll::Ready(()) } else { shared_state.waker = Some(ctx.waker().clone()); Poll::Pending } } } Rust的await和async 这次加入1.36稳定版的功能体验在语言层面的两个关键字async和await。 async async用于声明一个代码块为返回一个Future，通过在某个普通的函数声明前面加上async，Rust可以自动完成返回类型到Future类型的封装和转换，如下面的代码 async fn do_something() { //some heavy operation } 的返回值会是一个Future. Rust本身的Executor库也提供了阻塞执行的方法，允许我们在当前的调用线程里面阻塞执行直到封装的异步执行块允许完毕，即如下的代码 let fut = do_something(); block_on(fut); // proceeds until wrapped something is executed await await语句可以作用在Future上，用于非阻塞方式的同步逻辑，即异步地等待作用的Future对象的完成，然后读取返回的结果，考虑如下的三个异步的Future执行块，前两个有先后依赖而第三个可以同时进行： async fn learn_song() -&amp;gt; Song { //dom something Song } async fn sing_song(song: Song) { //sing the song } async fn dance() { //dance } 可以用如下的逻辑来表述上面的并发执行行为 async learn_and_sing() { let song = learn_song().await; sing_song(song).await; } let f1 = learn_and_sing().await; let f2 = dance(); futures::join(f1, f2); 标准库中的Future和futures crate 目前有两个Future库同时存在，一个是标准库中的std::future::Future，另外一个则是futures中定义的futures::future::Future。这一重复定义多少让人感到困惑不解：其实这主要是由于Future特性正在被开发中还不算足够完善的缘故。 早期的实现是通过future-rs扩展库的方式提供的，最近的版本才将它加到了标准库中；甚至于实现也是移过去的；可以认为std::future::Future实现了future-rs里面的一个最小集。后续的功能演进也可能仍然采用类似的策略 标准库中的Future进来保持最小的接口 更复杂的组合功能将会用类似future库的方式来提供 FutureExt 这是基于Future之上的一个扩展的Trait，可以实现很多方便的转换，包括 map将包含的输出值经过一个函数处理变换为另外一种输出 then实现两个Feature的链式操作，并且将前一个的输出传递为第二个闭包函数的输入，例如 let f1 = async {1}; let f2 = f1.then(|x| sync move { x + 3}); assert_eq!(f2.await, 4); left_future/right_future实现根据不同的条件返回不同部分的EitherFuture功能，如 let x = 6; let f = if x &amp;lt; 10 { async {true}.left_future() } else { async {false}.right_future() } into_stream将future转换为包含单个元素的stream，这个stream的输出是future本身，支持方便的stream操作，如 let f = async {17}; let collected:Vec&amp;lt;_&amp;gt; = f.into_stream().collect().await; flatten用于实现一次解封操作，等价于 f.then(|x| x) inspect实现一个future传递之前的额外查看和处理，最简单的例子是打印计算的结果，如 let f = async {1}; let nf = f.inspect(|&amp;amp;x| println!(&quot;will resolve as {}&quot;, x)); //nf = 1</summary></entry><entry><title type="html">Rust文本处理的性能及优化</title><link href="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/" rel="alternate" type="text/html" title="Rust文本处理的性能及优化" /><published>2019-11-29T00:00:00+08:00</published><updated>2019-11-29T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/11/29/rust-text-processing-performance/">&lt;p&gt;作为一门秉承&lt;strong&gt;零成本抽象&lt;/strong&gt;这一极具挑战的目标为语言设计核心的静态变成语言，用Rust语言来编写一些文本处理程序可以不需要可以优化就能达到很高的性能。
 但是如果我们对已经写就的文本处理程序的性能不甚满意，觉得不够快或者想将它推向性能更高的境地，即&lt;strong&gt;需要进一步优化&lt;/strong&gt;，可能还不得不额外下一些功夫才能做到。&lt;/p&gt;
 
 &lt;!--more--&gt;
@@ -3462,529 +3840,4 @@ sys     0m0.012s
 
 &lt;p&gt;当然这是一个过分简化了的例子，实际的代码往往比这个要复杂很多，这里的性能结果和结论往往不能适用实际的复杂场景，因为每一个程序的运行环境和执行情况可能都是独一无二的，必须一句实际情况来分析。&lt;/p&gt;
 
-&lt;p&gt;更复杂的情况，这里的计算时间的方法显然也太过原始了；可以借助强大的profile工具，生成perf可以解析的数据，从而进一步生成&lt;a href=&quot;https://github.com/brendangregg/FlameGraphhttps://github.com/brendangregg/FlameGraph&quot;&gt;火焰图&lt;/a&gt;或者直接查看&lt;code class=&quot;highlighter-rouge&quot;&gt;perf report&lt;/code&gt;的命令行界面来分析性能的热点在哪里。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="engineering" /><category term="performance" /><category term="cpp" /><category term="python" /><category term="regex" /><summary type="html">C++17 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。 程序员们的一个大福利就是终于不用外挂第三方库（无论是准标准的boost还是其它形形色色的其它第三方库）就可以直接方便地使用标准库自带的&amp;lt;regex&amp;gt;来写代码； 这显然比直接使用原始而笨拙的string::find_first_of外加一堆边界检查和判断要轻松和干净很多。</summary></entry><entry><title type="html">实现领域驱动设计</title><link href="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/" rel="alternate" type="text/html" title="实现领域驱动设计" /><published>2019-02-23T00:00:00+08:00</published><updated>2019-02-23T00:00:00+08:00</updated><id>https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl</id><content type="html" xml:base="https://skyscribe.github.io/post/2019/02/23/domain-driven-development-impl/">&lt;p&gt;领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在
-他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。
-甚至有一种说法是：&lt;strong&gt;如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书&lt;/strong&gt;以吸收新的灵感，
-然后才能知道你工作中的面性对象设计用错在了什么地方。&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;h2 id=&quot;和领域驱动设计的接触史&quot;&gt;和领域驱动设计的接触史&lt;/h2&gt;
-&lt;p&gt;领域驱动设计对我而言并不是一个很新鲜的名词，因为在我看来&lt;strong&gt;它讨论的还是面向对象的设计思想和基本的设计模式应用&lt;/strong&gt;；
-只不过是它将这些思想直接地应用到了软件所要解决的问题域中去了而已。
-只是我对它的理解还是经历了一个很长的曲折过程。直接用中文的“领域驱动设计”一词来描述无疑会使行文变得累赘不少，后面就暂且不时偷懒地用DDD来指代它。&lt;/p&gt;
-
-&lt;h3 id=&quot;职业生涯最早期的擦肩而过&quot;&gt;职业生涯最早期的擦肩而过&lt;/h3&gt;
-&lt;p&gt;我第一次和领域驱动设计的思想擦肩而过的日子应该是在十多年前，那时候我还是一个刚刚离开校门不就的青涩的初级程序员；
-自恃学了一些面向对象的设计方法，然后在TopLanguage社区上读到了一些大神推荐Martin Fowler的网站的文章。因为恰好在外企里面工作，英语还算可以，
-就仔细读了Martin博客上的几篇文章，恰好看到了关于领域驱动设计的讨论。&lt;/p&gt;
-
-&lt;p&gt;由于自己的工作经验实在是浅薄的可怜，眼界是是出奇的狭窄，&lt;strong&gt;可惜自己还不自知，对于软件工程中的领域知识复杂性实在了解的有限&lt;/strong&gt;。
-这个时候有公司高级设计师在刚刚火起来的微博上讨论领域驱动设计和领域特定语言，我看到这样新鲜的名词居然没有听说过，马上找来了Martin的书读了一遍。
-可惜实在是所知有限，并没有很深入的理解进去；得到的只是一些非常皮毛的概念。&lt;/p&gt;
-
-&lt;h3 id=&quot;二次接触&quot;&gt;二次接触&lt;/h3&gt;
-
-&lt;p&gt;大概三四年前，在做了长时间的软件工程师、高级工程师并尝试了其它团队Leader和项目管理的角色之后，我做出了深入技术领域的决定，成为了一名初级的软件架构师。
-出于自己爱读书的习惯，我又重新翻起了那本被认为是划时代设计思想巨著的《领域驱动设计》一书。这一次因为有了之前的工作经验，
-作者所谈的一些技术痛点读起来就变得显而易见，虽然Eric Evans所经历的行业我没有直接的感受，其中所谈的困境和作者想解决的问题却深深地引起了我的共鸣。&lt;/p&gt;
-
-&lt;p&gt;这个时候我心里最深切的想法是：再来深入体会和理解领域驱动设计其实应该是水到渠成的事情。
-可惜这一次我又错了，尽管我专门集中了最好的碎片时间尽量大块儿地阅读这本巨著；&lt;strong&gt;最终因为自己操作的机会毕竟有限&lt;/strong&gt;，
-很多方面的认识还是知其然而不知其所以然。&lt;/p&gt;
-
-&lt;p&gt;作者提到的关于Unbiqutous Language的概念和其它形形色色的概念，其实还是不免流于理论形式；虽然对从数学专业毕业的我而言，理解起这些理论来并不觉得吃力。
-这个时候我正在做架构师的工作，平时也亲自主持设计一些关键系统模块的高层设计和抽象思考，并有大量的时间去评审别的高级工程师设计出来的模型。&lt;/p&gt;
-
-&lt;p&gt;有意无意地我会讲Eric里面讲述的思想引入到我们日常的工作中，并努力身先示范并尽力去影响大家来推进这些思想的引用。
-这个时候的项目用的Java环境，而Spring本身到这个时候已经支持了不少DDD自身的一些逻辑注解；里面的文档都会给你一句简单的介绍说这个Service的概念来自于Eric Evans等。&lt;/p&gt;
-
-&lt;p&gt;很多时候我觉得自己明明很认真地告诉大家使用这些想法会得到怎样的好处，其它的同事也会对这些想法表示赞同，然而&lt;strong&gt;真正具体实施的时候，
-别人还是会觉得这些做法很费劲儿&lt;/strong&gt;，真正做出来的软件还是不自然地陷入到了“大泥球”之中，其实这些努力并不能算得上是成功。
-具体的原因当时的自己其实并没有理解的很深刻。&lt;/p&gt;
-
-&lt;h3 id=&quot;第三次亲密接触&quot;&gt;第三次亲密接触&lt;/h3&gt;
-
-&lt;p&gt;时光飞速地从身边流过，四年过去我已经从当初迷茫而不自知的初级架构师成长成为了一个积累了更多的经验又更加惶恐地认识到自己不足的一个中高级架构师。
-当时的迷茫和手足无措其实很大部分来自于自己知识积累上的不足和实际工作经历的欠缺；毕竟当时转过来重新深入钻研技术有一些其它方面的原因，并不是完全的水到渠成。&lt;/p&gt;
-
-&lt;p&gt;还好我尚能做到知不足而奋进；几年的时间我尽量用自己身边可用的渠道弥补自己之前相关知识上的欠缺。这些弥补的方式主要还是读书和思考，
-某种程度上来说，读书可以算作是我个人的比较优势，我的动手能力也还算可以，但是比较起来我还是更擅长于读书。&lt;/p&gt;
-
-&lt;p&gt;优秀的描述架构和设计的图书其实并没有许多；因为关于软件设计和架构的方法学和思想也就那么一些花样；其它一些具体的技术和框架是不断有花样出来，
-底层的这些本质的东西并没有发生太大的变化。商业软件的复杂性很多时候并不在于这些具体的软件基础技术；当然脱离这些基础技术的话，很多时候并不可能做出有使用价值的软件来。&lt;/p&gt;
-
-&lt;p&gt;基于这些其它方面技术的积累，我又一次对领域驱动设计发生了兴趣，于是就顺手来啃一下另外一本这个领域赫赫有名的《实现领域驱动设计》。
-简单翻了一下目录就不禁感叹：这不就是为现在我的知识和认知水平储备的吗？有广度又有深度，没有过多地重复一些其它的理论只是，
-却又不简单地堆砌代码；连书中的文字和插画风格也和Bob大叔的很相像，每一个部分都有一个关于牛仔的漫画和对白，可惜我对美国的牛仔文化并不是很熟悉。&lt;/p&gt;
-
-&lt;h2 id=&quot;简单的为什么和怎么做&quot;&gt;简单的为什么和怎么做&lt;/h2&gt;
-
-&lt;p&gt;对于任何一个稍微复杂一点的实体来说，想清楚这两个问题都会有不小的挑战。是否采用DDD方法，为什么要采用DDD以及怎样很好地时间DDD也是这样的复杂问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;为什么需要ddd&quot;&gt;为什么需要DDD&lt;/h3&gt;
-&lt;p&gt;为什么的问题其实取决于我们需要解决的问题域的复杂性，如果是非常简单的系统，用数十行的脚本或者SQL查询语言就可以完成的事情，断然是用不到DDD这么高级的抽象系统的，
-因为那样做不产生太多实际的价值，可能还会折进去不少的精力损耗而得不偿失。&lt;/p&gt;
-
-&lt;p&gt;DDD本身希望解决的是复杂的业务领域，这些业务领域在需要用软件来表述和实现的时候，需要多个团队成员的协作来完成需求讨论、设计、开发、测试已经维护才能实现商业目标。
-这种情况下，使用DDD可以极大地简化业务领域的复杂性；用更小的成本实现更大的商业价值。&lt;/p&gt;
-
-&lt;h3 id=&quot;最简单的怎么做&quot;&gt;最简单的怎么做&lt;/h3&gt;
-
-&lt;p&gt;DDD的核心思想可以认为是两个：&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;无处不在的领域业务语言即Ubiquitous Language，这是DDD最为强大的一个工具之一&lt;/li&gt;
-  &lt;li&gt;绑定的领域上下文即Bounded Context&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;这两者的关系是互相依存的，&lt;strong&gt;没有清晰的领域业务语言，就没有办法识别清楚&lt;/strong&gt;特定的绑定上下文；
-同样没有清晰的领域上下文，那么领域业务语言就会变得模糊不清出而失去威力。&lt;/p&gt;
-
-&lt;h3 id=&quot;ubiquitous-language&quot;&gt;Ubiquitous Language&lt;/h3&gt;
-&lt;p&gt;这是一门特殊的团队使用的通用开发语言，需要由&lt;strong&gt;领域知识专家（系统分析和需求知识专家）和开发技术专家（程序员）共同来开发和维系&lt;/strong&gt;。
-只有如此，两者才能共享相同的知识；通常情况下，该语言可能由领域专家先根据领域知识和需求来创建，然后该语言需要保持演进，以便领域知识专家和开发技术专家互相学习，
-共同产生目标软件模块甚至系统。&lt;/p&gt;
-
-&lt;p&gt;它是一种团队内部用来捕捉核心业务逻辑概念和内部领域软件模型的工具。它的作用范围需要限制在一个绑定的上下文中，
-从而有可能出现同一个实体在不同的绑定上下文中会有不同的语言名称，这个并没有什么问题。
-一个特定的Ubiquitous Language总是为特定的绑定上下文所服务的。&lt;/p&gt;
-
-&lt;p&gt;这种语言是领域专家和程序员之间的桥梁：通过共享相同的领域语言，知识专家和程序员共同写作，完成最终的软件产品；
-这种知识和技能上的互补是DDD方法的一个内生的优势。
-当然如果组织的沟通和行政结构不匹配的话，这也可能成为实现DDD的一个阻碍因素。&lt;/p&gt;
-
-&lt;h4 id=&quot;挑战和陷阱&quot;&gt;挑战和陷阱&lt;/h4&gt;
-
-&lt;p&gt;这里有一个巨大的挑战在：&lt;strong&gt;开发组织是否有足够的时间和投入来保证领域知识专家能够坐下来和开发人员一起讨论和发现&lt;/strong&gt;这些无处不在的通用领域语言，
-识别其中的抽象模型和核心业务价值的关系，不断地提炼领域通用语言。
-同样的开发人员或者程序员也要被不断地鼓励用该通用的语言和领域专家进行沟通，确保相互的理解和语言的演进，而不是一头扎进代码的细节中实现偏离了该共同语言的最终产品。&lt;/p&gt;
-
-&lt;p&gt;很多年以来，软件开发行业都有些过于追逐炫目的底层技术细节了（当然不是说这些不重要），而DDD的思想需要我们适当地变得少一点技术化，多讨论一些业务语言。
-因为领域问题的复杂性才是大部分商业软件复杂性的主要来源；新的技术和工具可以解决一些痛点，但是很多时候它们不应该是软件的核心价值所在。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域粒度切分和绑定上下文&quot;&gt;领域粒度切分和绑定上下文&lt;/h3&gt;
-
-&lt;p&gt;很多时候我们面对的领域问题非常复杂，然而开发人员往往禁不起诱惑而希望将所有的问题都放在一个领域中来解决，
-这样的副作用就是理解和沟通起来相当困难，出现问题也非常难以排查，从而使得系统维护和演进的成本变得日渐高昂甚至最终会被废弃而完全失去价值。&lt;/p&gt;
-
-&lt;p&gt;解决这一问题的办法是需要将问题领域切分为多个子领域，并确切地区分子领域和核心领域。
-&lt;strong&gt;核心领域关系到业务成功因此需要配备最好的领域知识专家和最好的开发人员&lt;/strong&gt;，从而使他们形成适合于他们的统一语言，保证即使其它领域不成功，核心的商业价值也可以得以保全。
-而非核心领域则是一些支持性的领域，这些领域中有些可能可以被多个其它领域所使用，这样的领域就是一些通用的子领域。&lt;/p&gt;
-
-&lt;p&gt;通过讲问题领域分割为多个子领域，复杂的问题得以简化；通过聚焦于核心领域，核心的商业价值得以最大化。
-每一个子领域和围绕它形成的领域专家和技术专家共同产生和维护的统一语言构成了特定的绑定上下文。&lt;/p&gt;
-
-&lt;h4 id=&quot;领域边界&quot;&gt;领域边界&lt;/h4&gt;
-
-&lt;p&gt;划分好的子领域形成了自然的领域边界；因此&lt;strong&gt;绑定上下其实是用领域统一语言的边界来分隔&lt;/strong&gt;的。
-不同的绑定上下文自然就不能共享统一的业务语言了，因为这个&lt;strong&gt;边界其实是个语言边界&lt;/strong&gt;；这也是前边一直强调的通用领域语言的重要性所在了。
-这也意味着&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;没有必要也&lt;strong&gt;没有可能在不同的子领域之间统一术语和上下文&lt;/strong&gt;，这个是由绑定上下文的本质决定的；不同的领域自然有不同的绑定上下文和自己的领域术语&lt;/li&gt;
-  &lt;li&gt;开发人员和领域专家需要认识到并且拥抱不同子领域的模型和概念不需要一致的现实&lt;/li&gt;
-  &lt;li&gt;跨越领域来分享概念和名词容易带来混淆和混乱，尽力不这么做&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;领域不是组件模块等纯软件概念&quot;&gt;领域不是组件、模块等纯软件概念&lt;/h4&gt;
-
-&lt;p&gt;领域模型是基于领域专家和技术专家的共同语言而存在和得以维系的；因此我们不能草率地将传统的纯软件架构技术和领域概念混为一谈。
-一个子领域并不是一个组件，或者一个模块，或者应用服务实例等纯软件组织概念。
-领域驱动设计要求我们总是在大脑里记清楚两者不是一回事儿；我们的&lt;strong&gt;模型总是柔和了业务领域知识和软件抽象技术的一个综合体&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;绑定上下文的粒度和大小&quot;&gt;绑定上下文的粒度和大小&lt;/h3&gt;
-
-&lt;p&gt;绑定上下文的&lt;strong&gt;粒度取决于所采用的领域统一语言所表述的概念边界&lt;/strong&gt;；最理想的情况是两者刚好能够完全匹配；但是没有匹配的话，还可以不断的修正它，
-这也正是敏捷软件开发思想的应用，不是什么太大的问题。&lt;/p&gt;
-
-&lt;p&gt;一个绑定上下文中所使用的其它的DDD设施，包括Entity，Aggregates，Events，Service等，
-应该是恰到好处地匹配DDD的需要，是“增之一分则太肥，减之一分则太瘦”的恰到好处。尤其是核心领域对应的绑定上下文，
-更要努力做到如此；自然这需要上面所说的最好的资源支持才可以做的到。&lt;/p&gt;
-
-&lt;p&gt;DDD的思想还要求我们界定绑定上下文的边界的时候，&lt;strong&gt;必须避免软件架构技术产生决定性的影响&lt;/strong&gt;；
-因为这一方法的指导性原则是，需要倾听和修正领域模型和语言边界，而不是软件架构实现技术的边界。
-有时候可以用具体承载领域的软件架构技术来指代领域，只要领域边界的界定不是根据这些架构技术得来的就行。&lt;/p&gt;
-
-&lt;h2 id=&quot;上下文映射&quot;&gt;上下文映射&lt;/h2&gt;
-
-&lt;p&gt;处于上述绑定上下文粒度和领域通用语言的考虑，复杂一点的领域设计系统中总会有多个不同的子领域；描述问题的解决方案的时候，我们需要考虑不同子领域之间的映射关系；
-而这正式上下文映射所要解决的问题。如果将多个绑定上下文描述在一张图中，他们之间的相互关系就是上下文映射。&lt;/p&gt;
-
-&lt;p&gt;上下文映射不光给我们提供了一个关于整个系统的高层视图，还架起了一座帮助我们在多个绑定上下文（子领域）之间沟通的桥梁。
-这一点之所以重要，是因为&lt;strong&gt;不同的子领域可能使用完全不同的”通用领域语言”&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;h3 id=&quot;如何描述上下文映射&quot;&gt;如何描述上下文映射&lt;/h3&gt;
-
-&lt;p&gt;一般情况下，上下文映射描述的是现在所理解的领域边界和这些相关子领域的相互关系；实际操作的时候我们需要保持敏捷而不是考虑过多想象的未来图景。
-大部分情况下，基本的领域框架和寥寥数笔领域关系就足够使用；如果需要描绘更多的细节信息，
-可以采用DDD中的其它诸如Aggregates、modules方法来细化这些关系；
-只是大部分情况下这样做并无必要。&lt;/p&gt;
-
-&lt;p&gt;需要留意的是&lt;strong&gt;上下文映射并不是企业软件架构或者系统拓扑结构&lt;/strong&gt;；它不是特别为这方面的意图所准备的。
-它的主要作用是帮助各个领域团队开发的时候作为沟通和交流的参照；在有必要的时候，它依然可以部分地用在这些场景，凸显系统集成的瓶颈所在；只是不要本末倒置就可以。&lt;/p&gt;
-
-&lt;p&gt;大部分情况下，上下文映射可以用白板的形式放置在领域开发团队的办公区域，使得参与其中的开发和业务人员随时可以看到它们。
-其它的方式可以根据实际团队的沟通习惯来实施，比如放在大家经常访问的Wiki中；不过如果这个Wiki长久没有人访问，还是不要浪费力气的好。&lt;/p&gt;
-
-&lt;h3 id=&quot;上下文映射关系&quot;&gt;上下文映射关系&lt;/h3&gt;
-&lt;p&gt;实际描述多个绑定上下文之间的相互关系的时候，可以采用如下几种Evans所定义的集成模式&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;伙伴式关系：两个领域之间是通过紧密写作来完成各自的领域职责；一荣俱荣一损俱损的关系，两者之间有直接而深入的耦合关系。相互关联的功能必须要通过两个团队之间的紧密合作才可能开发和集成成功。&lt;/li&gt;
-  &lt;li&gt;共享内核：两个领域之间共享一些基本的公用模型或者核心设施、代码等；从而两个领域的设计可以得到极大的简化；如果存在共享内核，需要尽力使得共享内核足够的小和简单。&lt;/li&gt;
-  &lt;li&gt;上下游关系：上游领域的改动无需通知下游，而下游的成功非常依赖于上游提供的服务。&lt;/li&gt;
-  &lt;li&gt;反破坏层：当上游领域和下游领域团队之间的&lt;strong&gt;沟通异常困难，或者下游非常难以协调上游的资源支持&lt;/strong&gt;的时候，下游领域团队往往会需要选择构建一个针对上游领域的反破坏层；这在大公司里面非常常见。&lt;/li&gt;
-  &lt;li&gt;开放宿主服务：一个领域通过想其它领域提供&lt;strong&gt;一个开放协议的方式&lt;/strong&gt;提供支持；新的领域如果需要和它继承，需要根据已有的协议添加适配即可。很多时候，下游的领域会将这个开发协议的提供方看做是一个难以可靠协调的上游，
-并且构建反破坏层来维护自身的稳定性。&lt;/li&gt;
-  &lt;li&gt;已发布的公用语言：两个领域之间可以通过共享一部分领域通用语言的方式来沟通和交互。&lt;/li&gt;
-  &lt;li&gt;大泥球：大泥球现象在一些上了历史的老项目中非常场景，当需要和这些遗留领域打交道的时候，我们&lt;strong&gt;需要格外小心构建隔离边界，防止大泥球问题的蔓延&lt;/strong&gt;。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;软件架构&quot;&gt;软件架构&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;DDD方法强调它并不需要和某一种架构风格相互绑定&lt;/strong&gt;，也不依赖于某些特定的软件架构方法，甚至于可以和风险驱动的软件架构方法相处融洽。
-不同的软件架构技术和方法有不同的适用场景，而&lt;strong&gt;DDD方法则力图和这些架构方法和谐共存&lt;/strong&gt;，不管是经典的封层架构，
-还是稍微现代一点的形形色色的架构风格和方法，DDD都可以根据需要来适用他们解决领域内的问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;分层架构和依赖导致原则&quot;&gt;分层架构和依赖导致原则&lt;/h3&gt;
-
-&lt;p&gt;传统的封层架构按照层次组织软件系统，严格的分层架构仅仅允许高层的组件依赖于低层的组件，并且不允许跨越层次调用依赖；而松散一点的分层架构则允许跨越一些中间层次来调用底层的组件；
-当然两者都允许底层的组件调用高层；并且需要确保分层架构中没有环产生，以免有难缠的系统依赖问题。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;依赖倒置原则其实从某种程度上来看打破了传统的分层架构的严谨性&lt;/strong&gt;，但是同时又允许更大的灵活性，因为组织依赖上都要求大家尽量依赖于抽象而不是依赖于具体的实现；
-甚至可以认为层次的概念呗弱化的同时，软件的灵活性还得到了保证。&lt;/p&gt;
-
-&lt;h3 id=&quot;端口和适配器架构&quot;&gt;端口和适配器架构&lt;/h3&gt;
-
-&lt;p&gt;这一架构风格原来也被称为是六边形架构；或者另外一个所谓的洋葱架构指向的也是这种风格。任何时候一个组件想要和另外一个组件交互的时候，只需要做这两件事情&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;拿到对方的端口&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;准备一个新的适配器组件，将自己的内部逻辑翻译为对外部端口的调用&lt;/strong&gt;即可&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;今天的很多封层架构其实都是端口和适配器架构，尤其是很多基于依赖注入设施的项目更是如此；即使是他们称呼自己为分层架构。
-这一架构的巨大好处是，即使外部模块或者组件没有就绪，我们也可以根据端口和适配器很方便地构建测试用例来验证用户场景。&lt;/p&gt;
-
-&lt;h3 id=&quot;基于服务的架构&quot;&gt;基于服务的架构&lt;/h3&gt;
-
-&lt;p&gt;基于服务的架构包括传统的SOA架构和新兴的微服务架构，他们的侧重点和针对服务切分的颗粒度乃至服务治理方式有形形色色的差异，好在从DDD方法认为这种架构风格并没有破坏领域的完整性。
-相反我们可以根据DDD的方法让一个服务描述一个对应的绑定上下文，在这个服务内部，所有的代码共享同一个通用的领域语言。&lt;/p&gt;
-
-&lt;h3 id=&quot;rest和ddd&quot;&gt;REST和DDD&lt;/h3&gt;
-&lt;p&gt;当今微服务大热的背景下，REST多多少少已经被很多场景滥用了，甚至可以说&lt;strong&gt;不该用而滥用的场景比应该使用而没有使用的情况要多&lt;/strong&gt;。
-作为服务的提供方来说，REST端口提供的是&lt;strong&gt;对于资源的抽象和操纵接口&lt;/strong&gt;，它是随着HTTP协议的兴起而变得无处不在的，其核心仍然是围绕着关于服务器资源的访问展开的；只不过这些资源的抽象本身一直在不断地扩大。
-对使用REST的客户端而言，它提供的是关于资源访问的URI和一系列资源操作的方法。&lt;/p&gt;
-
-&lt;p&gt;理想情况下，REST服务提供方需要&lt;strong&gt;按照超媒体的组织方式提供基于HATEOS风格的可发现式的API&lt;/strong&gt;，将客户端的访问从具体而又死板的URI信息中解耦；
-而客户端可以从一个简单的URI开始，根据实际的资源访问情况，步步深入访问其它需要的资源完成业务场景。&lt;/p&gt;
-
-&lt;p&gt;从DDD的角度考虑，一般不建议采用直接用REST API来暴露领域模型的做法，而是&lt;strong&gt;要尽量采用适度的隔离措施&lt;/strong&gt;，使得核心的领域模型不至于变得过度脆弱。有两种办法可以达到该目的&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;一种是专门创建一个用于提供REST表示接口的子领域，让该子领域访问核心的领域。&lt;/li&gt;
-  &lt;li&gt;另外一种做法是将注意力放置在媒体类型上，用一类媒体类型表述一系列的领域交互模型资源；这种做法其实是上述的共享内核或者已发布公共语言的继承方法。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;cqrs&quot;&gt;CQRS&lt;/h3&gt;
-&lt;p&gt;CQRS即命令和查询职责分离的简称；这一做法要求我们任何一个方法要么负责查询，要么负责执行命令修改状态；但是永远不要将两者混合在一起。
-依据这种做法，&lt;strong&gt;传统的领域模型就不得不分为两个部分：一个子模型负责查询，另外一个则负责执行命令&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;这样的做法虽然会带来意外耦合的问题，却有一些额外的好处，尤其是系统需要有不同的扩展性要求和查询、修改性能指标；将两者分离的做法很容易轻松地应对这些传统方法难以处理的难题。
-往往采用CQRS技术的系统需要&lt;strong&gt;仔细考虑和应对最终一致性&lt;/strong&gt;的问题。&lt;/p&gt;
-
-&lt;h3 id=&quot;事件驱动架构&quot;&gt;事件驱动架构&lt;/h3&gt;
-&lt;p&gt;事件驱动的架构方法鼓励使用各种事件产生、发送、检测、消费以及对时间做出反应来组织软件系统。DDD系统内部可能有来自内部、外部的多种不同的事件；我们&lt;strong&gt;用领域事件的做法来融合DDD和事件驱动&lt;/strong&gt;架构。
-通过使用领域事件来传递领域模型需要关注的关键信息，各个领域模型可以采用事件驱动架构的各种方法来监控、检测、过滤、合并领域时间，或者对领域事件做出反应，完成复杂的用户场景。&lt;/p&gt;
-
-&lt;h4 id=&quot;event-sagas&quot;&gt;Event Sagas&lt;/h4&gt;
-&lt;p&gt;Event Sagas用于描述&lt;strong&gt;长期运行、持续不断的事件处理过程&lt;/strong&gt;；有如下三种常见的办法来描述长期运行的长时间处理过程&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;将处理过程作为一个组合任务过程，用一个可以持久化的对象来记录任务执行时间、完成度信息&lt;/li&gt;
-  &lt;li&gt;将处理过程表述为收集各种活动交互的聚合的集合；其中一个或者多个维护整体的执行和状态信息&lt;/li&gt;
-  &lt;li&gt;处理过程本身设计为无状态的，但是每个处理时间的任务在处理完毕之后都增加更多信息到输出事件上，从而把进度、完成情况等信息递增地包含在事件中&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Event Sagas的方式要求我们&lt;strong&gt;必须拥抱最终一致性模型，并且妥善处理好超时和重试处理&lt;/strong&gt;，尽量补偿可能出现的异常情况，甚至在情况复杂的时候尽量引入工作流来降低领域问题的复杂性。&lt;/p&gt;
-
-&lt;h4 id=&quot;event-sourcing&quot;&gt;Event Sourcing&lt;/h4&gt;
-&lt;p&gt;一般情况下使用Event Sagas就可以追踪和记录系统中发生的事件，只是在某些业务场景下我们想更进一步地追踪每一个时刻系统发生的所有事件，而不仅仅是某个实体最后一次被修改后的状态和时间戳。
-Event Sourcing技术通过&lt;strong&gt;记录实体上所发生的所有事件信息，并将其放置在单独的存储实体上&lt;/strong&gt;来满足这一需求，
-用户甚至可以通过简单的提供实体的唯一标识来查询和定位具体的事件，甚至还原某一个时刻领域实体的状态。&lt;/p&gt;
-
-&lt;p&gt;这样的做法在很多时候可以&lt;strong&gt;提供足够灵活性的同时，满足极大的性能和扩展性需求&lt;/strong&gt;。这一方法能工作的前提是依赖于上述提过的最终一致性行为。
-同时使用Event Sourcing技术构建的系统往往是满足CQRS的要求或者可以认为是在CQRS基础上的进一步定制。&lt;/p&gt;
-
-&lt;h2 id=&quot;领域实体&quot;&gt;领域实体&lt;/h2&gt;
-
-&lt;p&gt;开发人员一种常见的错误倾向就是过分地关注主题的数据模型，这也许于我们过多地关注于数据库技术有关。
-然而&lt;strong&gt;领域驱动开发的核心是关于领域的行为和特征，而不是数据的获取和读取&lt;/strong&gt;。
-之所以要用领域实体的概念来封装业务特征，而不是直接在数据集的基础上采用CRUD来直接实现业务规则，主要是因为系统的业务复杂度不断提高的时候，直接CRUD的方式带来了软件复杂度的急剧上升。&lt;/p&gt;
-
-&lt;p&gt;领域实体和另外一个DDD术语Value Object有很多方面比较接近；两者的一个最显著的区别是：
-领域实体具有一个唯一的标识符，它可以区分不同的领域实体，而值对象可以直接复制并且复制的对象和原来的对象完全表述同样的领域抽象信息。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域实体标识符&quot;&gt;领域实体标识符&lt;/h3&gt;
-
-&lt;p&gt;领域实体标识符的一个最重要的要求就是&lt;strong&gt;需要保证在具体的领域内是唯一的，并且这个唯一性不受时间的改变而改变&lt;/strong&gt; - 即使程序退出重启了，如果这些信息被持久化保存，重新加载的时候这个唯一性仍然需要保留；
-否则就会带来很严重的不一致问题。&lt;/p&gt;
-
-&lt;p&gt;有很多技术手段来产生唯一的领域实体标识符，这些方法实现有简有繁，并且每一种都有它们自己的优点和不足。&lt;/p&gt;
-
-&lt;h4 id=&quot;用户保证的唯一性&quot;&gt;用户保证的唯一性&lt;/h4&gt;
-&lt;p&gt;一种最简单的思路是，让用户提供输入来保证领域实体的唯一性；这种方法简单直接并且在很多场景下是一种不错的解决方案。
-这样的做法有一个显而易见的不足就是扩展性和性能可能不高；甚至需要考虑好用户可能输入非法的标识符的情况，
-如果这是可能发生的，设计一个&lt;strong&gt;健壮的校验系统或者工作流验证系统&lt;/strong&gt;也是有意义的。&lt;/p&gt;
-
-&lt;h4 id=&quot;应用程序自动产生&quot;&gt;应用程序自动产生&lt;/h4&gt;
-
-&lt;p&gt;有很多技术手段可以让应用程序在需要的时候自动产生一个唯一的实体标识符，比如常见的UUID、GUID技术可以保证产生一个在绝大多数情况下都不会重复的唯一标识符。
-&lt;strong&gt;这些技术方法也有一些明显的陷阱&lt;/strong&gt;需要我们选择的时候留意&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;分布式节点的ID产生可能需要防止意外的ID碰撞，这个和选择使用的算法参数密切相关。&lt;/li&gt;
-  &lt;li&gt;直接用String对象来表述这些ID可能不是一个好主意，最好是用一个值对象来表示它，尤其是这样的ID里面包含了其它比如机器地址等信息的时候。&lt;/li&gt;
-  &lt;li&gt;如果有些领域对象需要知道这些基于随机数算法产生的标识符，会有额外的挑战需要我们应对。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;使用数据库系统产生的标识符&quot;&gt;使用数据库系统产生的标识符&lt;/h4&gt;
-
-&lt;p&gt;直接使用数据库系统来产生标识符有一个额外的好处是我们不需要考虑它的唯一性，&lt;strong&gt;存储系统自己封装了如何保证唯一性的重要细节&lt;/strong&gt;我们直接拿来使用就好了。
-常见的关系数据库系统比如Oracle、MySQL都提供了这样的设施；其不足之处是性能可能不能我们的需要；这一点尤其在大型分布式系统中格外明显。&lt;/p&gt;
-
-&lt;h4 id=&quot;请求另外一个绑定上下文来提供标识符&quot;&gt;请求另外一个绑定上下文来提供标识符&lt;/h4&gt;
-
-&lt;p&gt;这种方式的思想也很直接，需要唯一标识符的时候，请求上游的绑定上下文（领域）要求对方分配一个标识符。
-这样做的一个天然的问题是，如果上游的绑定上下文发生了变化该如何处理？我们可以使用事件驱动架构的办法，监控上游领域的领域事件，然后根据变化做出响应。&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;这也是一种最复杂的策略，因为领域内的实体不仅仅依赖于领域边界上的适配器翻译，还依赖于外部绑定上下文的领域事件更新&lt;/strong&gt;。
-因而在大部分情况下，我们必须谨慎选择采用该策略来决定领域实体的标识符。&lt;/p&gt;
-
-&lt;h4 id=&quot;何时产生实体标识符&quot;&gt;何时产生实体标识符&lt;/h4&gt;
-
-&lt;p&gt;一般来说我们有两种时机来决定领域实体的唯一标识符：一种是在领域实体对象被创建的时候，自动分配一个标识符；另外一种策略则是只有当实际需要讲实体放置在一个Repsoitory中的时候，才实际分配标识符。&lt;/p&gt;
-
-&lt;p&gt;第二种方法有一个显然的好处是，在&lt;strong&gt;实际放入Repostory之前我们依然可以像操作值对象一样操作这个领域实体&lt;/strong&gt;。
-潜在的问题是，如果系统架构风格是事件驱动的，那么实体对象被创建的时候，所发布的领域事件的实体标识符就无法拿到了。
-要处理这个问题，我们要么只能回到第一种方式做预先分配，要么我们在比较对象的时候，采用基于属性比较的方式而不是比较领域实体标识符。&lt;/p&gt;
-
-&lt;p&gt;当然第一种方式的情况下，我们实现对象的比较或者取hash的时候，可以直接用领域实体而无须关心其它的内部属性值。&lt;/p&gt;
-
-&lt;h4 id=&quot;多套标识符的协调和映射&quot;&gt;多套标识符的协调和映射&lt;/h4&gt;
-
-&lt;p&gt;如果我们采用存储系统提供的标识符，这些标识符可能和我们自己设计的领域实体的标识符中间产生不协调；比如ORM系统产生的标识符是一个数字串而领域模型需要提供另外一种表示方法。
-这种情况下，一般的做法是&lt;strong&gt;隐藏这些实际来自于其它地方的标识符，而仅仅对外暴露领域模型抽象出来的实体&lt;/strong&gt;标识符。
-这种情况下，如果需要讲标识符当做数据的键来使用，那么也不需要使用领域模型抽象的实体标识符。&lt;/p&gt;
-
-&lt;h4 id=&quot;实体标识符的稳定性&quot;&gt;实体标识符的稳定性&lt;/h4&gt;
-
-&lt;p&gt;大部分情况下出于标识符稳定性的要求，我们选择&lt;strong&gt;将标识符设计为不可变的，即在创建或者分配的时候可以设置一次，
-而一旦创建就不允许修改&lt;/strong&gt;了。这种设计策略和标识符合适创建没有直接关系。
-如果领域内部需要做标识符的修改，需要务必小心做好封装和信息隐藏，隔离对其它绑定上下文的影响。&lt;/p&gt;
-
-&lt;h3 id=&quot;挖掘实体的角色和职责&quot;&gt;挖掘实体的角色和职责&lt;/h3&gt;
-
-&lt;p&gt;角色和职责的挖掘是传统的面性对象设计方法中最困难的部分，也是最有价值的部分。
-我们需要使用的底层技术还是一样的，用接口来抽象实体所需要扮演的角色，然后用类来建模实际的领域实体。
-不论怎样选择这里的角色抽象，需要始终牢记的是&lt;strong&gt;跨职能团队根据领域业务逻辑而统一的领域语言才是决定这些角色和实体类的职责的最重要的因素&lt;/strong&gt;，
-而实际实现这些抽象的面性对象技术应该作为具体实现的支撑细节。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域实体的创建校验&quot;&gt;领域实体的创建、校验&lt;/h3&gt;
-
-&lt;p&gt;从面向对象编程的角度来看，领域实体本身是一个对象，因此需要调用对应的类的构造方法来生成实体对象。
-该实体类内部封装的属性之间可能存在一些&lt;strong&gt;非空值之外的一些相互约束关系，这些约束关系称之为Invariant&lt;/strong&gt;，它对应的参数需要在外部构造的时候，把对应的参数传入，并且在类的内部实现上加以隐藏。
-负责更新这些单个属性参数的内部操作方法不应该暴露给外部。&lt;/p&gt;
-
-&lt;p&gt;如果构造的过程比较复杂，可以用基于工厂模式的设计方法将实体对象的构造过程封装起来，方便外部用户更简单地生成实体对象；
-这一方法本身是设计模式的直接应用，实现起来并不麻烦。&lt;/p&gt;
-
-&lt;p&gt;另一个相关的常见的实体处理约束是关于实体对象的校验 - 其背景是我们往往需要处理多个对象的组合的情况；此时&lt;strong&gt;每一个子对象是合法的并不意味着这些对象的组合也依然是合乎领域实体模型约束&lt;/strong&gt;，因此需要合理的校验和判断。
-我们需要的是基于整个对象的校验；需要实现整对象校验的前提是，&lt;strong&gt;每一个子对象（可能是一个实体或者值对象）自身需要满足自身的校验约束&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;一种常见的处理方法是使用自封装，即在实体类内部提供多个Accessor方法，并且要求实体类内部的访问也需要使用这些自封装方法。
-这种处理方法也是“防御式编程”所推荐的处理方法。与此相反的一种反模式是，期望于用存储系统提供的校验工具来实现实体对象校验，这在某些情况下可能有一些比较大的缺陷；
-典型地如在MySQL数据库中，单个行记录最多只能包含65535个字符，如果超出此限制，数据库的校验则无法处理了。
-因而重要的是应该更好地关注与关注点分离，这也是计算机科学的基本处理思路。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域实体变更跟踪&quot;&gt;领域实体变更跟踪&lt;/h3&gt;
-&lt;p&gt;大部分情况下，领域实体对象的状态变化不需要被特别关注；而当这一&lt;strong&gt;需要的确被领域专家所确认&lt;/strong&gt;的时候，我们可以&lt;strong&gt;用领域事件这一方法来满足，或者使用事件存储&lt;/strong&gt;机制来达成目的。
-有时候我们纯粹是出于一些技术上的原因而不是领域专家的意见需要关注领域实体的每一个变更，这种情况下解决之道是使用Event Sourcing方法。&lt;/p&gt;
-
-&lt;h2 id=&quot;值对象&quot;&gt;值对象&lt;/h2&gt;
-
-&lt;p&gt;值对象在很多方面和领域实体对象非常想象，然而两者有一些至关重要的不同。所谓的值对象它所表述的是一些&lt;strong&gt;没有唯一标识的类似纯粹数值&lt;/strong&gt;的概念。
-值对象本身在DDD方法中占据重要的位置；我们可能感到惊讶的是，在DDD方法中我们总是应该&lt;strong&gt;力求多使用值对象而不是领域实体对象&lt;/strong&gt;；并且即使我们决定了使用领域实体来描述一些聚合概念，
-那么该实体内部如果可以用值对象的集合来表示，就尽量少用子领域实体的集合来表示。&lt;/p&gt;
-
-&lt;h3 id=&quot;值对象的特征&quot;&gt;值对象的特征&lt;/h3&gt;
-&lt;p&gt;值对象一般需要满足下面一些特征&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;描述领域中的一种数值，度量或者其它类似的概念&lt;/li&gt;
-  &lt;li&gt;可以用不可变对象来表示&lt;/li&gt;
-  &lt;li&gt;可以用&lt;strong&gt;等价关系来比较&lt;/strong&gt;另外一个完全不同的对象&lt;/li&gt;
-  &lt;li&gt;可以被另外一个对象替换而不影响语义和行为&lt;/li&gt;
-  &lt;li&gt;当被其它的协作对象使用的时候，能满足无副作用的行为约束&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;不可变性&quot;&gt;不可变性&lt;/h3&gt;
-&lt;p&gt;值对象可以表述为一个不可变对象的想法具有重要的简化意义；满足不可变对象意味着，一旦值对象被构造完成之后，
-其自身的方法调用并不会改变内部封装的属相值。这种情况下，&lt;strong&gt;如果需要变更，最好的办法是替换产生一个新的对象&lt;/strong&gt;。这样的处理方式和值对象本身的领域语义直接对应，该值对象才能和其它DDD概念更好地协作。
-当我们需要对构造好的值对象变更某些属性的时候，需要思考能否用替换的方法来达到同样的效果。&lt;/p&gt;
-
-&lt;h3 id=&quot;整对象概念&quot;&gt;整对象概念&lt;/h3&gt;
-
-&lt;p&gt;值对象需要能表述为一个完整对象的概念，而不是一堆属性之间的无意义拼凑；这些&lt;strong&gt;属性之间应该满足相互之间的高内聚&lt;/strong&gt;；有可能的话则讲没有内聚的属性移除到其它地方。
-同时时刻谨记值对象需要和绑定上下文中的领域概念相匹配，值对象本身所表述的概念整体上要能和领域通用语言协调一致；因此用一个基本的原始字符串类型来描述值对象远远不如用一个自定义的类类型来描述对应的领域概念要来的自然。&lt;/p&gt;
-
-&lt;h3 id=&quot;可替换性和等价判断&quot;&gt;可替换性和等价判断&lt;/h3&gt;
-
-&lt;p&gt;我们期望它能够满足不可变性的同时就意味着可替换性是显而易见的；因为当我们需要变更一个值对象的时候，
-只需要构造一个新的值对象并返回出去即可。同时可替换性也要求我们能够基于值的语义来判别两个值对象是否相当。
-这里的相等依赖于它所封装的内部属性是否都相等，其处理方式和领域实体有着明显的不同&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;领域实体对象的相等比较往往基于其唯一标识即可&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;值对象的想等下判断需要基于各个属性的等价性&lt;/strong&gt;来判别&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;无副作用&quot;&gt;无副作用&lt;/h3&gt;
-
-&lt;p&gt;无副作用本身要求对象的方法调用中不能修改对象自身的内部状态；值对象的无副作用其实是在满足了上面的不可变性和可替换性之后的自然可得的特征，因为除了构造方法除外，任何其它方法都不能违反不可变属性。
-如果发现某个值对象的方法必须要修改内部的状态，我们需要停下来挑战一下自己：能否用替换的方法而不是变更内部属性的方法达到同样的目的。&lt;/p&gt;
-
-&lt;h3 id=&quot;实现最小化集成&quot;&gt;实现最小化集成&lt;/h3&gt;
-
-&lt;p&gt;稍微复杂一点的DDD系统中都会有很多个需要被集成在一起的多个绑定上下文；此时使用值对象来完成他们之间的相互集成往往是最简单的：
-在下游的绑定上下文中，只需要&lt;strong&gt;用一个值对象来集成上游绑定上下文中传入的对象&lt;/strong&gt;即可。&lt;/p&gt;
-
-&lt;h3 id=&quot;将领域标准类型表述为值对象&quot;&gt;将领域标准类型表述为值对象&lt;/h3&gt;
-
-&lt;p&gt;在很多系统中，我们需要处理关于某些信息的有限种的分类信息，比如货币种类、HTTP协议的MIME类型等；这些用于表示事物的类型的信息如果用值对象来描述看起来简单易于理解。
-只是在实际实现上，可能用枚举类型来表示会是一个更自然的选择，尤其是如&lt;strong&gt;Java的枚举值类型允许实现抽象和多态行为&lt;/strong&gt;，即允许在枚举类本身中定义抽象行为，
-然后在具体的一个一个的值中提供具体实现；这种方法其实是状态模式的一个语言层面的简化实现。&lt;/p&gt;
-
-&lt;p&gt;这些标准类型的值对象定义最好是拿出来放在一个共享的绑定上下文中被多个其它的领域上下文所使用；同时需要计划好对这些标准类型值对象的更新和维护，因为实际上会有多个下游的共享上下文受此影响。
-如果系统中的此类定义很多，可以考虑使用代码生成的方法来减小人工维护的负担。&lt;/p&gt;
-
-&lt;h3 id=&quot;持久化值对象&quot;&gt;持久化值对象&lt;/h3&gt;
-
-&lt;p&gt;值对象的持久化有很多种不同的做法，我们可以使用&lt;strong&gt;Repository概念来完成具体的持久化&lt;/strong&gt;。基于值对象的上述特征，
-现在&lt;strong&gt;更流行的方法是使用NoSQL数据存储&lt;/strong&gt;来持久化值对象，但是更传统的基于ORM的持久化方法依然是有广泛的使用。&lt;/p&gt;
-
-&lt;p&gt;在基于ORM的方法中，如果值对象的属性中包含有聚合属性，当我们考虑将多个值序列化到一个列中的时候，就必须考虑存储系统的本身的限制。
-比如上述的&lt;strong&gt;MySQL最大行宽的限制&lt;/strong&gt;不仅会影响到单个属性列还对整个行记录的可用空间产生直接的约束。
-另外一个值得主意的情况是当&lt;strong&gt;将多个对象写入一个数据库列&lt;/strong&gt;的时候，就不能指望使用SQL查询的方法来实现高效检索。&lt;/p&gt;
-
-&lt;h2 id=&quot;服务&quot;&gt;服务&lt;/h2&gt;
-&lt;p&gt;DDD中的服务用来描述实现领域特定的任务的&lt;strong&gt;无状态的操作&lt;/strong&gt;的概念，
-它和和一般的软件架构理论（比如SOA或者微服务）中所谓的服务或者组件这些粗粒度的软件隔离实体的含义截然不相同，
-不能简单地将后者的概念拿来对比，否则会产生更多的混淆和误解。&lt;/p&gt;
-
-&lt;p&gt;DDD服务本身描述的还是一个&lt;strong&gt;和领域相关的概念&lt;/strong&gt;而不是一个抽象的通用的概念。
-当我们需要将一大块和实体或者值对象有些关系而又没有状态的职责剥离出来的时候，服务就派上用场了。通常来说我们出于这些目的来决定引入服务&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;业务逻辑操作比较复杂&lt;/li&gt;
-  &lt;li&gt;需要将某种领域逻辑的组合从一种形式转换为另外一种&lt;/li&gt;
-  &lt;li&gt;需要从多个领域对象的输入中通过某种运算产生出新的值对象&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;确保仅在必要的时候创建服务&quot;&gt;确保仅在必要的时候创建服务&lt;/h3&gt;
-
-&lt;p&gt;一种常见的使用服务的误区是&lt;strong&gt;滥用了服务的概念导致本该由领域对象或者值对象表达的概念都泄露&lt;/strong&gt;到了服务对象中。
-这也是上面提到的&lt;strong&gt;服务需要保证是无状态&lt;/strong&gt;的原因；如果需要保留状态，那么显然使用服务是一种误用。
-同时需要谨记的是服务仍然是一种领域知识相关的设施，如果想表述和领域通用语言不相关的概念，那么可能需要用到应用服务。&lt;/p&gt;
-
-&lt;h3 id=&quot;是否需要用分离的接口来描述服务&quot;&gt;是否需要用分离的接口来描述服务&lt;/h3&gt;
-
-&lt;p&gt;是否应该采用一个隔离的接口来描述服务并没有一个清晰的界定，因为它的好处和不足同样明显。
-采用分离的接口可以提高软件系统的可测试性，但是只有唯一实现的服务类再加上一个接口定义会显得比较怪异和画蛇添足。&lt;/p&gt;
-
-&lt;h2 id=&quot;领域事件&quot;&gt;领域事件&lt;/h2&gt;
-
-&lt;p&gt;Evans将领域事件描述为领域内发生的一部分完整的事实，它可以用来描述某个时间&lt;strong&gt;绑定上下文中发生的某些事情的表述&lt;/strong&gt;。
-如何决定什么是领域事件而什么不是？最好的策略是&lt;strong&gt;倾听领域专家的声音&lt;/strong&gt;，并从中发现这些事件的蛛丝马迹，比如领域专家的口中说出”当xxx发生的时候“或者”如果YYY发生“，这里的XXX和YYY就是清晰的领域事件。
-这些时间的出现往往意味着由某些地方需要关注这些事件出现的后果并做出反应。&lt;/p&gt;
-
-&lt;p&gt;使用领域事件的概念往往&lt;strong&gt;默认我们需要采用最终一致性模型&lt;/strong&gt;，这一隐含的假设我们应该始终铭记于心。
-使用领域事件的方法可以达到很高的并发处理性能和较低的系统耦合；当然不利之处是我们需要考虑它带来的&lt;strong&gt;系统行为的额外复杂性&lt;/strong&gt;，因为依赖从显示的调用变成了异步的发布/通知模型。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域事件的建模&quot;&gt;领域事件的建模&lt;/h3&gt;
-
-&lt;p&gt;我们总是用某个发生的事件来表述领域事件，比如somethingHappened，这个概念描述的是一件事实已经发生过；
-有时候我们还需要描述事件发生的上下文信息，比如发生的时间，出现次数等。
-不论如何建模，我们还需要保证&lt;strong&gt;领域事件总是不可变的&lt;/strong&gt;，就如已经发生的事情不可更改一样；
-同时参照前面所述的值对象的语义，保证领域事件没有副作用也是一项隐含的要求。&lt;/p&gt;
-
-&lt;h3 id=&quot;领域事件标识符&quot;&gt;领域事件标识符&lt;/h3&gt;
-&lt;p&gt;大部分情况下，当领域事件仅仅被一个绑定上下文消化、处理的时候，没有必要给领域事件指定一个唯一的标识符；
-然而当&lt;strong&gt;领域事件可能被从一个绑定上下文中通过底层的事件转发基础设施被发送到另外一个领域中&lt;/strong&gt;去的时候，
-我们就不得不为领域事件准备一个唯一的标识符，使得不同的事件可以在其被处理的范围内可以被唯一识别。
-同样的当一个领域事件需要被持久化存储或者从存储介质中恢复到内存的时候，事件标识符也必不可少。&lt;/p&gt;
-
-&lt;h3 id=&quot;从领域模型中发布事件&quot;&gt;从领域模型中发布事件&lt;/h3&gt;
-&lt;p&gt;当事件需要发送到某个远程的领域中去的时候，我们需要尽量把领域事件的细节与底层的事件分发中间件或者框架相解耦，&lt;strong&gt;避免将领域事件的细节泄露给基础设施中间件&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;发布事件的时候，最终一致性模型带来的副作用和&lt;strong&gt;它本身的一致性保证机制&lt;/strong&gt;值得详细考虑。
-当通过一个中间件或者事件转发设施来分发事件的时候，&lt;strong&gt;领域逻辑对事件延迟的容忍性&lt;/strong&gt;也需要根据领域业务要求进详细分析。
-有时候我们甚至需要对历史发生的事件做一些后续处理和分析，这种情况下，我们可以采用事件存储的方式，设置一个完成事件序列化保存的特殊的事件监听者。&lt;/p&gt;
-
-&lt;h2 id=&quot;模块&quot;&gt;模块&lt;/h2&gt;
-&lt;p&gt;一些现代的变成语言或者框架都自带了模块机制，因而模块的概念和这些语言框架中的模块的用法并没有特别本质的区别。
-唯一需要留意的是DDD中的模块的命名和使用是&lt;strong&gt;以领域模型的内聚为依据&lt;/strong&gt;的，它并不一定和代码的具体部署和运行方式强绑定。&lt;/p&gt;
-
-&lt;h2 id=&quot;聚合&quot;&gt;聚合&lt;/h2&gt;
-&lt;p&gt;聚合是一种用于&lt;strong&gt;将实体或者值对象仔细汇聚在一起并形成清晰的边界&lt;/strong&gt;的领域设计概念。从描述来看聚合好像很简单直接，然而它也许是DDD中最没有被准确理解和实施的概念。&lt;/p&gt;
-
-&lt;p&gt;聚合的设计实现上很容易落入（需要尽力避免）如下的两个极端&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;为了组合的方便而将聚合的引用关系设计的非常复杂和庞大&lt;/li&gt;
-  &lt;li&gt;或者将聚合的关系拆分地太独立以至于没有办法真正地维护领域逻辑中的不变式&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;在一致性边界内的不变式上建模聚合&quot;&gt;在一致性边界内的不变式上建模聚合&lt;/h3&gt;
-
-&lt;p&gt;为了发现领域模型中的聚合，我们需要仔细&lt;strong&gt;甄别领域边界内的业务规则的内在不变式&lt;/strong&gt;。
-这些不变式属于一些业务规则，并且这些业务规则必须总是一致的。这样的一致性由很多种形式，
-一种是传统的原子性的一致性，他们是即使生效的，并且是原子不可变更的；这种也往往被成为事务一致性；还有一种新的一致性模型是最终一致性。
-&lt;strong&gt;聚合不变式种考虑的是传统的事务一致性&lt;/strong&gt;。&lt;/p&gt;
-
-&lt;p&gt;设计良好的聚合可以保证每次修改的时候其内在的领域逻辑的一致性总是在修改后被保留，也就是说它的&lt;strong&gt;不变式在修改前后总是可以被满足&lt;/strong&gt;。
-这也意味着，从用户界面来的修改每次仅仅能够在一个聚合上被执行，否则事务一致性就很难满足。&lt;/p&gt;
-
-&lt;h3 id=&quot;保持聚合设计尽量的小&quot;&gt;保持聚合设计尽量的小&lt;/h3&gt;
-&lt;p&gt;因为我们需要保证聚合的事务一致性语义，考虑到&lt;strong&gt;性能和可扩展性&lt;/strong&gt;，自然而然地我们想要将聚合的设计保持足够的小，因为庞大的事务处理会带来明显的性能瓶颈。
-想象具有复杂的关联关系的聚合，当我们需要更新一个很小的属性的时候，为了维护一致性，
-我们可能不得不将所有有关联的记录都从其它的地方加载的内存中完成处理。&lt;/p&gt;
-
-&lt;p&gt;小规模的聚合带来的一个额外的好处是&lt;strong&gt;产生冲突的概率大大地降低&lt;/strong&gt;了，从而使得系统的可用性自然得以提高；因而不论任何情况，都要想办法降低聚合的体量保持它足够可能的小。&lt;/p&gt;
-
-&lt;h3 id=&quot;组合聚合对象的时候用标识符来引用之&quot;&gt;组合聚合对象的时候用标识符来引用之&lt;/h3&gt;
-&lt;p&gt;一个很常见的想法是可以组合多个聚合，在这种场景下，我们需要&lt;strong&gt;抵制住如下的诱惑：将引用的聚合想象为是在同一个一致性保证的边界&lt;/strong&gt;内。
-其实这样的做法会得不偿失，因为如果那么做了，聚合的规模就不可能保持的很小，性能惩罚就会悄悄地潜入进来，危及系统扩展性和可用性。&lt;/p&gt;
-
-&lt;p&gt;更好的处理方法是不在引用外部聚合对象（指针或者引用），而是在使用的地方&lt;strong&gt;用对方的全局唯一标识符来替代&lt;/strong&gt;。
-显然地得益于&lt;strong&gt;对象标识符本身保证了对象自己并不会被自动加载入内存&lt;/strong&gt;中；不管是静态的内存分配还是垃圾收集器的负担都得以大大减小。&lt;/p&gt;
-
-&lt;h3 id=&quot;在聚合边界之外采纳最终一致性模型&quot;&gt;在聚合边界之外采纳最终一致性模型&lt;/h3&gt;
-&lt;p&gt;对于跨越多个聚合的业务运算，业务处理用例其实&lt;strong&gt;跨越了多个领域上下文，这种情况下我们需要考虑最终一致性&lt;/strong&gt;模型保证而不是聚合本身默认的事务一致性模型。
-在大部分业务场景下，领域专家对最终一致性模型的容忍程度往往要高于开发人员的想象。&lt;/p&gt;
-
-&lt;p&gt;某些领域场景可能有一些额外的挑战，因为是&lt;strong&gt;采用最终一致性模型还是采用事务一致性模型并不容易得到一个清晰的答案&lt;/strong&gt;。
-熟悉传统的事务模型的DDD实践者可能更倾向于采用强一致性的事务保证，而喜欢CQRS模型的开发者则更喜欢最终一致性模型。
-问题的&lt;strong&gt;核心在于深入理解领域模型的不变式要求&lt;/strong&gt;，因为DDD开发的首要思想就是始终考虑领域的实际需求而不是具体的软件实现技术设施。&lt;/p&gt;
-
-&lt;h3 id=&quot;例外规则&quot;&gt;例外规则&lt;/h3&gt;
-&lt;p&gt;凡事都难免有例外，某些情况下我们处于特殊的需要会主动选择打破上述这些聚合规则，譬如&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;用户接口操作的遍历，比如在批量创建一系列聚合对象操作和创建一个聚合对象来操作所有处理没有很大区别的时候，我们可以选择打破上述的规则&lt;/li&gt;
-  &lt;li&gt;缺乏&lt;strong&gt;最终一致性要求的基础设施&lt;/strong&gt;，比如计时器、后台线程调度、消息传递设施；此时强行采用最终一致性会有额外的挑战，我们不得不妥协&lt;/li&gt;
-  &lt;li&gt;全局事务或者一些&lt;strong&gt;遗留技术的影响&lt;/strong&gt;，譬如我们不得不于其它依赖于两阶段提交的分布式事务系统打交道的时候，最终一致性处理的引入可能得不偿失&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;查询性能需要优化&lt;/strong&gt;的时候，我们不得不缓存外部聚合对象的指针而不是每次在需要的时候加载进内存做查询，当然性能的影响需要仔细掂量权衡&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;避免使用依赖注入&quot;&gt;避免使用依赖注入&lt;/h3&gt;
-
-&lt;p&gt;使用依赖注入技术来自动传入一个聚合类所依赖的服务或者仓库对象应该被认为是一个糟糕的想法，
-原因很简单：&lt;strong&gt;我们期望用对象标识符的方法来引用其它的聚合对象而不是用对象引用自身&lt;/strong&gt;而依赖注入技术会自动将对象的引用传递进来。&lt;/p&gt;
-
-&lt;h2 id=&quot;其它一些ddd方法和术语&quot;&gt;其它一些DDD方法和术语&lt;/h2&gt;
-&lt;p&gt;除了上面探讨的DDD方法和术语，还有如下一些比较容易理解的设施&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;工厂类，工厂方法、抽象工厂等，这些概念在传统的设计模式中已经得到了广泛的研究，DDD只是拿来使用。&lt;/li&gt;
-  &lt;li&gt;仓库概念和传统的数据库中的DAO或者对象集合的技术很接近，可以用传统的Hibernate技术也可以用NoSQL的方法来实现仓库，Spring等开源库已经提供了很好的封装手段。&lt;/li&gt;
-  &lt;li&gt;集成领域上下文的技术，可以是用基于传统的RPC的方式，也可以采用基于REST API的方法来完成，相关的软件架构技术已经探讨的比较充分了。&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="design" /><category term="　architecture" /><category term="pattern" /><category term="engineering" /><summary type="html">领域驱动设计在最近几年里越来越多地走进了主流架构设计的中心舞台上来了，这一切其实似乎是在业界精神领袖Martin Folwer在 他的《企业软件架构模式》一书和各种各样的讨论中的推荐之下之后忽然就火了起来。 甚至有一种说法是：如果学完了设计模式之后感觉没有什么用武之地，那么你需要去好好看一下Eric Evans写的《领域驱动设计》一书以吸收新的灵感， 然后才能知道你工作中的面性对象设计用错在了什么地方。</summary></entry></feed>
+&lt;p&gt;更复杂的情况，这里的计算时间的方法显然也太过原始了；可以借助强大的profile工具，生成perf可以解析的数据，从而进一步生成&lt;a href=&quot;https://github.com/brendangregg/FlameGraphhttps://github.com/brendangregg/FlameGraph&quot;&gt;火焰图&lt;/a&gt;或者直接查看&lt;code class=&quot;highlighter-rouge&quot;&gt;perf report&lt;/code&gt;的命令行界面来分析性能的热点在哪里。&lt;/p&gt;</content><author><name>Fei Yan</name><email>skyscribe.yf@gmail.com</email></author><category term="programming" /><category term="engineering" /><category term="performance" /><category term="cpp" /><category term="python" /><category term="regex" /><summary type="html">C++17 推出已经有将近3年的时间，速度快一些的公司才慢慢采纳了6年前的C++14进入正式的生产环境。 程序员们的一个大福利就是终于不用外挂第三方库（无论是准标准的boost还是其它形形色色的其它第三方库）就可以直接方便地使用标准库自带的&amp;lt;regex&amp;gt;来写代码； 这显然比直接使用原始而笨拙的string::find_first_of外加一堆边界检查和判断要轻松和干净很多。</summary></entry></feed>
